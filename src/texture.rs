@@ -76,7 +76,7 @@ impl TextureStore {
     /// Sets the invalidation state for the `Texture` store.  If invalidated, it indicates that the
     /// `Texture` needs to be redrawn.
     pub fn set_invalidated(&mut self, state: bool) {
-        this.invalidated = state;
+        self.invalidated = state;
     }
 }
 
