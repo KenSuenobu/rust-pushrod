@@ -12,5 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod texture;
-pub mod geometry;
+/// Geometry definitions: provides a point and size.
+pub enum Geometry {
+    Point { x: i32, y: i32 },
+    Size { w: u32, h: u32 },
+}
