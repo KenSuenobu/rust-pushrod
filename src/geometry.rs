@@ -27,3 +27,9 @@ pub struct Size {
     pub w: u32,
     pub h: u32,
 }
+
+impl Size {
+    pub fn get_memory_size(&self) -> u32 {
+        self.w * self.h * 4
+    }
+}
