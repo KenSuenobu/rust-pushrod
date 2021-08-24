@@ -62,9 +62,10 @@ impl TextureStore {
             self.size.w = size.w;
             self.size.h = size.h;
             self.store = Some(c.create_texture_target(None, size.w, size.h).unwrap());
-            self.invalidated = true;
 
             eprintln!("Created texture: size={}x{} (memory={})", size.w, size.h, size.get_memory_size());
+
+            self.set_invalidated(true);
         }
     }
 
