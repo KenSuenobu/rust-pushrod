@@ -17,6 +17,7 @@ use std::any::Any;
 use crate::image_widget::ImageWidget;
 use crate::button_widget::ButtonWidget;
 use crate::geometry::{Size, Point};
+use crate::base_widget::BaseWidget;
 
 pub trait Widget {
     fn as_any(&self) -> &dyn Any;
@@ -27,6 +28,7 @@ pub trait Widget {
 }
 
 pub enum SystemWidget {
+    Base(Box<BaseWidget>),
     Button(Box<ButtonWidget>),
     Image(Box<ImageWidget>),
     Custom(Box<dyn Widget>),
