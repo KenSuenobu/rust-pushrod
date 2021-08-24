@@ -15,3 +15,5 @@
 pub mod texture;
 pub mod geometry;
 pub mod widget;
+pub mod image_widget;
+pub mod button_widget;

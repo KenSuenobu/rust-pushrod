@@ -1,4 +1,4 @@
-// Widget
+// Button Widget
 // Pushrod
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,14 @@
 // limitations under the License.
 
 use std::any::Any;
+use crate::widget::Widget;
 
-pub trait Widget {
-    fn as_any(&self) -> &dyn Any;
+struct ButtonWidget {
+
 }
 
-pub enum SystemWidget {
-    Custom(Box<dyn Widget>),
+impl Widget for ButtonWidget {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
