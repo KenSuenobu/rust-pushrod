@@ -14,6 +14,8 @@
 
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
+use crate::geometry::Geometry;
+use crate::geometry::Geometry::{Size, Point};
 
 /// This stores the `Texture` object being drawn against as a `Canvas` object, its texture
 /// width and height, and an invalidated state.
@@ -57,14 +59,22 @@ impl TextureStore {
     /// ever redrawn, this function will automatically generate a new `Texture` to draw against, and
     /// destroy the previously stored `Texture`.  If any changes are observed when calling this
     /// function (ie. the width changes, height changes, or the store is lost), it is regenerated.
-    pub fn create_or_resize_texture(&mut self, c: &mut Canvas<Window>, width: u32, height: u32) {
-        if self.store.is_none() || self.width != width || self.height != height {
-            self.width = width;
-            self.height = height;
-            self.store = Some(c.create_texture_target(None, width, height).unwrap());
-            self.invalidated = true;
+    pub fn create_or_resize_texture(&mut self, c: &mut Canvas<Window>, geometry: Geometry) {
+        match geometry {
+            Size { w, h } => {
+                if self.store.is_none() || self.width != w || self.height != h {
+                    self.width = w;
+                    self.height = h;
+                    self.store = Some(c.create_texture_target(None, w, h).unwrap());
+                    self.invalidated = true;
 
-            eprintln!("Created texture: size={}x{} (memory={})", width, height, (width * height) * 4);
+                    eprintln!("Created texture: size={}x{} (memory={})", w, h, geometry.get_memory_size());
+                }
+            }
+
+            Point { x: _, y: _ } => {
+                eprintln!("Cannot create a texture with a point - size is required.");
+            }
         }
     }
 

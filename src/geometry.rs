@@ -22,7 +22,7 @@ impl Geometry {
     /// Returns the amount of memory that a texture would use based on the geometry width and
     /// height of the geometry, as long as `Self::Size` is used.  If not, a 0 will be sent,
     /// as this is dependent upon the `Size` enum being used.
-    fn get_memory_size(&self) -> u32 {
+    pub fn get_memory_size(&self) -> u32 {
         return match self {
             Self::Size { w, h } => w * h * 4,
             _default => 0,
