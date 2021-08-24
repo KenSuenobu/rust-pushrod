@@ -16,7 +16,7 @@
 use std::any::Any;
 use crate::widget::Widget;
 
-struct ImageWidget {
+pub struct ImageWidget {
 
 }
 

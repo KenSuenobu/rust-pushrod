@@ -14,11 +14,15 @@
 // limitations under the License.
 
 use std::any::Any;
+use crate::image_widget::ImageWidget;
+use crate::button_widget::ButtonWidget;
 
 pub trait Widget {
     fn as_any(&self) -> &dyn Any;
 }
 
 pub enum SystemWidget {
+    Button(Box<ButtonWidget>),
+    Image(Box<ImageWidget>),
     Custom(Box<dyn Widget>),
 }
