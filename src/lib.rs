@@ -17,4 +17,4 @@ pub mod geometry;
 pub mod widget;
 pub mod image_widget;
 pub mod button_widget;
-pub mod box_widget;
+pub mod base_widget;

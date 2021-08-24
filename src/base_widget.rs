@@ -1,4 +1,4 @@
-// Box Widget
+// Base Widget
 // Pushrod
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,12 @@ use std::any::Any;
 use crate::widget::Widget;
 use crate::geometry::{Point, Size};
 
-pub struct BoxWidget {
+pub struct BaseWidget {
     origin: Point,
     size: Size,
 }
 
-impl Widget for BoxWidget {
+impl Widget for BaseWidget {
     fn as_any(&self) -> &dyn Any {
         self
     }
