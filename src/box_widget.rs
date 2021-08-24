@@ -1,3 +1,4 @@
+// Box Widget
 // Pushrod
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod texture;
-pub mod geometry;
-pub mod widget;
-pub mod image_widget;
-pub mod button_widget;
-pub mod box_widget;
+use std::any::Any;
+use crate::widget::Widget;
+use crate::geometry::{Point, Size};
+
+pub struct BoxWidget {
+    origin: Point,
+    size: Size,
+}
+
+impl Widget for BoxWidget {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn get_origin(&self) -> &Point {
+        &self.origin
+    }
+
+    fn get_size(&self) -> &Size {
+        &self.size
+    }
+}
