@@ -47,7 +47,7 @@ impl Engine {
             .build()
             .unwrap();
 
-        canvas.set_draw_color(Color::RGB(255, 255, 255));
+        canvas.set_draw_color(Color::RGB(255, 0, 0));
         canvas.clear();
         canvas.present();
 
@@ -59,6 +59,7 @@ impl Engine {
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_millis();
+            let invalidated = false;
 
             for event in event_pump.poll_iter() {
                 match event {
@@ -136,7 +137,9 @@ impl Engine {
             //     .do_layout(self.widget_cache.borrow_cache());
             // self.widget_cache.draw_loop(&mut canvas);
 
-            canvas.present();
+            if invalidated {
+                canvas.present();
+            }
 
             // This obeys thread sleep time.
             let now = SystemTime::now()

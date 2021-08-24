@@ -5,7 +5,7 @@ pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("pushrod", 800, 600)
+        .window("pushrod", 600, 400)
         .position_centered()
         .opengl()
         .build()
