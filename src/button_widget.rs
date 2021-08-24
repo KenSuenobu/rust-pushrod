@@ -20,6 +20,7 @@ use crate::geometry::{Point, Size};
 pub struct ButtonWidget {
     origin: Point,
     size: Size,
+    invalidated: bool,
 }
 
 impl Widget for ButtonWidget {
@@ -33,5 +34,13 @@ impl Widget for ButtonWidget {
 
     fn get_size(&self) -> &Size {
         &self.size
+    }
+
+    fn is_invalidated(&self) -> bool {
+        self.invalidated
+    }
+
+    fn set_invalidated(&mut self) {
+        self.invalidated = true;
     }
 }

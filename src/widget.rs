@@ -25,6 +25,10 @@ pub trait Widget {
     fn get_origin(&self) -> &Point;
 
     fn get_size(&self) -> &Size;
+
+    fn set_invalidated(&mut self);
+
+    fn is_invalidated(&self) -> bool;
 }
 
 pub enum SystemWidget {
