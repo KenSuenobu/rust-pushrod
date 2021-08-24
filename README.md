@@ -17,3 +17,25 @@ approach.  Therefore, Pushrod now uses an event-based system to handle messaging
 The benefits to this are great - the main benefits being that each window now has its own event handler:
 every window that displays a new dialog contains its own window event handler.  This allows for global
 access to the widget store, the containing object, and the event handler.
+
+## Installing on Mac OS X
+
+Install Brew.  [Go here to get instructions on how to install.](https://www.brew.sh)
+
+Once installed, run the following commands:
+
+```shell
+brew update
+brew upgrade
+brew install sdl2 sdl2_image sdl2_ttf
+```
+
+Then modify your .profile and add:
+
+```shell
+export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
+```
+
+And you should be able to not only build the application, but you should be able to run the
+examples in the examples directory.
+
