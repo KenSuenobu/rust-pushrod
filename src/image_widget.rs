@@ -15,13 +15,23 @@
 
 use std::any::Any;
 use crate::widget::Widget;
+use crate::geometry::{Point, Size};
 
 pub struct ImageWidget {
-
+    origin: Point,
+    size: Size,
 }
 
 impl Widget for ImageWidget {
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn get_origin(&self) -> &Point {
+        &self.origin
+    }
+
+    fn get_size(&self) -> &Size {
+        &self.size
     }
 }

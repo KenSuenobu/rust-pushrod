@@ -16,9 +16,14 @@
 use std::any::Any;
 use crate::image_widget::ImageWidget;
 use crate::button_widget::ButtonWidget;
+use crate::geometry::{Size, Point};
 
 pub trait Widget {
     fn as_any(&self) -> &dyn Any;
+
+    fn get_origin(&self) -> &Point;
+
+    fn get_size(&self) -> &Size;
 }
 
 pub enum SystemWidget {

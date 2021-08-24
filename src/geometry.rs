@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Geometry definitions: provides a point and size.
-pub enum Geometry {
-    Point { x: i32, y: i32 },
-    Size { w: u32, h: u32 },
+/// Provides a definition of a point of origin: contains the `x` and `y` coordinates of
+/// an object.
+#[derive(Default)]
+pub struct Point {
+    pub x: i32,
+    pub y: i32,
 }
 
-impl Geometry {
-    /// Returns the amount of memory that a texture would use based on the geometry width and
-    /// height of the geometry, as long as `Self::Size` is used.  If not, a 0 will be sent,
-    /// as this is dependent upon the `Size` enum being used.
-    pub fn get_memory_size(&self) -> u32 {
-        return match self {
-            Self::Size { w, h } => w * h * 4,
-            _default => 0,
-        }
-    }
+/// Provides a definition of the size of an object: contains the `w` and `h` coordinates of
+/// an object.
+#[derive(Default)]
+pub struct Size {
+    pub w: u32,
+    pub h: u32,
 }
