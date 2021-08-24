@@ -18,6 +18,7 @@ use crate::image_widget::ImageWidget;
 use crate::button_widget::ButtonWidget;
 use crate::geometry::{Size, Point};
 use crate::base_widget::BaseWidget;
+use crate::texture::TextureStore;
 
 pub trait Widget {
     fn as_any(&self) -> &dyn Any;
@@ -29,6 +30,8 @@ pub trait Widget {
     fn set_invalidated(&mut self);
 
     fn is_invalidated(&self) -> bool;
+
+    fn get_texture(&mut self) -> &mut TextureStore;
 }
 
 pub enum SystemWidget {

@@ -16,11 +16,13 @@
 use std::any::Any;
 use crate::widget::Widget;
 use crate::geometry::{Point, Size};
+use crate::texture::TextureStore;
 
 pub struct BaseWidget {
     origin: Point,
     size: Size,
     invalidated: bool,
+    texture: TextureStore,
 }
 
 impl Widget for BaseWidget {
@@ -42,5 +44,9 @@ impl Widget for BaseWidget {
 
     fn set_invalidated(&mut self) {
         self.invalidated = true;
+    }
+
+    fn get_texture(&mut self) -> &mut TextureStore {
+        &mut self.texture
     }
 }
