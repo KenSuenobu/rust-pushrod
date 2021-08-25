@@ -38,12 +38,12 @@ impl Widget for ImageWidget {
         &self.size
     }
 
-    fn is_invalidated(&self) -> bool {
-        self.invalidated
-    }
-
     fn set_invalidated(&mut self) {
         self.invalidated = true;
+    }
+
+    fn is_invalidated(&self) -> bool {
+        self.invalidated
     }
 
     fn get_texture(&mut self) -> &mut TextureStore {
