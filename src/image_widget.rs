@@ -38,6 +38,15 @@ impl Widget for ImageWidget {
         &self.size
     }
 
+    fn set_origin(&mut self, point: Point) {
+        self.origin = point;
+    }
+
+    fn set_size(&mut self, size: Size) {
+        self.size = size;
+        self.set_invalidated();
+    }
+
     fn set_invalidated(&mut self) {
         self.invalidated = true;
     }

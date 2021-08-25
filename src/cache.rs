@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::widget::SystemWidget;
+use crate::widget::{SystemWidget, Widget};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
@@ -26,6 +26,39 @@ impl WidgetCache {
         Self {
             cache: Vec::new(),
         }
+    }
+
+    pub fn add(&mut self, widget: SystemWidget) -> i32 {
+        // let origin = widget.get_config().get_point(CONFIG_ORIGIN);
+        // let widget_id = self.cache.len();
+        //
+        // self.cache.push(WidgetContainer::new(
+        //     widget,
+        //     widget_name,
+        //     origin,
+        //     widget_id as i32,
+        //     0,
+        // ));
+        //
+        // (self.cache.len() - 1) as i32
+
+        0
+    }
+
+    pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
+        let invalidated = false;
+
+        // let cache_size = self.cache.len();
+        //
+        // for i in 0..cache_size {
+        //     if self.cache[i].widget.borrow_mut().is_invalidated() {
+        //         self.draw(0, c);
+        //
+        //         return true;
+        //     }
+        // }
+
+        invalidated
     }
 
     fn draw(&mut self, _widget_id: i32, _c: &mut Canvas<Window>) {

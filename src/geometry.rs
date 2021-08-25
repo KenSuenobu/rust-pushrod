@@ -14,7 +14,7 @@
 
 /// Provides a definition of a point of origin: contains the `x` and `y` coordinates of
 /// an object.
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -22,7 +22,7 @@ pub struct Point {
 
 /// Provides a definition of the size of an object: contains the `w` and `h` coordinates of
 /// an object.
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct Size {
     pub w: u32,
     pub h: u32,

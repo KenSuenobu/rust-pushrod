@@ -27,6 +27,10 @@ pub trait Widget {
 
     fn get_size(&self) -> &Size;
 
+    fn set_origin(&mut self, point: Point);
+
+    fn set_size(&mut self, size: Size);
+
     fn set_invalidated(&mut self);
 
     fn is_invalidated(&self) -> bool;

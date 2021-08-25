@@ -14,15 +14,17 @@
 // limitations under the License.
 
 use std::any::Any;
-use crate::widget::Widget;
+use crate::widget::{Widget, SystemWidget};
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
+use crate::base_widget::BaseWidget;
 
 pub struct ButtonWidget {
     origin: Point,
     size: Size,
     invalidated: bool,
     texture: TextureStore,
+    base_widget: BaseWidget,
 }
 
 impl Widget for ButtonWidget {
@@ -36,6 +38,16 @@ impl Widget for ButtonWidget {
 
     fn get_size(&self) -> &Size {
         &self.size
+    }
+
+    fn set_origin(&mut self, point: Point) {
+        self.origin = point;
+    }
+
+    fn set_size(&mut self, size: Size) {
+        self.size = size;
+        self.base_widget.set_size(size);
+        self.set_invalidated();
     }
 
     fn set_invalidated(&mut self) {

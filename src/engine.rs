@@ -19,11 +19,14 @@ use sdl2::video::Window;
 use std::thread::sleep;
 use std::time::{Duration, UNIX_EPOCH, SystemTime};
 use sdl2::pixels::Color;
+use crate::cache::WidgetCache;
+use crate::widget::{Widget, SystemWidget};
 
 pub struct Engine {
     frame_rate: u32,
     size: Size,
     running: bool,
+    widget_cache: WidgetCache,
 }
 
 impl Engine {
@@ -32,11 +35,16 @@ impl Engine {
             frame_rate,
             size,
             running: true,
+            widget_cache: WidgetCache::new(),
         }
     }
 
     pub fn shutdown(&mut self) {
         self.running = false;
+    }
+
+    pub fn add_widget(&mut self, widget: SystemWidget) {
+        self.widget_cache.add(widget);
     }
 
     pub fn run(&mut self, sdl: Sdl, window: Window) {
@@ -59,7 +67,6 @@ impl Engine {
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_millis();
-            let invalidated = false;
 
             for event in event_pump.poll_iter() {
                 match event {
@@ -135,9 +142,7 @@ impl Engine {
             // self.widget_cache.tick(self.layout_cache.get_layout_cache());
             // self.layout_cache
             //     .do_layout(self.widget_cache.borrow_cache());
-            // self.widget_cache.draw_loop(&mut canvas);
-
-            if invalidated {
+            if self.widget_cache.draw_loop(&mut canvas) {
                 canvas.present();
             }
 
