@@ -48,17 +48,23 @@ impl WidgetCache {
     }
 
     pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
-        let invalidated = false;
+        let mut invalidated = false;
+        let cache_size = self.cache.len();
 
-        // let cache_size = self.cache.len();
-        //
-        // for i in 0..cache_size {
-        //     if self.cache[i].widget.borrow_mut().is_invalidated() {
-        //         self.draw(0, c);
-        //
-        //         return true;
-        //     }
-        // }
+        for i in 0..cache_size {
+            match &self.cache[i] {
+                SystemWidget::Base(x) => {
+                    if x.is_invalidated() {
+                        invalidated = true;
+                        self.draw(0, c);
+                    }
+                },
+
+                _unused => {
+                    // Do nothing
+                },
+            }
+        }
 
         invalidated
     }

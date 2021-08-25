@@ -49,11 +49,11 @@ impl Widget for ImageWidget {
     fn set_size(&mut self, size: Size) {
         self.size = size;
         self.base_widget.set_size(size);
-        self.set_invalidated();
+        self.set_invalidated(true);
     }
 
-    fn set_invalidated(&mut self) {
-        self.invalidated = true;
+    fn set_invalidated(&mut self, state: bool) {
+        self.invalidated = state;
     }
 
     fn is_invalidated(&self) -> bool {

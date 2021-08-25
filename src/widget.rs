@@ -33,7 +33,7 @@ pub trait Widget {
 
     fn set_size(&mut self, size: Size);
 
-    fn set_invalidated(&mut self);
+    fn set_invalidated(&mut self, state: bool);
 
     fn is_invalidated(&self) -> bool;
 

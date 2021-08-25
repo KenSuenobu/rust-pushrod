@@ -48,11 +48,11 @@ impl Widget for BaseWidget {
 
     fn set_size(&mut self, size: Size) {
         self.size = size;
-        self.set_invalidated();
+        self.set_invalidated(true);
     }
 
-    fn set_invalidated(&mut self) {
-        self.invalidated = true;
+    fn set_invalidated(&mut self, state: bool) {
+        self.invalidated = state;
     }
 
     fn is_invalidated(&self) -> bool {
@@ -81,8 +81,6 @@ impl Widget for BaseWidget {
                     .draw_rect(Rect::new(0, 0, bounds.w, bounds.h))
                     .unwrap();
             }).unwrap();
-
-            self.invalidated = false;
         }
 
         self.texture.get_optional_ref()
