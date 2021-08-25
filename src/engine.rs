@@ -44,8 +44,8 @@ impl Engine {
         self.running = false;
     }
 
-    pub fn add_widget(&mut self, widget: SystemWidget) {
-        self.widget_cache.add(widget);
+    pub fn add_widget(&mut self, widget: SystemWidget) -> i32 {
+        self.widget_cache.add(widget)
     }
 
     pub fn run(&mut self, sdl: Sdl, window: Window) {

@@ -29,6 +29,8 @@ impl WidgetCache {
     }
 
     pub fn add(&mut self, widget: SystemWidget) -> i32 {
+        self.cache.push(widget);
+
         // let origin = widget.get_config().get_point(CONFIG_ORIGIN);
         // let widget_id = self.cache.len();
         //
@@ -42,7 +44,7 @@ impl WidgetCache {
         //
         // (self.cache.len() - 1) as i32
 
-        0
+        (self.cache.len() - 1) as i32
     }
 
     pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {

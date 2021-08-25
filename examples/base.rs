@@ -14,8 +14,9 @@ pub fn main() {
         .unwrap();
     let mut engine = Engine::new(Size::new(600, 400), 30);
     let base_widget = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+    let base_widget_id = engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
 
-    engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
+    eprintln!("Added base widget ID: {}", base_widget_id);
 
     // let mut new_base_widget = BaseWidget::new(make_points(100, 100), make_size(600, 400));
     //
