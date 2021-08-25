@@ -20,6 +20,15 @@ pub struct Point {
     pub y: i32,
 }
 
+impl Point {
+    pub fn new(x: i32, y: i32) -> Self {
+        Self {
+            x,
+            y,
+        }
+    }
+}
+
 /// Provides a definition of the size of an object: contains the `w` and `h` coordinates of
 /// an object.
 #[derive(Default, Copy, Clone)]

@@ -13,7 +13,7 @@ pub fn main() {
         .build()
         .unwrap();
     let mut engine = Engine::new(Size::new(600, 400), 30);
-    let base_widget = BaseWidget::new(Point { x: 20, y: 20 }, Size::new(560, 360));
+    let base_widget = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
 
     engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
 
