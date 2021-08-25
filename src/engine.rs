@@ -21,6 +21,7 @@ use std::time::{Duration, UNIX_EPOCH, SystemTime};
 use sdl2::pixels::Color;
 use crate::cache::WidgetCache;
 use crate::widget::{Widget, SystemWidget};
+use sdl2::event::Event;
 
 pub struct Engine {
     frame_rate: u32,
@@ -122,12 +123,14 @@ impl Engine {
                     //         self.layout_cache.get_layout_cache(),
                     //     );
                     // }
-                    //
-                    // Event::Quit { .. } => {
-                    //     if self.call_exit_callback() {
-                    //         break 'running;
-                    //     }
-                    // }
+
+                    Event::Quit { .. } => {
+                        // if self.call_exit_callback() {
+                        //     break 'running;
+                        // }
+
+                        break 'running;
+                    }
 
                     _remaining_event => {
                         // self.widget_cache.other_event(

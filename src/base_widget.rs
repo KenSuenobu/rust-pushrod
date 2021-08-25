@@ -87,5 +87,15 @@ impl Widget for BaseWidget {
 
         self.texture.get_optional_ref()
     }
+}
 
+impl BaseWidget {
+    pub fn new(origin: Point, size: Size) -> Self {
+        Self {
+            origin,
+            size,
+            invalidated: true,
+            texture: TextureStore::default(),
+        }
+    }
 }
