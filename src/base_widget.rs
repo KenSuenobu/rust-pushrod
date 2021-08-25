@@ -17,6 +17,10 @@ use std::any::Any;
 use crate::widget::Widget;
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
+use sdl2::render::{Texture, Canvas};
+use sdl2::video::Window;
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 
 pub struct BaseWidget {
     origin: Point,
@@ -58,4 +62,30 @@ impl Widget for BaseWidget {
     fn get_texture(&mut self) -> &mut TextureStore {
         &mut self.texture
     }
+
+    fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
+        if self.invalidated {
+            let bounds = self.size;
+            let base_color = Color::RGB(255, 255, 255);
+            let border_color = Color::RGB(0, 0, 0);
+
+            self.texture
+                .create_or_resize_texture(c, self.size);
+
+            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
+                texture.set_draw_color(base_color);
+                texture.clear();
+
+                texture.set_draw_color(border_color);
+                texture
+                    .draw_rect(Rect::new(0, 0, bounds.w, bounds.h))
+                    .unwrap();
+            }).unwrap();
+
+            self.invalidated = false;
+        }
+
+        self.texture.get_optional_ref()
+    }
+
 }

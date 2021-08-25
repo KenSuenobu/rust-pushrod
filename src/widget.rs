@@ -19,6 +19,8 @@ use crate::button_widget::ButtonWidget;
 use crate::geometry::{Size, Point};
 use crate::base_widget::BaseWidget;
 use crate::texture::TextureStore;
+use sdl2::render::{Texture, Canvas};
+use sdl2::video::Window;
 
 pub trait Widget {
     fn as_any(&self) -> &dyn Any;
@@ -36,6 +38,8 @@ pub trait Widget {
     fn is_invalidated(&self) -> bool;
 
     fn get_texture(&mut self) -> &mut TextureStore;
+
+    fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture>;
 }
 
 pub enum SystemWidget {

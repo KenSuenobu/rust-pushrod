@@ -142,6 +142,7 @@ impl Engine {
             // self.widget_cache.tick(self.layout_cache.get_layout_cache());
             // self.layout_cache
             //     .do_layout(self.widget_cache.borrow_cache());
+
             if self.widget_cache.draw_loop(&mut canvas) {
                 canvas.present();
             }

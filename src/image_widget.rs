@@ -17,12 +17,16 @@ use std::any::Any;
 use crate::widget::Widget;
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
+use crate::base_widget::BaseWidget;
+use sdl2::render::{Canvas, Texture};
+use sdl2::video::Window;
 
 pub struct ImageWidget {
     origin: Point,
     size: Size,
     invalidated: bool,
     texture: TextureStore,
+    base_widget: BaseWidget,
 }
 
 impl Widget for ImageWidget {
@@ -44,6 +48,7 @@ impl Widget for ImageWidget {
 
     fn set_size(&mut self, size: Size) {
         self.size = size;
+        self.base_widget.set_size(size);
         self.set_invalidated();
     }
 
@@ -57,5 +62,9 @@ impl Widget for ImageWidget {
 
     fn get_texture(&mut self) -> &mut TextureStore {
         &mut self.texture
+    }
+
+    fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
+        None
     }
 }

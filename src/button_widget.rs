@@ -18,6 +18,8 @@ use crate::widget::{Widget, SystemWidget};
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
 use crate::base_widget::BaseWidget;
+use sdl2::render::{Texture, Canvas};
+use sdl2::video::Window;
 
 pub struct ButtonWidget {
     origin: Point,
@@ -61,4 +63,9 @@ impl Widget for ButtonWidget {
     fn get_texture(&mut self) -> &mut TextureStore {
         &mut self.texture
     }
+
+    fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
+        None
+    }
+
 }
