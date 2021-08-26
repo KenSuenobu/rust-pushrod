@@ -59,6 +59,9 @@ impl WidgetCache {
         (self.cache.len() - 1) as i32
     }
 
+    /// This handles the direct events from the `Engine` class.  Events are not handled by the
+    /// `Engine` via indirection.  They are handled by the `Cache`, so that objects that are
+    /// selected or have focus are handled by this class.
     pub fn handle_event(&mut self, event: Event) {
         match event {
             Event::MouseButtonDown {
