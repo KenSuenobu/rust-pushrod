@@ -29,6 +29,12 @@ pub struct ImageWidget {
     base_widget: BaseWidget,
 }
 
+/// ImageWidget is a widget that contains a `BaseWidget`, then copies an image over the top of the
+/// base after the base has been drawn.  The drawing order is:
+///
+/// - Draw the base widget
+/// - Borrow the base widget's base widget canvas texture
+/// - Blit the image transparently over the base widget's canvas texture.
 impl Widget for ImageWidget {
     fn as_any(&self) -> &dyn Any {
         self

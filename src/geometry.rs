@@ -45,6 +45,7 @@ impl Size {
         }
     }
 
+    /// Shortcut to determine the size (in bytes) that a texture has allocated.
     pub fn get_memory_size(&self) -> u32 {
         self.w * self.h * 4
     }

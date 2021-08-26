@@ -22,13 +22,19 @@ pub struct WidgetCache {
     cache: Vec<SystemWidget>,
 }
 
+/// The `WidgetCache` is the store that stores all of the `Widget` objects for a Window.  It handles
+/// the widget drawing order, the hidden states, etc. for each `Widget`.  It contains a draw loop
+/// which is responsible for determining which objects need to be drawn (which are invalidated),
+/// and in what order.
 impl WidgetCache {
+    /// Constructor.
     pub fn new() -> Self {
         Self {
             cache: Vec::new(),
         }
     }
 
+    /// Adds a `SystemWidget` to the cache.
     pub fn add(&mut self, widget: SystemWidget) -> i32 {
         self.cache.push(widget);
 
@@ -48,6 +54,9 @@ impl WidgetCache {
         (self.cache.len() - 1) as i32
     }
 
+    /// Draws `Widget`s into the `Canvas`.  Detemines whether or not a `Widget` is invalidated,
+    /// draws it (and its children), and exits after draw completes.  Calls private function
+    /// `draw`, which is responsible for blitting a texture to the main `Canvas`.
     pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
         let mut invalidated = false;
         let cache_size = self.cache.len();
@@ -70,6 +79,9 @@ impl WidgetCache {
         invalidated
     }
 
+    /// Draws an object to the screen by calling a `Widget`'s draw function, which draws to a
+    /// `TextureStore`.  Once the `TextureStore` has been rendered, it is copied to the
+    /// `Canvas` at the widget's origin and size coordinates.
     fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>) {
         match &mut self.cache[widget_id as usize] {
             SystemWidget::Base(ref mut widget) => {

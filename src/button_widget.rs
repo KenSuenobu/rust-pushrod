@@ -29,6 +29,13 @@ pub struct ButtonWidget {
     base_widget: BaseWidget,
 }
 
+/// ButtonWidget is a widget that contains a `BaseWidget` and inverts the color of the base
+/// based on whether or not the mouse button is down/toggled in the bounds of the button.
+/// The drawing order is:
+///
+/// - Draw the base widget
+/// - Borrow the base widget's base widget canvas texture
+/// - Draw text on top of the canvas, inverted if selected
 impl Widget for ButtonWidget {
     fn as_any(&self) -> &dyn Any {
         self

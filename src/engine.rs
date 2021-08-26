@@ -30,6 +30,7 @@ pub struct Engine {
     widget_cache: WidgetCache,
 }
 
+/// The main engine of Pushrod.  Runs the run loop after adding widgets to a management cache.
 impl Engine {
     pub fn new(size: Size, frame_rate: u32) -> Self {
         Self {
@@ -40,14 +41,18 @@ impl Engine {
         }
     }
 
+    /// Shuts down Pushrod for this `Window`.
     pub fn shutdown(&mut self) {
         self.running = false;
     }
 
+    /// Adds a `SystemWidget` to the management stack.
     pub fn add_widget(&mut self, widget: SystemWidget) -> i32 {
         self.widget_cache.add(widget)
     }
 
+    /// Runs an instance of the `Engine`.  Handles events for the given `Window` through `Sdl`,
+    /// translating events into usable events by each `Widget`, and by the main application.
     pub fn run(&mut self, sdl: Sdl, window: Window) {
         let mut canvas = window
             .into_canvas()

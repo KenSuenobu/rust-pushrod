@@ -29,6 +29,14 @@ pub struct BaseWidget {
     texture: TextureStore,
 }
 
+/// This is a basic widget that just draws a background with a fill color in a canvas of a given
+/// size.  The steps for the drawing inside the `Canvas` are:
+///
+/// - Create/resize the texture if not created
+/// - Set the background draw color to the base (`Color::RGB(255, 255, 255)`)
+/// - Clear the canvas with that color
+/// - Set the draw color to the border (`Color::RGB(0, 0, 0)`)
+/// - Draw a box on the border of the object's bounds: 0 x 0 x Width x Height
 impl Widget for BaseWidget {
     fn as_any(&self) -> &dyn Any {
         self

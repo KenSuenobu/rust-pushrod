@@ -25,8 +25,10 @@ pub struct TextureStore {
     invalidated: bool,
 }
 
-/// This is a `TextureStore`.  This is a GPU-based texture store.  Any changes to the texture are
-/// treated as an 'invalidation', or a cache object needing refresh.
+/// This is a `TextureStore`.  This is a GPU-based texture store, stored on the GPU.  The texture
+/// address is stored as a pointer to the GPU memory by SDL.
+///
+/// Any changes to the texture are treated as an 'invalidation', or a cache object needing refresh.
 impl TextureStore {
     /// Retrieves a `&mut Texture` reference to the stored `Texture` object.
     ///
