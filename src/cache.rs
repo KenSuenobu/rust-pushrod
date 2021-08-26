@@ -57,6 +57,9 @@ impl WidgetCache {
     /// Draws `Widget`s into the `Canvas`.  Detemines whether or not a `Widget` is invalidated,
     /// draws it (and its children), and exits after draw completes.  Calls private function
     /// `draw`, which is responsible for blitting a texture to the main `Canvas`.
+    ///
+    /// Returns a boolean indicating whether or not the canvas was invalidated and needs to be
+    /// redrawn.  If not, the event loop will not redraw the canvas.
     pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
         let mut invalidated = false;
         let cache_size = self.cache.len();
