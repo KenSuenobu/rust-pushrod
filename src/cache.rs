@@ -16,6 +16,7 @@
 use crate::widget::{SystemWidget, Widget};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
+use sdl2::rect::Rect;
 
 pub struct WidgetCache {
     cache: Vec<SystemWidget>,
@@ -69,61 +70,83 @@ impl WidgetCache {
         invalidated
     }
 
-    fn draw(&mut self, _widget_id: i32, _c: &mut Canvas<Window>) {
-        // let parents_of_widget = self.get_children_of(widget_id);
-        //
-        // if parents_of_widget.is_empty() {
-        //     return;
-        // }
-        //
-        // for paint_id in &parents_of_widget {
-        //     let paint_widget = &mut self.cache[*paint_id as usize];
-        //     let is_hidden = paint_widget.widget.borrow_mut().get_config().is_hidden();
-        //     let is_enabled = paint_widget.widget.borrow_mut().get_config().is_enabled();
-        //     let widget_x = paint_widget.widget.borrow_mut().get_config().to_x(0);
-        //     let widget_y = paint_widget.widget.borrow_mut().get_config().to_y(0);
-        //     let widget_w = paint_widget
-        //         .widget
-        //         .borrow_mut()
-        //         .get_config()
-        //         .get_size(CONFIG_SIZE)[0];
-        //     let widget_h = paint_widget
-        //         .widget
-        //         .borrow_mut()
-        //         .get_config()
-        //         .get_size(CONFIG_SIZE)[1];
-        //
-        //     if !is_hidden {
-        //         match paint_widget
-        //             .widget
-        //             .borrow_mut()
-        //             .draw(c, &mut self.texture_cache)
-        //         {
-        //             Some(texture) => {
-        //                 c.copy(
-        //                     texture,
-        //                     None,
-        //                     Rect::new(widget_x, widget_y, widget_w, widget_h),
-        //                 )
-        //                     .unwrap();
-        //             }
-        //             None => eprintln!("No texture presented: ID={}", paint_id),
-        //         };
-        //
-        //         paint_widget.widget.borrow_mut().set_invalidated(false);
-        //     }
-        //
-        //     if *paint_id != widget_id {
-        //         self.draw(*paint_id, c);
-        //     }
-        //
-        //     if !is_enabled {
-        //         c.set_draw_color(Color::RGBA(0, 0, 0, 128));
-        //         c.draw_rect(Rect::new(widget_x, widget_y, widget_w, widget_h))
-        //             .unwrap();
-        //     }
-        // }
+    fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>) {
+        match &mut self.cache[widget_id as usize] {
+            SystemWidget::Base(mut widget) => {
+                match widget.draw(c) {
+                    Some(texture) => {
+                        c.copy(
+                            texture,
+                            None,
+                            Rect::new(0, 0, 600, 600),
+                        ).unwrap()
+                    }
+
+                    None => eprintln!("No texture presented."),
+                };
+
+                widget.set_invalidated(false);
+            }
+
+            _default => { },
+        }
     }
+
+    // fn draw(&mut self, _widget_id: i32, _c: &mut Canvas<Window>) {
+    //     // let parents_of_widget = self.get_children_of(widget_id);
+    //     //
+    //     // if parents_of_widget.is_empty() {
+    //     //     return;
+    //     // }
+    //     //
+    //     // for paint_id in &parents_of_widget {
+    //     //     let paint_widget = &mut self.cache[*paint_id as usize];
+    //     //     let is_hidden = paint_widget.widget.borrow_mut().get_config().is_hidden();
+    //     //     let is_enabled = paint_widget.widget.borrow_mut().get_config().is_enabled();
+    //     //     let widget_x = paint_widget.widget.borrow_mut().get_config().to_x(0);
+    //     //     let widget_y = paint_widget.widget.borrow_mut().get_config().to_y(0);
+    //     //     let widget_w = paint_widget
+    //     //         .widget
+    //     //         .borrow_mut()
+    //     //         .get_config()
+    //     //         .get_size(CONFIG_SIZE)[0];
+    //     //     let widget_h = paint_widget
+    //     //         .widget
+    //     //         .borrow_mut()
+    //     //         .get_config()
+    //     //         .get_size(CONFIG_SIZE)[1];
+    //     //
+    //     //     if !is_hidden {
+    //     //         match paint_widget
+    //     //             .widget
+    //     //             .borrow_mut()
+    //     //             .draw(c, &mut self.texture_cache)
+    //     //         {
+    //     //             Some(texture) => {
+    //     //                 c.copy(
+    //     //                     texture,
+    //     //                     None,
+    //     //                     Rect::new(widget_x, widget_y, widget_w, widget_h),
+    //     //                 )
+    //     //                     .unwrap();
+    //     //             }
+    //     //             None => eprintln!("No texture presented: ID={}", paint_id),
+    //     //         };
+    //     //
+    //     //         paint_widget.widget.borrow_mut().set_invalidated(false);
+    //     //     }
+    //     //
+    //     //     if *paint_id != widget_id {
+    //     //         self.draw(*paint_id, c);
+    //     //     }
+    //     //
+    //     //     if !is_enabled {
+    //     //         c.set_draw_color(Color::RGBA(0, 0, 0, 128));
+    //     //         c.draw_rect(Rect::new(widget_x, widget_y, widget_w, widget_h))
+    //     //             .unwrap();
+    //     //     }
+    //     // }
+    // }
 }
 
 impl Default for WidgetCache {

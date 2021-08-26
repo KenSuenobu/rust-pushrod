@@ -20,7 +20,7 @@ use std::thread::sleep;
 use std::time::{Duration, UNIX_EPOCH, SystemTime};
 use sdl2::pixels::Color;
 use crate::cache::WidgetCache;
-use crate::widget::{Widget, SystemWidget};
+use crate::widget::SystemWidget;
 use sdl2::event::Event;
 
 pub struct Engine {

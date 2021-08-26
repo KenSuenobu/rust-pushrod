@@ -14,7 +14,7 @@
 // limitations under the License.
 
 use std::any::Any;
-use crate::widget::{Widget, SystemWidget};
+use crate::widget::{Widget};
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
 use crate::base_widget::BaseWidget;
