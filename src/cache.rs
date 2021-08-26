@@ -26,6 +26,10 @@ pub struct WidgetCache {
 /// the widget drawing order, the hidden states, etc. for each `Widget`.  It contains a draw loop
 /// which is responsible for determining which objects need to be drawn (which are invalidated),
 /// and in what order.
+///
+/// Any interactions that are performed by the `Engine` are sent here.  This means, the `WidgetCache`
+/// has its own event handler.  This is necessary such that `Widget`s can interpret events that may
+/// apply to them, for instance: mouse movement, clicks, key press, etc.
 impl WidgetCache {
     /// Constructor.
     pub fn new() -> Self {
