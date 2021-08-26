@@ -61,6 +61,30 @@ impl WidgetCache {
 
     pub fn handle_event(&mut self, event: Event) {
         match event {
+            Event::MouseButtonDown {
+                mouse_btn, clicks, ..
+            } => {
+                self.widget_cache.button_clicked(
+                    self.current_widget_id,
+                    mouse_btn as u8,
+                    clicks,
+                    true,
+                    self.layout_cache.get_layout_cache(),
+                );
+            }
+
+            Event::MouseButtonUp {
+                mouse_btn, clicks, ..
+            } => {
+                self.widget_cache.button_clicked(
+                    -1,
+                    mouse_btn as u8,
+                    clicks,
+                    false,
+                    self.layout_cache.get_layout_cache(),
+                );
+            }
+
             Event::MouseMotion { x, y, .. } => {
                 eprintln!("Cache: mouse motion: {} x {}", x, y);
             },
@@ -69,9 +93,9 @@ impl WidgetCache {
         }
     }
 
-    /// Draws `Widget`s into the `Canvas`.  Detemines whether or not a `Widget` is invalidated,
+    /// Draws `Widget`s into the `Canvas`.  Determines whether or not a `Widget` is invalidated,
     /// draws it (and its children), and exits after draw completes.  Calls private function
-    /// `draw`, which is responsible for blitting a texture to the main `Canvas`.
+    /// `draw`, which is responsible for copying a texture to the main `Canvas`.
     ///
     /// Returns a boolean indicating whether or not the canvas was invalidated and needs to be
     /// redrawn.  If not, the event loop will not redraw the canvas.
