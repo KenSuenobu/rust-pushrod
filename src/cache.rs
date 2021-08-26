@@ -17,6 +17,7 @@ use crate::widget::{SystemWidget, Widget};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::rect::Rect;
+use sdl2::event::Event;
 
 pub struct WidgetCache {
     cache: Vec<SystemWidget>,
@@ -56,6 +57,16 @@ impl WidgetCache {
         // (self.cache.len() - 1) as i32
 
         (self.cache.len() - 1) as i32
+    }
+
+    pub fn handle_event(&mut self, event: Event) {
+        match event {
+            Event::MouseMotion { x, y, .. } => {
+                eprintln!("Cache: mouse motion: {} x {}", x, y);
+            },
+            _default => {},
+
+        }
     }
 
     /// Draws `Widget`s into the `Canvas`.  Detemines whether or not a `Widget` is invalidated,

@@ -61,7 +61,7 @@ impl Engine {
             .build()
             .unwrap();
 
-        canvas.set_draw_color(Color::RGB(255, 0, 0));
+        canvas.set_draw_color(Color::RGB(255, 255, 255));
         canvas.clear();
         canvas.present();
 
@@ -137,12 +137,8 @@ impl Engine {
                         break 'running;
                     }
 
-                    _remaining_event => {
-                        // self.widget_cache.other_event(
-                        //     self.current_widget_id,
-                        //     remaining_event,
-                        //     self.layout_cache.get_layout_cache(),
-                        // );
+                    remaining_event => {
+                        self.widget_cache.handle_event(remaining_event);
                     }
                 }
             }
@@ -151,7 +147,7 @@ impl Engine {
             // self.layout_cache
             //     .do_layout(self.widget_cache.borrow_cache());
 
-            canvas.set_draw_color(Color::RGB(255, 0, 0));
+            canvas.set_draw_color(Color::RGB(255, 255, 255));
             canvas.clear();
 
             if self.widget_cache.draw_loop(&mut canvas) {
