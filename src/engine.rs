@@ -146,6 +146,9 @@ impl Engine {
             // self.layout_cache
             //     .do_layout(self.widget_cache.borrow_cache());
 
+            canvas.set_draw_color(Color::RGB(255, 0, 0));
+            canvas.clear();
+
             if self.widget_cache.draw_loop(&mut canvas) {
                 canvas.present();
             }

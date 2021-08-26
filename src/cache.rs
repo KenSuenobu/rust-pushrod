@@ -72,13 +72,21 @@ impl WidgetCache {
 
     fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>) {
         match &mut self.cache[widget_id as usize] {
-            SystemWidget::Base(mut widget) => {
+            SystemWidget::Base(ref mut widget) => {
+                let widget_origin = *widget.get_origin();
+                let widget_size = *widget.get_size();
+
+                eprintln!("[Base] Drawing ID {} to x {} y {} w {} h {}", widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h);
+
                 match widget.draw(c) {
                     Some(texture) => {
                         c.copy(
                             texture,
                             None,
-                            Rect::new(0, 0, 600, 600),
+                            Rect::new(widget_origin.x,
+                                      widget_origin.y,
+                                      widget_size.w,
+                                      widget_size.h),
                         ).unwrap()
                     }
 
