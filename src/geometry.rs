@@ -57,3 +57,7 @@ impl Size {
 pub fn make_rect(origin: Point, bounds: Size) -> Rect {
     Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }
+
+pub fn make_origin() -> Point {
+    Point { x: 0, y: 0 }
+}

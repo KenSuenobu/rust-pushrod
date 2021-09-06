@@ -22,6 +22,7 @@ use crate::texture::TextureStore;
 use sdl2::render::{Texture, Canvas};
 use sdl2::video::Window;
 use sdl2::pixels::Color;
+use crate::box_widget::BoxWidget;
 
 /// `Widget` is a drawable, interactive object that is presented in a `Window`.
 pub trait Widget {
@@ -68,6 +69,9 @@ pub trait Widget {
 pub enum SystemWidget {
     /// Stores a `BaseWidget`, one of the simplest drawing `Widget` objects.
     Base(Box<BaseWidget>),
+
+    /// Stores a `BoxWidget`, an object that contains `BaseWidget` and draws a border with a width and color.
+    Box(Box<BoxWidget>),
 
     /// Stores a `ButtonWidget`, an object that can be interacted with, accepting button clicks.
     Button(Box<ButtonWidget>),

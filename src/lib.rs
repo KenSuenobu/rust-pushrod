@@ -20,3 +20,4 @@ pub mod button_widget;
 pub mod base_widget;
 pub mod cache;
 pub mod engine;
+pub mod box_widget;
