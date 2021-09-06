@@ -16,11 +16,12 @@
 use crate::widget::{SystemWidget, Widget};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
-use sdl2::rect::Rect;
 use sdl2::event::Event;
+use crate::geometry::make_rect;
 
 pub struct WidgetCache {
     cache: Vec<SystemWidget>,
+    current_widget_id: u32,
 }
 
 /// The `WidgetCache` is the store that stores all of the `Widget` objects for a Window.  It handles
@@ -36,6 +37,7 @@ impl WidgetCache {
     pub fn new() -> Self {
         Self {
             cache: Vec::new(),
+            current_widget_id: 0,
         }
     }
 
@@ -64,35 +66,25 @@ impl WidgetCache {
     /// selected or have focus are handled by this class.
     pub fn handle_event(&mut self, event: Event) {
         match event {
-            Event::MouseButtonDown {
-                mouse_btn, clicks, ..
-            } => {
-                self.widget_cache.button_clicked(
-                    self.current_widget_id,
-                    mouse_btn as u8,
-                    clicks,
-                    true,
-                    self.layout_cache.get_layout_cache(),
-                );
-            }
+            Event::MouseButtonDown { mouse_btn, clicks, x, y, .. } => {
+                eprintln!("Cache: mouse down: button={} clicks={} x={} y={}", mouse_btn as i32, clicks, x, y);
+            },
 
-            Event::MouseButtonUp {
-                mouse_btn, clicks, ..
-            } => {
-                self.widget_cache.button_clicked(
-                    -1,
-                    mouse_btn as u8,
-                    clicks,
-                    false,
-                    self.layout_cache.get_layout_cache(),
-                );
-            }
+            Event::MouseButtonUp { mouse_btn, clicks, x, y, .. } => {
+                eprintln!("Cache: mouse up: button={} clicks={} x={} y={}", mouse_btn as i32, clicks, x, y);
+            },
 
             Event::MouseMotion { x, y, .. } => {
-                eprintln!("Cache: mouse motion: {} x {}", x, y);
-            },
-            _default => {},
+                self.current_widget_id = self.get_widget_id(x as u32, y as u32);
 
+                // Mouse motion in relation to the widget needs to have the X and Y coordinates
+                // subtracted from the X/Y coordinates sent here in mouse motion.  Since these
+                // values can be negative based on the relation to the currently active object.
+
+                eprintln!("Cache: mouse motion: x={} y={} widget={}", x, y, self.current_widget_id);
+            },
+
+            _default => {},
         }
     }
 
@@ -140,10 +132,7 @@ impl WidgetCache {
                         c.copy(
                             texture,
                             None,
-                            Rect::new(widget_origin.x,
-                                      widget_origin.y,
-                                      widget_size.w,
-                                      widget_size.h),
+                            make_rect(widget_origin, widget_size),
                         ).unwrap()
                     }
 
@@ -155,6 +144,11 @@ impl WidgetCache {
 
             _default => { },
         }
+    }
+
+    /// Determines the ID of the widget at the given X/Y coordinates.
+    fn get_widget_id(&self, _x: u32, _y: u32) -> u32 {
+        0
     }
 
     // fn draw(&mut self, _widget_id: i32, _c: &mut Canvas<Window>) {

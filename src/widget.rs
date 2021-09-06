@@ -21,37 +21,44 @@ use crate::base_widget::BaseWidget;
 use crate::texture::TextureStore;
 use sdl2::render::{Texture, Canvas};
 use sdl2::video::Window;
+use sdl2::pixels::Color;
 
-/// Widget is a drawable, interactive object that is presented in a Window.
+/// `Widget` is a drawable, interactive object that is presented in a `Window`.
 pub trait Widget {
     /// Returns the pure form of the object for casting, if required.
     fn as_any(&self) -> &dyn Any;
 
-    /// Gets the origin (upper left-hand) coordinate of the Widget.
+    /// Gets the origin (upper left-hand) coordinate of the `Widget`.
     fn get_origin(&self) -> &Point;
 
     /// Gets the size (bounds) of the object in width and height.
     fn get_size(&self) -> &Size;
 
+    /// Gets the main color of the `Widget`.
+    fn get_color(&self) -> Color;
+
     /// Sets the origin point.
     fn set_origin(&mut self, point: Point);
 
-    /// Sets the size of the Widget.
+    /// Sets the size of the `Widget`.
     fn set_size(&mut self, size: Size);
 
     /// Sets the invalidation state of the object.  When invalidated, it indicates to the
     /// `Engine` that it needs to be refreshed in the main screen, or not.
     fn set_invalidated(&mut self, state: bool);
 
+    /// Sets the main color of the `Widget`.
+    fn set_color(&mut self, color: Color);
+
     /// Indicates whether or not an object needs to be redrawn.
     fn is_invalidated(&self) -> bool;
 
-    /// Retrieves the `TextureStore` for the Widget.  The `TextureStore` is the object's
+    /// Retrieves the `TextureStore` for the `Widget`.  The `TextureStore` is the object's
     /// drawing GPU texture that gets blitted to the screen.  Only update the texture if
     /// invalidated.
     fn get_texture(&mut self) -> &mut TextureStore;
 
-    /// Blits the image stored inside the `Widget` to the screen.  If the `Widget` doesn't
+    /// Copies the image stored inside the `Widget` to the screen.  If the `Widget` doesn't
     /// actually _draw_ anything, it can return `None`.  Otherwise, it returns a reference
     /// to the stored `Texture`.
     fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture>;

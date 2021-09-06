@@ -20,6 +20,7 @@ use crate::texture::TextureStore;
 use crate::base_widget::BaseWidget;
 use sdl2::render::{Texture, Canvas};
 use sdl2::video::Window;
+use sdl2::pixels::Color;
 
 pub struct ButtonWidget {
     origin: Point,
@@ -48,6 +49,10 @@ impl Widget for ButtonWidget {
     fn get_size(&self) -> &Size {
         &self.size
     }
+    
+    fn get_color(&self) -> Color {
+        self.base_widget.get_color()
+    }
 
     fn set_origin(&mut self, point: Point) {
         self.origin = point;
@@ -61,6 +66,11 @@ impl Widget for ButtonWidget {
 
     fn set_invalidated(&mut self, state: bool) {
         self.invalidated = state;
+    }
+
+    fn set_color(&mut self, color: Color) {
+        self.base_widget.set_color(color);
+        self.set_invalidated(true);
     }
 
     fn is_invalidated(&self) -> bool {

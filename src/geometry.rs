@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use sdl2::rect::Rect;
+
 /// Provides a definition of a point of origin: contains the `x` and `y` coordinates of
 /// an object.
 #[derive(Default, Copy, Clone)]
@@ -49,4 +51,9 @@ impl Size {
     pub fn get_memory_size(&self) -> u32 {
         self.w * self.h * 4
     }
+}
+
+// Helper method to create a rect bounds for Sdl
+pub fn make_rect(origin: Point, bounds: Size) -> Rect {
+    Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }

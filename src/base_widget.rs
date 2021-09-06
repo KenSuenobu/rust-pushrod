@@ -20,11 +20,11 @@ use crate::texture::TextureStore;
 use sdl2::render::{Texture, Canvas};
 use sdl2::video::Window;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 
 pub struct BaseWidget {
     origin: Point,
     size: Size,
+    base_color: Color,
     invalidated: bool,
     texture: TextureStore,
 }
@@ -35,8 +35,6 @@ pub struct BaseWidget {
 /// - Create/resize the texture if not created
 /// - Set the background draw color to the base (`Color::RGB(255, 255, 255)`)
 /// - Clear the canvas with that color
-/// - Set the draw color to the border (`Color::RGB(0, 0, 0)`)
-/// - Draw a box on the border of the object's bounds: 0 x 0 x Width x Height
 impl Widget for BaseWidget {
     fn as_any(&self) -> &dyn Any {
         self
@@ -48,6 +46,10 @@ impl Widget for BaseWidget {
 
     fn get_size(&self) -> &Size {
         &self.size
+    }
+
+    fn get_color(&self) -> Color {
+        self.base_color
     }
 
     fn set_origin(&mut self, point: Point) {
@@ -63,6 +65,11 @@ impl Widget for BaseWidget {
         self.invalidated = state;
     }
 
+    fn set_color(&mut self, color: Color) {
+        self.base_color = color;
+        self.set_invalidated(false);
+    }
+
     fn is_invalidated(&self) -> bool {
         self.invalidated
     }
@@ -74,8 +81,7 @@ impl Widget for BaseWidget {
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {
             let bounds = self.size;
-            let base_color = Color::RGB(255, 255, 255);
-            let border_color = Color::RGB(0, 0, 0);
+            let base_color = self.base_color;
 
             self.texture
                 .create_or_resize_texture(c, self.size);
@@ -83,11 +89,6 @@ impl Widget for BaseWidget {
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture.set_draw_color(base_color);
                 texture.clear();
-
-                texture.set_draw_color(border_color);
-                texture
-                    .draw_rect(Rect::new(0, 0, bounds.w, bounds.h))
-                    .unwrap();
             }).unwrap();
         }
 
@@ -100,6 +101,7 @@ impl BaseWidget {
         Self {
             origin,
             size,
+            base_color: Color::RGBA(255, 255, 255, 0),
             invalidated: true,
             texture: TextureStore::default(),
         }
