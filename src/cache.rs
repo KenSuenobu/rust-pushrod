@@ -82,6 +82,10 @@ impl WidgetCache {
                 // values can be negative based on the relation to the currently active object.
 
                 eprintln!("Cache: mouse motion: x={} y={} widget={}", x, y, self.current_widget_id);
+
+                // Once the object motion is found, it needs to be translated to the current widget
+                // ID and sent as a relative value based on the point position of the widget that
+                // was found.
             },
 
             _default => {},
