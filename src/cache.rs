@@ -44,20 +44,6 @@ impl WidgetCache {
     /// Adds a `SystemWidget` to the cache.
     pub fn add(&mut self, widget: SystemWidget) -> i32 {
         self.cache.push(widget);
-
-        // let origin = widget.get_config().get_point(CONFIG_ORIGIN);
-        // let widget_id = self.cache.len();
-        //
-        // self.cache.push(WidgetContainer::new(
-        //     widget,
-        //     widget_name,
-        //     origin,
-        //     widget_id as i32,
-        //     0,
-        // ));
-        //
-        // (self.cache.len() - 1) as i32
-
         (self.cache.len() - 1) as i32
     }
 
