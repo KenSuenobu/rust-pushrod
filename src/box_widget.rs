@@ -94,6 +94,7 @@ impl Widget for BoxWidget {
             let base_widget_texture = self.base_widget.draw(c).unwrap();
             let border_color = self.border_color;
             let border_width = self.border_width;
+            let widget_size = self.size;
             let widget_width = self.size.w;
             let widget_height = self.size.h;
 
@@ -103,7 +104,7 @@ impl Widget for BoxWidget {
                     .copy(
                         base_widget_texture,
                         None,
-                        make_rect(make_origin(), self.size),
+                        make_rect(make_origin(), widget_size),
                     )
                     .unwrap();
 
@@ -125,21 +126,27 @@ impl Widget for BoxWidget {
 
 }
 
+/// This is a `BoxWidget` that draws a `BaseWidget` as its base, and draws a border around the
+/// `BaseWidget` of a given width and color.
 impl BoxWidget {
+    /// Sets the border width.
     fn set_border_width(&mut self, width: u8) {
         self.border_width = width;
         self.set_invalidated(true);
     }
 
+    /// Sets the border color, which can be a `Color::RGB` or `Color::RGBA`.
     fn set_border_color(&mut self, color: Color) {
         self.border_color = color;
         self.set_invalidated(true);
     }
 
+    /// Retrieves the border width.
     fn get_border_width(&self) -> u8 {
         self.border_width
     }
 
+    /// Retrives the border color.
     fn get_border_color(&self) -> Color {
         self.border_color
     }
