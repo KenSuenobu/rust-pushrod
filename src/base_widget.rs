@@ -80,12 +80,12 @@ impl Widget for BaseWidget {
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {
-            let bounds = self.size;
             let base_color = self.base_color;
 
             self.texture
                 .create_or_resize_texture(c, self.size);
 
+            // Draw the background with only the base color.
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture.set_draw_color(base_color);
                 texture.clear();

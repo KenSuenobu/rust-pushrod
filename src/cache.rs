@@ -102,14 +102,22 @@ impl WidgetCache {
         let mut invalidated = false;
         let cache_size = self.cache.len();
 
+        // Walk the size of the cache and only draw objects that are invalidated.
         for i in 0..cache_size {
             match &self.cache[i] {
                 SystemWidget::Base(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
-                        self.draw(0, c);
+                        self.draw(i as u32, c);
                     }
                 },
+
+                SystemWidget::Box(x) => {
+                    if x.is_invalidated() {
+                        invalidated = true;
+                        self.draw(i as u32, c);
+                    }
+                }
 
                 _unused => {
                     // Do nothing
@@ -130,7 +138,7 @@ impl WidgetCache {
                 let widget_origin = *widget.get_origin();
                 let widget_size = *widget.get_size();
 
-                eprintln!("[Base] Drawing ID {} to x {} y {} w {} h {}", widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h);
+                eprintln!("[BASE] Drawing ID {} to x {} y {} w {} h {}", widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h);
 
                 match widget.draw(c) {
                     Some(texture) => {
@@ -145,9 +153,33 @@ impl WidgetCache {
                 };
 
                 widget.set_invalidated(false);
-            }
+            },
 
-            _default => { },
+            SystemWidget::Box(ref mut widget) => {
+                let widget_origin = *widget.get_origin();
+                let widget_size = *widget.get_size();
+
+                eprintln!("[BOX] Drawing ID {} to x {} y {} w {} h {}", widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h);
+
+                match widget.draw(c) {
+                    Some(texture) => {
+                        c.copy(
+                            texture,
+                            None,
+                            make_rect(widget_origin, widget_size),
+                        ).unwrap()
+                    }
+
+                    None => eprintln!("No texture presented."),
+                };
+
+                widget.set_invalidated(false);
+            },
+
+            _default => {
+                // Do nothing
+                eprintln!("I'm sent a widget that I can't draw yet!");
+            },
         }
     }
 
