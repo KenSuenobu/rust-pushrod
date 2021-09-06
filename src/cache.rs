@@ -113,6 +113,7 @@ impl WidgetCache {
 
                 _unused => {
                     // Do nothing
+                    eprintln!("I'm sent a widget that I can't draw yet!");
                 },
             }
         }

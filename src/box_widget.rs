@@ -129,6 +129,18 @@ impl Widget for BoxWidget {
 /// This is a `BoxWidget` that draws a `BaseWidget` as its base, and draws a border around the
 /// `BaseWidget` of a given width and color.
 impl BoxWidget {
+    pub fn new(origin: Point, size: Size, border_color: Color, border_width: u8) -> Self {
+        Self {
+            origin,
+            size,
+            invalidated: true,
+            texture: TextureStore::default(),
+            base_widget: BaseWidget::new(make_origin(), size),
+            border_color,
+            border_width,
+        }
+    }
+
     /// Sets the border width.
     fn set_border_width(&mut self, width: u8) {
         self.border_width = width;

@@ -2,6 +2,8 @@ use pushrod::engine::Engine;
 use pushrod::geometry::{Size, Point};
 use pushrod::base_widget::BaseWidget;
 use pushrod::widget::SystemWidget;
+use pushrod::box_widget::BoxWidget;
+use sdl2::pixels::Color;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -17,6 +19,12 @@ pub fn main() {
     let base_widget_id = engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
 
     eprintln!("Added base widget ID: {}", base_widget_id);
+
+    let box_widget = BoxWidget::new(Point::new(40, 40), Size::new(100, 100),
+    Color::BLUE, 3);
+    let box_widget_id = engine.add_widget(SystemWidget::Box(Box::new(box_widget)));
+
+    eprintln!("Added box widget ID: {}", box_widget_id);
 
     // let mut new_base_widget = BaseWidget::new(make_points(100, 100), make_size(600, 400));
     //
