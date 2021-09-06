@@ -75,17 +75,8 @@ impl WidgetCache {
             },
 
             Event::MouseMotion { x, y, .. } => {
-                self.current_widget_id = self.get_widget_id(x as u32, y as u32);
-
-                // Mouse motion in relation to the widget needs to have the X and Y coordinates
-                // subtracted from the X/Y coordinates sent here in mouse motion.  Since these
-                // values can be negative based on the relation to the currently active object.
-
-                eprintln!("Cache: mouse motion: x={} y={} widget={}", x, y, self.current_widget_id);
-
-                // Once the object motion is found, it needs to be translated to the current widget
-                // ID and sent as a relative value based on the point position of the widget that
-                // was found.
+                self.current_widget_id = self.get_widget_id(x, y);
+                eprintln!("Mouse: x={} y={} widget={}", x, y, self.current_widget_id);
             },
 
             _default => {},
@@ -184,8 +175,47 @@ impl WidgetCache {
     }
 
     /// Determines the ID of the widget at the given X/Y coordinates.
-    fn get_widget_id(&self, _x: u32, _y: u32) -> u32 {
-        0
+    fn get_widget_id(&self, x: i32, y: i32) -> u32 {
+        let cache_size = self.cache.len();
+
+        // Mouse motion in relation to the widget needs to have the X and Y coordinates
+        // subtracted from the X/Y coordinates sent here in mouse motion.  Since these
+        // values can be negative based on the relation to the currently active object.
+
+        let mut widget_id = 0;
+
+        for i in 0..cache_size {
+            let mut start_x = 0;
+            let mut end_x = 0;
+            let mut start_y = 0;
+            let mut end_y = 0;
+
+            match &self.cache[i] {
+                SystemWidget::Base(x) => {
+                    start_x = x.get_origin().x;
+                    start_y = x.get_origin().y;
+                    end_x = start_x + x.get_size().w as i32;
+                    end_y = start_y + x.get_size().h as i32;
+                },
+
+                SystemWidget::Box(x) => {
+                    start_x = x.get_origin().x;
+                    start_y = x.get_origin().y;
+                    end_x = start_x + x.get_size().w as i32;
+                    end_y = start_y + x.get_size().h as i32;
+                },
+
+                _default => {
+                    // Do nothing.
+                },
+            }
+
+            if x >= start_x && x <= end_x && y >= start_y && y <= end_y {
+                widget_id = i as u32;
+            }
+        }
+
+        widget_id
     }
 
     // fn draw(&mut self, _widget_id: i32, _c: &mut Canvas<Window>) {
