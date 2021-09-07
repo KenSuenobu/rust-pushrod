@@ -41,17 +41,21 @@ pub trait Widget {
     /// Sets the origin point.
     fn set_origin(&mut self, point: Point);
 
-    /// Sets the size of the `Widget`.
+    /// Sets the size of the `Widget`.  Sub-`Widget` objects must also be resized.
     fn set_size(&mut self, size: Size);
 
     /// Sets the invalidation state of the object.  When invalidated, it indicates to the
-    /// `Engine` that it needs to be refreshed in the main screen, or not.
+    /// `Engine` that it needs to be refreshed in the main screen, or not.  Note, any `Widget`s that
+    /// introduce multiple sub-`Widget`s into their drawing stack also need to be set invalidated
+    /// when the top-level is set.  Otherwise, you may exhibit unwanted or odd behavior.
     fn set_invalidated(&mut self, state: bool);
 
     /// Sets the main color of the `Widget`.
     fn set_color(&mut self, color: Color);
 
-    /// Indicates whether or not an object needs to be redrawn.
+    /// Indicates whether or not an object needs to be redrawn.  This only needs to be implemented
+    /// on the top-level `Widget`, unless a sub-`Widget` object changes state based on a timer or
+    /// other event.
     fn is_invalidated(&self) -> bool;
 
     /// Retrieves the `TextureStore` for the `Widget`.  The `TextureStore` is the object's
