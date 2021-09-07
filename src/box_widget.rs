@@ -70,7 +70,7 @@ impl Widget for BoxWidget {
 
     fn set_invalidated(&mut self, state: bool) {
         self.invalidated = state;
-        self.base_widget.set_invalidated(true);
+        self.base_widget.set_invalidated(state);
     }
 
     fn set_color(&mut self, color: Color) {
