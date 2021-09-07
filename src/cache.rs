@@ -47,6 +47,20 @@ impl WidgetCache {
         (self.cache.len() - 1) as i32
     }
 
+    /// Retrieves a `SystemWidget` from the cache by its ID.
+    pub fn get(&self, widget: i32) -> Option<&SystemWidget> {
+        if widget > self.cache.len() as i32 {
+            None
+        } else {
+            return Some(&self.cache[widget as usize])
+        }
+    }
+
+    /// Retrieves the current widget ID
+    pub fn get_current_widget(&self) -> u32 {
+        return self.current_widget_id
+    }
+
     /// This handles the direct events from the `Engine` class.  Events are not handled by the
     /// `Engine` via indirection.  They are handled by the `Cache`, so that objects that are
     /// selected or have focus are handled by this class.
