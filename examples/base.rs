@@ -22,18 +22,21 @@ pub fn main() {
 
     let mut box_widget1 = BoxWidget::new(Point::new(40, 40), Size::new(100, 100),
                                         Color::BLUE, 3);
+    box_widget1.set_color(Color::CYAN);
     let box_widget_id1 = engine.add_widget(SystemWidget::Box(Box::new(box_widget1)));
 
     eprintln!("Added box widget ID: {}", box_widget_id1);
 
     let mut box_widget2 = BoxWidget::new(Point::new(180, 40), Size::new(100, 100),
                                         Color::GREEN, 5);
+    box_widget2.set_color(Color::GRAY);
     let box_widget_id2 = engine.add_widget(SystemWidget::Box(Box::new(box_widget2)));
 
     eprintln!("Added box widget ID: {}", box_widget_id2);
 
     let mut box_widget3 = BoxWidget::new(Point::new(320, 40), Size::new(100, 100),
                                          Color::RED, 10);
+    box_widget3.set_color(Color::MAGENTA);
     let box_widget_id3  = engine.add_widget(SystemWidget::Box(Box::new(box_widget3)));
 
     eprintln!("Added box widget ID: {}", box_widget_id3);

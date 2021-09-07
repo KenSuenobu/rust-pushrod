@@ -52,7 +52,7 @@ impl TextureStore {
     /// Retrieves a `Option<&Texture>` object for the `Texture` object store.  Use this as a shortcut
     /// to the `Widget`'s return values (see `BaseWidget` for reference.)
     pub fn get_optional_ref(&mut self) -> Option<&Texture> {
-        Some(self.store.as_ref().unwrap())
+        self.store.as_ref()
     }
 
     /// This is used to create a new `Texture` object that can be drawn against.  If the `Widget` is

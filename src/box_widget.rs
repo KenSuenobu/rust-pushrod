@@ -70,6 +70,7 @@ impl Widget for BoxWidget {
 
     fn set_invalidated(&mut self, state: bool) {
         self.invalidated = state;
+        self.base_widget.set_invalidated(true);
     }
 
     fn set_color(&mut self, color: Color) {
@@ -158,7 +159,7 @@ impl BoxWidget {
         self.border_width
     }
 
-    /// Retrives the border color.
+    /// Retrieves the border color.
     fn get_border_color(&self) -> Color {
         self.border_color
     }

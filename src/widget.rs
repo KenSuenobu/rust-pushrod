@@ -62,7 +62,7 @@ pub trait Widget {
     /// Copies the image stored inside the `Widget` to the screen.  If the `Widget` doesn't
     /// actually _draw_ anything, it can return `None`.  Otherwise, it returns a reference
     /// to the stored `Texture`.
-    fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture>;
+    fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture>;
 }
 
 /// System Widgets.
