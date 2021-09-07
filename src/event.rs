@@ -14,5 +14,4 @@
 // limitations under the License.
 
 pub enum Event {
-    MouseMoved(i32, i32),
 }
