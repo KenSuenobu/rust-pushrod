@@ -15,3 +15,7 @@
 
 pub enum PushrodEvent {
 }
+
+trait EventHandler {
+    fn process_event(&self, event: &PushrodEvent);
+}

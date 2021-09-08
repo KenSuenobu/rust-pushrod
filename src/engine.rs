@@ -93,7 +93,7 @@ impl Engine {
                     }
 
                     remaining_event => {
-                        self.widget_cache.handle_event(remaining_event);
+                        let event_result = self.widget_cache.handle_event(remaining_event);
                     }
                 }
             }

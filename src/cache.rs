@@ -18,6 +18,7 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::event::Event;
 use crate::geometry::make_rect;
+use crate::event::PushrodEvent;
 
 pub struct WidgetCache {
     cache: Vec<SystemWidget>,
@@ -61,10 +62,31 @@ impl WidgetCache {
         return self.current_widget_id
     }
 
+    fn send_and_receive_event_to_widget(&self, widget_id: u32, event: Event) -> Option<&PushrodEvent> {
+        match &self.cache[widget_id as usize] {
+            SystemWidget::Base(x) => {
+                return x.handle_event(event);
+            },
+
+            SystemWidget::Box(x) => {
+                return x.handle_event(event);
+            }
+
+            _unused => {
+                // Do nothing
+                eprintln!("I am trying to handle an event with a widget that I can't handle yet!");
+            },
+        }
+
+        None
+    }
+
     /// This handles the direct events from the `Engine` class.  Events are not handled by the
     /// `Engine` via indirection.  They are handled by the `Cache`, so that objects that are
     /// selected or have focus are handled by this class.
-    pub fn handle_event(&mut self, event: Event) {
+    pub fn handle_event(&mut self, event: Event) -> Option<&PushrodEvent> {
+        let mut return_event = None;
+
         match event {
             Event::MouseButtonDown { mouse_btn, clicks, x, y, .. } => {
                 eprintln!("Cache: mouse down: button={} clicks={} x={} y={}", mouse_btn as i32, clicks, x, y);
@@ -74,13 +96,39 @@ impl WidgetCache {
                 eprintln!("Cache: mouse up: button={} clicks={} x={} y={}", mouse_btn as i32, clicks, x, y);
             },
 
-            Event::MouseMotion { x, y, .. } => {
+            Event::MouseMotion { timestamp, window_id, which, mousestate, x, y, xrel, yrel
+            } => {
+                let mut x_offset = 0;
+                let mut y_offset = 0;
+
                 self.current_widget_id = self.get_widget_id(x, y);
-                eprintln!("Mouse: x={} y={} widget={}", x, y, self.current_widget_id);
+
+                match &self.cache[self.current_widget_id as usize] {
+                    SystemWidget::Base(x) => {
+                        x_offset = x.get_origin().x;
+                        y_offset = x.get_origin().y;
+                    },
+
+                    SystemWidget::Box(x) => {
+                        x_offset = x.get_origin().x;
+                        y_offset = x.get_origin().y;
+                    }
+
+                    _unused => {
+                        // Do nothing
+                        eprintln!("I am trying to handle an event with a widget that I can't handle yet!");
+                    },
+                }
+
+                return self.send_and_receive_event_to_widget(self.current_widget_id, Event::MouseMotion {
+                    timestamp, window_id, which, mousestate,  x: x - x_offset, y: y - y_offset, xrel, yrel
+                });
             },
 
             _default => {},
         }
+
+        return_event
     }
 
     /// Draws `Widget`s into the `Canvas`.  Determines whether or not a `Widget` is invalidated,
