@@ -15,7 +15,7 @@
 
 use crate::base_widget::BaseWidget;
 use crate::event::PushrodEvent;
-use crate::geometry::{Point, Size};
+use crate::geometry::{Point, Size, make_rect, make_origin};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
 use sdl2::event::Event;
@@ -23,13 +23,15 @@ use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
+use sdl2::rect::Rect;
+use crate::box_widget::BoxWidget;
 
 pub struct ButtonWidget {
     origin: Point,
     size: Size,
     invalidated: bool,
     texture: TextureStore,
-    base_widget: BaseWidget,
+    base_widget: BoxWidget,
 }
 
 /// ButtonWidget is a widget that contains a `BaseWidget` and inverts the color of the base
@@ -85,10 +87,54 @@ impl Widget for ButtonWidget {
     }
 
     fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+        match event {
+            Event::MouseMotion {
+                x,
+                y,
+                ..
+            } => {
+            }
+
+            _default => {},
+        }
+
         None
     }
 
-    fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
-        None
+    fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
+        // Draw the base first
+        if self.invalidated {
+            self.texture.create_or_resize_texture(c, self.size);
+
+            let base_widget_texture = self.base_widget.draw(c).unwrap();
+            let widget_size = self.size;
+
+            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
+                // Copy the base texture to the current texture
+                texture
+                    .copy(
+                        base_widget_texture,
+                        None,
+                        make_rect(make_origin(), widget_size),
+                    )
+                    .unwrap();
+            })
+            .unwrap();
+        }
+
+        self.texture.get_optional_ref()
+    }
+}
+
+/// This is a `ButtonWidget` that draws a `BoxWidget` as its base, drawing text inside the box.
+impl ButtonWidget {
+    pub fn new(origin: Point, size: Size) -> Self {
+        Self {
+            origin,
+            size,
+            invalidated: true,
+            texture: TextureStore::default(),
+            base_widget: BoxWidget::new(make_origin(), size, Color::BLACK, 2),
+        }
     }
 }
