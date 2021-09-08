@@ -20,6 +20,8 @@ use crate::texture::TextureStore;
 use sdl2::render::{Texture, Canvas};
 use sdl2::video::Window;
 use sdl2::pixels::Color;
+use sdl2::event::Event;
+use crate::event::PushrodEvent;
 
 pub struct BaseWidget {
     origin: Point,
@@ -76,6 +78,10 @@ impl Widget for BaseWidget {
 
     fn get_texture(&mut self) -> &mut TextureStore {
         &mut self.texture
+    }
+
+    fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+        None
     }
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {

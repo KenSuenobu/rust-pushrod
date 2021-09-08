@@ -23,6 +23,8 @@ use sdl2::render::{Texture, Canvas};
 use sdl2::video::Window;
 use sdl2::pixels::Color;
 use crate::box_widget::BoxWidget;
+use sdl2::event::Event;
+use crate::event::PushrodEvent;
 
 /// `Widget` is a drawable, interactive object that is presented in a `Window`.
 pub trait Widget {
@@ -62,6 +64,10 @@ pub trait Widget {
     /// drawing GPU texture that gets blitted to the screen.  Only update the texture if
     /// invalidated.
     fn get_texture(&mut self) -> &mut TextureStore;
+
+    /// Function that retrieves an event from SDL2, and generates an optional `PushrodEvent` as a
+    /// result of the event.
+    fn handle_event(&self, event: Event) -> Option<&PushrodEvent>;
 
     /// Copies the image stored inside the `Widget` to the screen.  If the `Widget` doesn't
     /// actually _draw_ anything, it can return `None`.  Otherwise, it returns a reference
