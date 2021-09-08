@@ -121,7 +121,7 @@ impl WidgetCache {
                 }
 
                 return self.send_and_receive_event_to_widget(self.current_widget_id, Event::MouseMotion {
-                    timestamp, window_id, which, mousestate,  x: x - x_offset, y: y - y_offset, xrel, yrel
+                    timestamp, window_id, which, mousestate, x: x - x_offset, y: y - y_offset, xrel, yrel
                 });
             },
 

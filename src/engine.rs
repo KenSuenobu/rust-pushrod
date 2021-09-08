@@ -85,10 +85,6 @@ impl Engine {
                     // }
 
                     Event::Quit { .. } => {
-                        // if self.call_exit_callback() {
-                        //     break 'running;
-                        // }
-
                         break 'running;
                     }
 
