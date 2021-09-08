@@ -13,9 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub enum PushrodEvent {
-}
+pub enum PushrodEvent {}
 
-trait EventHandler {
+pub trait EventHandler {
     fn process_event(&self, event: &PushrodEvent);
 }

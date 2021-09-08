@@ -13,21 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::geometry::Size;
-use sdl2::Sdl;
-use sdl2::video::Window;
-use std::thread::sleep;
-use std::time::{Duration, UNIX_EPOCH, SystemTime};
-use sdl2::pixels::Color;
 use crate::cache::WidgetCache;
+use crate::event::EventHandler;
+use crate::geometry::Size;
 use crate::widget::SystemWidget;
 use sdl2::event::Event;
+use sdl2::pixels::Color;
+use sdl2::video::Window;
+use sdl2::Sdl;
+use std::thread::sleep;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 pub struct Engine {
     frame_rate: u32,
     size: Size,
     running: bool,
     widget_cache: WidgetCache,
+    event_handler: Option<Box<dyn EventHandler>>,
 }
 
 /// The main engine of Pushrod.  Runs the run loop after adding widgets to a management cache.
@@ -38,6 +40,7 @@ impl Engine {
             size,
             running: true,
             widget_cache: WidgetCache::new(),
+            event_handler: None,
         }
     }
 
@@ -49,6 +52,10 @@ impl Engine {
     /// Adds a `SystemWidget` to the management stack.
     pub fn add_widget(&mut self, widget: SystemWidget) -> i32 {
         self.widget_cache.add(widget)
+    }
+
+    pub fn add_event_handler(&mut self, handler: Box<dyn EventHandler>) {
+        self.event_handler = Some(handler);
     }
 
     /// Runs an instance of the `Engine`.  Handles events for the given `Window` through `Sdl`,
@@ -83,13 +90,16 @@ impl Engine {
                     //         self.layout_cache.get_layout_cache(),
                     //     );
                     // }
-
                     Event::Quit { .. } => {
                         break 'running;
                     }
 
                     remaining_event => {
                         let event_result = self.widget_cache.handle_event(remaining_event);
+
+                        if let Some(handler) = &self.event_handler {
+                            handler.process_event(event_result.unwrap());
+                        }
                     }
                 }
             }

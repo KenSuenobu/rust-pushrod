@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::event::PushrodEvent;
+use crate::geometry::make_rect;
 use crate::widget::{SystemWidget, Widget};
+use sdl2::event::Event;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
-use sdl2::event::Event;
-use crate::geometry::make_rect;
-use crate::event::PushrodEvent;
 
 pub struct WidgetCache {
     cache: Vec<SystemWidget>,
@@ -53,20 +53,24 @@ impl WidgetCache {
         if widget > self.cache.len() as i32 {
             None
         } else {
-            return Some(&self.cache[widget as usize])
+            return Some(&self.cache[widget as usize]);
         }
     }
 
     /// Retrieves the current widget ID
     pub fn get_current_widget(&self) -> u32 {
-        return self.current_widget_id
+        return self.current_widget_id;
     }
 
-    fn send_and_receive_event_to_widget(&self, widget_id: u32, event: Event) -> Option<&PushrodEvent> {
+    fn send_and_receive_event_to_widget(
+        &self,
+        widget_id: u32,
+        event: Event,
+    ) -> Option<&PushrodEvent> {
         match &self.cache[widget_id as usize] {
             SystemWidget::Base(x) => {
                 return x.handle_event(event);
-            },
+            }
 
             SystemWidget::Box(x) => {
                 return x.handle_event(event);
@@ -75,7 +79,7 @@ impl WidgetCache {
             _unused => {
                 // Do nothing
                 eprintln!("I am trying to handle an event with a widget that I can't handle yet!");
-            },
+            }
         }
 
         None
@@ -85,18 +89,42 @@ impl WidgetCache {
     /// `Engine` via indirection.  They are handled by the `Cache`, so that objects that are
     /// selected or have focus are handled by this class.
     pub fn handle_event(&mut self, event: Event) -> Option<&PushrodEvent> {
-        let mut return_event = None;
-
         match event {
-            Event::MouseButtonDown { mouse_btn, clicks, x, y, .. } => {
-                eprintln!("Cache: mouse down: button={} clicks={} x={} y={}", mouse_btn as i32, clicks, x, y);
-            },
+            Event::MouseButtonDown {
+                mouse_btn,
+                clicks,
+                x,
+                y,
+                ..
+            } => {
+                eprintln!(
+                    "Cache: mouse down: button={} clicks={} x={} y={}",
+                    mouse_btn as i32, clicks, x, y
+                );
+            }
 
-            Event::MouseButtonUp { mouse_btn, clicks, x, y, .. } => {
-                eprintln!("Cache: mouse up: button={} clicks={} x={} y={}", mouse_btn as i32, clicks, x, y);
-            },
+            Event::MouseButtonUp {
+                mouse_btn,
+                clicks,
+                x,
+                y,
+                ..
+            } => {
+                eprintln!(
+                    "Cache: mouse up: button={} clicks={} x={} y={}",
+                    mouse_btn as i32, clicks, x, y
+                );
+            }
 
-            Event::MouseMotion { timestamp, window_id, which, mousestate, x, y, xrel, yrel
+            Event::MouseMotion {
+                timestamp,
+                window_id,
+                which,
+                mousestate,
+                x,
+                y,
+                xrel,
+                yrel,
             } => {
                 let mut x_offset = 0;
                 let mut y_offset = 0;
@@ -107,7 +135,7 @@ impl WidgetCache {
                     SystemWidget::Base(x) => {
                         x_offset = x.get_origin().x;
                         y_offset = x.get_origin().y;
-                    },
+                    }
 
                     SystemWidget::Box(x) => {
                         x_offset = x.get_origin().x;
@@ -116,19 +144,31 @@ impl WidgetCache {
 
                     _unused => {
                         // Do nothing
-                        eprintln!("I am trying to handle an event with a widget that I can't handle yet!");
-                    },
+                        eprintln!(
+                            "I am trying to handle an event with a widget that I can't handle yet!"
+                        );
+                    }
                 }
 
-                return self.send_and_receive_event_to_widget(self.current_widget_id, Event::MouseMotion {
-                    timestamp, window_id, which, mousestate, x: x - x_offset, y: y - y_offset, xrel, yrel
-                });
-            },
+                return self.send_and_receive_event_to_widget(
+                    self.current_widget_id,
+                    Event::MouseMotion {
+                        timestamp,
+                        window_id,
+                        which,
+                        mousestate,
+                        x: x - x_offset,
+                        y: y - y_offset,
+                        xrel,
+                        yrel,
+                    },
+                );
+            }
 
-            _default => {},
+            _default => {}
         }
 
-        return_event
+        None
     }
 
     /// Draws `Widget`s into the `Canvas`.  Determines whether or not a `Widget` is invalidated,
@@ -149,7 +189,7 @@ impl WidgetCache {
                         invalidated = true;
                         self.draw(i as u32, c);
                     }
-                },
+                }
 
                 SystemWidget::Box(x) => {
                     if x.is_invalidated() {
@@ -161,7 +201,7 @@ impl WidgetCache {
                 _unused => {
                     // Do nothing
                     eprintln!("I'm sent a widget that I can't draw yet!");
-                },
+                }
             }
         }
 
@@ -177,48 +217,46 @@ impl WidgetCache {
                 let widget_origin = *widget.get_origin();
                 let widget_size = *widget.get_size();
 
-                eprintln!("[BASE] Drawing ID {} to x {} y {} w {} h {}", widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h);
+                eprintln!(
+                    "[BASE] Drawing ID {} to x {} y {} w {} h {}",
+                    widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
+                );
 
                 match widget.draw(c) {
-                    Some(texture) => {
-                        c.copy(
-                            texture,
-                            None,
-                            make_rect(widget_origin, widget_size),
-                        ).unwrap()
-                    }
+                    Some(texture) => c
+                        .copy(texture, None, make_rect(widget_origin, widget_size))
+                        .unwrap(),
 
                     None => eprintln!("No texture presented."),
                 };
 
                 widget.set_invalidated(false);
-            },
+            }
 
             SystemWidget::Box(ref mut widget) => {
                 let widget_origin = *widget.get_origin();
                 let widget_size = *widget.get_size();
 
-                eprintln!("[BOX] Drawing ID {} to x {} y {} w {} h {}", widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h);
+                eprintln!(
+                    "[BOX] Drawing ID {} to x {} y {} w {} h {}",
+                    widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
+                );
 
                 match widget.draw(c) {
-                    Some(texture) => {
-                        c.copy(
-                            texture,
-                            None,
-                            make_rect(widget_origin, widget_size),
-                        ).unwrap()
-                    }
+                    Some(texture) => c
+                        .copy(texture, None, make_rect(widget_origin, widget_size))
+                        .unwrap(),
 
                     None => eprintln!("No texture presented."),
                 };
 
                 widget.set_invalidated(false);
-            },
+            }
 
             _default => {
                 // Do nothing
                 eprintln!("I'm sent a widget that I can't draw yet!");
-            },
+            }
         }
     }
 
@@ -244,18 +282,18 @@ impl WidgetCache {
                     start_y = x.get_origin().y;
                     end_x = start_x + x.get_size().w as i32;
                     end_y = start_y + x.get_size().h as i32;
-                },
+                }
 
                 SystemWidget::Box(x) => {
                     start_x = x.get_origin().x;
                     start_y = x.get_origin().y;
                     end_x = start_x + x.get_size().w as i32;
                     end_y = start_y + x.get_size().h as i32;
-                },
+                }
 
                 _default => {
                     // Do nothing.
-                },
+                }
             }
 
             if x >= start_x && x <= end_x && y >= start_y && y <= end_y {

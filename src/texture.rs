@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::geometry::Size;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
-use crate::geometry::Size;
 
 /// This stores the `Texture` object being drawn against as a `Canvas` object, its texture
 /// width and height, and an invalidated state.
@@ -65,7 +65,12 @@ impl TextureStore {
             self.size.h = size.h;
             self.store = Some(c.create_texture_target(None, size.w, size.h).unwrap());
 
-            eprintln!("Created texture: size={}x{} (memory={})", size.w, size.h, size.get_memory_size());
+            eprintln!(
+                "Created texture: size={}x{} (memory={})",
+                size.w,
+                size.h,
+                size.get_memory_size()
+            );
 
             self.set_invalidated(true);
         }
@@ -82,4 +87,3 @@ impl TextureStore {
         self.invalidated = state;
     }
 }
-

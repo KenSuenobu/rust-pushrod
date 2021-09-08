@@ -13,18 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::any::Any;
-use crate::image_widget::ImageWidget;
-use crate::button_widget::ButtonWidget;
-use crate::geometry::{Size, Point};
 use crate::base_widget::BaseWidget;
-use crate::texture::TextureStore;
-use sdl2::render::{Texture, Canvas};
-use sdl2::video::Window;
-use sdl2::pixels::Color;
 use crate::box_widget::BoxWidget;
-use sdl2::event::Event;
+use crate::button_widget::ButtonWidget;
 use crate::event::PushrodEvent;
+use crate::geometry::{Point, Size};
+use crate::image_widget::ImageWidget;
+use crate::texture::TextureStore;
+use sdl2::event::Event;
+use sdl2::pixels::Color;
+use sdl2::render::{Canvas, Texture};
+use sdl2::video::Window;
+use std::any::Any;
 
 /// `Widget` is a drawable, interactive object that is presented in a `Window`.
 pub trait Widget {

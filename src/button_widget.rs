@@ -13,16 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::any::Any;
-use crate::widget::{Widget};
+use crate::base_widget::BaseWidget;
+use crate::event::PushrodEvent;
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
-use crate::base_widget::BaseWidget;
-use sdl2::render::{Texture, Canvas};
-use sdl2::video::Window;
-use sdl2::pixels::Color;
+use crate::widget::Widget;
 use sdl2::event::Event;
-use crate::event::PushrodEvent;
+use sdl2::pixels::Color;
+use sdl2::render::{Canvas, Texture};
+use sdl2::video::Window;
+use std::any::Any;
 
 pub struct ButtonWidget {
     origin: Point,
@@ -51,7 +51,7 @@ impl Widget for ButtonWidget {
     fn get_size(&self) -> &Size {
         &self.size
     }
-    
+
     fn get_color(&self) -> Color {
         self.base_widget.get_color()
     }
@@ -91,5 +91,4 @@ impl Widget for ButtonWidget {
     fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
         None
     }
-
 }

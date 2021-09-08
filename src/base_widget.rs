@@ -13,15 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::any::Any;
-use crate::widget::Widget;
+use crate::event::PushrodEvent;
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
-use sdl2::render::{Texture, Canvas};
-use sdl2::video::Window;
-use sdl2::pixels::Color;
+use crate::widget::Widget;
 use sdl2::event::Event;
-use crate::event::PushrodEvent;
+use sdl2::pixels::Color;
+use sdl2::render::{Canvas, Texture};
+use sdl2::video::Window;
+use std::any::Any;
 
 pub struct BaseWidget {
     origin: Point,
@@ -88,14 +88,14 @@ impl Widget for BaseWidget {
         if self.invalidated {
             let base_color = self.base_color;
 
-            self.texture
-                .create_or_resize_texture(c, self.size);
+            self.texture.create_or_resize_texture(c, self.size);
 
             // Draw the background with only the base color.
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture.set_draw_color(base_color);
                 texture.clear();
-            }).unwrap();
+            })
+            .unwrap();
         }
 
         self.texture.get_optional_ref()

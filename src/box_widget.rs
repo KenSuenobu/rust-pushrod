@@ -13,17 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::any::Any;
-use crate::widget::{Widget};
-use crate::geometry::{Point, Size, make_rect, make_origin};
-use crate::texture::TextureStore;
 use crate::base_widget::BaseWidget;
-use sdl2::render::{Texture, Canvas};
-use sdl2::video::Window;
+use crate::event::PushrodEvent;
+use crate::geometry::{make_origin, make_rect, Point, Size};
+use crate::texture::TextureStore;
+use crate::widget::Widget;
+use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use crate::event::PushrodEvent;
-use sdl2::event::Event;
+use sdl2::render::{Canvas, Texture};
+use sdl2::video::Window;
+use std::any::Any;
 
 pub struct BoxWidget {
     origin: Point,
@@ -95,8 +95,7 @@ impl Widget for BoxWidget {
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         // Draw the base first
         if self.invalidated {
-            self.texture
-                .create_or_resize_texture(c, self.size);
+            self.texture.create_or_resize_texture(c, self.size);
 
             let base_widget_texture = self.base_widget.draw(c).unwrap();
             let border_color = self.border_color;
@@ -122,15 +121,16 @@ impl Widget for BoxWidget {
                     let computed_width = (widget_width as u32 - (i as u32 * 2u32)) as u32;
                     let computed_height = (widget_height as u32 - (i as u32 * 2u32)) as u32;
 
-                    texture.draw_rect(Rect::new(i, i, computed_width, computed_height))
+                    texture
+                        .draw_rect(Rect::new(i, i, computed_width, computed_height))
                         .unwrap();
                 }
-            }).unwrap();
+            })
+            .unwrap();
         }
 
         self.texture.get_optional_ref()
     }
-
 }
 
 /// This is a `BoxWidget` that draws a `BaseWidget` as its base, and draws a border around the
