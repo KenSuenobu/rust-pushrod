@@ -15,6 +15,10 @@
 
 pub enum PushrodEvent {}
 
+/// The `EventHandler` is a class used to handle events generate from the `Engine::run` loop.
+/// These are `PushrodEvent` objects, which are events generated from `Widget`s that intercept
+/// normal events from `SDL2`.
 pub trait EventHandler {
+    /// Handles processing of events.  The `event` passed in is a `PushrodEvent` object.
     fn process_event(&self, event: &PushrodEvent);
 }

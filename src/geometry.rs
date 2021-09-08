@@ -50,11 +50,12 @@ impl Size {
     }
 }
 
-// Helper method to create a rect bounds for Sdl
+// Helper method to create a rect bounds for `SDL2`
 pub fn make_rect(origin: Point, bounds: Size) -> Rect {
     Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }
 
+// Makes an origin point.
 pub fn make_origin() -> Point {
     Point { x: 0, y: 0 }
 }
