@@ -87,6 +87,8 @@ impl Widget for ButtonWidget {
     }
 
     fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+        eprintln!("[BUTTON] event: {:?}", event);
+
         match event {
             Event::MouseMotion {
                 x,

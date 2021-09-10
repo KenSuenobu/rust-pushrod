@@ -89,6 +89,8 @@ impl Widget for BoxWidget {
     }
 
     fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+        eprintln!("[BOX] event: {:?}", event);
+
         None
     }
 

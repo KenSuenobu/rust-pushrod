@@ -83,6 +83,8 @@ impl Widget for ImageWidget {
     }
 
     fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+        eprintln!("[IMAGE] event: {:?}", event);
+
         None
     }
 

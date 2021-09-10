@@ -81,6 +81,8 @@ impl Widget for BaseWidget {
     }
 
     fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+        eprintln!("[BASE] event: {:?}", event);
+
         None
     }
 
