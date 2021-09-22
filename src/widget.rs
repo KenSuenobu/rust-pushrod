@@ -25,6 +25,7 @@ use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
+use crate::text_widget::TextWidget;
 
 /// `Widget` is a drawable, interactive object that is presented in a `Window`.
 pub trait Widget {
@@ -88,6 +89,9 @@ pub enum SystemWidget {
 
     /// Stores an `ImageWidget`, an object that displays an image.
     Image(Box<ImageWidget>),
+
+    /// Stores a `TextWidget`, an object that draws text within the limits of a widget's bounds.
+    Text(Box<TextWidget>),
 
     /// Stores a custom `Widget`.
     Custom(Box<dyn Widget>),

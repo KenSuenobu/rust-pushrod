@@ -76,6 +76,14 @@ impl WidgetCache {
                 return x.handle_event(event);
             }
 
+            SystemWidget::Button(x) => {
+                return x.handle_event(event);
+            }
+
+            SystemWidget::Image(x) => {
+                return x.handle_event(event);
+            }
+
             _unused => {
                 // Do nothing
                 eprintln!("I am trying to handle an event with a widget that I can't handle yet!");
