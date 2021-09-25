@@ -13,7 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub enum PushrodEvent {}
+use sdl2::event::Event;
+
+pub enum PushrodEvent {
+    /// Indicates a mouse entered the bounds of an object.  The ID of the object is returned.
+    EnteredBounds(u32),
+
+    /// Indicates a mouse exited the bounds of an object.  The ID of the object is returned.
+    ExitedBounds(u32),
+
+    /// Indicates an SDL-based Event occurred.
+    SystemEvent(Event),
+}
 
 /// The `EventHandler` is a class used to handle events generate from the `Engine::run` loop.
 /// These are `PushrodEvent` objects, which are events generated from `Widget`s that intercept

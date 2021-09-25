@@ -83,13 +83,6 @@ impl Engine {
 
             for event in event_pump.poll_iter() {
                 match event {
-                    // Event::MouseWheel { x, y, .. } => {
-                    //     self.widget_cache.mouse_scrolled(
-                    //         self.current_widget_id,
-                    //         vec![x, y],
-                    //         self.layout_cache.get_layout_cache(),
-                    //     );
-                    // }
                     Event::Quit { .. } => {
                         break 'running;
                     }
@@ -98,11 +91,18 @@ impl Engine {
                         let event_result = self.widget_cache.handle_event(remaining_event);
 
                         if let Some(handler) = &self.event_handler {
+                            // Needs to support handling of multiple events being generated
+                            // here.
+
                             handler.process_event(event_result.unwrap());
                         }
                     }
                 }
             }
+
+            // Walk through each event that was generated (if not empty)
+            // call the event_handler and pass each event one-by-one so it can be processed
+            // in the order in which the events were generated.
 
             // self.widget_cache.tick(self.layout_cache.get_layout_cache());
             // self.layout_cache

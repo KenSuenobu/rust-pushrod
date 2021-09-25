@@ -68,6 +68,8 @@ pub trait Widget {
 
     /// Function that retrieves an event from SDL2, and generates an optional `PushrodEvent` as a
     /// result of the event.
+    ///
+    /// TODO: FIX THIS SO IT RETURNS AN ARRAY OF EVENTS, NOT JUST A SINGLE EVENT
     fn handle_event(&self, event: Event) -> Option<&PushrodEvent>;
 
     /// Copies the image stored inside the `Widget` to the screen.  If the `Widget` doesn't

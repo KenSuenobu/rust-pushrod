@@ -30,6 +30,7 @@ pub struct ButtonWidget {
     origin: Point,
     size: Size,
     invalidated: bool,
+    in_bounds: bool,
     texture: TextureStore,
     base_widget: BoxWidget,
 }
@@ -97,6 +98,20 @@ impl Widget for ButtonWidget {
             } => {
             }
 
+            Event::MouseButtonUp {
+                x,
+                y,
+                ..
+            } => {
+            }
+
+            Event::MouseButtonDown {
+                x,
+                y,
+                ..
+            } => {
+            }
+
             _default => {},
         }
 
@@ -135,6 +150,7 @@ impl ButtonWidget {
             origin,
             size,
             invalidated: true,
+            in_bounds: false,
             texture: TextureStore::default(),
             base_widget: BoxWidget::new(make_origin(), size, Color::BLACK, 2),
         }
