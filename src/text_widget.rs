@@ -72,8 +72,16 @@ impl Widget for TextWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
-        eprintln!("[TEXT] event: {:?}", event);
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
+        match event {
+            PushrodEvent::SystemEvent(ev) => {
+                eprintln!("[TEXT] event: {:?}", ev);
+            },
+
+            _ => {
+
+            }
+        }
 
         None
     }

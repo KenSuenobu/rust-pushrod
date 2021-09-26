@@ -82,8 +82,16 @@ impl Widget for ImageWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
-        eprintln!("[IMAGE] event: {:?}", event);
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
+        match event {
+            PushrodEvent::SystemEvent(ev) => {
+                eprintln!("[IMAGE] event: {:?}", ev);
+            },
+
+            _ => {
+
+            }
+        }
 
         None
     }

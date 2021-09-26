@@ -87,30 +87,19 @@ impl Widget for ButtonWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
-        eprintln!("[BUTTON] event: {:?}", event);
-
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
-            Event::MouseMotion {
-                x,
-                y,
-                ..
-            } => {
-            }
+            PushrodEvent::SystemEvent(ev) => {
+                eprintln!("[BUTTON] event: {:?}", ev);
+            },
 
-            Event::MouseButtonUp {
-                x,
-                y,
-                ..
-            } => {
-            }
+            PushrodEvent::EnteredBounds(x) => {
+                eprintln!("[BUTTON] Entered bounds: {}", x);
+            },
 
-            Event::MouseButtonDown {
-                x,
-                y,
-                ..
-            } => {
-            }
+            PushrodEvent::ExitedBounds(x) => {
+                eprintln!("[BUTTON] Exited bounds: {}", x);
+            },
 
             _default => {},
         }

@@ -80,8 +80,16 @@ impl Widget for BaseWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
-        eprintln!("[BASE] event: {:?}", event);
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
+        match event {
+            PushrodEvent::SystemEvent(ev) => {
+                eprintln!("[BASE] event: {:?}", ev);
+            },
+
+            _ => {
+
+            }
+        }
 
         None
     }

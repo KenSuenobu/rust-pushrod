@@ -88,8 +88,16 @@ impl Widget for BoxWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
-        eprintln!("[BOX] event: {:?}", event);
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
+        match event {
+            PushrodEvent::SystemEvent(ev) => {
+                eprintln!("[BOX] event: {:?}", ev);
+            },
+
+            _ => {
+
+            }
+        }
 
         None
     }

@@ -65,7 +65,7 @@ impl WidgetCache {
     fn send_and_receive_event_to_widget(
         &self,
         widget_id: u32,
-        event: Event,
+        event: PushrodEvent,
     ) -> Option<&[PushrodEvent]> {
         match &self.cache[widget_id as usize] {
             SystemWidget::Base(x) => {
@@ -145,6 +145,18 @@ impl WidgetCache {
                 if self.current_widget_id != previous_widget_id {
                     let exited_event = PushrodEvent::ExitedBounds(previous_widget_id);
                     let entered_event = PushrodEvent::EnteredBounds(self.current_widget_id);
+
+                    // Exited event
+                    self.send_and_receive_event_to_widget(
+                        previous_widget_id,
+                        exited_event,
+                    );
+
+                    // Entered event
+                    self.send_and_receive_event_to_widget(
+                        self.current_widget_id,
+                        entered_event,
+                    );
                 }
 
                 match &self.cache[self.current_widget_id as usize] {
@@ -168,16 +180,18 @@ impl WidgetCache {
 
                 return self.send_and_receive_event_to_widget(
                     self.current_widget_id,
-                    Event::MouseMotion {
-                        timestamp,
-                        window_id,
-                        which,
-                        mousestate,
-                        x: x - x_offset,
-                        y: y - y_offset,
-                        xrel,
-                        yrel,
-                    },
+                    PushrodEvent::SystemEvent(
+                        Event::MouseMotion {
+                            timestamp,
+                            window_id,
+                            which,
+                            mousestate,
+                            x: x - x_offset,
+                            y: y - y_offset,
+                            xrel,
+                            yrel,
+                        }
+                    ),
                 );
             }
 
