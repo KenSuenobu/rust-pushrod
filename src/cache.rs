@@ -136,8 +136,16 @@ impl WidgetCache {
             } => {
                 let mut x_offset = 0;
                 let mut y_offset = 0;
+                let previous_widget_id = self.current_widget_id;
 
                 self.current_widget_id = self.get_widget_id(x, y);
+
+                // Send previous widget ID event that an event left it bounds
+                // Send current widget ID event that event entered its bounds
+                if self.current_widget_id != previous_widget_id {
+                    let exited_event = PushrodEvent::ExitedBounds(previous_widget_id);
+                    let entered_event = PushrodEvent::EnteredBounds(self.current_widget_id);
+                }
 
                 match &self.cache[self.current_widget_id as usize] {
                     SystemWidget::Base(x) => {
