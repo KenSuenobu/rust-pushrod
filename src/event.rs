@@ -15,6 +15,7 @@
 
 use sdl2::event::Event;
 
+#[derive(Debug)]
 pub enum PushrodEvent {
     /// Indicates a mouse entered the bounds of an object.  The ID of the object is returned.
     EnteredBounds(u32),
