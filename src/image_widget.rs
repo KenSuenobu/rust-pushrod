@@ -82,7 +82,7 @@ impl Widget for ImageWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
         eprintln!("[IMAGE] event: {:?}", event);
 
         None

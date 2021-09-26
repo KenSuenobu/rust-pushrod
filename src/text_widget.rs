@@ -72,7 +72,7 @@ impl Widget for TextWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
         eprintln!("[TEXT] event: {:?}", event);
 
         None

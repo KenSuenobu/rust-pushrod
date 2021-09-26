@@ -31,5 +31,5 @@ pub enum PushrodEvent {
 /// normal events from `SDL2`.
 pub trait EventHandler {
     /// Handles processing of events.  The `event` passed in is a `PushrodEvent` object.
-    fn process_event(&self, event: &PushrodEvent);
+    fn process_event(&self, event: &[PushrodEvent]);
 }

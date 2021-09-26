@@ -66,7 +66,7 @@ impl WidgetCache {
         &self,
         widget_id: u32,
         event: Event,
-    ) -> Option<&PushrodEvent> {
+    ) -> Option<&[PushrodEvent]> {
         match &self.cache[widget_id as usize] {
             SystemWidget::Base(x) => {
                 return x.handle_event(event);
@@ -96,7 +96,7 @@ impl WidgetCache {
     /// This handles the direct events from the `Engine` class.  Events are not handled by the
     /// `Engine` via indirection.  They are handled by the `Cache`, so that objects that are
     /// selected or have focus are handled by this class.
-    pub fn handle_event(&mut self, event: Event) -> Option<&PushrodEvent> {
+    pub fn handle_event(&mut self, event: Event) -> Option<&[PushrodEvent]> {
         match event {
             Event::MouseButtonDown {
                 mouse_btn,

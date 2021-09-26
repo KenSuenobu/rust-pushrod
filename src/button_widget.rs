@@ -87,7 +87,7 @@ impl Widget for ButtonWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
         eprintln!("[BUTTON] event: {:?}", event);
 
         match event {

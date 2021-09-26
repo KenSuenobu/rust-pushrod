@@ -88,7 +88,7 @@ impl Widget for BoxWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: Event) -> Option<&PushrodEvent> {
+    fn handle_event(&self, event: Event) -> Option<&[PushrodEvent]> {
         eprintln!("[BOX] event: {:?}", event);
 
         None
