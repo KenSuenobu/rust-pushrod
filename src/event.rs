@@ -39,6 +39,7 @@ pub enum PushrodEvent {
 /// These are `PushrodEvent` objects, which are events generated from `Widget`s that intercept
 /// normal events from `SDL2`.
 pub trait EventHandler {
-    /// Handles processing of events.  The `event` passed in is a `PushrodEvent` object.
-    fn process_event(&self, event: &[PushrodEvent]);
+    /// Handles processing of events.  The `events` passed in are references to `PushrodEvent` objects.
+    /// This function will only be called if the event list is non-empty.
+    fn process_event(&self, events: Vec<&PushrodEvent>);
 }

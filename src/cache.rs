@@ -96,7 +96,9 @@ impl WidgetCache {
     /// This handles the direct events from the `Engine` class.  Events are not handled by the
     /// `Engine` via indirection.  They are handled by the `Cache`, so that objects that are
     /// selected or have focus are handled by this class.
-    pub fn handle_event(&mut self, event: Event) -> Option<&[PushrodEvent]> {
+    pub fn handle_event(&mut self, event: Event) -> Vec<&PushrodEvent> {
+        let mut return_vector: Vec<&PushrodEvent> = Vec::new();
+
         match event {
             Event::MouseButtonDown {
                 mouse_btn,
@@ -146,17 +148,25 @@ impl WidgetCache {
                     let exited_event = PushrodEvent::ExitedBounds(previous_widget_id);
                     let entered_event = PushrodEvent::EnteredBounds(self.current_widget_id);
 
-                    // Exited event
-                    self.send_and_receive_event_to_widget(
+                    // Exited event - copy return events only if some are generated
+                    if let Some(ref x) = self.send_and_receive_event_to_widget(
                         previous_widget_id,
                         exited_event,
-                    );
+                    ) {
+                        for i in 0..x.len() {
+                            return_vector.push(&x[i]);
+                        }
+                    }
 
                     // Entered event
-                    self.send_and_receive_event_to_widget(
+                    if let Some(ref x) = self.send_and_receive_event_to_widget(
                         self.current_widget_id,
                         entered_event,
-                    );
+                    ) {
+                        for i in 0..x.len() {
+                            return_vector.push(&x[i]);
+                        }
+                    }
                 }
 
                 match &self.cache[self.current_widget_id as usize] {
@@ -178,7 +188,7 @@ impl WidgetCache {
                     }
                 }
 
-                return self.send_and_receive_event_to_widget(
+                if let Some(x) = self.send_and_receive_event_to_widget(
                     self.current_widget_id,
                     PushrodEvent::SystemEvent(
                         Event::MouseMotion {
@@ -192,13 +202,17 @@ impl WidgetCache {
                             yrel,
                         }
                     ),
-                );
+                ) {
+                    for i in 0..x.len() {
+                        return_vector.push(&x[i]);
+                    }
+                }
             }
 
             _default => {}
         }
 
-        None
+        return_vector
     }
 
     /// Draws `Widget`s into the `Canvas`.  Determines whether or not a `Widget` is invalidated,
