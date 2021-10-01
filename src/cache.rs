@@ -86,7 +86,7 @@ impl WidgetCache {
 
             _unused => {
                 // Do nothing
-                eprintln!("I am trying to handle an event with a widget that I can't handle yet!");
+                eprintln!("[send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
             }
         }
 
@@ -244,7 +244,7 @@ impl WidgetCache {
 
                 _unused => {
                     // Do nothing
-                    eprintln!("I'm sent a widget that I can't draw yet!");
+                    eprintln!("[draw_loop] I'm sent a widget that I can't draw yet!");
                 }
             }
         }
