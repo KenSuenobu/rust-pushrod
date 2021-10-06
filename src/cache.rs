@@ -108,7 +108,7 @@ impl WidgetCache {
                 ..
             } => {
                 eprintln!(
-                    "[handle_event] mouse down: button={} clicks={} x={} y={}",
+                    "[WidgetCache::handle_event] mouse down: button={} clicks={} x={} y={}",
                     mouse_btn as i32, clicks, x, y
                 );
             }
@@ -121,7 +121,7 @@ impl WidgetCache {
                 ..
             } => {
                 eprintln!(
-                    "[handle_event] mouse up: button={} clicks={} x={} y={}",
+                    "[WidgetCache::handle_event] mouse up: button={} clicks={} x={} y={}",
                     mouse_btn as i32, clicks, x, y
                 );
             }
@@ -180,6 +180,11 @@ impl WidgetCache {
                         y_offset = x.get_origin().y;
                     }
 
+                    SystemWidget::Button(x) => {
+                        x_offset = x.get_origin().x;
+                        y_offset = x.get_origin().y;
+                    }
+
                     _unused => {
                         // Do nothing
                         eprintln!(
@@ -233,14 +238,21 @@ impl WidgetCache {
                         invalidated = true;
                         self.draw(i as u32, c);
                     }
-                }
+                },
 
                 SystemWidget::Box(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
                         self.draw(i as u32, c);
                     }
-                }
+                },
+
+                SystemWidget::Button(x) => {
+                    if x.is_invalidated() {
+                        invalidated = true;
+                        self.draw(i as u32, c);
+                    }
+                },
 
                 _unused => {
                     // Do nothing
@@ -262,7 +274,7 @@ impl WidgetCache {
                 let widget_size = *widget.get_size();
 
                 eprintln!(
-                    "[BASE] Drawing ID {} to x {} y {} w {} h {}",
+                    "[WidgetCache::draw] Base: Drawing ID {} to x {} y {} w {} h {}",
                     widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
                 );
 
@@ -282,7 +294,27 @@ impl WidgetCache {
                 let widget_size = *widget.get_size();
 
                 eprintln!(
-                    "[BOX] Drawing ID {} to x {} y {} w {} h {}",
+                    "[WidgetCache::draw] Box: Drawing ID {} to x {} y {} w {} h {}",
+                    widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
+                );
+
+                match widget.draw(c) {
+                    Some(texture) => c
+                        .copy(texture, None, make_rect(widget_origin, widget_size))
+                        .unwrap(),
+
+                    None => eprintln!("[WidgetCache::draw] No texture presented."),
+                };
+
+                widget.set_invalidated(false);
+            }
+
+            SystemWidget::Button(ref mut widget) => {
+                let widget_origin = *widget.get_origin();
+                let widget_size = *widget.get_size();
+
+                eprintln!(
+                    "[WidgetCache::draw] Button: Drawing ID {} to x {} y {} w {} h {}",
                     widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
                 );
 
@@ -329,6 +361,13 @@ impl WidgetCache {
                 }
 
                 SystemWidget::Box(x) => {
+                    start_x = x.get_origin().x;
+                    start_y = x.get_origin().y;
+                    end_x = start_x + x.get_size().w as i32;
+                    end_y = start_y + x.get_size().h as i32;
+                }
+
+                SystemWidget::Button(x) => {
                     start_x = x.get_origin().x;
                     start_y = x.get_origin().y;
                     end_x = start_x + x.get_size().w as i32;

@@ -39,7 +39,7 @@ pub fn main() {
 
     eprintln!("Added box widget ID: {}", box_widget_id3);
 
-    let mut button_widget1 = ButtonWidget::new(Point::new(40, 140), Size::new(140, 60));
+    let mut button_widget1 = ButtonWidget::new(Point::new(40, 160), Size::new(140, 60));
     let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button_widget1)));
 
     eprintln!("Added button widget ID: {}", button_widget_id1);
