@@ -14,17 +14,17 @@
 // limitations under the License.
 
 use crate::base_widget::BaseWidget;
+use crate::box_widget::BoxWidget;
 use crate::event::PushrodEvent;
-use crate::geometry::{Point, Size, make_rect, make_origin};
+use crate::geometry::{make_origin, make_rect, Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
 use sdl2::event::Event;
 use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
-use sdl2::rect::Rect;
-use crate::box_widget::BoxWidget;
 
 pub struct ButtonWidget {
     origin: Point,
@@ -91,17 +91,17 @@ impl Widget for ButtonWidget {
         match event {
             PushrodEvent::SystemEvent(ev) => {
                 eprintln!("[ButtonWidget::handle_event] event: {:?}", ev);
-            },
+            }
 
             PushrodEvent::EnteredBounds(x) => {
                 eprintln!("[ButtonWidget::handle_event] Entered bounds: {}", x);
-            },
+            }
 
             PushrodEvent::ExitedBounds(x) => {
                 eprintln!("[ButtonWidget::handle_event] Exited bounds: {}", x);
-            },
+            }
 
-            _default => {},
+            _default => {}
         }
 
         None

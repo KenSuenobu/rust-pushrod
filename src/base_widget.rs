@@ -84,11 +84,9 @@ impl Widget for BaseWidget {
         match event {
             PushrodEvent::SystemEvent(ev) => {
                 eprintln!("[BaseWidget::handle_event] event: {:?}", ev);
-            },
-
-            _ => {
-
             }
+
+            _ => {}
         }
 
         None

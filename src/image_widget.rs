@@ -86,11 +86,9 @@ impl Widget for ImageWidget {
         match event {
             PushrodEvent::SystemEvent(ev) => {
                 eprintln!("[ImageWidget::handle_event] event: {:?}", ev);
-            },
-
-            _ => {
-
             }
+
+            _ => {}
         }
 
         None

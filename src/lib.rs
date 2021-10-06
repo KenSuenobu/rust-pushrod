@@ -15,11 +15,11 @@
 pub mod base_widget;
 pub mod box_widget;
 pub mod button_widget;
-pub mod image_widget;
-pub mod text_widget;
 pub mod cache;
 pub mod engine;
 pub mod event;
 pub mod geometry;
+pub mod image_widget;
+pub mod text_widget;
 pub mod texture;
 pub mod widget;

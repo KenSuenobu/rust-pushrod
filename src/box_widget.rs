@@ -92,11 +92,9 @@ impl Widget for BoxWidget {
         match event {
             PushrodEvent::SystemEvent(ev) => {
                 eprintln!("[BoxWidget::handle_event] event: {:?}", ev);
-            },
-
-            _ => {
-
             }
+
+            _ => {}
         }
 
         None

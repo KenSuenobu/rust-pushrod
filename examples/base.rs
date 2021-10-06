@@ -1,10 +1,10 @@
 use pushrod::base_widget::BaseWidget;
 use pushrod::box_widget::BoxWidget;
+use pushrod::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::geometry::{Point, Size};
 use pushrod::widget::{SystemWidget, Widget};
 use sdl2::pixels::Color;
-use pushrod::button_widget::ButtonWidget;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();

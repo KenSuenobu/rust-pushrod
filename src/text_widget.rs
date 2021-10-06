@@ -61,8 +61,7 @@ impl Widget for TextWidget {
         self.invalidated = state;
     }
 
-    fn set_color(&mut self, color: Color) {
-    }
+    fn set_color(&mut self, color: Color) {}
 
     fn is_invalidated(&self) -> bool {
         self.invalidated
@@ -76,11 +75,9 @@ impl Widget for TextWidget {
         match event {
             PushrodEvent::SystemEvent(ev) => {
                 eprintln!("[TextWidget::handle_event] event: {:?}", ev);
-            },
-
-            _ => {
-
             }
+
+            _ => {}
         }
 
         None

@@ -149,20 +149,18 @@ impl WidgetCache {
                     let entered_event = PushrodEvent::EnteredBounds(self.current_widget_id);
 
                     // Exited event - copy return events only if some are generated
-                    if let Some(ref x) = self.send_and_receive_event_to_widget(
-                        previous_widget_id,
-                        exited_event,
-                    ) {
+                    if let Some(ref x) =
+                        self.send_and_receive_event_to_widget(previous_widget_id, exited_event)
+                    {
                         for i in 0..x.len() {
                             return_vector.push(&x[i]);
                         }
                     }
 
                     // Entered event
-                    if let Some(ref x) = self.send_and_receive_event_to_widget(
-                        self.current_widget_id,
-                        entered_event,
-                    ) {
+                    if let Some(ref x) =
+                        self.send_and_receive_event_to_widget(self.current_widget_id, entered_event)
+                    {
                         for i in 0..x.len() {
                             return_vector.push(&x[i]);
                         }
@@ -195,18 +193,16 @@ impl WidgetCache {
 
                 if let Some(x) = self.send_and_receive_event_to_widget(
                     self.current_widget_id,
-                    PushrodEvent::SystemEvent(
-                        Event::MouseMotion {
-                            timestamp,
-                            window_id,
-                            which,
-                            mousestate,
-                            x: x - x_offset,
-                            y: y - y_offset,
-                            xrel,
-                            yrel,
-                        }
-                    ),
+                    PushrodEvent::SystemEvent(Event::MouseMotion {
+                        timestamp,
+                        window_id,
+                        which,
+                        mousestate,
+                        x: x - x_offset,
+                        y: y - y_offset,
+                        xrel,
+                        yrel,
+                    }),
                 ) {
                     for i in 0..x.len() {
                         return_vector.push(&x[i]);
@@ -238,21 +234,21 @@ impl WidgetCache {
                         invalidated = true;
                         self.draw(i as u32, c);
                     }
-                },
+                }
 
                 SystemWidget::Box(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
                         self.draw(i as u32, c);
                     }
-                },
+                }
 
                 SystemWidget::Button(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
                         self.draw(i as u32, c);
                     }
-                },
+                }
 
                 _unused => {
                     // Do nothing
