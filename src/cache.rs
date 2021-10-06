@@ -86,7 +86,7 @@ impl WidgetCache {
 
             _unused => {
                 // Do nothing
-                eprintln!("[send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
+                eprintln!("[WidgetCache::send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
             }
         }
 
@@ -183,7 +183,7 @@ impl WidgetCache {
                     _unused => {
                         // Do nothing
                         eprintln!(
-                            "[handle_event] I am trying to handle an event with a widget that I can't handle yet!"
+                            "[WidgetCache::handle_event] I am trying to handle an event with a widget that I can't handle yet!"
                         );
                     }
                 }
@@ -244,7 +244,7 @@ impl WidgetCache {
 
                 _unused => {
                     // Do nothing
-                    eprintln!("[draw_loop] I'm sent a widget that I can't draw yet!");
+                    eprintln!("[WidgetCache::draw_loop] I'm sent a widget that I can't draw yet!");
                 }
             }
         }
@@ -271,7 +271,7 @@ impl WidgetCache {
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("No texture presented."),
+                    None => eprintln!("[WidgetCache::draw] No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -291,7 +291,7 @@ impl WidgetCache {
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("[draw] No texture presented."),
+                    None => eprintln!("[WidgetCache::draw] No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -299,7 +299,7 @@ impl WidgetCache {
 
             _default => {
                 // Do nothing
-                eprintln!("[draw] I'm sent a widget that I can't draw yet!");
+                eprintln!("[WidgetCache::draw] I'm sent a widget that I can't draw yet!");
             }
         }
     }
