@@ -90,15 +90,15 @@ impl Widget for ButtonWidget {
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(ev) => {
-                eprintln!("[BUTTON] event: {:?}", ev);
+                eprintln!("[ButtonWidget::handle_event] event: {:?}", ev);
             },
 
             PushrodEvent::EnteredBounds(x) => {
-                eprintln!("[BUTTON] Entered bounds: {}", x);
+                eprintln!("[ButtonWidget::handle_event] Entered bounds: {}", x);
             },
 
             PushrodEvent::ExitedBounds(x) => {
-                eprintln!("[BUTTON] Exited bounds: {}", x);
+                eprintln!("[ButtonWidget::handle_event] Exited bounds: {}", x);
             },
 
             _default => {},

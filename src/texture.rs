@@ -66,7 +66,7 @@ impl TextureStore {
             self.store = Some(c.create_texture_target(None, size.w, size.h).unwrap());
 
             eprintln!(
-                "Created texture: size={}x{} (memory={})",
+                "[create_or_resize_texture] Created texture: size={}x{} (memory={})",
                 size.w,
                 size.h,
                 size.get_memory_size()

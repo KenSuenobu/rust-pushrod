@@ -85,7 +85,7 @@ impl Widget for ImageWidget {
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(ev) => {
-                eprintln!("[IMAGE] event: {:?}", ev);
+                eprintln!("[ImageWidget::handle_event] event: {:?}", ev);
             },
 
             _ => {

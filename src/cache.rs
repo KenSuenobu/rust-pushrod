@@ -108,7 +108,7 @@ impl WidgetCache {
                 ..
             } => {
                 eprintln!(
-                    "Cache: mouse down: button={} clicks={} x={} y={}",
+                    "[handle_event] mouse down: button={} clicks={} x={} y={}",
                     mouse_btn as i32, clicks, x, y
                 );
             }
@@ -121,7 +121,7 @@ impl WidgetCache {
                 ..
             } => {
                 eprintln!(
-                    "Cache: mouse up: button={} clicks={} x={} y={}",
+                    "[handle_event] mouse up: button={} clicks={} x={} y={}",
                     mouse_btn as i32, clicks, x, y
                 );
             }
@@ -183,7 +183,7 @@ impl WidgetCache {
                     _unused => {
                         // Do nothing
                         eprintln!(
-                            "I am trying to handle an event with a widget that I can't handle yet!"
+                            "[handle_event] I am trying to handle an event with a widget that I can't handle yet!"
                         );
                     }
                 }
@@ -291,7 +291,7 @@ impl WidgetCache {
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("No texture presented."),
+                    None => eprintln!("[draw] No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -299,7 +299,7 @@ impl WidgetCache {
 
             _default => {
                 // Do nothing
-                eprintln!("I'm sent a widget that I can't draw yet!");
+                eprintln!("[draw] I'm sent a widget that I can't draw yet!");
             }
         }
     }

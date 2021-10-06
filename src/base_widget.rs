@@ -83,7 +83,7 @@ impl Widget for BaseWidget {
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(ev) => {
-                eprintln!("[BASE] event: {:?}", ev);
+                eprintln!("[BaseWidget::handle_event] event: {:?}", ev);
             },
 
             _ => {

@@ -75,7 +75,7 @@ impl Widget for TextWidget {
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(ev) => {
-                eprintln!("[TEXT] event: {:?}", ev);
+                eprintln!("[TextWidget::handle_event] event: {:?}", ev);
             },
 
             _ => {
