@@ -53,13 +53,13 @@ impl WidgetCache {
         if widget > self.cache.len() as i32 {
             None
         } else {
-            return Some(&self.cache[widget as usize]);
+            Some(&self.cache[widget as usize])
         }
     }
 
     /// Retrieves the current widget ID
     pub fn get_current_widget(&self) -> u32 {
-        return self.current_widget_id;
+        self.current_widget_id
     }
 
     fn send_and_receive_event_to_widget(
@@ -149,7 +149,7 @@ impl WidgetCache {
                     let entered_event = PushrodEvent::EnteredBounds(self.current_widget_id);
 
                     // Exited event - copy return events only if some are generated
-                    if let Some(ref x) =
+                    if let Some(x) =
                         self.send_and_receive_event_to_widget(previous_widget_id, exited_event)
                     {
                         for i in 0..x.len() {
@@ -158,7 +158,7 @@ impl WidgetCache {
                     }
 
                     // Entered event
-                    if let Some(ref x) =
+                    if let Some(x) =
                         self.send_and_receive_event_to_widget(self.current_widget_id, entered_event)
                     {
                         for i in 0..x.len() {

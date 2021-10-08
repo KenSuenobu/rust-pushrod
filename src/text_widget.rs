@@ -17,7 +17,6 @@ use crate::event::PushrodEvent;
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
-use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
@@ -61,7 +60,7 @@ impl Widget for TextWidget {
         self.invalidated = state;
     }
 
-    fn set_color(&mut self, color: Color) {}
+    fn set_color(&mut self, _color: Color) {}
 
     fn is_invalidated(&self) -> bool {
         self.invalidated

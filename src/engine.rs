@@ -94,7 +94,7 @@ impl Engine {
                             // Needs to support handling of multiple events being generated
                             // here.
 
-                            if event_result.len() > 0 {
+                            if !event_result.is_empty() {
                                 handler.process_event(event_result);
                             }
                         }

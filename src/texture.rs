@@ -78,7 +78,7 @@ impl TextureStore {
 
     /// Retrieves the invalidation state.
     pub fn is_invalidated(&self) -> bool {
-        return self.invalidated;
+        self.invalidated
     }
 
     /// Sets the invalidation state for the `Texture` store.  If invalidated, it indicates that the

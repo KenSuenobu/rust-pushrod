@@ -21,7 +21,6 @@ use crate::geometry::{Point, Size};
 use crate::image_widget::ImageWidget;
 use crate::text_widget::TextWidget;
 use crate::texture::TextureStore;
-use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;

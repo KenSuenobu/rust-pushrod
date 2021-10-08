@@ -13,15 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::base_widget::BaseWidget;
 use crate::box_widget::BoxWidget;
 use crate::event::PushrodEvent;
 use crate::geometry::{make_origin, make_rect, Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
-use sdl2::event::Event;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;

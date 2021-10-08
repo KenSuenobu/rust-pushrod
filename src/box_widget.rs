@@ -18,7 +18,6 @@ use crate::event::PushrodEvent;
 use crate::geometry::{make_origin, make_rect, Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
-use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{Canvas, Texture};
