@@ -21,6 +21,7 @@ use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
+use sdl2::rect::Rect;
 
 pub struct BaseWidget {
     origin: Point,
@@ -94,6 +95,7 @@ impl Widget for BaseWidget {
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {
             let base_color = self.base_color;
+            let size = self.size;
 
             self.texture.create_or_resize_texture(c, self.size);
 
@@ -101,6 +103,8 @@ impl Widget for BaseWidget {
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture.set_draw_color(base_color);
                 texture.clear();
+
+                texture.fill_rect(Rect::new(0, 0, size.w, size.h));
             })
             .unwrap();
         }

@@ -16,34 +16,50 @@ pub fn main() {
         .build()
         .unwrap();
     let mut engine = Engine::new(Size::new(600, 400), 30);
-    let base_widget = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+
+    let mut base_widget = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+    base_widget.set_color(Color::BLUE);
     let base_widget_id = engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
 
     eprintln!("Added base widget ID: {}", base_widget_id);
 
-    let mut box_widget1 = BoxWidget::new(Point::new(40, 40), Size::new(100, 100), Color::BLUE, 3);
-    box_widget1.set_color(Color::CYAN);
-    let box_widget_id1 = engine.add_widget(SystemWidget::Box(Box::new(box_widget1)));
-
-    eprintln!("Added box widget ID: {}", box_widget_id1);
-
-    let mut box_widget2 = BoxWidget::new(Point::new(180, 40), Size::new(100, 100), Color::GREEN, 5);
-    box_widget2.set_color(Color::GRAY);
-    let box_widget_id2 = engine.add_widget(SystemWidget::Box(Box::new(box_widget2)));
-
-    eprintln!("Added box widget ID: {}", box_widget_id2);
-
-    let mut box_widget3 = BoxWidget::new(Point::new(320, 40), Size::new(100, 100), Color::RED, 10);
-    box_widget3.set_color(Color::MAGENTA);
-    let box_widget_id3 = engine.add_widget(SystemWidget::Box(Box::new(box_widget3)));
-
-    eprintln!("Added box widget ID: {}", box_widget_id3);
-
-    let mut button_widget1 = ButtonWidget::new(Point::new(40, 160), Size::new(140, 60));
-    let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button_widget1)));
-
-    eprintln!("Added button widget ID: {}", button_widget_id1);
-
+    // let mut base_widget2 = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+    // base_widget2.set_color(Color::BLUE);
+    // let base_widget_id2 = engine.add_widget(SystemWidget::Base(Box::new(base_widget2)));
+    // let mut base_widget3 = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+    // base_widget3.set_color(Color::BLUE);
+    // let base_widget_id3 = engine.add_widget(SystemWidget::Base(Box::new(base_widget3)));
+    // let mut base_widget4 = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+    // base_widget4.set_color(Color::BLUE);
+    // let base_widget_id4 = engine.add_widget(SystemWidget::Base(Box::new(base_widget4)));
+    // let mut base_widget5 = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+    // base_widget5.set_color(Color::BLUE);
+    // let base_widget_id5 = engine.add_widget(SystemWidget::Base(Box::new(base_widget5)));
+    //
+    //
+    // let mut box_widget1 = BoxWidget::new(Point::new(40, 40), Size::new(100, 100), Color::BLUE, 3);
+    // box_widget1.set_color(Color::CYAN);
+    // let box_widget_id1 = engine.add_widget(SystemWidget::Box(Box::new(box_widget1)));
+    //
+    // eprintln!("Added box widget ID: {}", box_widget_id1);
+    //
+    // let mut box_widget2 = BoxWidget::new(Point::new(180, 40), Size::new(100, 100), Color::GREEN, 5);
+    // box_widget2.set_color(Color::GRAY);
+    // let box_widget_id2 = engine.add_widget(SystemWidget::Box(Box::new(box_widget2)));
+    //
+    // eprintln!("Added box widget ID: {}", box_widget_id2);
+    //
+    // let mut box_widget3 = BoxWidget::new(Point::new(320, 40), Size::new(100, 100), Color::RED, 10);
+    // box_widget3.set_color(Color::MAGENTA);
+    // let box_widget_id3 = engine.add_widget(SystemWidget::Box(Box::new(box_widget3)));
+    //
+    // eprintln!("Added box widget ID: {}", box_widget_id3);
+    //
+    // let mut button_widget1 = ButtonWidget::new(Point::new(40, 160), Size::new(140, 60));
+    // let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button_widget1)));
+    //
+    // eprintln!("Added button widget ID: {}", button_widget_id1);
+    //
     // let mut new_base_widget = BaseWidget::new(make_points(100, 100), make_size(600, 400));
     //
     // new_base_widget

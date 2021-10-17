@@ -15,14 +15,15 @@
 
 use crate::cache::WidgetCache;
 use crate::event::EventHandler;
-use crate::geometry::Size;
-use crate::widget::SystemWidget;
+use crate::geometry::{Size, Point};
+use crate::widget::{SystemWidget, Widget};
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::video::Window;
 use sdl2::Sdl;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use crate::base_widget::BaseWidget;
 
 pub struct Engine {
     frame_rate: u32,
@@ -35,11 +36,18 @@ pub struct Engine {
 /// The main engine of Pushrod.  Runs the run loop after adding widgets to a management cache.
 impl Engine {
     pub fn new(size: Size, frame_rate: u32) -> Self {
+        let mut widget_cache = WidgetCache::default();
+        let mut base_widget = BaseWidget::new(Point::new(0, 0), Size::new(size.w, size.h));
+
+        base_widget.set_color(Color::RGBA(0, 0, 0, 0));
+
+        widget_cache.add(SystemWidget::Base(Box::new(base_widget)));
+
         Self {
             frame_rate,
             size,
             running: true,
-            widget_cache: WidgetCache::new(),
+            widget_cache,
             event_handler: None,
         }
     }
