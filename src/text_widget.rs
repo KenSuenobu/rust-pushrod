@@ -18,15 +18,18 @@ use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
 use sdl2::pixels::Color;
-use sdl2::render::{Canvas, Texture};
+use sdl2::render::{Canvas, Texture, TextureQuery};
 use sdl2::video::Window;
 use std::any::Any;
+use std::path::Path;
+use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 
 pub struct TextWidget {
     origin: Point,
     size: Size,
     invalidated: bool,
     texture: TextureStore,
+    ttf_context: Sdl2TtfContext,
 }
 
 /// `TextWidget` is a widget that renders text from a string within the bounds of the `Widget`.
@@ -84,5 +87,52 @@ impl Widget for TextWidget {
 
     fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
         None
+    }
+}
+
+impl TextWidget {
+
+    pub fn new(origin: Point, size: Size) -> Self {
+        Self {
+            origin,
+            size,
+            invalidated: false,
+            texture: TextureStore::default(),
+            ttf_context: sdl2::ttf::init().map_err(|e| e.to_string()).unwrap(),
+        }
+    }
+
+    /// Renders text, given the font name, size, style, color, string, and max width.  Transfers
+    /// ownership of the `Texture` to the calling function, returns the width and height of the
+    /// texture after rendering.  By using the identical font name, size, and style, if SDL2 caches
+    /// the font data, this will allow the font to be cached internally.
+    pub fn render_text(
+        &mut self,
+        c: &mut Canvas<Window>,
+    ) -> (Texture, u32, u32) {
+        let ttf_context = &self.ttf_context;
+        let texture_creator = c.texture_creator();
+        let font_name = "assets/OpenSans-Regular.ttf";
+        let text_color = Color::BLACK;
+        let font_size = 14;
+        let font_style: FontStyle = FontStyle::NORMAL;
+        let text_message = "Hello World";
+        let mut font = ttf_context
+            .load_font(Path::new(&font_name), font_size as u16)
+            .unwrap();
+        let surface = font
+            .render(&text_message)
+            .blended_wrapped(text_color, self.size.w)
+            .map_err(|e| e.to_string())
+            .unwrap();
+        let font_texture = texture_creator
+            .create_texture_from_surface(&surface)
+            .map_err(|e| e.to_string())
+            .unwrap();
+        let TextureQuery { width, height, .. } = font_texture.query();
+
+        font.set_style(font_style);
+
+        (font_texture, width, height)
     }
 }
