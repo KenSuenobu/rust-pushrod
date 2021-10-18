@@ -279,7 +279,7 @@ impl WidgetCache {
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("[WidgetCache::draw] No texture presented."),
+                    None => eprintln!("[WidgetCache::draw] BASE: No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -299,7 +299,7 @@ impl WidgetCache {
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("[WidgetCache::draw] No texture presented."),
+                    None => eprintln!("[WidgetCache::draw] BOX: No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -319,7 +319,7 @@ impl WidgetCache {
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("[WidgetCache::draw] No texture presented."),
+                    None => eprintln!("[WidgetCache::draw] BUTTON: No texture presented."),
                 };
 
                 widget.set_invalidated(false);

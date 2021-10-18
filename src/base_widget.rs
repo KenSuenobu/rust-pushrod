@@ -69,7 +69,7 @@ impl Widget for BaseWidget {
 
     fn set_color(&mut self, color: Color) {
         self.base_color = color;
-        self.set_invalidated(false);
+        self.set_invalidated(true);
     }
 
     fn is_invalidated(&self) -> bool {
@@ -94,17 +94,15 @@ impl Widget for BaseWidget {
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {
+            self.texture.create_or_resize_texture(c, self.size);
+
             let base_color = self.base_color;
             let size = self.size;
-
-            self.texture.create_or_resize_texture(c, self.size);
 
             // Draw the background with only the base color.
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture.set_draw_color(base_color);
                 texture.clear();
-
-                texture.fill_rect(Rect::new(0, 0, size.w, size.h));
             })
             .unwrap();
         }

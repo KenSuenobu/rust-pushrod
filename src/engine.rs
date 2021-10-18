@@ -39,7 +39,7 @@ impl Engine {
         let mut widget_cache = WidgetCache::default();
         let mut base_widget = BaseWidget::new(Point::new(0, 0), Size::new(size.w, size.h));
 
-        base_widget.set_color(Color::RGBA(0, 0, 0, 0));
+        base_widget.set_color(Color::RGBA(255, 255, 255, 255));
 
         widget_cache.add(SystemWidget::Base(Box::new(base_widget)));
 
@@ -76,7 +76,7 @@ impl Engine {
             .build()
             .unwrap();
 
-        canvas.set_draw_color(Color::RGB(255, 255, 255));
+        canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
         canvas.clear();
         canvas.present();
 
@@ -118,7 +118,7 @@ impl Engine {
             // self.layout_cache
             //     .do_layout(self.widget_cache.borrow_cache());
 
-            canvas.set_draw_color(Color::RGB(255, 255, 255));
+            canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
             canvas.clear();
 
             if self.widget_cache.draw_loop(&mut canvas) {
