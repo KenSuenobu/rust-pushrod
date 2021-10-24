@@ -30,6 +30,7 @@ pub struct TextWidget {
     invalidated: bool,
     texture: TextureStore,
     ttf_context: Sdl2TtfContext,
+    text: String,
 }
 
 /// `TextWidget` is a widget that renders text from a string within the bounds of the `Widget`.
@@ -86,19 +87,64 @@ impl Widget for TextWidget {
     }
 
     fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
-        None
+        if self.invalidated {
+            //     self.texture.create_or_resize_texture(c, self.size);
+            //
+            //     let base_color = self.base_color;
+            //     let size = self.size;
+            //
+            //     // Draw the background with only the base color.
+            //     c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
+            //         texture.set_draw_color(base_color);
+            //         texture.clear();
+            //     })
+            //         .unwrap();
+            // }
+            let bounds = self.properties.get_bounds();
+            let (font_texture, width, height) = t.render_text(c);
+            let text_justification = self.properties.get_value(PROPERTY_TEXT_JUSTIFICATION);
+            let texture_y = 0;
+            let widget_w = bounds.0;
+            let texture_x: i32 = match text_justification {
+                TEXT_JUSTIFY_LEFT => 0,
+                TEXT_JUSTIFY_CENTER => (widget_w - width) as i32 / 2,
+                TEXT_JUSTIFY_RIGHT => (widget_w - width) as i32,
+                _ => 0,
+            };
+
+            self.texture_store
+                .create_or_resize_texture(c, bounds.0, bounds.1);
+
+            let cloned_properties = self.properties.clone();
+
+            c.with_texture_canvas(self.texture_store.get_mut_ref(), |texture| {
+                draw_base(texture, &cloned_properties, None);
+
+                texture
+                    .copy(
+                        &font_texture,
+                        None,
+                        Rect::new(texture_x, texture_y, width, height),
+                    )
+                    .unwrap();
+            })
+                .unwrap();
+        }
+
+        self.texture.get_optional_ref()
     }
 }
 
 impl TextWidget {
 
-    pub fn new(origin: Point, size: Size) -> Self {
+    pub fn new(origin: Point, size: Size, text: String) -> Self {
         Self {
             origin,
             size,
             invalidated: false,
             texture: TextureStore::default(),
             ttf_context: sdl2::ttf::init().map_err(|e| e.to_string()).unwrap(),
+            text,
         }
     }
 
