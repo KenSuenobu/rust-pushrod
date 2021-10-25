@@ -23,6 +23,7 @@ use sdl2::video::Window;
 use std::any::Any;
 use std::path::Path;
 use sdl2::ttf::{FontStyle, Sdl2TtfContext};
+use sdl2::rect::Rect;
 
 pub struct TextWidget {
     origin: Point,
@@ -86,7 +87,7 @@ impl Widget for TextWidget {
         None
     }
 
-    fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
+    fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {
             //     self.texture.create_or_resize_texture(c, self.size);
             //
@@ -100,31 +101,26 @@ impl Widget for TextWidget {
             //     })
             //         .unwrap();
             // }
-            let bounds = self.properties.get_bounds();
-            let (font_texture, width, height) = t.render_text(c);
-            let text_justification = self.properties.get_value(PROPERTY_TEXT_JUSTIFICATION);
-            let texture_y = 0;
-            let widget_w = bounds.0;
-            let texture_x: i32 = match text_justification {
-                TEXT_JUSTIFY_LEFT => 0,
-                TEXT_JUSTIFY_CENTER => (widget_w - width) as i32 / 2,
-                TEXT_JUSTIFY_RIGHT => (widget_w - width) as i32,
-                _ => 0,
-            };
+            let (font_texture, width, height) = self.render_text(c);
+            let widget_w = self.size.w;
+            // let texture_x: i32 = match text_justification {
+            //     TEXT_JUSTIFY_LEFT => 0,
+            //     TEXT_JUSTIFY_CENTER => (widget_w - width) as i32 / 2,
+            //     TEXT_JUSTIFY_RIGHT => (widget_w - width) as i32,
+            //     _ => 0,
+            // };
 
-            self.texture_store
-                .create_or_resize_texture(c, bounds.0, bounds.1);
+            self.texture.create_or_resize_texture(c, self.size);
 
-            let cloned_properties = self.properties.clone();
-
-            c.with_texture_canvas(self.texture_store.get_mut_ref(), |texture| {
-                draw_base(texture, &cloned_properties, None);
+            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
+                texture.set_draw_color(Color::WHITE);
+                texture.clear();
 
                 texture
                     .copy(
                         &font_texture,
                         None,
-                        Rect::new(texture_x, texture_y, width, height),
+                        Rect::new(0, 0, width, height),
                     )
                     .unwrap();
             })
