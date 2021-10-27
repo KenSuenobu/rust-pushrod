@@ -25,6 +25,19 @@ use std::path::Path;
 use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::rect::Rect;
 
+/// `TextAlignment` is used by the `TextWidget` to identify the alignment of the text within the
+/// bounds of the `Widget`.
+pub enum TextAlignment {
+    /// Align text against the left bounds.
+    AlignLeft,
+
+    /// Align text to the center of the bounds.
+    AlignCenter,
+
+    /// Align text so the end of the text is against the max width of the bounds.
+    AlignRight,
+}
+
 pub struct TextWidget {
     origin: Point,
     size: Size,
@@ -32,6 +45,7 @@ pub struct TextWidget {
     texture: TextureStore,
     ttf_context: Sdl2TtfContext,
     text: String,
+    alignment: TextAlignment,
 }
 
 /// `TextWidget` is a widget that renders text from a string within the bounds of the `Widget`.
@@ -103,12 +117,12 @@ impl Widget for TextWidget {
             // }
             let (font_texture, width, height) = self.render_text(c);
             let widget_w = self.size.w;
-            // let texture_x: i32 = match text_justification {
-            //     TEXT_JUSTIFY_LEFT => 0,
-            //     TEXT_JUSTIFY_CENTER => (widget_w - width) as i32 / 2,
-            //     TEXT_JUSTIFY_RIGHT => (widget_w - width) as i32,
-            //     _ => 0,
-            // };
+            let texture_x: i32 = match self.alignment {
+                TextAlignment::AlignLeft => 0,
+                TextAlignment::AlignCenter => (widget_w - width) as i32 / 2,
+                TextAlignment::AlignRight => (widget_w - width) as i32,
+                _ => 0,
+            };
 
             self.texture.create_or_resize_texture(c, self.size);
 
@@ -120,7 +134,7 @@ impl Widget for TextWidget {
                     .copy(
                         &font_texture,
                         None,
-                        Rect::new(0, 0, width, height),
+                        Rect::new(texture_x, 0, width, height),
                     )
                     .unwrap();
             })
@@ -133,7 +147,7 @@ impl Widget for TextWidget {
 
 impl TextWidget {
 
-    pub fn new(origin: Point, size: Size, text: String) -> Self {
+    pub fn new(origin: Point, size: Size, text: String, align: TextAlignment) -> Self {
         Self {
             origin,
             size,
@@ -141,6 +155,7 @@ impl TextWidget {
             texture: TextureStore::default(),
             ttf_context: sdl2::ttf::init().map_err(|e| e.to_string()).unwrap(),
             text,
+            alignment: align,
         }
     }
 
