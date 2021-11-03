@@ -18,10 +18,10 @@ use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
 use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
-use sdl2::rect::Rect;
 
 pub struct BaseWidget {
     origin: Point,

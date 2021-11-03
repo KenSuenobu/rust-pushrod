@@ -13,9 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::base_widget::BaseWidget;
 use crate::cache::WidgetCache;
 use crate::event::EventHandler;
-use crate::geometry::{Size, Point};
+use crate::geometry::{Point, Size};
 use crate::widget::{SystemWidget, Widget};
 use sdl2::event::Event;
 use sdl2::pixels::Color;
@@ -23,7 +24,6 @@ use sdl2::video::Window;
 use sdl2::Sdl;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use crate::base_widget::BaseWidget;
 
 pub struct Engine {
     frame_rate: u32,

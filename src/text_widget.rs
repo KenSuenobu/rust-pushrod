@@ -18,12 +18,12 @@ use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
 use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use sdl2::render::{Canvas, Texture, TextureQuery};
+use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::video::Window;
 use std::any::Any;
 use std::path::Path;
-use sdl2::ttf::{FontStyle, Sdl2TtfContext};
-use sdl2::rect::Rect;
 
 /// `TextAlignment` is used by the `TextWidget` to identify the alignment of the text within the
 /// bounds of the `Widget`.
@@ -131,14 +131,10 @@ impl Widget for TextWidget {
                 texture.clear();
 
                 texture
-                    .copy(
-                        &font_texture,
-                        None,
-                        Rect::new(texture_x, 0, width, height),
-                    )
+                    .copy(&font_texture, None, Rect::new(texture_x, 0, width, height))
                     .unwrap();
             })
-                .unwrap();
+            .unwrap();
         }
 
         self.texture.get_optional_ref()
@@ -146,7 +142,6 @@ impl Widget for TextWidget {
 }
 
 impl TextWidget {
-
     pub fn new(origin: Point, size: Size, text: String, align: TextAlignment) -> Self {
         Self {
             origin,
@@ -163,10 +158,7 @@ impl TextWidget {
     /// ownership of the `Texture` to the calling function, returns the width and height of the
     /// texture after rendering.  By using the identical font name, size, and style, if SDL2 caches
     /// the font data, this will allow the font to be cached internally.
-    pub fn render_text(
-        &mut self,
-        c: &mut Canvas<Window>,
-    ) -> (Texture, u32, u32) {
+    pub fn render_text(&mut self, c: &mut Canvas<Window>) -> (Texture, u32, u32) {
         let ttf_context = &self.ttf_context;
         let texture_creator = c.texture_creator();
         let font_name = "assets/OpenSans-Regular.ttf";
