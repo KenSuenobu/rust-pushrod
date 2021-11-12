@@ -5,6 +5,7 @@ use pushrod::engine::Engine;
 use pushrod::geometry::{Point, Size};
 use pushrod::widget::{SystemWidget, Widget};
 use sdl2::pixels::Color;
+use pushrod::text_widget::{TextAlignment, TextWidget};
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -22,6 +23,10 @@ pub fn main() {
     let base_widget_id = engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
 
     eprintln!("Added base widget ID: {}", base_widget_id);
+
+    let mut text_widget = TextWidget::new(Point::new(0, 20), Size::new(600, 40),
+        String::from("Hello, Pushrod World!"), TextAlignment::AlignCenter);
+    let text_widget_id1 = engine.add_widget(SystemWidget::Text(Box::new(text_widget)));
 
     let mut box_widget1 = BoxWidget::new(Point::new(40, 40), Size::new(100, 100), Color::BLUE, 3);
     box_widget1.set_color(Color::CYAN);
