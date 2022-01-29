@@ -18,6 +18,12 @@ The benefits to this are great - the main benefits being that each window now ha
 every window that displays a new dialog contains its own window event handler.  This allows for global
 access to the widget store, the containing object, and the event handler.
 
+## Installing on Ubuntu Linux
+
+```shell
+sudo apt install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+```
+
 ## Installing on Mac OS X
 
 Install Brew.  [Go here to get instructions on how to install.](https://www.brew.sh)
