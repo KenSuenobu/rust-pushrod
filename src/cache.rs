@@ -252,7 +252,7 @@ impl WidgetCache {
 
                 _unused => {
                     // Do nothing
-                    eprintln!("[WidgetCache::draw_loop] I'm sent a widget that I can't draw yet!");
+                    // eprintln!("[WidgetCache::draw_loop] I'm sent a widget that I can't draw yet!");
                 }
             }
         }

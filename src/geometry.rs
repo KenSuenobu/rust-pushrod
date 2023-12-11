@@ -28,6 +28,11 @@ impl Point {
     }
 }
 
+/// Helper, creates a new `Point` object by its `x` and `y` base coordinates.
+pub fn point(x: i32, y: i32) -> Point {
+    Point::new(x, y)
+}
+
 /// Provides a definition of the size of an object: contains the `w` and `h` coordinates of
 /// an object.
 #[derive(Default, Copy, Clone)]
@@ -50,12 +55,22 @@ impl Size {
     }
 }
 
-// Helper method to create a rect bounds for `SDL2`
+/// Helper, creates a new size object by its `w` and `h` size coordinates.
+pub fn size(w: u32, h: u32) -> Size {
+    Size::new(w, h)
+}
+
+/// Helper method to create a rect bounds for `SDL2`
 pub fn make_rect(origin: Point, bounds: Size) -> Rect {
     Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }
 
-// Makes an origin point.
+/// Helper, creates a full rectangle object based on the `x`, `y`, `w`, and `h` coordinates.
+pub fn rect(x: i32, y: i32, w: u32, h: u32) -> Rect {
+    make_rect(point(x, y), size(w, h))
+}
+
+/// Makes an origin point.  Origin is `0` x `0`.
 pub fn make_origin() -> Point {
     Point { x: 0, y: 0 }
 }

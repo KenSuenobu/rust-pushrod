@@ -2,7 +2,7 @@ use pushrod::base_widget::BaseWidget;
 use pushrod::box_widget::BoxWidget;
 use pushrod::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
-use pushrod::geometry::{Point, Size};
+use pushrod::geometry::{point, size};
 use pushrod::widget::{SystemWidget, Widget};
 use sdl2::pixels::Color;
 use pushrod::text_widget::{TextAlignment, TextWidget};
@@ -16,37 +16,37 @@ pub fn main() {
         .opengl()
         .build()
         .unwrap();
-    let mut engine = Engine::new(Size::new(600, 400), 30);
+    let mut engine = Engine::new(size(600, 400), 30);
 
-    let mut base_widget = BaseWidget::new(Point::new(20, 20), Size::new(560, 360));
+    let mut base_widget = BaseWidget::new(point(20, 20), size(560, 360));
     base_widget.set_color(Color::RGBA(127, 127, 127, 255));
     let base_widget_id = engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
 
     eprintln!("Added base widget ID: {}", base_widget_id);
 
-    let mut text_widget = TextWidget::new(Point::new(0, 20), Size::new(600, 40),
+    let mut text_widget = TextWidget::new(point(0, 20), size(600, 40),
         String::from("Hello, Pushrod World!"), TextAlignment::AlignCenter);
     let text_widget_id1 = engine.add_widget(SystemWidget::Text(Box::new(text_widget)));
 
-    let mut box_widget1 = BoxWidget::new(Point::new(40, 40), Size::new(100, 100), Color::BLUE, 3);
+    let mut box_widget1 = BoxWidget::new(point(40, 40), size(100, 100), Color::BLUE, 3);
     box_widget1.set_color(Color::CYAN);
     let box_widget_id1 = engine.add_widget(SystemWidget::Box(Box::new(box_widget1)));
 
     eprintln!("Added box widget ID: {}", box_widget_id1);
 
-    let mut box_widget2 = BoxWidget::new(Point::new(180, 40), Size::new(100, 100), Color::GREEN, 5);
+    let mut box_widget2 = BoxWidget::new(point(180, 40), size(100, 100), Color::GREEN, 5);
     box_widget2.set_color(Color::GRAY);
     let box_widget_id2 = engine.add_widget(SystemWidget::Box(Box::new(box_widget2)));
 
     eprintln!("Added box widget ID: {}", box_widget_id2);
 
-    let mut box_widget3 = BoxWidget::new(Point::new(320, 40), Size::new(100, 100), Color::RED, 10);
+    let mut box_widget3 = BoxWidget::new(point(320, 40), size(100, 100), Color::RED, 10);
     box_widget3.set_color(Color::MAGENTA);
     let box_widget_id3 = engine.add_widget(SystemWidget::Box(Box::new(box_widget3)));
 
     eprintln!("Added box widget ID: {}", box_widget_id3);
 
-    let mut button_widget1 = ButtonWidget::new(Point::new(40, 160), Size::new(140, 60));
+    let mut button_widget1 = ButtonWidget::new(point(40, 160), size(140, 60));
     let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button_widget1)));
 
     eprintln!("Added button widget ID: {}", button_widget_id1);
