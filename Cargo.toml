@@ -20,6 +20,6 @@ name = "pushrod"
 path = "src/lib.rs"
 
 [dependencies.sdl2]
-version = "^0.35.2"
+version = "^0.36.0"
 features = ["ttf", "image", "unsafe_textures"]
 
