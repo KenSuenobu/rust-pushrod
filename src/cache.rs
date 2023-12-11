@@ -266,8 +266,8 @@ impl WidgetCache {
     fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>) {
         match &mut self.cache[widget_id as usize] {
             SystemWidget::Base(ref mut widget) => {
-                let widget_origin = *widget.get_origin();
-                let widget_size = *widget.get_size();
+                let widget_origin = widget.get_origin().clone();
+                let widget_size = widget.get_size().clone();
 
                 eprintln!(
                     "[WidgetCache::draw] Base: Drawing ID {} to x {} y {} w {} h {}",
@@ -286,8 +286,8 @@ impl WidgetCache {
             }
 
             SystemWidget::Box(ref mut widget) => {
-                let widget_origin = *widget.get_origin();
-                let widget_size = *widget.get_size();
+                let widget_origin = widget.get_origin().clone();
+                let widget_size = widget.get_size().clone();
 
                 eprintln!(
                     "[WidgetCache::draw] Box: Drawing ID {} to x {} y {} w {} h {}",
@@ -306,8 +306,8 @@ impl WidgetCache {
             }
 
             SystemWidget::Button(ref mut widget) => {
-                let widget_origin = *widget.get_origin();
-                let widget_size = *widget.get_size();
+                let widget_origin = widget.get_origin().clone();
+                let widget_size = widget.get_size().clone();
 
                 eprintln!(
                     "[WidgetCache::draw] Button: Drawing ID {} to x {} y {} w {} h {}",
