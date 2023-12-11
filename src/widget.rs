@@ -95,3 +95,52 @@ pub enum SystemWidget {
     /// Stores a custom `Widget`.
     Custom(Box<dyn Widget>),
 }
+
+#[macro_export]
+macro_rules! impl_widget_base {
+    () => {
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+
+        fn get_origin(&self) -> &Point {
+            &self.origin
+        }
+
+        fn get_size(&self) -> &Size {
+            &self.size
+        }
+
+        fn get_color(&self) -> Color {
+            self.base_widget.get_color()
+        }
+
+        fn set_origin(&mut self, point: Point) {
+            self.origin = point;
+        }
+
+        fn set_size(&mut self, size: Size) {
+            self.size = size;
+            self.base_widget.set_size(size);
+            self.set_invalidated(true);
+        }
+
+        fn set_invalidated(&mut self, state: bool) {
+            self.invalidated = state;
+            self.base_widget.set_invalidated(state);
+        }
+
+        fn set_color(&mut self, color: Color) {
+            self.base_widget.set_color(color);
+            self.set_invalidated(true);
+        }
+
+        fn is_invalidated(&self) -> bool {
+            self.invalidated
+        }
+
+        fn get_texture(&mut self) -> &mut TextureStore {
+            &mut self.texture
+        }
+    };
+}
