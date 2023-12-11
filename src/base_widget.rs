@@ -114,8 +114,8 @@ impl Widget for BaseWidget {
 impl BaseWidget {
     pub fn new(origin: Point, size: Size) -> Self {
         Self {
-            origin,
-            size,
+            origin: origin.clone(),
+            size: size.clone(),
             base_color: Color::RGBA(255, 255, 255, 0),
             invalidated: true,
             texture: TextureStore::default(),

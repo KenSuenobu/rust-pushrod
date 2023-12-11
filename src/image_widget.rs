@@ -39,8 +39,6 @@ pub struct ImageWidget {
 /// - Borrow the base widget's base widget canvas texture
 /// - Blit the image transparently over the base widget's canvas texture.
 impl Widget for ImageWidget {
-    impl_widget_base!();
-
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(ev) => {
@@ -56,4 +54,6 @@ impl Widget for ImageWidget {
     fn draw(&mut self, _c: &mut Canvas<Window>) -> Option<&Texture> {
         None
     }
+
+    impl_widget_base!();
 }

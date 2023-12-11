@@ -44,8 +44,6 @@ pub struct BoxWidget {
 /// - Borrow the base widget's base widget canvas texture
 /// - Draw a box around it with the specified with and color
 impl Widget for BoxWidget {
-    impl_widget_base!();
-
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(ev) => {
@@ -97,6 +95,8 @@ impl Widget for BoxWidget {
 
         self.texture.get_optional_ref()
     }
+
+    impl_widget_base!();
 }
 
 /// This is a `BoxWidget` that draws a `BaseWidget` as its base, and draws a border around the
@@ -104,8 +104,8 @@ impl Widget for BoxWidget {
 impl BoxWidget {
     pub fn new(origin: Point, size: Size, border_color: Color, border_width: u8) -> Self {
         Self {
-            origin,
-            size,
+            origin: origin.clone(),
+            size: size.clone(),
             invalidated: true,
             texture: TextureStore::default(),
             base_widget: BaseWidget::new(make_origin(), size),

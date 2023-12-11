@@ -144,8 +144,8 @@ impl Widget for TextWidget {
 impl TextWidget {
     pub fn new(origin: Point, size: Size, text: String, align: TextAlignment) -> Self {
         Self {
-            origin,
-            size,
+            origin: origin.clone(),
+            size: size.clone(),
             invalidated: false,
             texture: TextureStore::default(),
             ttf_context: sdl2::ttf::init().map_err(|e| e.to_string()).unwrap(),

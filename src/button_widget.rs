@@ -41,8 +41,6 @@ pub struct ButtonWidget {
 /// - Borrow the base widget's base widget canvas texture
 /// - Draw text on top of the canvas, inverted if selected
 impl Widget for ButtonWidget {
-    impl_widget_base!();
-
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(ev) => {
@@ -86,14 +84,16 @@ impl Widget for ButtonWidget {
 
         self.texture.get_optional_ref()
     }
+
+    impl_widget_base!();
 }
 
 /// This is a `ButtonWidget` that draws a `BoxWidget` as its base, drawing text inside the box.
 impl ButtonWidget {
     pub fn new(origin: Point, size: Size) -> Self {
         Self {
-            origin,
-            size,
+            origin: origin.clone(),
+            size: size.clone(),
             invalidated: true,
             in_bounds: false,
             texture: TextureStore::default(),
