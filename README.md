@@ -18,10 +18,19 @@ The benefits to this are great - the main benefits being that each window now ha
 every window that displays a new dialog contains its own window event handler.  This allows for global
 access to the widget store, the containing object, and the event handler.
 
+Developers who have written GUI applications on the Atari ST, Macintosh, Amiga, and other event-based
+GUI libraries will instantly feel at home here.
+
 ## Installing on Ubuntu Linux
 
 ```shell
 sudo apt install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+```
+
+## Installing on Redhat Linux
+
+```shell
+sudo yum install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
 ```
 
 ## Installing on Mac OS X
