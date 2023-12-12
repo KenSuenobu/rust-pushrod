@@ -25,16 +25,7 @@ pub struct WidgetCache {
     current_widget_id: u32,
 }
 
-/// The `WidgetCache` is the store that stores all of the `Widget` objects for a Window.  It handles
-/// the widget drawing order, the hidden states, etc. for each `Widget`.  It contains a draw loop
-/// which is responsible for determining which objects need to be drawn (which are invalidated),
-/// and in what order.
-///
-/// Any interactions that are performed by the `Engine` are sent here.  This means, the `WidgetCache`
-/// has its own event handler.  This is necessary such that `Widget`s can interpret events that may
-/// apply to them, for instance: mouse movement, clicks, key press, etc.
 impl WidgetCache {
-    /// Constructor.
     pub fn new() -> Self {
         Self {
             cache: Vec::new(),
@@ -42,13 +33,11 @@ impl WidgetCache {
         }
     }
 
-    /// Adds a `SystemWidget` to the cache.
     pub fn add(&mut self, widget: SystemWidget) -> i32 {
         self.cache.push(widget);
         (self.cache.len() - 1) as i32
     }
 
-    /// Retrieves a `SystemWidget` from the cache by its ID.
     pub fn get(&self, widget: i32) -> Option<&SystemWidget> {
         if widget > self.cache.len() as i32 {
             None
@@ -57,7 +46,6 @@ impl WidgetCache {
         }
     }
 
-    /// Retrieves the current widget ID
     pub fn get_current_widget(&self) -> u32 {
         self.current_widget_id
     }
@@ -77,8 +65,7 @@ impl WidgetCache {
             }
 
             _unused => {
-                // Do nothing
-                eprintln!("[WidgetCache::send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
+                panic!("[WidgetCache::send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
             }
         }
 
@@ -134,24 +121,19 @@ impl WidgetCache {
 
                 self.current_widget_id = self.get_widget_id(x, y);
 
-                // Send previous widget ID event that an event left it bounds
-                // Send current widget ID event that event entered its bounds
                 if self.current_widget_id != previous_widget_id {
-                    let exited_event = PushrodEvent::ExitedBounds(previous_widget_id);
-                    let entered_event = PushrodEvent::EnteredBounds(self.current_widget_id);
+                    let bounds_event = PushrodEvent::BoundsChange(previous_widget_id, self.current_widget_id);
 
-                    // Exited event - copy return events only if some are generated
                     if let Some(x) =
-                        self.send_and_receive_event_to_widget(previous_widget_id, exited_event)
+                        self.send_and_receive_event_to_widget(previous_widget_id, bounds_event.clone())
                     {
                         for i in 0..x.len() {
                             return_vector.push(&x[i]);
                         }
                     }
 
-                    // Entered event
                     if let Some(x) =
-                        self.send_and_receive_event_to_widget(self.current_widget_id, entered_event)
+                        self.send_and_receive_event_to_widget(self.current_widget_id, bounds_event.clone())
                     {
                         for i in 0..x.len() {
                             return_vector.push(&x[i]);
@@ -171,8 +153,7 @@ impl WidgetCache {
                     }
 
                     _unused => {
-                        // Do nothing
-                        eprintln!(
+                        panic!(
                             "[WidgetCache::handle_event] I am trying to handle an event with a widget that I can't handle yet!"
                         );
                     }
@@ -203,12 +184,6 @@ impl WidgetCache {
         return_vector
     }
 
-    /// Draws `Widget`s into the `Canvas`.  Determines whether or not a `Widget` is invalidated,
-    /// draws it (and its children), and exits after draw completes.  Calls private function
-    /// `draw`, which is responsible for copying a texture to the main `Canvas`.
-    ///
-    /// Returns a boolean indicating whether or not the canvas was invalidated and needs to be
-    /// redrawn.  If not, the event loop will not redraw the canvas.
     pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
         let mut invalidated = false;
         let cache_size = self.cache.len();
@@ -230,19 +205,13 @@ impl WidgetCache {
                     }
                 }
 
-                _unused => {
-                    // Do nothing
-                    // eprintln!("[WidgetCache::draw_loop] I'm sent a widget that I can't draw yet!");
-                }
+                _unused => { }
             }
         }
 
         invalidated
     }
 
-    /// Draws an object to the screen by calling a `Widget`'s draw function, which draws to a
-    /// `TextureStore`.  Once the `TextureStore` has been rendered, it is copied to the
-    /// `Canvas` at the widget's origin and size coordinates.
     fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>) {
         match &mut self.cache[widget_id as usize] {
             SystemWidget::Base(ref mut widget) => {
@@ -276,19 +245,17 @@ impl WidgetCache {
             }
 
             _default => {
-                // Do nothing
                 panic!("[WidgetCache::draw] I'm sent a widget that I can't draw yet! (needs to be implemented in 'draw')");
             }
         }
     }
 
-    /// Determines the ID of the widget at the given X/Y coordinates.
+    /// BUG: Does not currently handle widget Z coordinates, as no Z coordinates currently exist.
+    /// "Widget on Top" is not yet implemented, so get widget ID will return the last object that
+    /// exists in the coordinates given.  Overlapped objects will return the top-most object based
+    /// on the insertion order in the cache.
     fn get_widget_id(&self, x: i32, y: i32) -> u32 {
         let cache_size = self.cache.len();
-
-        // Mouse motion in relation to the widget needs to have the X and Y coordinates
-        // subtracted from the X/Y coordinates sent here in mouse motion.  Since these
-        // values can be negative based on the relation to the currently active object.
 
         let mut widget_id = 0;
 

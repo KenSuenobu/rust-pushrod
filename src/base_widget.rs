@@ -31,12 +31,6 @@ pub struct BaseWidget {
     texture: TextureStore,
 }
 
-/// This is a basic widget that just draws a background with a fill color in a canvas of a given
-/// size.  The steps for the drawing inside the `Canvas` are:
-///
-/// - Create/resize the texture if not created
-/// - Set the background draw color to the base (`Color::RGB(255, 255, 255)`)
-/// - Clear the canvas with that color
 impl Widget for BaseWidget {
     fn as_any(&self) -> &dyn Any {
         self
@@ -80,17 +74,7 @@ impl Widget for BaseWidget {
         &mut self.texture
     }
 
-    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
-        match event {
-            PushrodEvent::SystemEvent(ev) => {
-                // eprintln!("[BaseWidget::handle_event] event: {:?}", ev);
-            }
-
-            _ => {}
-        }
-
-        None
-    }
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {
@@ -99,7 +83,6 @@ impl Widget for BaseWidget {
             let base_color = self.base_color;
             let size = self.size;
 
-            // Draw the background with only the base color.
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture.set_draw_color(base_color);
                 texture.clear();
@@ -114,8 +97,8 @@ impl Widget for BaseWidget {
 impl BaseWidget {
     pub fn new(origin: Point, size: Size) -> Self {
         Self {
-            origin: origin.clone(),
-            size: size.clone(),
+            origin,
+            size,
             base_color: Color::RGBA(255, 255, 255, 0),
             invalidated: true,
             texture: TextureStore::default(),

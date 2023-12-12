@@ -14,8 +14,6 @@
 
 use sdl2::rect::Rect;
 
-/// Provides a definition of a point of origin: contains the `x` and `y` coordinates of
-/// an object.
 #[derive(Default, Copy, Clone)]
 pub struct Point {
     pub x: i32,
@@ -28,13 +26,10 @@ impl Point {
     }
 }
 
-/// Helper, creates a new `Point` object by its `x` and `y` base coordinates.
 pub fn point(x: i32, y: i32) -> Point {
     Point::new(x, y)
 }
 
-/// Provides a definition of the size of an object: contains the `w` and `h` coordinates of
-/// an object.
 #[derive(Default, Copy, Clone)]
 pub struct Size {
     pub w: u32,
@@ -49,28 +44,23 @@ impl Size {
         }
     }
 
-    /// Shortcut to determine the size (in bytes) that a texture has allocated.
     pub fn get_memory_size(&self) -> u32 {
         self.w * self.h * 4
     }
 }
 
-/// Helper, creates a new size object by its `w` and `h` size coordinates.
 pub fn size(w: u32, h: u32) -> Size {
     Size::new(w, h)
 }
 
-/// Helper method to create a rect bounds for `SDL2`
 pub fn make_rect(origin: Point, bounds: Size) -> Rect {
     Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }
 
-/// Helper, creates a full rectangle object based on the `x`, `y`, `w`, and `h` coordinates.
 pub fn rect(x: i32, y: i32, w: u32, h: u32) -> Rect {
     make_rect(point(x, y), size(w, h))
 }
 
-/// Makes an origin point.  Origin is `0` x `0`.
 pub fn origin_point() -> Point {
     Point { x: 0, y: 0 }
 }

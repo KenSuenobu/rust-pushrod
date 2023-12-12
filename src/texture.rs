@@ -16,8 +16,6 @@ use crate::geometry::Size;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
-/// This stores the `Texture` object being drawn against as a `Canvas` object, its texture
-/// width and height, and an invalidated state.
 #[derive(Default)]
 pub struct TextureStore {
     store: Option<Texture>,
@@ -25,10 +23,6 @@ pub struct TextureStore {
     invalidated: bool,
 }
 
-/// This is a `TextureStore`.  This is a GPU-based texture store, stored on the GPU.  The texture
-/// address is stored as a pointer to the GPU memory by SDL.
-///
-/// Any changes to the texture are treated as an 'invalidation', or a cache object needing refresh.
 impl TextureStore {
     /// Retrieves a `&mut Texture` reference to the stored `Texture` object.
     ///
@@ -49,16 +43,10 @@ impl TextureStore {
         self.store.as_mut().unwrap()
     }
 
-    /// Retrieves a `Option<&Texture>` object for the `Texture` object store.  Use this as a shortcut
-    /// to the `Widget`'s return values (see `BaseWidget` for reference.)
     pub fn get_optional_ref(&mut self) -> Option<&Texture> {
         self.store.as_ref()
     }
 
-    /// This is used to create a new `Texture` object that can be drawn against.  If the `Widget` is
-    /// ever redrawn, this function will automatically generate a new `Texture` to draw against, and
-    /// destroy the previously stored `Texture`.  If any changes are observed when calling this
-    /// function (ie. the width changes, height changes, or the store is lost), it is regenerated.
     pub fn create_or_resize_texture(&mut self, c: &mut Canvas<Window>, size: Size) {
         if self.store.is_none() || self.size.w != size.w || self.size.h != size.h {
             self.size.w = size.w;
@@ -76,13 +64,10 @@ impl TextureStore {
         }
     }
 
-    /// Retrieves the invalidation state.
     pub fn is_invalidated(&self) -> bool {
         self.invalidated
     }
 
-    /// Sets the invalidation state for the `Texture` store.  If invalidated, it indicates that the
-    /// `Texture` needs to be redrawn.
     pub fn set_invalidated(&mut self, state: bool) {
         self.invalidated = state;
     }

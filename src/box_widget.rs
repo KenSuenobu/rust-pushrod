@@ -35,20 +35,13 @@ pub struct BoxWidget {
     border_width: u8,
 }
 
-/// `BoxWidget` is a widget that contains a `BaseWidget`, and draws a border around the base after
-/// it is rendered.  The border color is controlled as part of the `BoxWidget`'s properties.
 impl Widget for BoxWidget {
-    /// `BoxWidget` accepts and emits no events.
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
-    /// Draws the widget contents.
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
-        // Draw the base first
         if self.invalidated {
             self.texture.create_or_resize_texture(c, self.size);
 
-            // These objects need to be declared in the scope of the Widget, but outside of the
-            // scope of the closure, since `self` is not allowed inside the scope of the closure.
             let base_widget_texture = self.base_widget.draw(c).unwrap();
             let border_color = self.border_color;
             let border_width = self.border_width;
@@ -57,7 +50,6 @@ impl Widget for BoxWidget {
             let widget_height = self.size.h;
 
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                // Copy the base texture to the current texture
                 texture
                     .copy(
                         base_widget_texture,
@@ -66,11 +58,8 @@ impl Widget for BoxWidget {
                     )
                     .unwrap();
 
-                // Set the drawing color for the border.
                 texture.set_draw_color(border_color);
 
-                // Draw each segment of the border here, starting from 0 to the border width.
-                // The drawing order is from the outside in.
                 for i in 0..border_width as i32 {
                     let computed_width = (widget_width as u32 - (i as u32 * 2u32)) as u32;
                     let computed_height = (widget_height as u32 - (i as u32 * 2u32)) as u32;
@@ -89,8 +78,6 @@ impl Widget for BoxWidget {
     impl_widget_base!();
 }
 
-/// This is a `BoxWidget` that draws a `BaseWidget` as its base, and draws a border around the
-/// `BaseWidget` of a given width and color.
 impl BoxWidget {
     pub fn new(origin: Point, size: Size, border_color: Color, border_width: u8) -> Self {
         Self {
