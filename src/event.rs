@@ -23,14 +23,6 @@ pub enum PushrodEvent {
     /// Indicates a mouse exited the bounds of an object.  The ID of the object is returned.
     ExitedBounds(u32),
 
-    /// Indicates an object has been toggled.  The ID of the object is returned along with its
-    /// selection state.
-    Toggled(u32, bool),
-
-    /// Indicates an object was clicked.  The ID of the object is returned along with the number
-    /// of clicks within the object.
-    Clicked(u32, u32),
-
     /// Indicates an SDL-based Event occurred.
     SystemEvent(Event),
 }

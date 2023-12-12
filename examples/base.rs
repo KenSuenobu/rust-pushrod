@@ -1,11 +1,9 @@
 use pushrod::base_widget::BaseWidget;
 use pushrod::box_widget::BoxWidget;
-use pushrod::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::geometry::{point, size};
 use pushrod::widget::{SystemWidget, Widget};
 use sdl2::pixels::Color;
-use pushrod::text_widget::{TextAlignment, TextWidget};
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -24,9 +22,9 @@ pub fn main() {
 
     eprintln!("Added base widget ID: {}", base_widget_id);
 
-    let mut text_widget = TextWidget::new(point(0, 20), size(600, 40),
-        String::from("Hello, Pushrod World!"), TextAlignment::AlignCenter);
-    let text_widget_id1 = engine.add_widget(SystemWidget::Text(Box::new(text_widget)));
+    // let mut text_widget = TextWidget::new(point(0, 20), size(600, 40),
+    //     String::from("Hello, Pushrod World!"), TextAlignment::AlignCenter);
+    // let text_widget_id1 = engine.add_widget(SystemWidget::Text(Box::new(text_widget)));
 
     let mut box_widget1 = BoxWidget::new(point(40, 40), size(100, 100), Color::BLUE, 3);
     box_widget1.set_color(Color::CYAN);
@@ -46,10 +44,10 @@ pub fn main() {
 
     eprintln!("Added box widget ID: {}", box_widget_id3);
 
-    let mut button_widget1 = ButtonWidget::new(point(40, 160), size(140, 60));
-    let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button_widget1)));
-
-    eprintln!("Added button widget ID: {}", button_widget_id1);
+    // let mut button_widget1 = ButtonWidget::new(point(40, 160), size(140, 60));
+    // let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button_widget1)));
+    //
+    // eprintln!("Added button widget ID: {}", button_widget_id1);
 
     // let mut new_base_widget = BaseWidget::new(make_points(100, 100), make_size(600, 400));
     //

@@ -76,14 +76,6 @@ impl WidgetCache {
                 return x.handle_event(event);
             }
 
-            SystemWidget::Button(x) => {
-                return x.handle_event(event);
-            }
-
-            SystemWidget::Image(x) => {
-                return x.handle_event(event);
-            }
-
             _unused => {
                 // Do nothing
                 eprintln!("[WidgetCache::send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
@@ -178,11 +170,6 @@ impl WidgetCache {
                         y_offset = x.get_origin().y;
                     }
 
-                    SystemWidget::Button(x) => {
-                        x_offset = x.get_origin().x;
-                        y_offset = x.get_origin().y;
-                    }
-
                     _unused => {
                         // Do nothing
                         eprintln!(
@@ -237,13 +224,6 @@ impl WidgetCache {
                 }
 
                 SystemWidget::Box(x) => {
-                    if x.is_invalidated() {
-                        invalidated = true;
-                        self.draw(i as u32, c);
-                    }
-                }
-
-                SystemWidget::Button(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
                         self.draw(i as u32, c);
@@ -305,26 +285,6 @@ impl WidgetCache {
                 widget.set_invalidated(false);
             }
 
-            SystemWidget::Button(ref mut widget) => {
-                let widget_origin = widget.get_origin().clone();
-                let widget_size = widget.get_size().clone();
-
-                eprintln!(
-                    "[WidgetCache::draw] Button: Drawing ID {} to x {} y {} w {} h {}",
-                    widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
-                );
-
-                match widget.draw(c) {
-                    Some(texture) => c
-                        .copy(texture, None, make_rect(widget_origin, widget_size))
-                        .unwrap(),
-
-                    None => eprintln!("[WidgetCache::draw] BUTTON: No texture presented."),
-                };
-
-                widget.set_invalidated(false);
-            }
-
             _default => {
                 // Do nothing
                 eprintln!("[WidgetCache::draw] I'm sent a widget that I can't draw yet!");
@@ -357,13 +317,6 @@ impl WidgetCache {
                 }
 
                 SystemWidget::Box(x) => {
-                    start_x = x.get_origin().x;
-                    start_y = x.get_origin().y;
-                    end_x = start_x + x.get_size().w as i32;
-                    end_y = start_y + x.get_size().h as i32;
-                }
-
-                SystemWidget::Button(x) => {
                     start_x = x.get_origin().x;
                     start_y = x.get_origin().y;
                     end_x = start_x + x.get_size().w as i32;
