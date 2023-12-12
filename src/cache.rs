@@ -92,31 +92,31 @@ impl WidgetCache {
         let mut return_vector: Vec<&PushrodEvent> = Vec::new();
 
         match event {
-            Event::MouseButtonDown {
-                mouse_btn,
-                clicks,
-                x,
-                y,
-                ..
-            } => {
-                eprintln!(
-                    "[WidgetCache::handle_event] mouse down: button={} clicks={} x={} y={}",
-                    mouse_btn as i32, clicks, x, y
-                );
-            }
-
-            Event::MouseButtonUp {
-                mouse_btn,
-                clicks,
-                x,
-                y,
-                ..
-            } => {
-                eprintln!(
-                    "[WidgetCache::handle_event] mouse up: button={} clicks={} x={} y={}",
-                    mouse_btn as i32, clicks, x, y
-                );
-            }
+            // Event::MouseButtonDown {
+            //     mouse_btn,
+            //     clicks,
+            //     x,
+            //     y,
+            //     ..
+            // } => {
+            //     eprintln!(
+            //         "[WidgetCache::handle_event] mouse down: button={} clicks={} x={} y={}",
+            //         mouse_btn as i32, clicks, x, y
+            //     );
+            // }
+            //
+            // Event::MouseButtonUp {
+            //     mouse_btn,
+            //     clicks,
+            //     x,
+            //     y,
+            //     ..
+            // } => {
+            //     eprintln!(
+            //         "[WidgetCache::handle_event] mouse up: button={} clicks={} x={} y={}",
+            //         mouse_btn as i32, clicks, x, y
+            //     );
+            // }
 
             Event::MouseMotion {
                 timestamp,
@@ -249,17 +249,12 @@ impl WidgetCache {
                 let widget_origin = widget.get_origin().clone();
                 let widget_size = widget.get_size().clone();
 
-                eprintln!(
-                    "[WidgetCache::draw] Base: Drawing ID {} to x {} y {} w {} h {}",
-                    widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
-                );
-
                 match widget.draw(c) {
                     Some(texture) => c
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("[WidgetCache::draw] BASE: No texture presented."),
+                    None => panic!("[WidgetCache::draw] BASE: No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -269,17 +264,12 @@ impl WidgetCache {
                 let widget_origin = widget.get_origin().clone();
                 let widget_size = widget.get_size().clone();
 
-                eprintln!(
-                    "[WidgetCache::draw] Box: Drawing ID {} to x {} y {} w {} h {}",
-                    widget_id, widget_origin.x, widget_origin.y, widget_size.w, widget_size.h
-                );
-
                 match widget.draw(c) {
                     Some(texture) => c
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => eprintln!("[WidgetCache::draw] BOX: No texture presented."),
+                    None => panic!("[WidgetCache::draw] BOX: No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -287,7 +277,7 @@ impl WidgetCache {
 
             _default => {
                 // Do nothing
-                eprintln!("[WidgetCache::draw] I'm sent a widget that I can't draw yet!");
+                panic!("[WidgetCache::draw] I'm sent a widget that I can't draw yet! (needs to be implemented in 'draw')");
             }
         }
     }

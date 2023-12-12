@@ -15,7 +15,7 @@
 
 use crate::base_widget::BaseWidget;
 use crate::event::PushrodEvent;
-use crate::geometry::{make_origin, make_rect, Point, Size};
+use crate::geometry::{origin_point, make_rect, Point, Size};
 use crate::texture::TextureStore;
 use crate::widget::Widget;
 use sdl2::pixels::Color;
@@ -37,30 +37,18 @@ pub struct BoxWidget {
 
 /// `BoxWidget` is a widget that contains a `BaseWidget`, and draws a border around the base after
 /// it is rendered.  The border color is controlled as part of the `BoxWidget`'s properties.
-///
-/// The drawing order is:
-///
-/// - Draw the base widget
-/// - Borrow the base widget's base widget canvas texture
-/// - Draw a box around it with the specified with and color
 impl Widget for BoxWidget {
-    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
-        match event {
-            PushrodEvent::SystemEvent(ev) => {
-                // eprintln!("[BoxWidget::handle_event] event: {:?}", ev);
-            }
+    /// `BoxWidget` accepts and emits no events.
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
-            _ => {}
-        }
-
-        None
-    }
-
+    /// Draws the widget contents.
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         // Draw the base first
         if self.invalidated {
             self.texture.create_or_resize_texture(c, self.size);
 
+            // These objects need to be declared in the scope of the Widget, but outside of the
+            // scope of the closure, since `self` is not allowed inside the scope of the closure.
             let base_widget_texture = self.base_widget.draw(c).unwrap();
             let border_color = self.border_color;
             let border_width = self.border_width;
@@ -74,13 +62,15 @@ impl Widget for BoxWidget {
                     .copy(
                         base_widget_texture,
                         None,
-                        make_rect(make_origin(), widget_size),
+                        make_rect(origin_point(), widget_size),
                     )
                     .unwrap();
 
-                // Now we draw the box.
+                // Set the drawing color for the border.
                 texture.set_draw_color(border_color);
 
+                // Draw each segment of the border here, starting from 0 to the border width.
+                // The drawing order is from the outside in.
                 for i in 0..border_width as i32 {
                     let computed_width = (widget_width as u32 - (i as u32 * 2u32)) as u32;
                     let computed_height = (widget_height as u32 - (i as u32 * 2u32)) as u32;
@@ -108,7 +98,7 @@ impl BoxWidget {
             size: size.clone(),
             invalidated: true,
             texture: TextureStore::default(),
-            base_widget: BaseWidget::new(make_origin(), size),
+            base_widget: BaseWidget::new(origin_point(), size),
             border_color,
             border_width,
         }

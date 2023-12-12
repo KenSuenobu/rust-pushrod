@@ -71,6 +71,6 @@ pub fn rect(x: i32, y: i32, w: u32, h: u32) -> Rect {
 }
 
 /// Makes an origin point.  Origin is `0` x `0`.
-pub fn make_origin() -> Point {
+pub fn origin_point() -> Point {
     Point { x: 0, y: 0 }
 }
