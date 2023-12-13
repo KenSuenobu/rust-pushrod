@@ -12,6 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # rust-pushrod
+//!
+//! Pushrod is a library written entirely in Rust, utilizing the SDL2 later for drawing interactive
+//! elements to the screen via OpenGL.
+//!
+//! It is an event-based GUI library that utilizes an event loop to handle the event, dispatch, and
+//! draw loop.
+//!
+//! # Dependencies
+//!
+//! Pushrod uses the following dependency:
+//! ```ignore
+//! [dependencies.sdl2]
+//! version = "^0.36.0"
+//! features = ["ttf", "image", "unsafe_textures"]
+//! ```
+//!
+//! Note, the `unsafe_textures` feature is required for OpenGL functionality.
+
 pub mod base_widget;
 pub mod box_widget;
 pub mod cache;
