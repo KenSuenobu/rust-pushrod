@@ -119,12 +119,15 @@ pub enum SystemWidget {
 /// the following support objects in the `struct` that defined the `Widget`:
 ///
 /// ```rust,no_run
+/// struct MyWidget {
 ///   origin: Point,
 ///   size: Size,
 ///   invalidated: bool,
 ///   in_bounds: bool,
 ///   texture: TextureStore,
 ///   base_widget: BaseWidget,
+///   ...,
+/// }
 /// ```
 ///
 /// Note, any `Widget` that is drawn must draw against the `base_widget`, which utilizes the

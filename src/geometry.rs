@@ -12,8 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # Geometry
+//!
+//! These are geometric representations of shapes and coordinates in drawing space within
+//! `Pushrod`.  All objects positioned within a window are drawn using these `Struct`s and
+//! method calls.
+
 use sdl2::rect::Rect;
 
+/// A geometric struct representing `x` and `y` positional coordinates.
 #[derive(Default, Copy, Clone)]
 pub struct Point {
     pub x: i32,
@@ -26,10 +33,12 @@ impl Point {
     }
 }
 
+/// Creates a new `Point` given `x` and `y` coordinates.
 pub fn point(x: i32, y: i32) -> Point {
     Point::new(x, y)
 }
 
+/// A geometric struct representing the size of an object in `w`idth and `h`eight.
 #[derive(Default, Copy, Clone)]
 pub struct Size {
     pub w: u32,
@@ -49,18 +58,22 @@ impl Size {
     }
 }
 
+/// Creates a new size object with its width and height coordinates.
 pub fn size(w: u32, h: u32) -> Size {
     Size::new(w, h)
 }
 
+/// Creates a new `Rect` object given `Point` and `Size` constraints.
 pub fn make_rect(origin: Point, bounds: Size) -> Rect {
     Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }
 
+/// Creates a new `Rect` object given `x`, `y`, `w`, and `h` values.
 pub fn rect(x: i32, y: i32, w: u32, h: u32) -> Rect {
     make_rect(point(x, y), size(w, h))
 }
 
+/// Returns point of origin (`0x0`)
 pub fn origin_point() -> Point {
     Point { x: 0, y: 0 }
 }
