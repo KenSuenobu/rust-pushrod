@@ -12,10 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # TextureStore
+//!
+//! The `TextureStore` is used to store the texture on a GPU that can be used as a drawing
+//! canvas object.
+//!
+//! The `Canvas` and `Texture` refer to the `sdl2::render` crate.  Please visit that crate for
+//! more information on the drawing features available.
+
 use crate::geometry::Size;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
+/// Contains the `TextureStore` components: the optional `Texture`, size, and invalidation flags.
 #[derive(Default)]
 pub struct TextureStore {
     store: Option<Texture>,
@@ -43,10 +52,16 @@ impl TextureStore {
         self.store.as_mut().unwrap()
     }
 
+    /// Retrieves a `&Texture` reference object as an optional.  This is a safer way to
+    /// draw, as it will not return an object if `create_or_resize_texture` has been not
+    /// yet been called.
     pub fn get_optional_ref(&mut self) -> Option<&Texture> {
         self.store.as_ref()
     }
 
+    /// Creates or resizes the texture for drawing.  It will create a new `Texture` object
+    /// to draw against if the `store` object currently does not contain a `Texture`, or if
+    /// the object size has changed.
     pub fn create_or_resize_texture(&mut self, c: &mut Canvas<Window>, size: Size) {
         if self.store.is_none() || self.size.w != size.w || self.size.h != size.h {
             self.size.w = size.w;
@@ -64,10 +79,13 @@ impl TextureStore {
         }
     }
 
+    /// Returns `true` if the object needs to be redrawn to the screen, `false` otherwise.
     pub fn is_invalidated(&self) -> bool {
         self.invalidated
     }
 
+    /// Sets the invalidation flag, forcing the object to be redrawn on the screen if set
+    /// to `true`.
     pub fn set_invalidated(&mut self, state: bool) {
         self.invalidated = state;
     }

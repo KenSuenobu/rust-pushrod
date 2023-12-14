@@ -13,8 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # PushrodEvents
+//!
+//! Events are objects that contain messages that result from a user or system interaction.
+//! They contain different types of messages, such as mouse clicks, coordinates, keyboard
+//! presses, and so on.
+//!
+//! `PushrodEvents` are structured objects that contain these messages wrapped in a `Struct`,
+//! which can be interpreted by other `Widget`s in the `Pushrod` library.
+
 use sdl2::event::Event;
 
+/// These are different types of events that the `Pushrod` library will generate.  Any custom
+/// events should be added here.
 #[derive(Debug, Clone)]
 pub enum PushrodEvent {
     /// Indicates a change in object bounds, exiting of one bound and entering another.  First
@@ -26,6 +37,8 @@ pub enum PushrodEvent {
     SystemEvent(Event),
 }
 
+/// This is a trait that indicates an impl can process events.
 pub trait EventHandler {
+    /// Processes a list of events.
     fn process_event(&self, events: Vec<&PushrodEvent>);
 }

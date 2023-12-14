@@ -13,6 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # WidgetCache
+//!
+//! Contains a cache of the `Widget`s that are members of a display `Window`.  `Widget`s are
+//! stored in the order of creation.
+
 use crate::event::PushrodEvent;
 use crate::geometry::make_rect;
 use crate::widget::{SystemWidget, Widget};
@@ -20,12 +25,15 @@ use sdl2::event::Event;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+/// Contains a list of the `Widget`s in a `Vec`.  The `current_widget_id` indicates the currently
+/// active `Widget` ID under which the mouse pointer has located.
 pub struct WidgetCache {
     cache: Vec<SystemWidget>,
     current_widget_id: u32,
 }
 
 impl WidgetCache {
+    /// Creates a new `WidgetCache`.
     pub fn new() -> Self {
         Self {
             cache: Vec::new(),
@@ -33,11 +41,13 @@ impl WidgetCache {
         }
     }
 
+    /// Adds a `SystemWidget` to the cache, returning its ID after insertion.
     pub fn add(&mut self, widget: SystemWidget) -> i32 {
         self.cache.push(widget);
         (self.cache.len() - 1) as i32
     }
 
+    /// Retrieves an optional reference to the `SystemWidget` object by ID, `None` if not found.
     pub fn get(&self, widget: i32) -> Option<&SystemWidget> {
         if widget > self.cache.len() as i32 {
             None
@@ -46,10 +56,12 @@ impl WidgetCache {
         }
     }
 
+    /// Retrieves the next available `Widget` cache ID.
     pub fn get_current_widget(&self) -> u32 {
         self.current_widget_id
     }
 
+    /// Internal function that sends a `PushrodEvent` to a widget, and captures the returned event.
     fn send_and_receive_event_to_widget(
         &self,
         widget_id: u32,
@@ -72,12 +84,26 @@ impl WidgetCache {
         None
     }
 
-    /// This handles the direct events from the `Engine` class.  Events are not handled by the
-    /// `Engine` via indirection.  They are handled by the `Cache`, so that objects that are
-    /// selected or have focus are handled by this class.
+    /// This handles the direct events from the `Engine`.  Raw events are sent in from the
+    /// `event_pump` from the `SDL2` library, are translated, and are returned as a `PushrodEvent`
+    /// list after being processed.  Any `Widget` that takes in an event, processes it, and generates
+    /// a responding `PushrodEvent` in turn are returned here, so that the `Engine` can take the
+    /// list of events, and pass them on to the `handle_event` function that was registered in the
+    /// runtime loop.
+    ///
+    /// To expand, the following flow is used:
+    ///
+    /// - `SDL2` `Event` comes in
+    /// - `Event` is deconstructed, handled for `Widget`s in the cache, and sent to the `Widget` using
+    ///   `send_and_receive_event_to_widget`
+    /// - `PushrodEvent(s)` returned from the function are then yielded back to the `Engine`.
     pub fn handle_event(&mut self, event: Event) -> Vec<&PushrodEvent> {
+        /// This is our return list of `PushrodEvent` references that are sent back to the
+        /// `Engine` for processing by the `handle_event` function that may or may not have been
+        /// set in the `Engine` at runtime.
         let mut return_vector: Vec<&PushrodEvent> = Vec::new();
 
+        /// Main event match
         match event {
             // Event::MouseButtonDown {
             //     mouse_btn,
@@ -105,6 +131,10 @@ impl WidgetCache {
             //     );
             // }
 
+            /// Handles a `MouseMotion` event, capturing the timestamp, UI window ID, mouse button ID,
+            /// the mouse state (down, up), `X` and `Y` coordinates relative to the `Window`, and the
+            /// `xrel` and `yrel` relative values from the previous and current `x` and `y` mouse
+            /// states.
             Event::MouseMotion {
                 timestamp,
                 window_id,
@@ -119,8 +149,13 @@ impl WidgetCache {
                 let mut y_offset = 0;
                 let previous_widget_id = self.current_widget_id;
 
+                // Retrieve the top-most widget ID located within the bounds of the `X` and `Y`
+                // coordinates of the mouse.
                 self.current_widget_id = self.get_widget_id(x, y);
 
+                // We check the current and previous widget IDs here.  If they have changed, this
+                // means the bounds of the pointer have changed from one `Widget` to another.
+                // In that case, we generate a `BoundsChange` event, which indicates this change.
                 if self.current_widget_id != previous_widget_id {
                     let bounds_event = PushrodEvent::BoundsChange(previous_widget_id, self.current_widget_id);
 
@@ -141,6 +176,8 @@ impl WidgetCache {
                     }
                 }
 
+                // Determine the offset of the X and Y coordinates within the `Widget` where the
+                // mouse is currently located in relation to its bounds.
                 match &self.cache[self.current_widget_id as usize] {
                     SystemWidget::Base(x) => {
                         x_offset = x.get_origin().x;
@@ -159,6 +196,9 @@ impl WidgetCache {
                     }
                 }
 
+                // Wrap the event in a `SystemEvent`, and send it to the `Widget`.  If the `Widget`
+                // handles the event and generates its own, add any additional `Event`s generated
+                // to the list of return events.
                 if let Some(x) = self.send_and_receive_event_to_widget(
                     self.current_widget_id,
                     PushrodEvent::SystemEvent(Event::MouseMotion {
@@ -184,11 +224,16 @@ impl WidgetCache {
         return_vector
     }
 
+    /// This is the main draw loop for all of the `Widget`s in the cache.  Since we are drawing
+    /// to a GPU texture, and not the screen directly, there is no need to compute overlapping
+    /// components.  Just call the draw method on any of the invalidated components, and let the
+    /// GPU blit them to the screen.  Returns `true` if any members of the cache need to be redrawn
+    /// to the screen by flipping the GPU texture cache, `false` indicating no change.
     pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
         let mut invalidated = false;
         let cache_size = self.cache.len();
 
-        // Walk the size of the cache and only draw objects that are invalidated.
+        /// Walk the cache and only draw objects that are invalidated.
         for i in 0..cache_size {
             match &self.cache[i] {
                 SystemWidget::Base(x) => {
@@ -212,6 +257,8 @@ impl WidgetCache {
         invalidated
     }
 
+    /// Internal function that draws the object texture to the GPU.  Clears the invalidation flag
+    /// on the `Widget` once blitted.
     fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>) {
         match &mut self.cache[widget_id as usize] {
             SystemWidget::Base(ref mut widget) => {
@@ -250,10 +297,13 @@ impl WidgetCache {
         }
     }
 
-    /// BUG: Does not currently handle widget Z coordinates, as no Z coordinates currently exist.
-    /// "Widget on Top" is not yet implemented, so get widget ID will return the last object that
-    /// exists in the coordinates given.  Overlapped objects will return the top-most object based
-    /// on the insertion order in the cache.
+    // Returns the top-most `Widget` ID given `x` and `y` coordinates.  Returns 0 if no widget
+    // was found (which indicates the top-level `Widget` ID of the window).
+    //
+    // BUG: Does not currently handle widget Z coordinates, as no Z coordinates currently exist.
+    // "Widget on Top" is not yet implemented, so get widget ID will return the last object that
+    // exists in the coordinates given.  Overlapped objects will return the top-most object based
+    // on the insertion order in the cache.
     fn get_widget_id(&self, x: i32, y: i32) -> u32 {
         let cache_size = self.cache.len();
 

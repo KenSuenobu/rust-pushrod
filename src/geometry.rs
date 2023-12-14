@@ -17,17 +17,23 @@
 //! These are geometric representations of shapes and coordinates in drawing space within
 //! `Pushrod`.  All objects positioned within a window are drawn using these `Struct`s and
 //! method calls.
+//!
+//! `X` and `Y` positions are from the upper left-hand corner of the widget.
 
 use sdl2::rect::Rect;
 
 /// A geometric struct representing `x` and `y` positional coordinates.
 #[derive(Default, Copy, Clone)]
 pub struct Point {
+    /// Horizontal point from left to right in pixels.
     pub x: i32,
+
+    /// Vertical point from top to bottom in pixels.
     pub y: i32,
 }
 
 impl Point {
+    /// Constructor to create a new `Point` object.
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
@@ -41,24 +47,25 @@ pub fn point(x: i32, y: i32) -> Point {
 /// A geometric struct representing the size of an object in `w`idth and `h`eight.
 #[derive(Default, Copy, Clone)]
 pub struct Size {
+    /// Width in pixels.
     pub w: u32,
+
+    /// Height in pixels.
     pub h: u32,
 }
 
 impl Size {
-    pub fn new(width: u32, height: u32) -> Self {
-        Self {
-            w: width,
-            h: height,
-        }
-    }
+    /// Constructor to create a new `Size` object.
+    pub fn new(w: u32, h: u32) -> Self { Self { w, h } }
 
+    /// Computes the amount of memory (in bytes) that a sized object takes in GPU RAM.
+    /// This calculation is the `w`idth x `h`eight multiplied by 4 (4 bytes representing RGBA).
     pub fn get_memory_size(&self) -> u32 {
         self.w * self.h * 4
     }
 }
 
-/// Creates a new size object with its width and height coordinates.
+/// Creates a new size object with its `w`idth and `h`eight constraints.
 pub fn size(w: u32, h: u32) -> Size {
     Size::new(w, h)
 }

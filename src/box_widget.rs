@@ -13,6 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # BoxWidget
+//!
+//! This is a simple system `Widget` that utilizes the `BaseWidget`, and draws on its canvas to
+//! create a border of a specific width and color.
+
 use crate::base_widget::BaseWidget;
 use crate::event::PushrodEvent;
 use crate::geometry::{origin_point, make_rect, Point, Size};
@@ -39,7 +44,7 @@ impl Widget for BoxWidget {
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
-        if self.invalidated {
+        if self.invalidated && self.border_width > 0 {
             self.texture.create_or_resize_texture(c, self.size);
 
             let base_widget_texture = self.base_widget.draw(c).unwrap();
@@ -79,6 +84,8 @@ impl Widget for BoxWidget {
 }
 
 impl BoxWidget {
+    /// Creates a new `BoxWidget` based on its point of origin, size, border color, and border width.
+    /// Any borders with a width of 0 will not be drawn.
     pub fn new(origin: Point, size: Size, border_color: Color, border_width: u8) -> Self {
         Self {
             origin: origin.clone(),
@@ -91,25 +98,25 @@ impl BoxWidget {
         }
     }
 
-    /// Sets the border width.
-    fn set_border_width(&mut self, width: u8) {
+    /// Sets the border width in pixels.
+    pub fn set_border_width(&mut self, width: u8) {
         self.border_width = width;
         self.set_invalidated(true);
     }
 
     /// Sets the border color, which can be a `Color::RGB` or `Color::RGBA`.
-    fn set_border_color(&mut self, color: Color) {
+    pub fn set_border_color(&mut self, color: Color) {
         self.border_color = color;
         self.set_invalidated(true);
     }
 
-    /// Retrieves the border width.
-    fn get_border_width(&self) -> u8 {
+    /// Retrieves the border width in pixels.
+    pub fn get_border_width(&self) -> u8 {
         self.border_width
     }
 
     /// Retrieves the border color.
-    fn get_border_color(&self) -> Color {
+    pub fn get_border_color(&self) -> Color {
         self.border_color
     }
 }
