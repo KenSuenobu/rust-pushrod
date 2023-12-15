@@ -13,6 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # Widget
+//!
+//! A UI element that exists in a window, whether visible or otherwise, that consumes and
+//! alternatively generates events.
+
 use crate::base_widget::BaseWidget;
 use crate::box_widget::BoxWidget;
 use crate::event::PushrodEvent;
