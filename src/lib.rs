@@ -39,3 +39,5 @@ pub mod event;
 pub mod geometry;
 pub mod texture;
 pub mod widget;
+pub mod font;
+mod text_widget;
