@@ -40,4 +40,4 @@ pub mod geometry;
 pub mod texture;
 pub mod widget;
 pub mod font;
-mod text_widget;
+pub mod text_widget;

@@ -88,8 +88,8 @@ impl Engine {
 
     /// The main run loop.
     pub fn run(&mut self, sdl: Sdl, window: Window) {
-        /// Initializes the canvas, creating a textured canvas against which GPU textures will be
-        /// used, specifying hardware acceleration.
+        // Initializes the canvas, creating a textured canvas against which GPU textures will be
+        // used, specifying hardware acceleration.
         let mut canvas = window
             .into_canvas()
             .target_texture()
@@ -97,13 +97,13 @@ impl Engine {
             .build()
             .unwrap();
 
-        /// Sets the screen color to all white, clears and presents the canvas to display.
+        // Sets the screen color to all white, clears and presents the canvas to display.
         canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
         canvas.clear();
         canvas.present();
 
-        /// Attaches to the `SDL` library event pump, against which all windowed events are
-        /// sent.  Also determines the amount of time to wait between frames.
+        // Attaches to the `SDL` library event pump, against which all windowed events are
+        // sent.  Also determines the amount of time to wait between frames.
         let mut event_pump = sdl.event_pump().unwrap();
         let fps_as_ms = (1000.0 / self.frame_rate as f64) as u128;
 
@@ -149,14 +149,14 @@ impl Engine {
                 canvas.present();
             }
 
-            /// This obeys thread sleep time.
+            // This obeys thread sleep time.
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_millis();
 
-            /// Sleep a determinant amount of milliseconds to generate enough of a delay for the
-            /// frames per second to be honored, so no screen tearing occurs (for vsync)
+            // Sleep a determinant amount of milliseconds to generate enough of a delay for the
+            // frames per second to be honored, so no screen tearing occurs (for vsync)
             if now - start < fps_as_ms {
                 let diff = fps_as_ms - (now - start);
 

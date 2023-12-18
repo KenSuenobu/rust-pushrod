@@ -98,12 +98,12 @@ impl WidgetCache {
     ///   `send_and_receive_event_to_widget`
     /// - `PushrodEvent(s)` returned from the function are then yielded back to the `Engine`.
     pub fn handle_event(&mut self, event: Event) -> Vec<&PushrodEvent> {
-        /// This is our return list of `PushrodEvent` references that are sent back to the
-        /// `Engine` for processing by the `handle_event` function that may or may not have been
-        /// set in the `Engine` at runtime.
+        // This is our return list of `PushrodEvent` references that are sent back to the
+        // `Engine` for processing by the `handle_event` function that may or may not have been
+        // set in the `Engine` at runtime.
         let mut return_vector: Vec<&PushrodEvent> = Vec::new();
 
-        /// Main event match
+        // Main event match
         match event {
             // Event::MouseButtonDown {
             //     mouse_btn,
@@ -131,10 +131,10 @@ impl WidgetCache {
             //     );
             // }
 
-            /// Handles a `MouseMotion` event, capturing the timestamp, UI window ID, mouse button ID,
-            /// the mouse state (down, up), `X` and `Y` coordinates relative to the `Window`, and the
-            /// `xrel` and `yrel` relative values from the previous and current `x` and `y` mouse
-            /// states.
+            // Handles a `MouseMotion` event, capturing the timestamp, UI window ID, mouse button ID,
+            // the mouse state (down, up), `X` and `Y` coordinates relative to the `Window`, and the
+            // `xrel` and `yrel` relative values from the previous and current `x` and `y` mouse
+            // states.
             Event::MouseMotion {
                 timestamp,
                 window_id,
@@ -233,7 +233,7 @@ impl WidgetCache {
         let mut invalidated = false;
         let cache_size = self.cache.len();
 
-        /// Walk the cache and only draw objects that are invalidated.
+        // Walk the cache and only draw objects that are invalidated.
         for i in 0..cache_size {
             match &self.cache[i] {
                 SystemWidget::Base(x) => {
