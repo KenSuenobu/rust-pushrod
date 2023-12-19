@@ -18,6 +18,7 @@ use sdl2::render::{Canvas, Texture};
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
 use std::any::Any;
+use sdl2::rect::Rect;
 use crate::base_widget::BaseWidget;
 use crate::event::PushrodEvent;
 use crate::font::FontCache;
@@ -41,7 +42,7 @@ pub struct TextWidget {
     base_widget: BaseWidget,
     font_name: String,
     font_style: FontStyle,
-    font_size: u32,
+    font_size: u16,
     font_color: Color,
     justification: TextJustify,
     msg: String,
@@ -52,36 +53,34 @@ impl Widget for TextWidget {
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {
-            // self.texture.create_or_resize_texture(c, self.size);
-            //
-            // let base_widget_texture = self.base_widget.draw(c).unwrap();
-            // let border_color = self.border_color;
-            // let border_width = self.border_width;
-            // let widget_size = self.size;
-            // let widget_width = self.size.w;
-            // let widget_height = self.size.h;
-            //
-            // c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-            //     texture
-            //         .copy(
-            //             base_widget_texture,
-            //             None,
-            //             make_rect(origin_point(), widget_size),
-            //         )
-            //         .unwrap();
-            //
-            //     texture.set_draw_color(border_color);
-            //
-            //     for i in 0..border_width as i32 {
-            //         let computed_width = (widget_width as u32 - (i as u32 * 2u32)) as u32;
-            //         let computed_height = (widget_height as u32 - (i as u32 * 2u32)) as u32;
-            //
-            //         texture
-            //             .draw_rect(Rect::new(i, i, computed_width, computed_height))
-            //             .unwrap();
-            //     }
-            // })
-            //     .unwrap();
+            self.texture.create_or_resize_texture(c, self.size);
+
+            let base_widget_texture = self.base_widget.draw(c).unwrap();
+            let widget_width = self.size.w;
+            let ( font_texture, font_width, font_height ) = self.font_cache.render_text(
+                c, self.font_name.clone(), self.font_size, self.font_style, self.font_color,
+                self.msg.clone(), widget_width
+            );
+            let texture_y = 0;
+            let texture_x = match self.justification {
+                TextJustify::Left => 0,
+                TextJustify::Right => self.size.w as i32 - font_width as i32,
+                TextJustify::Center => (self.size.w as i32 - font_width as i32) / 2,
+            };
+
+            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
+                texture.set_draw_color(self.base_widget.get_color());
+                texture.clear();
+
+                texture
+                    .copy(
+                        &font_texture,
+                        None,
+                        Rect::new(texture_x as i32, texture_y, font_width, font_height),
+                    )
+                    .unwrap();
+            })
+            .unwrap();
         }
 
         self.texture.get_optional_ref()
@@ -96,7 +95,7 @@ impl TextWidget {
         size: Size,
         font_name: String,
         font_style: FontStyle,
-        font_size: u32,
+        font_size: u16,
         font_color: Color,
         justification: TextJustify,
         msg: String,
