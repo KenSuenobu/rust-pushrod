@@ -250,7 +250,9 @@ impl WidgetCache {
                     }
                 }
 
-                _unused => { }
+                _unused => {
+                    panic!("[WidgetCache::draw_loop] I'm sent a widget that I can't draw yet! (needs to be implemented in 'draw_loop')");
+                }
             }
         }
 
