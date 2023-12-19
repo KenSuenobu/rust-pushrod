@@ -22,7 +22,7 @@ use sdl2::rect::Rect;
 use crate::base_widget::BaseWidget;
 use crate::event::PushrodEvent;
 use crate::font::FontCache;
-use crate::geometry::{origin_point, Point, Size};
+use crate::geometry::{make_rect, origin_point, Point, point, rect, Size};
 use crate::texture::TextureStore;
 use crate::impl_widget_base;
 use crate::widget::Widget;
@@ -69,9 +69,17 @@ impl Widget for TextWidget {
             };
 
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                texture.set_draw_color(self.base_widget.get_color());
-                texture.clear();
+                texture
+                    .copy(
+                        &base_widget_texture,
+                        None,
+                        rect(0, 0, self.size.w, self.size.h)
+                    )
+                    .unwrap();
+            })
+                .unwrap();
 
+            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture
                     .copy(
                         &font_texture,
@@ -116,10 +124,16 @@ impl TextWidget {
         }
     }
 
+    pub fn set_font_color(&mut self, color: Color) {
+        self.font_color = color;
+    }
+
     pub fn set_text(&mut self, msg: String) {
         self.msg = msg;
         self.set_invalidated(true);
     }
+
+    pub fn get_font_color(&self) -> Color { self.font_color }
 
     pub fn get_text(&self) -> String {
         self.msg.clone()

@@ -27,6 +27,7 @@ use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
+use crate::text_widget::TextWidget;
 
 /// `Widget` is a drawable, interactive object that is presented in a `Window`.
 ///
@@ -109,6 +110,10 @@ pub enum SystemWidget {
 
     /// Stores a `BoxWidget`, an object that contains `BaseWidget` and draws a border with a width and color.
     Box(Box<BoxWidget>),
+
+    /// Stores a `TextWidget`, an object that contains `BaseWidget` and renders text with a specific font name,
+    /// font size, text color, and text.
+    Text(Box<TextWidget>),
 
     /// Stores a custom `Widget`.
     Custom(Box<dyn Widget>),
