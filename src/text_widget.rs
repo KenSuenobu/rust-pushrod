@@ -22,7 +22,7 @@ use sdl2::rect::Rect;
 use crate::base_widget::BaseWidget;
 use crate::event::PushrodEvent;
 use crate::font::FontCache;
-use crate::geometry::{make_rect, origin_point, Point, point, rect, Size};
+use crate::geometry::{origin_point, Point, rect, Size};
 use crate::texture::TextureStore;
 use crate::impl_widget_base;
 use crate::widget::Widget;
@@ -49,7 +49,7 @@ pub struct TextWidget {
 }
 
 impl Widget for TextWidget {
-    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
+    fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated {

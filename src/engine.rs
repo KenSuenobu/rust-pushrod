@@ -86,6 +86,11 @@ impl Engine {
         self.event_handler = Some(handler);
     }
 
+    /// Returns the current `Size` of the managed window.
+    pub fn get_size(&self) -> Size {
+        self.size
+    }
+
     /// The main run loop.
     pub fn run(&mut self, sdl: Sdl, window: Window) {
         // Initializes the canvas, creating a textured canvas against which GPU textures will be
@@ -113,6 +118,7 @@ impl Engine {
                 .unwrap()
                 .as_millis();
 
+            // Consume and process events first.
             for event in event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => {
@@ -138,13 +144,11 @@ impl Engine {
             // call the event_handler and pass each event one-by-one so it can be processed
             // in the order in which the events were generated.
 
-            // self.widget_cache.tick(self.layout_cache.get_layout_cache());
-            // self.layout_cache
-            //     .do_layout(self.widget_cache.borrow_cache());
-
+            // Blit the canvas.
             canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
             canvas.clear();
 
+            // If draw_loop returns a true, indicating invalidation, swap the canvas buffer.
             if self.widget_cache.draw_loop(&mut canvas) {
                 canvas.present();
             }

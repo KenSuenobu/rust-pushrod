@@ -94,7 +94,7 @@ impl Widget for BaseWidget {
 
     /// Handles any `PushrodEvent` objects.  Since this is a `BaseWidget`, it does not handle or
     /// generate any events.
-    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
+    fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
     /// Draws the object.
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
@@ -102,7 +102,6 @@ impl Widget for BaseWidget {
             self.texture.create_or_resize_texture(c, self.size);
 
             let base_color = self.base_color;
-            let size = self.size;
 
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
                 texture.set_draw_color(base_color);

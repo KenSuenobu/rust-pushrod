@@ -76,12 +76,14 @@ impl WidgetCache {
                 return x.handle_event(event);
             }
 
+            SystemWidget::Text(x) => {
+                return x.handle_event(event);
+            }
+
             _unused => {
                 panic!("[WidgetCache::send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
             }
         }
-
-        None
     }
 
     /// This handles the direct events from the `Engine`.  Raw events are sent in from the

@@ -41,7 +41,7 @@ pub struct BoxWidget {
 }
 
 impl Widget for BoxWidget {
-    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
+    fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
     fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
         if self.invalidated && self.border_width > 0 {
