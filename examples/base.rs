@@ -23,7 +23,7 @@ pub fn main() {
 
     eprintln!("Added base widget ID: {}", base_widget_id);
 
-    let mut text_widget = TextWidget::new(point(24, 24), size(300, 40),
+    let text_widget = TextWidget::new(point(24, 24), size(300, 40),
         String::from("assets/OpenSans-Regular.ttf"), sdl2::ttf::FontStyle::NORMAL, 28,
         Color::BLACK, TextJustify::Left, String::from("Welcome to Pushrod"),
     );
