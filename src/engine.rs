@@ -151,11 +151,9 @@ impl Engine {
             canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
             canvas.clear();
 
-            // Borrow the font cache so that it can be used by the draw loop.
-            let font_cache = &mut self.font_cache;
-
-            // If draw_loop returns a true, indicating invalidation, swap the canvas buffer.
-            if self.widget_cache.draw_loop(&mut canvas, font_cache) {
+            // If draw_loop returns a true, indicating invalidation, swap the canvas buffer.  Borrows the font cache
+            // so that a widget can render text if required.
+            if self.widget_cache.draw_loop(&mut canvas, &mut self.font_cache) {
                 canvas.present();
             }
 
