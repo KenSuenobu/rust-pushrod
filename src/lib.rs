@@ -41,3 +41,4 @@ pub mod texture;
 pub mod widget;
 pub mod font;
 pub mod text_widget;
+pub mod button_widget;

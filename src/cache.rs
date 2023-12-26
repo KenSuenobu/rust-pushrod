@@ -24,6 +24,7 @@ use crate::widget::{SystemWidget, Widget};
 use sdl2::event::Event;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
+use crate::font::FontCache;
 
 /// Contains a list of the `Widget`s in a `Vec`.  The `current_widget_id` indicates the currently
 /// active `Widget` ID under which the mouse pointer has located.
@@ -227,7 +228,7 @@ impl WidgetCache {
     /// components.  Just call the draw method on any of the invalidated components, and let the
     /// GPU blit them to the screen.  Returns `true` if any members of the cache need to be redrawn
     /// to the screen by flipping the GPU texture cache, `false` indicating no change.
-    pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
+    pub fn draw_loop(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> bool {
         let mut invalidated = false;
         let cache_size = self.cache.len();
 
@@ -237,21 +238,21 @@ impl WidgetCache {
                 SystemWidget::Base(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
-                        self.draw(i as u32, c);
+                        self.draw(i as u32, c, fc);
                     }
                 }
 
                 SystemWidget::Box(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
-                        self.draw(i as u32, c);
+                        self.draw(i as u32, c, fc);
                     }
                 }
 
                 SystemWidget::Text(x) => {
                     if x.is_invalidated() {
                         invalidated = true;
-                        self.draw(i as u32, c);
+                        self.draw(i as u32, c, fc);
                     }
                 }
 
@@ -266,13 +267,13 @@ impl WidgetCache {
 
     /// Internal function that draws the object texture to the GPU.  Clears the invalidation flag
     /// on the `Widget` once blitted.
-    fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>) {
+    fn draw(&mut self, widget_id: u32, c: &mut Canvas<Window>, fc: &mut FontCache) {
         match &mut self.cache[widget_id as usize] {
             SystemWidget::Base(ref mut widget) => {
                 let widget_origin = widget.get_origin().clone();
                 let widget_size = widget.get_size().clone();
 
-                match widget.draw(c) {
+                match widget.draw(c, fc) {
                     Some(texture) => c
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
@@ -287,7 +288,7 @@ impl WidgetCache {
                 let widget_origin = widget.get_origin().clone();
                 let widget_size = widget.get_size().clone();
 
-                match widget.draw(c) {
+                match widget.draw(c, fc) {
                     Some(texture) => c
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
@@ -302,7 +303,7 @@ impl WidgetCache {
                 let widget_origin = widget.get_origin().clone();
                 let widget_size = widget.get_size().clone();
 
-                match widget.draw(c) {
+                match widget.draw(c, fc) {
                     Some(texture) => c
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),

@@ -4,6 +4,8 @@ use pushrod::engine::Engine;
 use pushrod::geometry::{point, size};
 use pushrod::widget::{SystemWidget, Widget};
 use sdl2::pixels::Color;
+use sdl2::ttf::FontStyle;
+use pushrod::button_widget::ButtonWidget;
 use pushrod::text_widget::{TextJustify, TextWidget};
 
 pub fn main() {
@@ -50,10 +52,12 @@ pub fn main() {
 
     eprintln!("Added box widget ID: {}", box_widget_id3);
 
-    // let mut button_widget1 = ButtonWidget::new(point(40, 160), size(140, 60));
-    // let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button_widget1)));
-    //
-    // eprintln!("Added button widget ID: {}", button_widget_id1);
+    let mut button1_widget = ButtonWidget::new(point(40, 160), size(120, 20),
+        String::from("assets/OpenSans-Regular.ttf"), FontStyle::NORMAL, 14, Color::BLACK,
+        TextJustify::Center, String::from("Click me"), 2);
+    let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button1_widget)));
+
+    eprintln!("Added button widget ID: {}", button_widget_id1);
 
     // let mut new_base_widget = BaseWidget::new(make_points(100, 100), make_size(600, 400));
     //

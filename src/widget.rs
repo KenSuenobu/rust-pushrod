@@ -27,6 +27,8 @@ use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
+use crate::button_widget::ButtonWidget;
+use crate::font::FontCache;
 use crate::text_widget::TextWidget;
 
 /// `Widget` is a drawable, interactive object that is presented in a `Window`.
@@ -100,7 +102,7 @@ pub trait Widget {
     /// All drawing is always done from an origin point, as the actual `Widget`'s `get_origin`
     /// point is indicated to the `Pushrod` system as to where the `Widget` should be drawn in
     /// the user viewable space (canvas).
-    fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture>;
+    fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture>;
 }
 
 /// System Widgets.
@@ -114,6 +116,10 @@ pub enum SystemWidget {
     /// Stores a `TextWidget`, an object that contains `BaseWidget` and renders text with a specific font name,
     /// font size, text color, and text.
     Text(Box<TextWidget>),
+
+    /// Stores a `ButtonWidget`, an object that contains a `BaseWidget` and a `TextWidget`, drawing a black border,
+    /// around the frame of the button, and a 3D-like appearance within its specified border width.
+    Button(Box<ButtonWidget>),
 
     /// Stores a custom `Widget`.
     Custom(Box<dyn Widget>),

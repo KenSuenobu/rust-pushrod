@@ -39,6 +39,7 @@ use sdl2::video::Window;
 use sdl2::Sdl;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use crate::font::FontCache;
 
 /// Engine structure.  Contains the desired display frame rate, size of the UI window, a
 /// running flag, the `WidgetCache` for the tree of `Widget`s in the UI, and an optional event
@@ -48,6 +49,7 @@ pub struct Engine {
     size: Size,
     running: bool,
     widget_cache: WidgetCache,
+    font_cache: FontCache,
     event_handler: Option<Box<dyn EventHandler>>,
 }
 
@@ -67,6 +69,7 @@ impl Engine {
             size,
             running: true,
             widget_cache,
+            font_cache: FontCache::default(),
             event_handler: None,
         }
     }
@@ -148,8 +151,11 @@ impl Engine {
             canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
             canvas.clear();
 
+            // Borrow the font cache so that it can be used by the draw loop.
+            let font_cache = &mut self.font_cache;
+
             // If draw_loop returns a true, indicating invalidation, swap the canvas buffer.
-            if self.widget_cache.draw_loop(&mut canvas) {
+            if self.widget_cache.draw_loop(&mut canvas, font_cache) {
                 canvas.present();
             }
 

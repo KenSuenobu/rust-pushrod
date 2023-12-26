@@ -26,6 +26,7 @@ use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
+use crate::font::FontCache;
 
 /// BaseWidget structure containing the point of origin, size, base color, an invalidation flag,
 /// and texture store for drawing.
@@ -97,7 +98,7 @@ impl Widget for BaseWidget {
     fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
     /// Draws the object.
-    fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
+    fn draw(&mut self, c: &mut Canvas<Window>, _fc: &mut FontCache) -> Option<&Texture> {
         if self.invalidated {
             self.texture.create_or_resize_texture(c, self.size);
 

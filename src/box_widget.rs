@@ -28,6 +28,7 @@ use sdl2::rect::Rect;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
+use crate::font::FontCache;
 use crate::impl_widget_base;
 
 pub struct BoxWidget {
@@ -43,11 +44,11 @@ pub struct BoxWidget {
 impl Widget for BoxWidget {
     fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
 
-    fn draw(&mut self, c: &mut Canvas<Window>) -> Option<&Texture> {
+    fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture> {
         if self.invalidated && self.border_width > 0 {
             self.texture.create_or_resize_texture(c, self.size);
 
-            let base_widget_texture = self.base_widget.draw(c).unwrap();
+            let base_widget_texture = self.base_widget.draw(c, fc).unwrap();
             let border_color = self.border_color;
             let border_width = self.border_width;
             let widget_size = self.size;
