@@ -33,6 +33,11 @@ pub enum PushrodEvent {
     /// the `Widget` that gained bounds.
     BoundsChange(u32, u32),
 
+    /// Indicates a `Widget` detected a click event inside its bounds.  The first argument is
+    /// the ID of the `Widget` that was clicked, second argument is the number of clicks that
+    /// the `Widget` received.
+    Clicked(u32, u8),
+
     /// Indicates an SDL-based Event occurred.
     SystemEvent(Event),
 }

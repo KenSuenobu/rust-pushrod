@@ -54,3 +54,8 @@ export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
 And you should be able to not only build the application, but you should be able to run the
 examples in the examples directory.
 
+### State of the app
+
+This is the current state of the example app.
+
+![App image](examples/example-app.png)
