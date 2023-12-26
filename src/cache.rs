@@ -191,6 +191,11 @@ impl WidgetCache {
                         y_offset = x.get_origin().y;
                     }
 
+                    SystemWidget::Text(x) => {
+                        x_offset = x.get_origin().x;
+                        y_offset = x.get_origin().y;
+                    }
+
                     _unused => {
                         panic!(
                             "[WidgetCache::handle_event] I am trying to handle an event with a widget that I can't handle yet!"
@@ -243,6 +248,13 @@ impl WidgetCache {
                     }
                 }
 
+                SystemWidget::Text(x) => {
+                    if x.is_invalidated() {
+                        invalidated = true;
+                        self.draw(i as u32, c);
+                    }
+                }
+
                 _unused => {
                     panic!("[WidgetCache::draw_loop] I'm sent a widget that I can't draw yet! (needs to be implemented in 'draw_loop')");
                 }
@@ -272,6 +284,21 @@ impl WidgetCache {
             }
 
             SystemWidget::Box(ref mut widget) => {
+                let widget_origin = widget.get_origin().clone();
+                let widget_size = widget.get_size().clone();
+
+                match widget.draw(c) {
+                    Some(texture) => c
+                        .copy(texture, None, make_rect(widget_origin, widget_size))
+                        .unwrap(),
+
+                    None => panic!("[WidgetCache::draw] BOX: No texture presented."),
+                };
+
+                widget.set_invalidated(false);
+            }
+
+            SystemWidget::Text(ref mut widget) => {
                 let widget_origin = widget.get_origin().clone();
                 let widget_size = widget.get_size().clone();
 
@@ -325,7 +352,15 @@ impl WidgetCache {
                     end_y = start_y + x.get_size().h as i32;
                 }
 
+                SystemWidget::Text(x) => {
+                    start_x = x.get_origin().x;
+                    start_y = x.get_origin().y;
+                    end_x = start_x + x.get_size().w as i32;
+                    end_y = start_y + x.get_size().h as i32;
+                }
+
                 _default => {
+                    panic!("[WidgetCache::get_widget_id] Unable to get widget by ID {}, cannot handle yet.", i);
                     // Do nothing.
                 }
             }
