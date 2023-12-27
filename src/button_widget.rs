@@ -49,7 +49,12 @@ impl Widget for ButtonWidget {
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
             PushrodEvent::SystemEvent(x) => {
-                eprintln!("System Event: {:?}", x);
+                match &x {
+                    _default => {
+                        eprintln!("[ButtonWidget] Wrapped SystemEvent: {:?}", &x);
+                    }
+                }
+
             }
 
             _default => {}
