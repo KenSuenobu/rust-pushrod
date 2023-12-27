@@ -46,7 +46,17 @@ pub struct ButtonWidget {
 }
 
 impl Widget for ButtonWidget {
-    fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
+    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
+        match event {
+            PushrodEvent::SystemEvent(x) => {
+                eprintln!("System Event: {:?}", x);
+            }
+
+            _default => {}
+        }
+
+        None
+    }
 
     fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture> {
         if self.invalidated && self.border_width > 0 {
@@ -129,6 +139,7 @@ impl ButtonWidget {
         self.border_width
     }
 
+    /// Changes the text displayed inside the button.
     pub fn set_text(&mut self, msg: String) {
         self.text_widget.set_text(msg.clone());
     }

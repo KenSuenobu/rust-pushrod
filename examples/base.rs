@@ -25,7 +25,7 @@ pub fn main() {
 
     eprintln!("Added base widget ID: {}", base_widget_id);
 
-    let mut text_widget = TextWidget::new(point(24, 24), size(180, 18),
+    let mut text_widget = TextWidget::new(point(40, 30), size(180, 18),
         String::from("assets/OpenSans-Regular.ttf"), sdl2::ttf::FontStyle::NORMAL, 14,
         Color::WHITE, TextJustify::Left, String::from("Welcome to Pushrod!"),
     );
@@ -34,25 +34,25 @@ pub fn main() {
 
     eprintln!("Added text widget ID: {}", text_widget_id1);
 
-    let mut box_widget1 = BoxWidget::new(point(40, 80), size(100, 100), Color::BLUE, 3);
+    let mut box_widget1 = BoxWidget::new(point(40, 60), size(100, 100), Color::BLUE, 3);
     box_widget1.set_color(Color::CYAN);
     let box_widget_id1 = engine.add_widget(SystemWidget::Box(Box::new(box_widget1)));
 
     eprintln!("Added box widget ID: {}", box_widget_id1);
 
-    let mut box_widget2 = BoxWidget::new(point(180, 80), size(100, 100), Color::GREEN, 5);
+    let mut box_widget2 = BoxWidget::new(point(180, 60), size(100, 100), Color::GREEN, 5);
     box_widget2.set_color(Color::GRAY);
     let box_widget_id2 = engine.add_widget(SystemWidget::Box(Box::new(box_widget2)));
 
     eprintln!("Added box widget ID: {}", box_widget_id2);
 
-    let mut box_widget3 = BoxWidget::new(point(320, 80), size(100, 100), Color::RED, 10);
+    let mut box_widget3 = BoxWidget::new(point(320, 60), size(100, 100), Color::RED, 10);
     box_widget3.set_color(Color::MAGENTA);
     let box_widget_id3 = engine.add_widget(SystemWidget::Box(Box::new(box_widget3)));
 
     eprintln!("Added box widget ID: {}", box_widget_id3);
 
-    let mut button1_widget = ButtonWidget::new(point(40, 160), size(120, 20),
+    let mut button1_widget = ButtonWidget::new(point(40, 180), size(120, 20),
         String::from("assets/OpenSans-Regular.ttf"), FontStyle::NORMAL, 14, Color::BLACK,
         TextJustify::Center, String::from("Click me"), 2);
     let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button1_widget)));

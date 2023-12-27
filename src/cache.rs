@@ -81,6 +81,10 @@ impl WidgetCache {
                 return x.handle_event(event);
             }
 
+            SystemWidget::Button(x) => {
+                return x.handle_event(event);
+            }
+
             _unused => {
                 panic!("[WidgetCache::send_and_receive_event_to_widget] I am trying to handle an event with a widget that I can't handle yet!");
             }
@@ -108,31 +112,43 @@ impl WidgetCache {
 
         // Main event match
         match event {
-            // Event::MouseButtonDown {
-            //     mouse_btn,
-            //     clicks,
-            //     x,
-            //     y,
-            //     ..
-            // } => {
-            //     eprintln!(
-            //         "[WidgetCache::handle_event] mouse down: button={} clicks={} x={} y={}",
-            //         mouse_btn as i32, clicks, x, y
-            //     );
-            // }
-            //
-            // Event::MouseButtonUp {
-            //     mouse_btn,
-            //     clicks,
-            //     x,
-            //     y,
-            //     ..
-            // } => {
-            //     eprintln!(
-            //         "[WidgetCache::handle_event] mouse up: button={} clicks={} x={} y={}",
-            //         mouse_btn as i32, clicks, x, y
-            //     );
-            // }
+            Event::MouseButtonDown {
+                mouse_btn,
+                clicks,
+                x,
+                y,
+                ..
+            } => {
+                self.current_widget_id = self.get_widget_id(x, y);
+
+                if let Some(x) = self.send_and_receive_event_to_widget(
+                    self.current_widget_id,
+                    PushrodEvent::SystemEvent(event.clone()),
+                ) {
+                    for i in 0..x.len() {
+                        return_vector.push(&x[i]);
+                    }
+                }
+            }
+
+            Event::MouseButtonUp {
+                mouse_btn,
+                clicks,
+                x,
+                y,
+                ..
+            } => {
+                self.current_widget_id = self.get_widget_id(x, y);
+
+                if let Some(x) = self.send_and_receive_event_to_widget(
+                    self.current_widget_id,
+                    PushrodEvent::SystemEvent(event.clone()),
+                ) {
+                    for i in 0..x.len() {
+                        return_vector.push(&x[i]);
+                    }
+                }
+            }
 
             // Handles a `MouseMotion` event, capturing the timestamp, UI window ID, mouse button ID,
             // the mouse state (down, up), `X` and `Y` coordinates relative to the `Window`, and the
@@ -197,6 +213,11 @@ impl WidgetCache {
                         y_offset = x.get_origin().y;
                     }
 
+                    SystemWidget::Button(x) => {
+                        x_offset = x.get_origin().x;
+                        y_offset = x.get_origin().y;
+                    }
+
                     _unused => {
                         panic!(
                             "[WidgetCache::handle_event] I am trying to handle an event with a widget that I can't handle yet!"
@@ -256,6 +277,13 @@ impl WidgetCache {
                     }
                 }
 
+                SystemWidget::Button(x) => {
+                    if x.is_invalidated() {
+                        invalidated = true;
+                        self.draw(i as u32, c, fc);
+                    }
+                }
+
                 _unused => {
                     panic!("[WidgetCache::draw_loop] I'm sent a widget that I can't draw yet! (needs to be implemented in 'draw_loop')");
                 }
@@ -308,7 +336,22 @@ impl WidgetCache {
                         .copy(texture, None, make_rect(widget_origin, widget_size))
                         .unwrap(),
 
-                    None => panic!("[WidgetCache::draw] BOX: No texture presented."),
+                    None => panic!("[WidgetCache::draw] TEXT: No texture presented."),
+                };
+
+                widget.set_invalidated(false);
+            }
+
+            SystemWidget::Button(ref mut widget) => {
+                let widget_origin = widget.get_origin().clone();
+                let widget_size = widget.get_size().clone();
+
+                match widget.draw(c, fc) {
+                    Some(texture) => c
+                        .copy(texture, None, make_rect(widget_origin, widget_size))
+                        .unwrap(),
+
+                    None => panic!("[WidgetCache::draw] BUTTON: No texture presented."),
                 };
 
                 widget.set_invalidated(false);
@@ -354,6 +397,13 @@ impl WidgetCache {
                 }
 
                 SystemWidget::Text(x) => {
+                    start_x = x.get_origin().x;
+                    start_y = x.get_origin().y;
+                    end_x = start_x + x.get_size().w as i32;
+                    end_y = start_y + x.get_size().h as i32;
+                }
+
+                SystemWidget::Button(x) => {
                     start_x = x.get_origin().x;
                     start_y = x.get_origin().y;
                     end_x = start_x + x.get_size().w as i32;
