@@ -36,7 +36,7 @@ use crate::widget::Widget;
 use crate::impl_widget_base;
 
 pub struct ButtonWidget {
-    id: u32,
+    id: i32,
     origin: Point,
     size: Size,
     invalidated: bool,
@@ -49,10 +49,10 @@ pub struct ButtonWidget {
 impl Widget for ButtonWidget {
     fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
         match event {
-            PushrodEvent::SystemEvent(x) => {
+            PushrodEvent::SystemEvent(widget_id, x) => {
                 match &x {
                     _default => {
-                        eprintln!("[ButtonWidget] Wrapped SystemEvent: {:?}", &x);
+                        eprintln!("[ButtonWidget] Wrapped SystemEvent: Widget={:?} {:?}", widget_id, &x);
                     }
                 }
 

@@ -38,8 +38,9 @@ pub enum PushrodEvent {
     /// the `Widget` received.
     Clicked(u32, u8),
 
-    /// Indicates an SDL-based Event occurred.
-    SystemEvent(Event),
+    /// Indicates an SDL-based Event occurred.  The first argument is the ID of the widget that
+    /// was found, and the second is the event that occurred.
+    SystemEvent(u32, Event),
 }
 
 /// This is a trait that indicates an impl can process events.

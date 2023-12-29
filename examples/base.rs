@@ -55,6 +55,7 @@ pub fn main() {
     let mut button1_widget = ButtonWidget::new(point(40, 180), size(120, 20),
         String::from("assets/OpenSans-Regular.ttf"), FontStyle::NORMAL, 14, Color::BLACK,
         TextJustify::Center, String::from("Click me"), 2);
+    button1_widget.set_id(1);
     let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button1_widget)));
 
     eprintln!("Added button widget ID: {}", button_widget_id1);

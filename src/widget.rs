@@ -27,7 +27,6 @@ use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use std::any::Any;
-use sdl2::sys::__uint_least32_t;
 use crate::button_widget::ButtonWidget;
 use crate::font::FontCache;
 use crate::text_widget::TextWidget;
@@ -39,10 +38,10 @@ use crate::text_widget::TextWidget;
 /// so on.
 pub trait Widget {
     /// Returns the ID of the `Widget`, assigned by the `Engine`.
-    fn get_id(&self) -> u32;
+    fn get_id(&self) -> i32;
 
     /// Sets the ID of the `Widget`
-    fn set_id(&mut self, id: u32);
+    fn set_id(&mut self, id: i32);
 
     /// Returns the pure form of the object for casting, if required.  This is used internally by
     /// the `Pushrod` event system, and should always just return `self`.  (See #impl_widget_base
@@ -171,7 +170,7 @@ macro_rules! impl_widget_base {
         fn as_any(&self) -> &dyn Any { self }
 
         /// Default implementation, returns the ID of this `Widget`.
-        fn get_id(&self) -> u32 { self.id }
+        fn get_id(&self) -> i32 { self.id }
 
         /// Default implementation, returns the `Point` of origin of this `Widget`.
         fn get_origin(&self) -> &Point { &self.origin }
@@ -183,7 +182,7 @@ macro_rules! impl_widget_base {
         fn get_color(&self) -> Color { self.base_widget.get_color() }
 
         /// Default implementation, sets the `ID` of this `Widget`.
-        fn set_id(&mut self, id: u32) { self.id = id; }
+        fn set_id(&mut self, id: i32) { self.id = id; }
 
         /// Default implementation, sets the `Point` of origin of this object.
         fn set_origin(&mut self, point: Point) { self.origin = point; }

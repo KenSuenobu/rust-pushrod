@@ -39,7 +39,7 @@ pub enum TextJustify {
 }
 
 pub struct TextWidget {
-    id: u32,
+    id: i32,
     origin: Point,
     size: Size,
     invalidated: bool,

@@ -32,7 +32,7 @@ use crate::font::FontCache;
 use crate::impl_widget_base;
 
 pub struct BoxWidget {
-    id: u32,
+    id: i32,
     origin: Point,
     size: Size,
     invalidated: bool,

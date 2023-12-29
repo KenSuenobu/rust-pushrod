@@ -123,7 +123,7 @@ impl WidgetCache {
 
                 if let Some(x) = self.send_and_receive_event_to_widget(
                     self.current_widget_id,
-                    PushrodEvent::SystemEvent(event.clone()),
+                    PushrodEvent::SystemEvent(self.current_widget_id, event.clone()),
                 ) {
                     for i in 0..x.len() {
                         return_vector.push(&x[i]);
@@ -142,7 +142,7 @@ impl WidgetCache {
 
                 if let Some(x) = self.send_and_receive_event_to_widget(
                     self.current_widget_id,
-                    PushrodEvent::SystemEvent(event.clone()),
+                    PushrodEvent::SystemEvent(self.current_widget_id, event.clone()),
                 ) {
                     for i in 0..x.len() {
                         return_vector.push(&x[i]);
@@ -230,7 +230,7 @@ impl WidgetCache {
                 // to the list of return events.
                 if let Some(x) = self.send_and_receive_event_to_widget(
                     self.current_widget_id,
-                    PushrodEvent::SystemEvent(event.clone()),
+                    PushrodEvent::SystemEvent(self.current_widget_id, event.clone()),
                 ) {
                     for i in 0..x.len() {
                         return_vector.push(&x[i]);
