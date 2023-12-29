@@ -32,6 +32,7 @@ use crate::font::FontCache;
 use crate::impl_widget_base;
 
 pub struct BoxWidget {
+    id: u32,
     origin: Point,
     size: Size,
     invalidated: bool,
@@ -89,6 +90,7 @@ impl BoxWidget {
     /// Any borders with a width of 0 will not be drawn.
     pub fn new(origin: Point, size: Size, border_color: Color, border_width: u8) -> Self {
         Self {
+            id: 0,
             origin: origin.clone(),
             size: size.clone(),
             invalidated: true,

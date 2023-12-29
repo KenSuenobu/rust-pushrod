@@ -39,6 +39,7 @@ pub enum TextJustify {
 }
 
 pub struct TextWidget {
+    id: u32,
     origin: Point,
     size: Size,
     invalidated: bool,
@@ -113,6 +114,7 @@ impl TextWidget {
         msg: String,
     ) -> Self {
         Self {
+            id: 0,
             origin,
             size,
             invalidated: true,

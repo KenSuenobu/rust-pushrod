@@ -31,6 +31,7 @@ use crate::font::FontCache;
 /// BaseWidget structure containing the point of origin, size, base color, an invalidation flag,
 /// and texture store for drawing.
 pub struct BaseWidget {
+    id: u32,
     origin: Point,
     size: Size,
     base_color: Color,
@@ -43,6 +44,12 @@ impl Widget for BaseWidget {
     fn as_any(&self) -> &dyn Any {
         self
     }
+
+    /// Returns the ID for the `Widget`.
+    fn get_id(&self) -> u32 { self.id }
+
+    /// Sets the ID for the `Widget`.
+    fn set_id(&mut self, id: u32) { self.id = id; }
 
     /// Returns the `Point` of origin for the `Widget`.
     fn get_origin(&self) -> &Point {
@@ -119,6 +126,7 @@ impl BaseWidget {
     /// Creates a new `BaseWidget` given the `Point` of origin and its `Size`.
     pub fn new(origin: Point, size: Size) -> Self {
         Self {
+            id: 0,
             origin,
             size,
             base_color: Color::RGBA(255, 255, 255, 0),

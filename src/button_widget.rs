@@ -36,6 +36,7 @@ use crate::widget::Widget;
 use crate::impl_widget_base;
 
 pub struct ButtonWidget {
+    id: u32,
     origin: Point,
     size: Size,
     invalidated: bool,
@@ -121,6 +122,7 @@ impl ButtonWidget {
     pub fn new(origin: Point, size: Size, font_name: String, font_style: FontStyle, font_size: u16,
                font_color: Color, justification: TextJustify, msg: String, border_width: u8) -> Self {
         Self {
+            id: 0,
             origin: origin.clone(),
             size: size.clone(),
             invalidated: true,
