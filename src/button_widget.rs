@@ -52,7 +52,7 @@ impl Widget for ButtonWidget {
             PushrodEvent::SystemEvent(widget_id, x) => {
                 match &x {
                     _default => {
-                        eprintln!("[ButtonWidget] Wrapped SystemEvent: Widget={:?} {:?}", widget_id, &x);
+                        eprintln!("[ButtonWidget] Wrapped SystemEvent: ID={:?} Widget={:?} {:?}", self.id, widget_id, &x);
                     }
                 }
 
