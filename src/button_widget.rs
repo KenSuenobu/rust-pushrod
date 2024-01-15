@@ -96,11 +96,8 @@ impl Widget for ButtonWidget {
                                   Size::new(self.size.w - ((border_width + 1) * 2), self.size.h - ((border_width + 1) * 2))),
                     )
                     .unwrap();
-            })
-                .unwrap();
 
-            // Draw the border
-            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
+                // Draw the border
                 texture.set_draw_color(Color::BLACK);
                 texture.draw_rect(Rect::new(0, 0, widget_size.w, widget_size.h))
                     .unwrap();
