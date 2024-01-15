@@ -73,19 +73,17 @@ impl Widget for TextWidget {
                 TextJustify::Center => (self.size.w as i32 - *font_width as i32) / 2,
             };
 
+            #[allow(unused_must_use)]
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                texture
+                &texture
                     .copy(
                         &base_widget_texture,
                         None,
                         rect(0, 0, self.size.w, self.size.h)
                     )
                     .unwrap();
-            })
-                .unwrap();
 
-            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                texture
+                &texture
                     .copy(
                         &font_texture,
                         None,
@@ -93,7 +91,7 @@ impl Widget for TextWidget {
                     )
                     .unwrap();
             })
-            .unwrap();
+                .unwrap();
         }
 
         self.texture.get_optional_ref()

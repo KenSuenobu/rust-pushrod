@@ -76,28 +76,26 @@ impl Widget for ButtonWidget {
             // let widget_width = self.size.w;
             // let widget_height = self.size.h;
 
-            // Draw the background
+            #[allow(unused_must_use)]
             c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                texture
+                // Draw the background
+                &texture
                     .copy(
                         base_widget_texture,
                         None,
                         make_rect(origin_point(), widget_size),
                     )
                     .unwrap();
-            })
-                .unwrap();
 
-            // Overlay the text
-            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                texture
+                // Overlay the text
+                &texture
                     .copy(
                         text_widget_texture,
                         None,
                         make_rect(point((border_width + 1) as i32, (border_width + 1) as i32),
                                   Size::new(self.size.w - ((border_width + 1) * 2), self.size.h - ((border_width + 1) * 2))),
                     )
-                            .unwrap();
+                    .unwrap();
             })
                 .unwrap();
 
