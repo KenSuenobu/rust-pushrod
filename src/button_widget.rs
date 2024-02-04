@@ -25,6 +25,7 @@ use sdl2::render::{Canvas, Texture};
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
 use std::any::Any;
+use sdl2::event::Event::{MouseButtonDown, MouseButtonUp};
 use sdl2::rect::Rect;
 use crate::base_widget::BaseWidget;
 use crate::event::PushrodEvent;
@@ -44,6 +45,7 @@ pub struct ButtonWidget {
     base_widget: BaseWidget,
     text_widget: TextWidget,
     border_width: u8,
+    selected_state: bool,
 }
 
 impl Widget for ButtonWidget {
@@ -51,6 +53,18 @@ impl Widget for ButtonWidget {
         match event {
             PushrodEvent::SystemEvent(widget_id, x) => {
                 match &x {
+                    MouseButtonDown {
+                        mouse_btn, clicks, ..
+                    } => {
+                        eprintln!("[ButtonWidget] Button down: {:?} clicks={:?}", mouse_btn, clicks);
+                    }
+
+                    MouseButtonUp {
+                        mouse_btn, clicks, ..
+                    } => {
+                        eprintln!("[ButtonWidget] Button up: {:?} clicks={:?}", mouse_btn, clicks);
+                    }
+
                     _default => {
                         eprintln!("[ButtonWidget] Wrapped SystemEvent: ID={:?} Widget={:?} {:?}", self.id, widget_id, &x);
                     }
@@ -67,6 +81,11 @@ impl Widget for ButtonWidget {
     fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture> {
         if self.invalidated && self.border_width > 0 {
             self.texture.create_or_resize_texture(c, self.size);
+
+            if self.selected_state {
+                self.base_widget.set_color(Color::BLACK);
+                self.text_widget.set_color(Color::WHITE);
+            }
 
             let base_widget_texture = self.base_widget.draw(c, fc).unwrap();
             let text_widget_texture = self.text_widget.draw(c, fc).unwrap();
@@ -127,6 +146,7 @@ impl ButtonWidget {
                                          Size::new(size.w - (border_width as u32 * 2), size.h - (border_width as u32 * 2)),
                                          font_name, font_style, font_size, font_color, justification, msg),
             border_width,
+            selected_state: false,
         }
     }
 
