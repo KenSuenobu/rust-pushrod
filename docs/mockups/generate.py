@@ -1241,6 +1241,292 @@ def code_editor_chassis():
             ("2. Editor: stub inserted (or found), caret placed in the body; generated lines read-only", b, "insert_function / reveal_range")]
 
 
+# ---- Chassis application (docs/ROADMAP_CHASSIS.md) ---------------------------------------
+CW_W, CW_H = 1200, 760
+LEFT_W, RIGHT_W = 250, 280
+TOP = 58                     # menu bar (24) + toolbar (34)
+STATUS_H = 24
+
+def _ch_menubar(c):
+    c.rect(0, 0, CW_W, 24, fill=WHITE, outline=None); c.line(0, 23, CW_W, 23, GRAY)
+    x = 10
+    for t in ["File", "Edit", "View", "Form", "Project", "Run", "Help"]:
+        c.text(x, 3, t, BLACK, 13); x += c.tw(t, 13) + 22
+
+def _ch_toolbar(c):
+    c.rect(0, 24, CW_W, 34, fill=PANEL, outline=None); c.line(0, 57, CW_W, 57, GRAY)
+    x = 8
+    for group in [["New", "Open", "Save"], ["Undo", "Redo"], ["Run   "]]:
+        for t in group:
+            if t.startswith("Run"):
+                w = int(c.tw("Run", 12)) + 36
+                c.button(x, 29, w, 24, ""); c.text(x + 9, 32, "Run", BLACK, 12); c.tri(x + w - 18, 36, 9, "right")
+            else:
+                w = int(c.tw(t, 12)) + 18
+                c.button(x, 29, w, 24, ""); c.ctext(x, 29, w, 24, t, BLACK, 12)
+            x += w + 4
+        c.line(x + 3, 30, x + 3, 52, GRAY); x += 10
+
+def _ch_section(c, x, y, w, title, open_=True, count=None):
+    c.tri(x + 8, y + 7, 8, "down" if open_ else "right", DARK)
+    c.text(x + 22, y + 1, title + (f"  ({count})" if count is not None else ""), BLACK, 13)
+    return y + 22
+
+def _ch_row(c, x, y, w, label, selected=False, icon=None, indent=22):
+    if selected: c.rect(x + 1, y, w - 2, 20, fill=BLACK, outline=None)
+    fg = WHITE if selected else BLACK
+    tx = x + indent
+    if icon: icon(c, tx, y + 3, fg); tx += 20
+    c.text(tx, y + 1, label, fg, 13)
+    return y + 20
+
+def _ico_form(c, x, y, fg):
+    c.rect(x, y, 14, 13, fill=None, outline=fg); c.line(x, y + 4, x + 13, y + 4, fg)
+def _ico_image(c, x, y, fg):
+    c.rect(x, y, 14, 13, fill=None, outline=fg); c.poly([(x + 2, y + 11), (x + 6, y + 5), (x + 10, y + 11)], fill=fg)
+def _ico_btn(c, x, y, fg):
+    c.rect(x, y + 2, 14, 9, fill=None, outline=fg)
+def _ico_lbl(c, x, y, fg):
+    c.text(x + 1, y - 3, "A", fg, 13)
+def _ico_chk(c, x, y, fg):
+    c.rect(x + 1, y + 1, 11, 11, fill=None, outline=fg); c.line(x + 3, y + 6, x + 6, y + 9, fg); c.line(x + 6, y + 9, x + 11, y + 2, fg)
+def _ico_rad(c, x, y, fg):
+    c.ellipse(x + 1, y + 1, 11, 11, outline=fg); c.ellipse(x + 4, y + 4, 5, 5, fill=fg, outline=None)
+def _ico_fld(c, x, y, fg):
+    c.rect(x, y + 2, 14, 9, fill=None, outline=fg); c.line(x + 3, y + 4, x + 3, y + 9, fg)
+def _ico_sep(c, x, y, fg):
+    c.line(x, y + 6, x + 14, y + 6, fg)
+def _ico_link(c, x, y, fg):
+    c.text(x, y - 3, "a", fg, 13); c.line(x, y + 12, x + 12, y + 12, fg)
+
+PALETTE = [("Label", _ico_lbl), ("Boxed Label", _ico_btn), ("Button", _ico_btn), ("Image Button", _ico_image),
+           ("Link Label", _ico_link), ("Check Box", _ico_chk), ("Radio Button", _ico_rad), ("Text Field", _ico_fld),
+           ("Separator", _ico_sep)]
+
+def _ch_left(c, palette_pressed=None):
+    c.rect(0, TOP, LEFT_W, CW_H - TOP - STATUS_H, fill=WHITE, outline=None)
+    c.line(LEFT_W, TOP, LEFT_W, CW_H - STATUS_H, GRAY)
+    y = TOP + 8
+    c.text(10, y, "PROJECT", DARK, 11); c.text(LEFT_W - 96, y, "contacts.prsc", MID, 11); y += 20
+    y = _ch_section(c, 6, y, LEFT_W, "Forms", True, 2)
+    y = _ch_row(c, 0, y, LEFT_W, "MainForm", icon=_ico_form, indent=28)
+    y = _ch_row(c, 0, y, LEFT_W, "ContactDialog", selected=True, icon=_ico_form, indent=28)
+    y = _ch_section(c, 6, y + 2, LEFT_W, "Menus", False, 1)
+    y = _ch_section(c, 6, y, LEFT_W, "Strings", False, 12)
+    y = _ch_section(c, 6, y, LEFT_W, "Images", True, 1)
+    y = _ch_row(c, 0, y, LEFT_W, "logo.png", icon=_ico_image, indent=28)
+    y = _ch_section(c, 6, y + 2, LEFT_W, "Icons", False, 4)
+    # splitter
+    sy = y + 8
+    c.rect(0, sy, LEFT_W, 6, fill=PANEL, outline=None)
+    for xx in (LEFT_W // 2 - 6, LEFT_W // 2, LEFT_W // 2 + 6): c.rect(xx, sy + 2, 2, 2, fill=DARK, outline=None)
+    y = sy + 14
+    c.text(10, y, "PALETTE", DARK, 11); y += 18
+    c.field(8, y, LEFT_W - 16, "", placeholder="Search widgets"); y += 30
+    y = _ch_section(c, 6, y, LEFT_W, "Basic", True)
+    for name, ico in PALETTE:
+        y = _ch_row(c, 0, y, LEFT_W, name, selected=(name == palette_pressed), icon=ico, indent=28)
+    for sec in ["Values", "Containers", "Lists"]:
+        y = _ch_section(c, 6, y + 2, LEFT_W, sec, False)
+
+def _ch_tabs(c, active="Designer", title="ContactDialog"):
+    x0 = LEFT_W + 1; w = CW_W - LEFT_W - RIGHT_W - 2
+    c.rect(x0, TOP, w, 30, fill=PANEL, outline=None); c.line(x0, TOP + 29, x0 + w, TOP + 29, BLACK)
+    x = x0 + 10
+    for t in ["Designer", "Code"]:
+        tw = int(c.tw(t, 13)) + 28
+        if t == active:
+            c.rect(x, TOP + 4, tw, 26, fill=WHITE, outline=BLACK); c.line(x + 1, TOP + 29, x + tw - 1, TOP + 29, WHITE)
+        else:
+            c.rect(x, TOP + 6, tw, 23, fill=PANEL, outline=MID)
+        c.ctext(x, TOP + 5, tw, 24, t, BLACK if t == active else DARK, 13)
+        x += tw + 4
+    c.text(x0 + w - c.tw(title + "   F12 switches", 12) - 10, TOP + 9, title + "   F12 switches", MID, 12)
+    return x0, TOP + 30, w, CW_H - STATUS_H - TOP - 30
+
+FORM_X, FORM_Y, FORM_W, FORM_H = 330, 140, 440, 300
+def _ch_grid(c, x, y, w, h):
+    c.rect(x, y, w, h, fill=(226, 226, 226), outline=None)
+    for gy in range(y + 8, y + h, 16):
+        for gx in range(x + 8, x + w, 16): c.rect(gx, gy, 1, 1, fill=MID, outline=None)
+
+def _ch_form(c, selected="OK", has_code=("OK",), extra=None):
+    fx, fy = FORM_X, FORM_Y
+    c.rect(fx, fy, FORM_W, FORM_H, fill=PANEL)
+    c.rect(fx, fy, FORM_W, 26, fill=WHITE); c.ctext(fx, fy, FORM_W, 26, "Contact", BLACK, 13)
+    for i in range(0, FORM_H - 30, 16):
+        for j in range(8, FORM_W, 16): c.rect(fx + j, fy + 34 + i, 1, 1, fill=GRAY, outline=None)
+    rows = [("Name:", "Jane Doe"), ("E-mail:", "jane.doe@example.com"), ("Phone:", "555-0100")]
+    for n, (lab, val) in enumerate(rows):
+        yy = fy + 48 + n * 36
+        c.text(fx + 24, yy + 3, lab, BLACK, 13); c.field(fx + 100, yy, 300, val)
+    c.checkbox(fx + 100, fy + 158, "Send me product updates", state="on")
+    c.line(fx + 16, fy + 200, fx + FORM_W - 16, fy + 200, GRAY)
+    widgets = {"Cancel": (fx + FORM_W - 210, fy + 230, 90, 28), "OK": (fx + FORM_W - 110, fy + 230, 90, 28)}
+    c.button(*widgets["Cancel"], "Cancel")
+    c.button(*widgets["OK"], "OK", default=True)
+    for name in has_code:
+        x, y, w, h = widgets[name]
+        c.poly([(x + w - 9, y), (x + w, y), (x + w, y + 9)], fill=BLACK)
+    if selected:
+        x, y, w, h = widgets[selected]
+        c.rect(x - 3, y - 3, w + 6, h + 6, fill=None, outline=BLACK)
+        for hx in (x - 6, x + w / 2 - 3, x + w):
+            for hy in (y - 6, y + h / 2 - 3, y + h):
+                if hx == x + w / 2 - 3 and hy == y + h / 2 - 3: continue
+                c.rect(int(hx), int(hy), 6, 6, fill=BLACK, outline=None)
+    return widgets
+
+def _prop(c, x, y, w, label, value=None, kind="field", vw=None):
+    c.text(x + 10, y + 3, label, DARK, 12)
+    vx = x + 98; vw = vw or (w - 108)
+    if kind == "field": c.field(vx, y, vw, value, h=22)
+    elif kind == "check":
+        cx = vx
+        for lab, on in value:
+            c.checkbox(cx, y + 1, lab, state="on" if on else "off"); cx += int(c.tw(lab)) + 34
+    elif kind == "choice":
+        c.rect(vx, y, vw, 22, fill=WHITE); c.text(vx + 6, y + 3, value, BLACK, 13); c.tri(vx + vw - 16, y + 8, 8, "down")
+    elif kind == "color":
+        c.rect(vx, y + 2, 18, 18, fill=value[1]); c.field(vx + 24, y, vw - 24, value[0], h=22)
+    return y + 28
+
+def _ch_head(c, x, y, w, t):
+    c.rect(x, y, w, 20, fill=PANEL, outline=None); c.text(x + 10, y + 2, t, DARK, 11)
+    return y + 26
+
+def _ch_right(c, tab="Properties", events=None):
+    x = CW_W - RIGHT_W
+    c.rect(x, TOP, RIGHT_W, CW_H - TOP - STATUS_H, fill=WHITE, outline=None)
+    c.line(x, TOP, x, CW_H - STATUS_H, GRAY)
+    y = TOP + 8
+    c.text(x + 10, y, "INSPECTOR", DARK, 11); c.text(x + RIGHT_W - 22, y - 3, "×", DARK, 15); y += 20
+    c.text(x + 10, y, "OkButton", BLACK, 17); y += 26
+    c.text(x + 10, y, "Button  ·  ID 7  ·  pushrod.button", MID, 12); y += 24
+    tx = x + 10
+    for t in ["Properties", "Events (2)" if events else "Events (1)"]:
+        tw = int(c.tw(t, 13)) + 24
+        act = t.startswith(tab)
+        c.rect(tx, y, tw, 24, fill=WHITE if act else PANEL, outline=BLACK if act else MID)
+        if act: c.line(tx + 1, y + 23, tx + tw - 1, y + 23, WHITE)
+        c.ctext(tx, y, tw, 24, t, BLACK if act else DARK, 13); tx += tw + 4
+    c.line(x + 1, y + 23, x + RIGHT_W - 1, y + 23, BLACK); c.line(x + 10, y + 23, tx - 4, y + 23, BLACK)
+    if tab == "Properties":
+        act = [(x + 10, )]
+    y += 32
+    if tab == "Properties":
+        y = _ch_head(c, x, y, RIGHT_W, "IDENTITY")
+        y = _prop(c, x, y, RIGHT_W, "Name", "OkButton")
+        y = _prop(c, x, y, RIGHT_W, "Text", "OK")
+        y = _ch_head(c, x, y + 2, RIGHT_W, "LAYOUT")
+        c.text(x + 10, y + 3, "Position", DARK, 12); c.field(x + 98, y, 64, "320"); c.field(x + 168, y, 64, "230"); y += 28
+        c.text(x + 10, y + 3, "Size", DARK, 12); c.field(x + 98, y, 64, "90"); c.field(x + 168, y, 64, "28"); y += 28
+        y = _ch_head(c, x, y + 2, RIGHT_W, "BEHAVIOR")
+        c.checkbox(x + 98, y + 1, "Default", state="on"); c.checkbox(x + 180, y + 1, "Cancel"); y += 24
+        c.checkbox(x + 98, y + 1, "Toggle"); c.checkbox(x + 180, y + 1, "Disabled"); y += 24
+        c.checkbox(x + 98, y + 1, "Hidden"); y += 30
+        y = _ch_head(c, x, y, RIGHT_W, "APPEARANCE")
+        y = _prop(c, x, y, RIGHT_W, "Font", "Body (14)", kind="choice")
+        y = _prop(c, x, y, RIGHT_W, "Text color", ("#000000", BLACK), kind="color")
+        y = _prop(c, x, y, RIGHT_W, "Tooltip", "Save the contact")
+    else:
+        y = _ch_head(c, x, y, RIGHT_W, "EVENTS   (dot = has code)")
+        for ev, handler in events:
+            if handler:
+                c.ellipse(x + 12, y + 6, 8, 8, fill=BLACK, outline=None)
+                c.text(x + 28, y + 2, ev, BLACK, 13); c.text(x + 132, y + 3, handler, DARK, 12)
+            else:
+                c.text(x + 28, y + 2, ev, DARK, 13); c.text(x + 132, y + 3, "add…", MID, 12)
+            c.line(x + 10, y + 24, x + RIGHT_W - 10, y + 24, (230, 230, 230))
+            y += 26
+
+def _ch_status(c, text):
+    y = CW_H - STATUS_H
+    c.rect(0, y, CW_W, STATUS_H, fill=PANEL, outline=None); c.line(0, y, CW_W, y, GRAY)
+    x = 10
+    for part in text:
+        c.text(x, y + 4, part, DARK, 12); x += c.tw(part, 12) + 14
+        c.line(x - 7, y + 4, x - 7, y + 20, GRAY)
+
+def _chassis_window(tab="Designer", palette_pressed=None, right_tab="Properties", events=None, status=None):
+    c = C(CW_W, CW_H, bg=WHITE)
+    _ch_menubar(c); _ch_toolbar(c); _ch_left(c, palette_pressed)
+    x0, y0, w, h = _ch_tabs(c, tab)
+    _ch_right(c, right_tab, events)
+    _ch_status(c, status or ["contacts.prsc", "ContactDialog · 9 widgets", "OkButton (Button)  x 320  y 230  90 × 28", "Grid 8 px"])
+    return c, (x0, y0, w, h)
+
+EVENTS_OK = [("Clicked", "on_ok_clicked"), ("FocusGained", None), ("FocusLost", None),
+             ("PointerEntered", None), ("PointerExited", None), ("KeyPressed", None)]
+
+@sb("chassis", 1)
+def chassis_designer():
+    c, (x0, y0, w, h) = _chassis_window()
+    _ch_grid(c, x0, y0, w, h); _ch_form(c)
+    return [("Designer: OK button selected; its properties in the inspector on the right", c, None)]
+
+@sb("chassis", 2)
+def chassis_drag():
+    c, (x0, y0, w, h) = _chassis_window(palette_pressed="Text Field",
+        status=["contacts.prsc", "ContactDialog · 9 widgets", "Dragging Text Field  x 100  y 194", "Snaps to grid and to neighbors"])
+    _ch_grid(c, x0, y0, w, h); _ch_form(c, selected=None)
+    dx, dy = FORM_X + 100, FORM_Y + 194
+    c.dotted(dx, dy, 300, 22)
+    c.dotted(dx, FORM_Y + 40, 1, 180)
+    c.pointer(dx + 140, dy + 10)
+    return [("Drag from the palette: outline shows where it lands; dotted guide aligns with the fields above", c, "drop adds the widget and selects it")]
+
+@sb("chassis", 3)
+def chassis_events_menu():
+    c, (x0, y0, w, h) = _chassis_window()
+    _ch_grid(c, x0, y0, w, h); wid = _ch_form(c)
+    x, y, ww, hh = wid["OK"]
+    mx, my = x + 40, y + 16
+    items = [("EVENTS", "", {"header"}), ("     Clicked", "on_ok_clicked", {"code"}), ("     FocusGained", "", set()),
+             ("     FocusLost", "", set()), ("     PointerEntered", "", set()), ("     PointerExited", "", set()),
+             ("     KeyPressed", "", set()), ("", "", {"sep"}), ("Cut", "Ctrl+X", set()), ("Copy", "Ctrl+C", set()),
+             ("Delete", "Del", set()), ("", "", {"sep"}), ("Bring to Front", "", set()), ("Send to Back", "", set()),
+             ("", "", {"sep"}), ("Inspector", "F4", set())]
+    mw = 250
+    mh = sum(9 if "sep" in f else 22 for _, _, f in items) + 4
+    c.rect(mx, my, mw, mh, fill=WHITE)
+    cy = my + 2
+    for n, (label, sc, f) in enumerate(items):
+        if "sep" in f: c.line(mx + 4, cy + 4, mx + mw - 5, cy + 4, MID); cy += 9; continue
+        if "header" in f: c.text(mx + 10, cy + 4, label, MID, 11); cy += 22; continue
+        hot = label.strip() == "FocusGained"
+        if hot: c.rect(mx + 1, cy, mw - 2, 22, fill=BLACK, outline=None)
+        col = WHITE if hot else BLACK
+        c.text(mx + 10, cy + 1, label, col, 13)
+        if "code" in f: c.ellipse(mx + 12, cy + 7, 8, 8, fill=col, outline=None)
+        if sc: c.text(mx + mw - 10 - c.tw(sc, 12), cy + 3, sc, DARK if not hot else WHITE, 12)
+        cy += 22
+    c.pointer(mx + 120, my + 2 + 22 + 22 + 10)
+    return [("Right-click: the widget's events (a dot marks events with code); choosing one opens its handler", c, "choosing FocusGained creates on_ok_focus_gained")]
+
+@sb("chassis", 4)
+def chassis_code():
+    ev = [("Clicked", "on_ok_clicked"), ("FocusGained", "on_ok_focus_gained"), ("FocusLost", None),
+          ("PointerEntered", None), ("PointerExited", None), ("KeyPressed", None)]
+    c, (x0, y0, w, h) = _chassis_window(tab="Code", right_tab="Events", events=ev,
+        status=["contacts.prsc", "contact_dialog.rs", "Ln 9, Col 5", "Rust", "Generated lines are read-only"])
+    lines = [
+        [("// ContactDialog event handlers. Chassis generates the signatures;", COM)],
+        [("// write code inside the function bodies.", COM)],
+        [("fn ", KW), ("on_ok_clicked", FN_), ("(state: &", BLACK), ("mut ", KW), ("AppState, ui: &", BLACK), ("mut ", KW), ("Ui) {", BLACK)],
+        [("    state.save(ui.text(ids::NAME_FIELD));", BLACK)],
+        [("    ui.close_form();", BLACK)],
+        [("}", BLACK)],
+        [("", BLACK)],
+        [("fn ", KW), ("on_ok_focus_gained", FN_), ("(state: &", BLACK), ("mut ", KW), ("AppState, ui: &", BLACK), ("mut ", KW), ("Ui) {", BLACK)],
+        [("    ", BLACK)],
+        [("}", BLACK)],
+    ]
+    c.rect(x0, y0, w, h, fill=WHITE, outline=None)
+    _code(c, x0 + 1, y0 + 1, w - 2, h - 2, lines=lines, current=9, caret=(9, 4), guarded=(1, 2, 3, 6, 8, 10))
+    return [("Code tab: the new handler is inserted and the caret placed in its body; the inspector lists the events", c, None)]
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
