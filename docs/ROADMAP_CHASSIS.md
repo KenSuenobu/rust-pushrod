@@ -22,7 +22,8 @@ Pushrod resource file (the `PRSC` form file format, Pushrod roadmap 6.3), the wa
 kept their dialogs in an `.RSC` file.
 
 **Status:** design approved; issues filed on GitHub (titles `chassis: [epic.issue] ...`, label `chassis`, one
-milestone per phase). See the [Action Plan](#action-plan) for how Chassis gets written.
+milestone per phase). Labels mark the release: `chassis-mvp` (phases M1 to M5), `chassis-examples` (example
+projects built once the MVP is out), and `chassis-v2`. See the [Action Plan](#action-plan) for how Chassis gets written.
 
 ## Design
 
@@ -287,13 +288,14 @@ The Chassis MVP is a version in which a developer can:
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
-| 1 ([#157](https://github.com/KenSuenobu/rust-pushrod/issues/157)) | Application shell | Main window, three-pane workspace, Designer/Code tabs, and commands. | 5 | 4 |
-| 2 ([#158](https://github.com/KenSuenobu/rust-pushrod/issues/158)) | Project and resource file | Project model, open and save, the project drawer, and editors for forms, strings, images, icons, files, and menus. | 8 | 7 |
-| 3 ([#159](https://github.com/KenSuenobu/rust-pushrod/issues/159)) | Form designer | Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo. | 9 | 8 |
-| 4 ([#160](https://github.com/KenSuenobu/rust-pushrod/issues/160)) | Inspector | The right-hand drawer: identity, typed property editors, names and IDs. | 5 | 4 |
-| 5 ([#161](https://github.com/KenSuenobu/rust-pushrod/issues/161)) | Events and code | Events menu with code indicators, inspector Events tab, handler creation, the code view, and generated wiring. | 7 | 7 |
-| 6 ([#162](https://github.com/KenSuenobu/rust-pushrod/issues/162)) | Build and run | Code generation rules, a command-line generator, build and run, error list, templates. | 5 | 3 |
+| 1 ([#157](https://github.com/KenSuenobu/rust-pushrod/issues/157)) | Application shell | Main window, three-pane workspace, Designer/Code tabs, and commands. | 7 | 4 |
+| 2 ([#158](https://github.com/KenSuenobu/rust-pushrod/issues/158)) | Project and resource file | Project model, open and save, the project drawer, and editors for forms, strings, images, icons, files, and menus. | 10 | 7 |
+| 3 ([#159](https://github.com/KenSuenobu/rust-pushrod/issues/159)) | Form designer | Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo. | 11 | 8 |
+| 4 ([#160](https://github.com/KenSuenobu/rust-pushrod/issues/160)) | Inspector | The right-hand drawer: identity, typed property editors, names and IDs. | 6 | 4 |
+| 5 ([#161](https://github.com/KenSuenobu/rust-pushrod/issues/161)) | Events and code | Events menu with code indicators, inspector Events tab, handler creation, the code view, and generated wiring. | 8 | 7 |
+| 6 ([#162](https://github.com/KenSuenobu/rust-pushrod/issues/162)) | Build and run | Code generation rules, a command-line generator, build and run, error list, templates. | 6 | 3 |
 | 7 ([#163](https://github.com/KenSuenobu/rust-pushrod/issues/163)) | Quality, documentation, and release | CI and golden screenshots, documentation, the sample project, packaging. | 4 | 3 |
+| 8 ([#207](https://github.com/KenSuenobu/rust-pushrod/issues/207)) | Example projects | Small, complete applications built with Chassis at the MVP, kept in the repository for learning and testing. | 8 | 0 |
 
 ## Epic 1: Application shell ([#157](https://github.com/KenSuenobu/rust-pushrod/issues/157))
 
@@ -309,7 +311,9 @@ Main window, three-pane workspace, Designer/Code tabs, and commands.
 | 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)) | Three-pane workspace | Project drawer, editor, and inspector in resizable, collapsible split views. | `app`, `chassis`, `chassis-mvp`, `parallelizable`, `size/M` | Y | Y | M2 | M | `chassis/src/workspace.rs` |
 | 1.3 ([#171](https://github.com/KenSuenobu/rust-pushrod/issues/171)) | Designer and Code tabs | Two tabs per open form; F12 switches; each keeps its scroll, selection, and caret. | `app`, `chassis`, `chassis-mvp`, `parallelizable`, `size/S` | Y | Y | M2 | S | `chassis/src/editor_tabs.rs` |
 | 1.4 ([#170](https://github.com/KenSuenobu/rust-pushrod/issues/170)) | Commands, menus, and shortcuts | Every command as an action, reachable from menus, toolbar, and familiar shortcuts. | `app`, `chassis`, `chassis-mvp`, `parallelizable`, `size/M` | Y | Y | M2 | M | `chassis/src/commands.rs` |
-| 1.5 ([#200](https://github.com/KenSuenobu/rust-pushrod/issues/200)) | Workspace settings | Remember window size, pane widths, open forms, and recent projects. | `app`, `chassis`, `parallelizable`, `size/S` | Y | N | post | S | `chassis/src/settings.rs` |
+| 1.5 ([#200](https://github.com/KenSuenobu/rust-pushrod/issues/200)) | Workspace settings | Remember window size, pane widths, open forms, and recent projects. | `app`, `chassis`, `chassis-v2`, `parallelizable`, `size/S` | Y | N | post | S | `chassis/src/settings.rs` |
+| 1.6 ([#216](https://github.com/KenSuenobu/rust-pushrod/issues/216)) | Find in project | Search forms, widget names and properties, resources, and code from one place. | `app`, `chassis`, `chassis-v2`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/search.rs` |
+| 1.7 ([#217](https://github.com/KenSuenobu/rust-pushrod/issues/217)) | Multiple windows per project | Design applications with several windows, each its own form, and choose which opens first. | `app`, `chassis`, `chassis-v2`, `designer`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/project/windows.rs` |
 
 ### 1.1: Chassis crate and main window
 
@@ -399,7 +403,7 @@ Main window, three-pane workspace, Designer/Code tabs, and commands.
 
 ### 1.5: Workspace settings
 
-*Issue [#200](https://github.com/KenSuenobu/rust-pushrod/issues/200) · Chassis: after the MVP*
+*Issue [#200](https://github.com/KenSuenobu/rust-pushrod/issues/200) · Chassis v2*
 
 **Problem Statement.** Re-arranging panes and reopening the last project every session is tedious.
 
@@ -415,6 +419,44 @@ Main window, three-pane workspace, Designer/Code tabs, and commands.
 **Technical Stack.** Rust, directories, serde
 
 **Documentation.** `pushrod-docs/docs/chassis/overview.md` ("Chassis overview", Chassis group, update).
+
+### 1.6: Find in project
+
+*Issue [#216](https://github.com/KenSuenobu/rust-pushrod/issues/216) · Chassis v2*
+
+**Problem Statement.** In a project with many forms and resources, finding where a string, widget, or handler is used shouldn't mean opening everything.
+
+**Solution / Scope.** Ctrl+Shift+F opens a search panel below the editor: one query searches widget names and property values in every form, resource names and string text, and the handler files. Results are grouped by kind; choosing one opens the form with the widget selected, the resource's editor, or the Code tab at the line.
+
+**Acceptance Criteria.**
+
+- One search covers forms, resources, and code
+- Every result navigates to its source
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)), 5.4 ([#189](https://github.com/KenSuenobu/rust-pushrod/issues/189)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view
+
+**Technical Stack.** Rust, Pushrod
+
+**Documentation.** `pushrod-docs/docs/chassis/overview.md` ("Chassis overview", Chassis group, update).
+
+### 1.7: Multiple windows per project
+
+*Issue [#217](https://github.com/KenSuenobu/rust-pushrod/issues/217) · Chassis v2*
+
+**Problem Statement.** Real applications have a main window plus palettes, inspectors, or secondary windows, not only modal dialogs.
+
+**Solution / Scope.** Forms can be marked as windows (separate OS windows with their own engine, Pushrod 1.16) or dialogs. The project settings choose the startup window. Generated code opens windows by form ID (`app.open_window(ids::forms::PALETTE)`).
+
+**Acceptance Criteria.**
+
+- A project with two windows builds and runs both
+- Startup window configurable
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 2.2 ([#172](https://github.com/KenSuenobu/rust-pushrod/issues/172)), 5.7 ([#166](https://github.com/KenSuenobu/rust-pushrod/issues/166)); Pushrod: Pushrod 1.16 [#82](https://github.com/KenSuenobu/rust-pushrod/issues/82) Multiple windows: separate OS windows, each with its own engine
+
+**Technical Stack.** Rust, Pushrod
+
+**Documentation.** `pushrod-docs/docs/chassis/projects-and-resources.md` ("Projects and resources", Chassis group, update).
 
 ## Epic 2: Project and resource file ([#158](https://github.com/KenSuenobu/rust-pushrod/issues/158))
 
@@ -432,8 +474,10 @@ Project model, open and save, the project drawer, and editors for forms, strings
 | 2.4 ([#174](https://github.com/KenSuenobu/rust-pushrod/issues/174)) | Manage resources and IDs | Add, rename, duplicate, and delete resources; see and copy each resource's ID. | `chassis`, `chassis-mvp`, `parallelizable`, `project`, `size/S` | Y | Y | M2 | S | `chassis/src/project/resources.rs`, `chassis/src/project_drawer.rs` |
 | 2.5 ([#175](https://github.com/KenSuenobu/rust-pushrod/issues/175)) | String table editor | Edit the resource file's strings: name, text, and ID. | `chassis`, `chassis-mvp`, `parallelizable`, `project`, `resources`, `size/S` | Y | Y | M2 | S | `chassis/src/editors/strings.rs` |
 | 2.6 ([#176](https://github.com/KenSuenobu/rust-pushrod/issues/176)) | Images and icons | Import images and icons into the resource file and use them in widgets by ID. | `chassis`, `chassis-mvp`, `parallelizable`, `project`, `resources`, `size/M` | Y | Y | M2 | M | `chassis/src/editors/images.rs`, `chassis/src/editors/icons.rs` |
-| 2.7 ([#201](https://github.com/KenSuenobu/rust-pushrod/issues/201)) | Menu editor | Design menu bars and context menus stored in the resource file. | `chassis`, `parallelizable`, `project`, `resources`, `size/M` | Y | N | post | M | `chassis/src/editors/menus.rs` |
+| 2.7 ([#201](https://github.com/KenSuenobu/rust-pushrod/issues/201)) | Menu editor | Design menu bars and context menus stored in the resource file. | `chassis`, `chassis-v2`, `parallelizable`, `project`, `resources`, `size/M` | Y | N | post | M | `chassis/src/editors/menus.rs` |
 | 2.8 ([#177](https://github.com/KenSuenobu/rust-pushrod/issues/177)) | Files | Add arbitrary files (license text, templates, data) to the resource file and load them by ID. | `chassis`, `chassis-mvp`, `parallelizable`, `project`, `resources`, `size/S` | Y | Y | M2 | S | `chassis/src/editors/files.rs` |
+| 2.9 ([#218](https://github.com/KenSuenobu/rust-pushrod/issues/218)) | Localization | String tables per language, a language switch in the designer, and missing-translation reports. | `chassis`, `chassis-v2`, `parallelizable`, `project`, `resources`, `size/M` | Y | N | post | M | `chassis/src/editors/strings.rs`, `chassis/src/project/languages.rs` |
+| 2.10 ([#219](https://github.com/KenSuenobu/rust-pushrod/issues/219)) | Source control status | Show which forms, resources, and code files have changed since the last commit. | `chassis`, `chassis-v2`, `parallelizable`, `project`, `size/S` | Y | N | post | S | `chassis/src/project/vcs.rs` |
 
 ### 2.1: Project model
 
@@ -559,7 +603,7 @@ Project model, open and save, the project drawer, and editors for forms, strings
 
 ### 2.7: Menu editor
 
-*Issue [#201](https://github.com/KenSuenobu/rust-pushrod/issues/201) · Chassis: after the MVP*
+*Issue [#201](https://github.com/KenSuenobu/rust-pushrod/issues/201) · Chassis v2*
 
 **Problem Statement.** Menus are resources too; building them in code is tedious and they should be editable like forms.
 
@@ -597,6 +641,46 @@ Project model, open and save, the project drawer, and editors for forms, strings
 
 **Documentation.** `pushrod-docs/docs/chassis/projects-and-resources.md` ("Projects and resources", Chassis group, update).
 
+### 2.9: Localization
+
+*Issue [#218](https://github.com/KenSuenobu/rust-pushrod/issues/218) · Chassis v2*
+
+**Problem Statement.** Applications whose text lives in string resources are one step from being translatable; the editor should take that step.
+
+**Solution / Scope.** The string editor gains a column per language; the designer's View menu switches the form preview between languages, so long translations that break layouts show up while designing. A report lists strings missing in each language. The run-time side (choosing the language at startup) extends Pushrod's resource kinds (6.11).
+
+**Acceptance Criteria.**
+
+- Strings editable per language
+- Designer previews any language
+- Missing translations listed
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 2.5 ([#175](https://github.com/KenSuenobu/rust-pushrod/issues/175)); Pushrod: Pushrod 6.11 [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) Resource kinds: strings, images, icons, files, menus, and alerts
+
+**Technical Stack.** Rust, Pushrod
+
+**Documentation.** `pushrod-docs/docs/chassis/projects-and-resources.md` ("Projects and resources", Chassis group, update).
+
+### 2.10: Source control status
+
+*Issue [#219](https://github.com/KenSuenobu/rust-pushrod/issues/219) · Chassis v2*
+
+**Problem Statement.** Developers want to see at a glance what they've changed, as in VS Code's file list.
+
+**Solution / Scope.** When the project is in a Git repository, the project drawer marks changed and new resources and forms (a small `M` or `A` after the name), and the status bar shows the branch. Read-only: committing stays in the developer's own tools.
+
+**Acceptance Criteria.**
+
+- Changed and new items marked
+- Branch shown in the status bar
+- No effect outside Git repositories
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 2.3 ([#173](https://github.com/KenSuenobu/rust-pushrod/issues/173))
+
+**Technical Stack.** Rust, git2
+
+**Documentation.** `pushrod-docs/docs/chassis/projects-and-resources.md` ("Projects and resources", Chassis group, update).
+
 ## Epic 3: Form designer ([#159](https://github.com/KenSuenobu/rust-pushrod/issues/159))
 
 Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo.
@@ -615,7 +699,9 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 | 3.6 ([#184](https://github.com/KenSuenobu/rust-pushrod/issues/184)) | Containers, z-order, and tab order | Drop into group boxes and containers; bring forward and back; set the Tab order. | `chassis`, `chassis-mvp`, `designer`, `parallelizable`, `size/M` | Y | Y | M3 | M | `chassis/src/designer/structure.rs` |
 | 3.7 ([#183](https://github.com/KenSuenobu/rust-pushrod/issues/183)) | Clipboard and undo | Cut, copy, paste, duplicate; every designer change undoable. | `chassis`, `chassis-mvp`, `designer`, `parallelizable`, `size/M` | Y | Y | M3 | M | `chassis/src/designer/history.rs` |
 | 3.8 ([#185](https://github.com/KenSuenobu/rust-pushrod/issues/185)) | Layout managers in the designer | Insert widgets into Column, Row, Form, and Grid layouts; spacers; breadcrumb; live resize. | `chassis`, `chassis-mvp`, `designer`, `layout`, `size/L` | N | Y | M3 | L | `chassis/src/designer/layouts.rs`, `chassis/src/designer/breadcrumb.rs` |
-| 3.9 ([#202](https://github.com/KenSuenobu/rust-pushrod/issues/202)) | Form preview | Run the form live inside Chassis without building. | `chassis`, `designer`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/designer/preview.rs` |
+| 3.9 ([#202](https://github.com/KenSuenobu/rust-pushrod/issues/202)) | Form preview | Run the form live inside Chassis without building. | `chassis`, `chassis-v2`, `designer`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/designer/preview.rs` |
+| 3.10 ([#220](https://github.com/KenSuenobu/rust-pushrod/issues/220)) | Visual form inheritance | Base a form on another form and override only what differs. | `chassis`, `chassis-v2`, `designer`, `parallelizable`, `size/L` | Y | N | post | L | `chassis/src/designer/inheritance.rs` |
+| 3.11 ([#221](https://github.com/KenSuenobu/rust-pushrod/issues/221)) | Accessibility and usability checks | Warn about missing labels, Tab order gaps, mnemonic conflicts, and tiny click targets. | `chassis`, `chassis-v2`, `designer`, `parallelizable`, `quality`, `size/M` | Y | N | post | M | `chassis/src/designer/checks.rs` |
 
 ### 3.1: Design surface
 
@@ -796,7 +882,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 
 ### 3.9: Form preview
 
-*Issue [#202](https://github.com/KenSuenobu/rust-pushrod/issues/202) · Chassis: after the MVP*
+*Issue [#202](https://github.com/KenSuenobu/rust-pushrod/issues/202) · Chassis v2*
 
 **Problem Statement.** Checking how a form behaves (focus order, resizing, keyboard) shouldn't require a full build.
 
@@ -810,6 +896,46 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 **Parallelism / Dependencies.** Parallelizable. Chassis: 3.1 ([#178](https://github.com/KenSuenobu/rust-pushrod/issues/178)); Pushrod: Pushrod 1.16 [#82](https://github.com/KenSuenobu/rust-pushrod/issues/82) Multiple windows: separate OS windows, each with its own engine
 
 **Technical Stack.** Rust, Pushrod
+
+**Documentation.** `pushrod-docs/docs/chassis/designing-forms.md` ("Designing forms", Chassis group, update).
+
+### 3.10: Visual form inheritance
+
+*Issue [#220](https://github.com/KenSuenobu/rust-pushrod/issues/220) · Chassis v2*
+
+**Problem Statement.** Dialogs in one application share a frame (title area, button row, logo); copying it into every form means changing it everywhere.
+
+**Solution / Scope.** A form can derive from a base form: it shows the base's widgets (marked as inherited, locked unless overridden) and adds its own. Changing the base updates every derived form. The resource file stores the base reference and the overrides; generated code builds the base first.
+
+**Acceptance Criteria.**
+
+- Derived forms update when the base changes
+- Overrides survive base changes
+- Inherited widgets visibly marked
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 3.8 ([#185](https://github.com/KenSuenobu/rust-pushrod/issues/185)), 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 6.11 [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) Resource kinds: strings, images, icons, files, menus, and alerts
+
+**Technical Stack.** Rust, Pushrod
+
+**Documentation.** `pushrod-docs/docs/chassis/designing-forms.md` ("Designing forms", Chassis group, update).
+
+### 3.11: Accessibility and usability checks
+
+*Issue [#221](https://github.com/KenSuenobu/rust-pushrod/issues/221) · Chassis v2*
+
+**Problem Statement.** Forms that work with the mouse can still fail keyboard and screen-reader users; problems are cheapest to fix while designing.
+
+**Solution / Scope.** A checks panel lists problems per form: fields without an associated label, focusable widgets missing from the Tab order, duplicate mnemonics, no default or cancel button in a dialog, controls smaller than a minimum size. Each problem selects its widget; `chassis check` reports them too.
+
+**Acceptance Criteria.**
+
+- Each check detects its problem on a test form
+- Problems navigate to the widget
+- `chassis check` reports them
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 3.6 ([#184](https://github.com/KenSuenobu/rust-pushrod/issues/184)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)); Pushrod: Pushrod 1.14 [#80](https://github.com/KenSuenobu/rust-pushrod/issues/80) Accessibility: expose widgets to screen readers, Pushrod 1.12 [#76](https://github.com/KenSuenobu/rust-pushrod/issues/76) Keyboard mnemonics: underlined shortcut letters
+
+**Technical Stack.** Rust
 
 **Documentation.** `pushrod-docs/docs/chassis/designing-forms.md` ("Designing forms", Chassis group, update).
 
@@ -827,7 +953,8 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 | 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187)) | Property grid | Every property from introspection, grouped and labeled. | `chassis`, `chassis-mvp`, `inspector`, `size/M` | N | Y | M4 | M | `chassis/src/inspector/grid.rs` |
 | 4.3 ([#188](https://github.com/KenSuenobu/rust-pushrod/issues/188)) | Typed property editors | Text, number, check, choice, color, font, string-resource, and image editors. | `chassis`, `chassis-mvp`, `inspector`, `parallelizable`, `size/M` | Y | Y | M4 | M | `chassis/src/inspector/editors.rs` |
 | 4.4 ([#191](https://github.com/KenSuenobu/rust-pushrod/issues/191)) | Names and IDs | Validated, unique Rust identifiers; renames carried into constants and handlers. | `chassis`, `chassis-mvp`, `inspector`, `parallelizable`, `size/M` | Y | Y | M4 | M | `chassis/src/inspector/names.rs` |
-| 4.5 ([#203](https://github.com/KenSuenobu/rust-pushrod/issues/203)) | Multiple selection editing | Edit the properties several selected widgets share. | `chassis`, `inspector`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/inspector/grid.rs` |
+| 4.5 ([#203](https://github.com/KenSuenobu/rust-pushrod/issues/203)) | Multiple selection editing | Edit the properties several selected widgets share. | `chassis`, `chassis-v2`, `inspector`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/inspector/grid.rs` |
+| 4.6 ([#222](https://github.com/KenSuenobu/rust-pushrod/issues/222)) | Data bindings in the inspector | Bind a widget property to another property or to application state without writing code. | `chassis`, `chassis-v2`, `inspector`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/inspector/bindings.rs` |
 
 ### 4.1: Inspector drawer
 
@@ -917,7 +1044,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 
 ### 4.5: Multiple selection editing
 
-*Issue [#203](https://github.com/KenSuenobu/rust-pushrod/issues/203) · Chassis: after the MVP*
+*Issue [#203](https://github.com/KenSuenobu/rust-pushrod/issues/203) · Chassis v2*
 
 **Problem Statement.** Setting the same font or color on many widgets one at a time is slow.
 
@@ -931,6 +1058,26 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 **Parallelism / Dependencies.** Parallelizable. Chassis: 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187))
 
 **Technical Stack.** Rust
+
+**Documentation.** `pushrod-docs/docs/chassis/inspector.md` ("The inspector", Chassis group, update).
+
+### 4.6: Data bindings in the inspector
+
+*Issue [#222](https://github.com/KenSuenobu/rust-pushrod/issues/222) · Chassis v2*
+
+**Problem Statement.** Keeping a label in step with a slider, or enabling a button when a check box is on, is boilerplate that a designer can express directly.
+
+**Solution / Scope.** Each property row gets a bind button: choose a source widget and property (or an application state field), and a converter (as is, not, number to text). Bindings are stored in the resource file and set up at load time by Pushrod's property bindings (9.6). Bound properties show a link mark.
+
+**Acceptance Criteria.**
+
+- A slider-to-label binding works without code
+- Bindings round-trip through the resource file
+- Bound properties marked in the inspector
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187)); Pushrod: Pushrod 9.6 [#98](https://github.com/KenSuenobu/rust-pushrod/issues/98) Property bindings: keep two properties in sync
+
+**Technical Stack.** Rust, Pushrod
 
 **Documentation.** `pushrod-docs/docs/chassis/inspector.md` ("The inspector", Chassis group, update).
 
@@ -951,6 +1098,7 @@ Events menu with code indicators, inspector Events tab, handler creation, the co
 | 5.5 ([#194](https://github.com/KenSuenobu/rust-pushrod/issues/194)) | Code indicator on the design surface | Corner mark on widgets that have handlers. | `chassis`, `chassis-mvp`, `designer`, `events`, `parallelizable`, `size/S` | Y | Y | M4 | S | `chassis/src/designer/overlay.rs` |
 | 5.6 ([#195](https://github.com/KenSuenobu/rust-pushrod/issues/195)) | Keep handlers in sync | Renames, deletions, and orphaned handlers. | `chassis`, `chassis-mvp`, `code`, `events`, `parallelizable`, `size/M` | Y | Y | M4 | M | `chassis/src/code/sync.rs` |
 | 5.7 ([#166](https://github.com/KenSuenobu/rust-pushrod/issues/166)) | Event wiring generation | Generated code registers each handler with the engine by widget ID. | `chassis`, `chassis-mvp`, `codegen`, `size/M` | N | Y | M1 | M | `chassis/src/codegen/wiring.rs` |
+| 5.8 ([#223](https://github.com/KenSuenobu/rust-pushrod/issues/223)) | Code intelligence with rust-analyzer | Completion, hover, signature help, and inline errors in the Code tab, through the Language Server Protocol. | `chassis`, `chassis-v2`, `code`, `parallelizable`, `size/L` | Y | N | post | L | `chassis/src/code/lsp.rs` |
 
 ### 5.1: Events context menu
 
@@ -1098,6 +1246,26 @@ Events menu with code indicators, inspector Events tab, handler creation, the co
 
 **Documentation.** `pushrod-docs/docs/chassis/projects-and-resources.md` ("Projects and resources", Chassis group, update).
 
+### 5.8: Code intelligence with rust-analyzer
+
+*Issue [#223](https://github.com/KenSuenobu/rust-pushrod/issues/223) · Chassis v2*
+
+**Problem Statement.** The Tier 1 code editor highlights code but doesn't understand it; completion and inline errors make handler writing much faster.
+
+**Solution / Scope.** Run rust-analyzer as a language server for the project and connect it to the code editor: completion popup, hover information, signature help, and diagnostics drawn as underlines and gutter markers (editor decorations, Pushrod 11.8). Optional: Chassis works without rust-analyzer installed.
+
+**Acceptance Criteria.**
+
+- Completion and hover work in handler files
+- Errors appear inline while typing
+- Chassis works when rust-analyzer is absent
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 5.4 ([#189](https://github.com/KenSuenobu/rust-pushrod/issues/189)); Pushrod: Pushrod 11.8 [#149](https://github.com/KenSuenobu/rust-pushrod/issues/149) Chassis: Code editor API for the Chassis designer
+
+**Technical Stack.** Rust, lsp-types, rust-analyzer
+
+**Documentation.** `pushrod-docs/docs/chassis/events-and-code.md` ("Events and code", Chassis group, update).
+
 ## Epic 6: Build and run ([#162](https://github.com/KenSuenobu/rust-pushrod/issues/162))
 
 Code generation rules, a command-line generator, build and run, error list, templates.
@@ -1110,9 +1278,10 @@ Code generation rules, a command-line generator, build and run, error list, temp
 |---|---|---|---|---|---|---|---|---|
 | 6.1 ([#165](https://github.com/KenSuenobu/rust-pushrod/issues/165)) | Code generation rules | What Chassis writes, when, and what it never touches. | `chassis`, `chassis-mvp`, `codegen`, `size/S` | N | Y | M1 | S | `chassis/src/codegen/mod.rs` |
 | 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)) | Build and run | Run (F5) builds with Cargo and launches the application; output panel. | `build`, `chassis`, `chassis-mvp`, `size/M` | N | Y | M5 | M | `chassis/src/build.rs` |
-| 6.3 ([#204](https://github.com/KenSuenobu/rust-pushrod/issues/204)) | Error list | Compiler errors listed and linked to the code view. | `build`, `chassis`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/build/errors.rs` |
-| 6.4 ([#205](https://github.com/KenSuenobu/rust-pushrod/issues/205)) | Project templates | Start from an empty app, a dialog app, or the contacts sample. | `chassis`, `parallelizable`, `project`, `size/S` | Y | N | post | S | `chassis/templates/` |
+| 6.3 ([#204](https://github.com/KenSuenobu/rust-pushrod/issues/204)) | Error list | Compiler errors listed and linked to the code view. | `build`, `chassis`, `chassis-v2`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/build/errors.rs` |
+| 6.4 ([#205](https://github.com/KenSuenobu/rust-pushrod/issues/205)) | Project templates | Start from an empty app, a dialog app, or the contacts sample. | `chassis`, `chassis-v2`, `parallelizable`, `project`, `size/S` | Y | N | post | S | `chassis/templates/` |
 | 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)) | Command-line generator | `chassis generate` regenerates IDs and wiring without opening the UI. | `chassis`, `chassis-mvp`, `cli`, `codegen`, `parallelizable`, `size/S` | Y | Y | M1 | S | `chassis/src/cli.rs` |
+| 6.6 ([#224](https://github.com/KenSuenobu/rust-pushrod/issues/224)) | Build targets, including the Atari ST | Choose a build target and backend: desktop SDL2, SDL3 when available, and the experimental Atari ST backend. | `build`, `chassis`, `chassis-v2`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/build/targets.rs` |
 
 ### 6.1: Code generation rules
 
@@ -1154,7 +1323,7 @@ Code generation rules, a command-line generator, build and run, error list, temp
 
 ### 6.3: Error list
 
-*Issue [#204](https://github.com/KenSuenobu/rust-pushrod/issues/204) · Chassis: after the MVP*
+*Issue [#204](https://github.com/KenSuenobu/rust-pushrod/issues/204) · Chassis v2*
 
 **Problem Statement.** Reading raw compiler output to find an error is slow.
 
@@ -1173,7 +1342,7 @@ Code generation rules, a command-line generator, build and run, error list, temp
 
 ### 6.4: Project templates
 
-*Issue [#205](https://github.com/KenSuenobu/rust-pushrod/issues/205) · Chassis: after the MVP*
+*Issue [#205](https://github.com/KenSuenobu/rust-pushrod/issues/205) · Chassis v2*
 
 **Problem Statement.** Starting every project from an empty form is slower than starting from a working pattern.
 
@@ -1208,6 +1377,25 @@ Code generation rules, a command-line generator, build and run, error list, temp
 
 **Documentation.** `pushrod-docs/docs/chassis/projects-and-resources.md` ("Projects and resources", Chassis group, update).
 
+### 6.6: Build targets, including the Atari ST
+
+*Issue [#224](https://github.com/KenSuenobu/rust-pushrod/issues/224) · Chassis v2*
+
+**Problem Statement.** Pushrod's backends make other targets possible; Chassis should build for them without hand-editing Cargo configuration.
+
+**Solution / Scope.** A target menu next to Run: the desktop (SDL2), SDL3 once Pushrod ships it (10.5), and the Atari ST backend (10.4, experimental, outline drawing mode). Chassis sets the Cargo target and backend feature, builds, and reports where the output is; for the Atari ST it produces a `.PRG` ready for an emulator or real hardware.
+
+**Acceptance Criteria.**
+
+- Switching targets builds the right backend
+- Atari ST build produces a runnable program in an emulator
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)); Pushrod: Pushrod 10.5 [#135](https://github.com/KenSuenobu/rust-pushrod/issues/135) SDL3 backend (pushrod-sdl3), Pushrod 10.4 [#108](https://github.com/KenSuenobu/rust-pushrod/issues/108) Experimental: Atari ST / TOS backend
+
+**Technical Stack.** Rust, Cargo
+
+**Documentation.** `pushrod-docs/docs/chassis/getting-started.md` ("Getting started with Chassis", Chassis group, update).
+
 ## Epic 7: Quality, documentation, and release ([#163](https://github.com/KenSuenobu/rust-pushrod/issues/163))
 
 CI and golden screenshots, documentation, the sample project, packaging.
@@ -1221,7 +1409,7 @@ CI and golden screenshots, documentation, the sample project, packaging.
 | 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)) | CI and golden screenshots | Build, test, and compare Chassis's own screens with goldens. | `chassis`, `chassis-mvp`, `parallelizable`, `quality`, `size/M` | Y | Y | M5 | M | `.github/workflows/ci.yml`, `chassis/tests/` |
 | 7.2 ([#198](https://github.com/KenSuenobu/rust-pushrod/issues/198)) | Chassis documentation | A Chassis section on the docs site with a start-to-finish tutorial. | `chassis`, `chassis-mvp`, `documentation`, `parallelizable`, `size/M` | Y | Y | M5 | M | `pushrod-docs/docs/chassis/` |
 | 7.3 ([#199](https://github.com/KenSuenobu/rust-pushrod/issues/199)) | Sample project | The contacts sample, built with Chassis, fictional data only. | `chassis`, `chassis-mvp`, `example`, `parallelizable`, `size/S` | Y | Y | M5 | S | `examples/chassis-contacts/` |
-| 7.4 ([#206](https://github.com/KenSuenobu/rust-pushrod/issues/206)) | Packaging and releases | `cargo install chassis` and downloadable builds. | `chassis`, `parallelizable`, `release`, `size/M` | Y | N | post | M | `chassis/Cargo.toml`, `.github/workflows/release.yml` |
+| 7.4 ([#206](https://github.com/KenSuenobu/rust-pushrod/issues/206)) | Packaging and releases | `cargo install chassis` and downloadable builds. | `chassis`, `chassis-v2`, `parallelizable`, `release`, `size/M` | Y | N | post | M | `chassis/Cargo.toml`, `.github/workflows/release.yml` |
 
 ### 7.1: CI and golden screenshots
 
@@ -1282,7 +1470,7 @@ CI and golden screenshots, documentation, the sample project, packaging.
 
 ### 7.4: Packaging and releases
 
-*Issue [#206](https://github.com/KenSuenobu/rust-pushrod/issues/206) · Chassis: after the MVP*
+*Issue [#206](https://github.com/KenSuenobu/rust-pushrod/issues/206) · Chassis v2*
 
 **Problem Statement.** Users shouldn't have to clone the repository to use Chassis.
 
@@ -1299,9 +1487,276 @@ CI and golden screenshots, documentation, the sample project, packaging.
 
 **Documentation.** `pushrod-docs/docs/chassis/overview.md` ("Chassis overview", Chassis group, update).
 
+## Epic 8: Example projects ([#207](https://github.com/KenSuenobu/rust-pushrod/issues/207))
+
+Small, complete applications built with Chassis at the MVP, kept in the repository for learning and testing.
+
+**Problem.** Chassis needs real projects that exercise every feature, and other contributors need ready-made projects to test changes against, both in Chassis and in Pushrod.
+
+**Scope.** A set of example applications, each built entirely in Chassis, using only Pushrod MVP widgets and fictional data. Each lives in `examples/chassis/<name>/` with its resource file, handlers, a README, golden screenshots, and a CI job that regenerates (`chassis generate`), builds, and runs its scripted test. Together they cover every Chassis MVP feature; the README of each says which features it exercises.
+
+| Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
+|---|---|---|---|---|---|---|---|---|
+| 8.1 ([#208](https://github.com/KenSuenobu/rust-pushrod/issues/208)) | Hello, Chassis | The smallest Chassis application: one form, a label, and a button that counts clicks. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/hello/` |
+| 8.2 ([#209](https://github.com/KenSuenobu/rust-pushrod/issues/209)) | Temperature converter | Two linked fields that convert between Celsius and Fahrenheit as you type. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/temperature/` |
+| 8.3 ([#210](https://github.com/KenSuenobu/rust-pushrod/issues/210)) | Tip calculator | Enter a bill, pick a tip percentage, and split it between people. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/tip-calculator/` |
+| 8.4 ([#211](https://github.com/KenSuenobu/rust-pushrod/issues/211)) | Settings dialog | A classic preferences dialog with OK, Cancel, and Apply. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/settings-dialog/` |
+| 8.5 ([#212](https://github.com/KenSuenobu/rust-pushrod/issues/212)) | Image viewer | Browse a set of pictures stored in the resource file. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/image-viewer/` |
+| 8.6 ([#213](https://github.com/KenSuenobu/rust-pushrod/issues/213)) | Stopwatch | Start, stop, lap, and reset, with a progress bar for the current minute. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/stopwatch/` |
+| 8.7 ([#214](https://github.com/KenSuenobu/rust-pushrod/issues/214)) | Quiz | A short multiple-choice quiz whose questions live in the resource file. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/quiz/` |
+| 8.8 ([#215](https://github.com/KenSuenobu/rust-pushrod/issues/215)) | Dice roller | Roll one to four dice and keep a running total. | `chassis`, `chassis-examples`, `example`, `help wanted`, `parallelizable`, `size/S` | Y | N | examples | S | `examples/chassis/dice/` |
+
+### 8.1: Hello, Chassis
+
+*Issue [#208](https://github.com/KenSuenobu/rust-pushrod/issues/208) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: the smallest Chassis application: one form, a label, and a button that counts clicks.
+
+**Solution / Scope.** **Exercises:** creating a project, dropping widgets, editing properties, double-click to create the default handler, Run.
+
+**Screens:** one window: a greeting label and a Click Me button; the label shows the click count.
+
+**Handlers:** `on_click_me_clicked` updates the label.
+
+**Resources (by ID):** form `MAIN`; string `GREETING`.
+
+Built entirely in Chassis; lives in `examples/chassis/hello/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-hello-1.png](mockups/chassis-example-hello-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, new).
+
+### 8.2: Temperature converter
+
+*Issue [#209](https://github.com/KenSuenobu/rust-pushrod/issues/209) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: two linked fields that convert between Celsius and Fahrenheit as you type.
+
+**Solution / Scope.** **Exercises:** text fields with numeric validation, `TextChanged` handlers, a Form layout, a slider, live updates between widgets.
+
+**Screens:** Celsius and Fahrenheit fields in a Form layout, a slider from -40 to 100 degrees, and a note label.
+
+**Handlers:** `on_celsius_text_changed`, `on_fahrenheit_text_changed`, `on_slider_value_changed` keep all three in step without loops.
+
+**Resources (by ID):** form `MAIN`; strings for labels and the invalid-number message.
+
+Built entirely in Chassis; lives in `examples/chassis/temperature/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-temperature-1.png](mockups/chassis-example-temperature-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 3.2 [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) Slider, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
+
+### 8.3: Tip calculator
+
+*Issue [#210](https://github.com/KenSuenobu/rust-pushrod/issues/210) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: enter a bill, pick a tip percentage, and split it between people.
+
+**Solution / Scope.** **Exercises:** radio groups, a slider, group boxes, Column and Row layouts with a Spacer, number formatting.
+
+**Screens:** bill amount field, a radio group of tip percentages (10, 15, 20, custom with slider), a people slider, and result labels for tip, total, and per person.
+
+**Handlers:** value and selection handlers recompute the results.
+
+**Resources (by ID):** form `MAIN`; strings for labels and currency format.
+
+Built entirely in Chassis; lives in `examples/chassis/tip-calculator/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-tip-calculator-1.png](mockups/chassis-example-tip-calculator-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 2.5 [#31](https://github.com/KenSuenobu/rust-pushrod/issues/31) Radio buttons and radio groups, Pushrod 3.2 [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) Slider, Pushrod 3.3 [#41](https://github.com/KenSuenobu/rust-pushrod/issues/41) Group box (titled frame), Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
+
+### 8.4: Settings dialog
+
+*Issue [#211](https://github.com/KenSuenobu/rust-pushrod/issues/211) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: a classic preferences dialog with OK, Cancel, and Apply.
+
+**Solution / Scope.** **Exercises:** modal dialogs, default and cancel buttons, check boxes (including the mixed state), radio groups in group boxes, a slider, string resources, keyboard navigation and Tab order.
+
+**Screens:** a main window with a Settings button that opens the modal dialog: General (check boxes), Appearance (radio group, slider), and OK, Cancel, Apply.
+
+**Handlers:** `on_settings_clicked` opens the dialog; `on_ok_clicked` and `on_apply_clicked` copy values to the application state; Cancel discards.
+
+**Resources (by ID):** forms `MAIN`, `SETTINGS`; strings for every label.
+
+Built entirely in Chassis; lives in `examples/chassis/settings-dialog/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-settings-dialog-1.png](mockups/chassis-example-settings-dialog-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 2.5 [#31](https://github.com/KenSuenobu/rust-pushrod/issues/31) Radio buttons and radio groups, Pushrod 3.3 [#41](https://github.com/KenSuenobu/rust-pushrod/issues/41) Group box (titled frame)
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
+
+### 8.5: Image viewer
+
+*Issue [#212](https://github.com/KenSuenobu/rust-pushrod/issues/212) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: browse a set of pictures stored in the resource file.
+
+**Solution / Scope.** **Exercises:** image and icon resources by ID, the Image widget, a scrollable Container for large images, Previous and Next with keyboard shortcuts.
+
+**Screens:** a toolbar row with Previous, Next, and a caption label; the picture in a scrollable container below.
+
+**Handlers:** `on_previous_clicked`, `on_next_clicked` step through `ids::images` in order and update the caption from string resources.
+
+**Resources (by ID):** form `MAIN`; images `HILLS`, `STREET`, `HARBOR` (sample pictures with clear licenses); captions as strings.
+
+Built entirely in Chassis; lives in `examples/chassis/image-viewer/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-image-viewer-1.png](mockups/chassis-example-image-viewer-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 2.7 [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) Image widget, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 6.10 [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) Resource manager: load resource sets and get resources by ID
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
+
+### 8.6: Stopwatch
+
+*Issue [#213](https://github.com/KenSuenobu/rust-pushrod/issues/213) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: start, stop, lap, and reset, with a progress bar for the current minute.
+
+**Solution / Scope.** **Exercises:** timers (idle and tick callbacks), a progress bar, enabling and disabling buttons by state, a list of laps in labels.
+
+**Screens:** large time label, a progress bar for the current minute, Start/Stop, Lap, and Reset buttons, and the last five laps.
+
+**Handlers:** `on_start_stop_clicked`, `on_lap_clicked`, `on_reset_clicked`, and a timer tick handler.
+
+**Resources (by ID):** form `MAIN`; strings for button captions.
+
+Built entirely in Chassis; lives in `examples/chassis/stopwatch/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-stopwatch-1.png](mockups/chassis-example-stopwatch-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 1.5 [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) Timers and idle callbacks, Pushrod 4.1 [#48](https://github.com/KenSuenobu/rust-pushrod/issues/48) Progress bar
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
+
+### 8.7: Quiz
+
+*Issue [#214](https://github.com/KenSuenobu/rust-pushrod/issues/214) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: a short multiple-choice quiz whose questions live in the resource file.
+
+**Solution / Scope.** **Exercises:** string resources as data, radio groups rebuilt per question, a progress bar, an alert at the end, file resources (a question list loaded by ID).
+
+**Screens:** the question text, four answer radio buttons, Next, a progress bar for position in the quiz, and a final score alert.
+
+**Handlers:** `on_next_clicked` checks the answer and shows the next question; the last one shows the score in an alert.
+
+**Resources (by ID):** form `MAIN`; file `QUESTIONS` (a small text file of fictional trivia); strings for the UI.
+
+Built entirely in Chassis; lives in `examples/chassis/quiz/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-quiz-1.png](mockups/chassis-example-quiz-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 2.5 [#31](https://github.com/KenSuenobu/rust-pushrod/issues/31) Radio buttons and radio groups, Pushrod 4.1 [#48](https://github.com/KenSuenobu/rust-pushrod/issues/48) Progress bar, Pushrod 2.9 [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) Alert dialog, Pushrod 6.10 [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) Resource manager: load resource sets and get resources by ID
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
+
+### 8.8: Dice roller
+
+*Issue [#215](https://github.com/KenSuenobu/rust-pushrod/issues/215) · Chassis examples*
+
+**Problem Statement.** An example project for others to learn from and test against: roll one to four dice and keep a running total.
+
+**Solution / Scope.** **Exercises:** icon resources for die faces, image buttons, a slider for the number of dice, a Row layout that grows with the dice count.
+
+**Screens:** a Roll button, a slider for 1 to 4 dice, a row of die faces, and the total.
+
+**Handlers:** `on_roll_clicked` picks faces and updates the icons and total; `on_dice_value_changed` shows or hides dice.
+
+**Resources (by ID):** form `MAIN`; icons `DIE_1` to `DIE_6`.
+
+Built entirely in Chassis; lives in `examples/chassis/dice/` with its `.prsc` file, handler files, generated code, a README listing the features it exercises, and golden screenshots. Fictional data only.
+
+![chassis-example-dice-1.png](mockups/chassis-example-dice-1.png)
+
+**Acceptance Criteria.**
+
+- Created and maintained in Chassis (no hand-edited generated code)
+- CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- Golden screenshots match the mockup
+- README lists the Chassis and Pushrod features it exercises
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 6.5 ([#167](https://github.com/KenSuenobu/rust-pushrod/issues/167)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)); Pushrod: Pushrod 2.8 [#34](https://github.com/KenSuenobu/rust-pushrod/issues/34) Icon widget (picture with caption), Pushrod 3.2 [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) Slider, Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts, Pushrod 6.10 [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) Resource manager: load resource sets and get resources by ID
+
+**Technical Stack.** Rust, Pushrod, Chassis
+
+**Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
+
 ## Work Order
 
-Work in this order; items in the same phase can run in parallel unless their dependencies say otherwise.
+Work in this order; items in the same phase can run in parallel unless their dependencies say otherwise. Phases M1 to M5 make the Chassis MVP (label `chassis-mvp`); then come the example projects (`chassis-examples`) and Chassis v2 (`chassis-v2`).
 
 **Chassis M1: core without UI**
 
@@ -1354,7 +1809,18 @@ Work in this order; items in the same phase can run in parallel unless their dep
 - 7.2 ([#198](https://github.com/KenSuenobu/rust-pushrod/issues/198)) Chassis documentation
 - 7.3 ([#199](https://github.com/KenSuenobu/rust-pushrod/issues/199)) Sample project
 
-**Chassis: after the MVP**
+**Chassis examples**
+
+- 8.1 ([#208](https://github.com/KenSuenobu/rust-pushrod/issues/208)) Hello, Chassis
+- 8.2 ([#209](https://github.com/KenSuenobu/rust-pushrod/issues/209)) Temperature converter
+- 8.3 ([#210](https://github.com/KenSuenobu/rust-pushrod/issues/210)) Tip calculator
+- 8.4 ([#211](https://github.com/KenSuenobu/rust-pushrod/issues/211)) Settings dialog
+- 8.5 ([#212](https://github.com/KenSuenobu/rust-pushrod/issues/212)) Image viewer
+- 8.6 ([#213](https://github.com/KenSuenobu/rust-pushrod/issues/213)) Stopwatch
+- 8.7 ([#214](https://github.com/KenSuenobu/rust-pushrod/issues/214)) Quiz
+- 8.8 ([#215](https://github.com/KenSuenobu/rust-pushrod/issues/215)) Dice roller
+
+**Chassis v2**
 
 - 1.5 ([#200](https://github.com/KenSuenobu/rust-pushrod/issues/200)) Workspace settings
 - 2.7 ([#201](https://github.com/KenSuenobu/rust-pushrod/issues/201)) Menu editor
@@ -1363,6 +1829,15 @@ Work in this order; items in the same phase can run in parallel unless their dep
 - 6.3 ([#204](https://github.com/KenSuenobu/rust-pushrod/issues/204)) Error list
 - 6.4 ([#205](https://github.com/KenSuenobu/rust-pushrod/issues/205)) Project templates
 - 7.4 ([#206](https://github.com/KenSuenobu/rust-pushrod/issues/206)) Packaging and releases
+- 1.6 ([#216](https://github.com/KenSuenobu/rust-pushrod/issues/216)) Find in project
+- 1.7 ([#217](https://github.com/KenSuenobu/rust-pushrod/issues/217)) Multiple windows per project
+- 2.9 ([#218](https://github.com/KenSuenobu/rust-pushrod/issues/218)) Localization
+- 2.10 ([#219](https://github.com/KenSuenobu/rust-pushrod/issues/219)) Source control status
+- 3.10 ([#220](https://github.com/KenSuenobu/rust-pushrod/issues/220)) Visual form inheritance
+- 3.11 ([#221](https://github.com/KenSuenobu/rust-pushrod/issues/221)) Accessibility and usability checks
+- 4.6 ([#222](https://github.com/KenSuenobu/rust-pushrod/issues/222)) Data bindings in the inspector
+- 5.8 ([#223](https://github.com/KenSuenobu/rust-pushrod/issues/223)) Code intelligence with rust-analyzer
+- 6.6 ([#224](https://github.com/KenSuenobu/rust-pushrod/issues/224)) Build targets, including the Atari ST
 
 ## Action Plan
 
@@ -1389,7 +1864,24 @@ flowchart LR
 | **Chassis M3: form designer** | Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo. | 3.1 ([#178](https://github.com/KenSuenobu/rust-pushrod/issues/178)), 3.2 ([#179](https://github.com/KenSuenobu/rust-pushrod/issues/179)), 3.4 ([#180](https://github.com/KenSuenobu/rust-pushrod/issues/180)), 3.3 ([#181](https://github.com/KenSuenobu/rust-pushrod/issues/181)), 3.5 ([#182](https://github.com/KenSuenobu/rust-pushrod/issues/182)), 3.7 ([#183](https://github.com/KenSuenobu/rust-pushrod/issues/183)), 3.6 ([#184](https://github.com/KenSuenobu/rust-pushrod/issues/184)), 3.8 ([#185](https://github.com/KenSuenobu/rust-pushrod/issues/185)) | M2 done; Pushrod design mode (6.9), drag and drop (9.8), undo (1.15), layouts (5.5 to 5.7) |
 | **Chassis M4: inspector, events, and code** | Property inspector, events menu and indicators, handler creation, and the code view. | 4.1 ([#186](https://github.com/KenSuenobu/rust-pushrod/issues/186)), 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187)), 4.3 ([#188](https://github.com/KenSuenobu/rust-pushrod/issues/188)), 5.4 ([#189](https://github.com/KenSuenobu/rust-pushrod/issues/189)), 5.3 ([#190](https://github.com/KenSuenobu/rust-pushrod/issues/190)), 4.4 ([#191](https://github.com/KenSuenobu/rust-pushrod/issues/191)), 5.1 ([#192](https://github.com/KenSuenobu/rust-pushrod/issues/192)), 5.2 ([#193](https://github.com/KenSuenobu/rust-pushrod/issues/193)), 5.5 ([#194](https://github.com/KenSuenobu/rust-pushrod/issues/194)), 5.6 ([#195](https://github.com/KenSuenobu/rust-pushrod/issues/195)) | M3 done; Pushrod event metadata (6.13), context menu (2.19), choice button (3.6), code editor (Epic 11) |
 | **Chassis M5: build, run, and release (MVP)** | Build and run from Chassis, CI, documentation, and the sample project. Completes the Chassis MVP. | 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)), 7.2 ([#198](https://github.com/KenSuenobu/rust-pushrod/issues/198)), 7.3 ([#199](https://github.com/KenSuenobu/rust-pushrod/issues/199)) | M4 done |
-| **Chassis: after the MVP** | Settings, menu editor, form preview, multi-selection editing, error list, templates, packaging. | 1.5 ([#200](https://github.com/KenSuenobu/rust-pushrod/issues/200)), 2.7 ([#201](https://github.com/KenSuenobu/rust-pushrod/issues/201)), 3.9 ([#202](https://github.com/KenSuenobu/rust-pushrod/issues/202)), 4.5 ([#203](https://github.com/KenSuenobu/rust-pushrod/issues/203)), 6.3 ([#204](https://github.com/KenSuenobu/rust-pushrod/issues/204)), 6.4 ([#205](https://github.com/KenSuenobu/rust-pushrod/issues/205)), 7.4 ([#206](https://github.com/KenSuenobu/rust-pushrod/issues/206)) | Chassis MVP released |
+| **Chassis examples** | Example projects built with Chassis once it reaches the MVP: small, complete applications that exercise its features and that anyone can build and test against. | 8.1 ([#208](https://github.com/KenSuenobu/rust-pushrod/issues/208)), 8.2 ([#209](https://github.com/KenSuenobu/rust-pushrod/issues/209)), 8.3 ([#210](https://github.com/KenSuenobu/rust-pushrod/issues/210)), 8.4 ([#211](https://github.com/KenSuenobu/rust-pushrod/issues/211)), 8.5 ([#212](https://github.com/KenSuenobu/rust-pushrod/issues/212)), 8.6 ([#213](https://github.com/KenSuenobu/rust-pushrod/issues/213)), 8.7 ([#214](https://github.com/KenSuenobu/rust-pushrod/issues/214)), 8.8 ([#215](https://github.com/KenSuenobu/rust-pushrod/issues/215)) | Chassis MVP released; each example can be built independently by anyone |
+| **Chassis v2** | The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets. | 1.5 ([#200](https://github.com/KenSuenobu/rust-pushrod/issues/200)), 2.7 ([#201](https://github.com/KenSuenobu/rust-pushrod/issues/201)), 3.9 ([#202](https://github.com/KenSuenobu/rust-pushrod/issues/202)), 4.5 ([#203](https://github.com/KenSuenobu/rust-pushrod/issues/203)), 6.3 ([#204](https://github.com/KenSuenobu/rust-pushrod/issues/204)), 6.4 ([#205](https://github.com/KenSuenobu/rust-pushrod/issues/205)), 7.4 ([#206](https://github.com/KenSuenobu/rust-pushrod/issues/206)), 1.6 ([#216](https://github.com/KenSuenobu/rust-pushrod/issues/216)), 1.7 ([#217](https://github.com/KenSuenobu/rust-pushrod/issues/217)), 2.9 ([#218](https://github.com/KenSuenobu/rust-pushrod/issues/218)), 2.10 ([#219](https://github.com/KenSuenobu/rust-pushrod/issues/219)), 3.10 ([#220](https://github.com/KenSuenobu/rust-pushrod/issues/220)), 3.11 ([#221](https://github.com/KenSuenobu/rust-pushrod/issues/221)), 4.6 ([#222](https://github.com/KenSuenobu/rust-pushrod/issues/222)), 5.8 ([#223](https://github.com/KenSuenobu/rust-pushrod/issues/223)), 6.6 ([#224](https://github.com/KenSuenobu/rust-pushrod/issues/224)) | Chassis MVP released |
+
+### Example projects
+
+Once Chassis reaches the MVP, the example projects (Epic 8) are built with it: eight small, complete applications, each exercising a different set of features, kept in `examples/chassis/` with golden screenshots and a scripted CI test. They are labeled `help wanted` and `chassis-examples`: anyone can pick one up, and together they become the test bed for changes to Chassis and Pushrod.
+
+| Example | What it exercises |
+|---|---|
+| 8.1 ([#208](https://github.com/KenSuenobu/rust-pushrod/issues/208)) Hello, Chassis | The smallest Chassis application: one form, a label, and a button that counts clicks. |
+| 8.2 ([#209](https://github.com/KenSuenobu/rust-pushrod/issues/209)) Temperature converter | Two linked fields that convert between Celsius and Fahrenheit as you type. |
+| 8.3 ([#210](https://github.com/KenSuenobu/rust-pushrod/issues/210)) Tip calculator | Enter a bill, pick a tip percentage, and split it between people. |
+| 8.4 ([#211](https://github.com/KenSuenobu/rust-pushrod/issues/211)) Settings dialog | A classic preferences dialog with OK, Cancel, and Apply. |
+| 8.5 ([#212](https://github.com/KenSuenobu/rust-pushrod/issues/212)) Image viewer | Browse a set of pictures stored in the resource file. |
+| 8.6 ([#213](https://github.com/KenSuenobu/rust-pushrod/issues/213)) Stopwatch | Start, stop, lap, and reset, with a progress bar for the current minute. |
+| 8.7 ([#214](https://github.com/KenSuenobu/rust-pushrod/issues/214)) Quiz | A short multiple-choice quiz whose questions live in the resource file. |
+| 8.8 ([#215](https://github.com/KenSuenobu/rust-pushrod/issues/215)) Dice roller | Roll one to four dice and keep a running total. |
+
 
 ### First steps
 
