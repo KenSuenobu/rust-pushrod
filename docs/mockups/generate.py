@@ -1527,6 +1527,217 @@ def chassis_code():
     return [("Code tab: the new handler is inserted and the caret placed in its body; the inspector lists the events", c, None)]
 
 
+# ---- Chassis: designing with layout managers ---------------------------------------------
+LW, LH_ = 1000, 600          # frame: editor (left) + inspector (right)
+ED_W = LW - RIGHT_W
+
+def _lay_tag(c, x, y, w, h, name, selected=False):
+    """Designer overlay for a layout: dotted bounds and a small name tag."""
+    c.dotted(x, y, w, h, BLACK if selected else DARK)
+    tw = int(c.tw(name, 10)) + 8
+    c.rect(x, y - 13, tw, 13, fill=BLACK if selected else WHITE, outline=DARK)
+    c.text(x + 4, y - 13, name, WHITE if selected else DARK, 10)
+
+def _ins_bar(c, x, y, w, vertical=False):
+    """Insertion bar: where a dragged widget will be placed in a layout."""
+    if vertical:
+        c.rect(x - 1, y, 3, w, fill=BLACK, outline=None); c.rect(x - 4, y, 9, 2, fill=BLACK, outline=None); c.rect(x - 4, y + w - 2, 9, 2, fill=BLACK, outline=None)
+    else:
+        c.rect(x, y - 1, w, 3, fill=BLACK, outline=None); c.rect(x, y - 4, 2, 9, fill=BLACK, outline=None); c.rect(x + w - 2, y - 4, 2, 9, fill=BLACK, outline=None)
+
+def _ghost(c, x, y, label):
+    w = int(c.tw(label, 12)) + 16
+    c.dotted(x, y, w, 22); c.text(x + 8, y + 3, label, DARK, 12)
+
+def _spring(c, x, y, w):
+    """Spacer, drawn only in the designer: a zigzag spring."""
+    pts, n = [], max(4, w // 10)
+    for i in range(n + 1):
+        pts.append((x + i * w / n, y + (0 if i % 2 == 0 else 8)))
+    c.d.line([(px * S, (py + 6) * S) for px, py in pts], fill=DARK, width=S)
+
+def _layout_frame(crumbs, inspector):
+    c = C(LW, LH_, bg=WHITE)
+    # tabs
+    c.rect(0, 0, ED_W, 30, fill=PANEL, outline=None); c.line(0, 29, ED_W, 29, BLACK)
+    x = 10
+    for t, act in [("Designer", True), ("Code", False)]:
+        tw = int(c.tw(t, 13)) + 28
+        if act: c.rect(x, 4, tw, 26, fill=WHITE, outline=BLACK); c.line(x + 1, 29, x + tw - 1, 29, WHITE)
+        else: c.rect(x, 6, tw, 23, fill=PANEL, outline=MID)
+        c.ctext(x, 5, tw, 24, t, BLACK if act else DARK, 13); x += tw + 4
+    # breadcrumb: the path from the form to the selection (Esc selects the parent)
+    c.rect(0, 30, ED_W, 26, fill=WHITE, outline=None); c.line(0, 55, ED_W, 55, GRAY)
+    x = 10
+    for n, part in enumerate(crumbs):
+        last = n == len(crumbs) - 1
+        c.text(x, 34, part, BLACK if last else DARK, 12); x += c.tw(part, 12) + 6
+        if not last: c.tri(x, 40, 7, "right", MID); x += 14
+    c.text(ED_W - c.tw("Esc selects the parent", 11) - 10, 36, "Esc selects the parent", MID, 11)
+    _ch_grid(c, 0, 56, ED_W, LH_ - 56)
+    c.line(ED_W, 0, ED_W, LH_, GRAY)
+    # inspector
+    ix = ED_W
+    c.rect(ix + 1, 0, RIGHT_W - 1, LH_, fill=WHITE, outline=None)
+    y = 10
+    c.text(ix + 10, y, "INSPECTOR", DARK, 11); y += 20
+    title, sub, sections = inspector
+    c.text(ix + 10, y, title, BLACK, 17); y += 26
+    c.text(ix + 10, y, sub, MID, 12); y += 26
+    for head, rows in sections:
+        y = _ch_head(c, ix, y, RIGHT_W, head)
+        for label, value, kind in rows:
+            y = _prop(c, ix, y, RIGHT_W, label, value, kind=kind)
+        y += 4
+    return c
+
+FX, FY = 70, 96   # form origin in the frame
+
+def _form_box(c, w, h, title="Contact"):
+    c.rect(FX, FY, w, h, fill=PANEL)
+    c.rect(FX, FY, w, 26, fill=WHITE); c.ctext(FX, FY, w, 26, title, BLACK, 13)
+
+FORM_PROPS = lambda layout: ("ContactDialog", "Form  ·  root", [
+    ("IDENTITY", [("Name", "ContactDialog", "field"), ("Title", "Contact", "field")]),
+    ("LAYOUT", [("Layout", layout, "choice"), ("Spacing", "8", "field"), ("Margins", "12", "field"), ("Min size", "320 × 200", "field")])])
+
+@sb("chassis-layout", 1)
+def layout_column_empty():
+    c = _layout_frame(["ContactDialog"], FORM_PROPS("Column"))
+    W, H = 520, 300
+    _form_box(c, W, H)
+    lx, ly, lw, lh = FX + 12, FY + 26 + 12, W - 24, H - 26 - 24
+    _lay_tag(c, lx, ly, lw, lh, "Column", selected=True)
+    c.ctext(lx, ly, lw, lh, "Drop widgets here: they stack top to bottom", MID, 13)
+    return [("1. Choose a layout for the form (inspector: Layout = Column). The form becomes a column", c, None)]
+
+@sb("chassis-layout", 2)
+def layout_insert_form():
+    c = _layout_frame(["ContactDialog", "Column"], ("Column", "Layout of ContactDialog", [
+        ("COLUMN", [("Spacing", "8", "field"), ("Margins", "12", "field"), ("Align", "Stretch", "choice")]),
+        ("CHILDREN", [("Count", "1", "field")])]))
+    W, H = 520, 300
+    _form_box(c, W, H)
+    lx, ly, lw = FX + 12, FY + 26 + 12, W - 24
+    _lay_tag(c, lx, ly, lw, H - 26 - 24, "Column", selected=True)
+    c.text(lx + 4, ly + 6, "Contact details", BLACK, 16)
+    _ins_bar(c, lx + 4, ly + 40, lw - 8)
+    _ghost(c, lx + 150, ly + 50, "Form layout"); c.pointer(lx + 210, ly + 60)
+    return [("2. A label is in. Dragging a Form layout: the bar shows it will go below the label", c, "drop inserts at the bar; no x/y to set")]
+
+def _contact_rows(c, x, y, w, rows, label_w=70, wrap=False):
+    """Form-layout rows: right-aligned labels in one column, stretched fields."""
+    for n, (lab, val) in enumerate(rows):
+        if wrap:
+            c.text(x + 4, y, lab, BLACK, 13); c.field(x + 4, y + 20, w - 8, val); y += 50
+        else:
+            c.text(x + label_w - c.tw(lab, 13), y + 3, lab, BLACK, 13)
+            c.field(x + label_w + 8, y, w - label_w - 12, val); y += 32
+    return y
+
+@sb("chassis-layout", 3)
+def layout_form_rows():
+    c = _layout_frame(["ContactDialog", "Column", "Form"], ("Form", "Form layout in Column", [
+        ("FORM LAYOUT", [("Label align", "Right", "choice"), ("Row spacing", "8", "field"), ("Wrap below", "280 px", "field")]),
+        ("IN COLUMN", [("Stretch", "0", "field")])]))
+    W, H = 520, 300
+    _form_box(c, W, H)
+    lx, ly, lw = FX + 12, FY + 26 + 12, W - 24
+    _lay_tag(c, lx, ly, lw, H - 26 - 24, "Column")
+    c.text(lx + 4, ly + 6, "Contact details", BLACK, 16)
+    fx, fy, fw = lx + 6, ly + 44, lw - 12
+    y = _contact_rows(c, fx, fy, fw, [("Name:", "Jane Doe"), ("E-mail:", "jane.doe@example.com")])
+    _lay_tag(c, fx, fy - 6, fw, y - fy + 40, "Form", selected=True)
+    c.dotted(fx + 4, y, 70, 22); c.text(fx + 12, y + 3, "Label:", MID, 13)
+    c.dotted(fx + 86, y, fw - 90, 22)
+    _ghost(c, fx + 200, y + 34, "Text Field"); c.pointer(fx + 250, y + 42)
+    return [("3. Dropping a Text Field into the Form layout adds a row: label and field, aligned with the rows above", c, "new row: Label3 + TextField3")]
+
+def _full_dialog(c, W, x0, y0, wrap=False, selected_spacer=True, tags=True):
+    c.rect(x0, y0, W, 26, fill=WHITE); c.ctext(x0, y0, W, 26, "Contact", BLACK, 13)
+    lx, ly, lw = x0 + 12, y0 + 26 + 12, W - 24
+    y = ly
+    c.text(lx + 4, y + 6, "Contact details", BLACK, 16); y += 44
+    fy = y
+    y = _contact_rows(c, lx + 6, y, lw - 12, [("Name:", "Jane Doe"), ("E-mail:", "jane.doe@example.com"), ("Phone:", "555-0100")], wrap=wrap)
+    c.checkbox(lx + (10 if wrap else 84), y + 2, "Send me product updates", state="on"); y += 30
+    if tags: _lay_tag(c, lx + 6, fy - 6, lw - 12, y - fy + 6, "Form")
+    c.line(lx + 4, y + 6, lx + lw - 4, y + 6, GRAY); y += 18
+    ry = y
+    bw = 90
+    sx, sw = lx + 10, lw - 20 - 2 * bw - 16
+    if tags:
+        _spring(c, sx, ry + 6, sw)
+        if selected_spacer: c.rect(sx - 2, ry + 2, sw + 4, 24, fill=None, outline=BLACK)
+    c.button(lx + lw - 10 - 2 * bw - 8, ry, bw, 28, "Cancel"); c.button(lx + lw - 10 - bw, ry, bw, 28, "OK", default=True)
+    if tags: _lay_tag(c, lx + 6, ry - 4, lw - 12, 36, "Row")
+    y = ry + 40
+    if tags: _lay_tag(c, lx, ly, lw, y - ly, "Column")
+    return y + 6
+
+@sb("chassis-layout", 4)
+def layout_row_spacer():
+    c = _layout_frame(["ContactDialog", "Column", "Row", "Spacer1"], ("Spacer1", "Spacer in Row", [
+        ("SPACER", [("Min width", "0", "field")]),
+        ("IN ROW", [("Stretch", "1", "field"), ("Align", "Center", "choice"), ("Margin", "0", "field")])]))
+    W = 520
+    probe = C(LW, LH_); h = _full_dialog(probe, W, FX, FY) - FY
+    c.rect(FX, FY, W, h, fill=PANEL)
+    _full_dialog(c, W, FX, FY)
+    return [("4. A Row holds a Spacer, Cancel, and OK: the Spacer (stretch 1) takes the extra width, so the buttons stay right", c, None)]
+
+@sb("chassis-layout", 5)
+def layout_resize():
+    def sized(w, wrap):
+        probe = C(800, 600); h = _full_dialog(probe, w, 14, 14, wrap=wrap, selected_spacer=False) - 14
+        return h
+    hn, hw = sized(300, True), sized(560, False)
+    H = max(hn, hw) + 60
+    a = C(330, H, bg=(226, 226, 226))
+    a.rect(14, 14, 300, hn, fill=PANEL); _full_dialog(a, 300, 14, 14, wrap=True, selected_spacer=False)
+    a.text(14, H - 28, "Narrow (300 px): labels wrap above fields", DARK, 12)
+    b = C(590, H, bg=(226, 226, 226))
+    b.rect(14, 14, 560, hw, fill=PANEL); _full_dialog(b, 560, 14, 14, selected_spacer=False)
+    b.text(14, H - 28, "Wide (560 px): fields stretch, the Spacer grows, buttons stay right", DARK, 12)
+    return [("5. Before: narrow", a, None), ("After: drag the form's edge wider; layouts re-arrange live", b, None)]
+
+@sb("chassis-layout", 6)
+def layout_grid():
+    c = _layout_frame(["ContactDialog", "Grid", "NotesArea"], ("NotesArea", "Text Area in Grid", [
+        ("IN GRID", [("Row", "1", "field"), ("Column", "0", "field"), ("Row span", "1", "field"), ("Column span", "3", "field"), ("Align", "Fill", "choice")]),
+        ("GRID", [("Columns", "1 · 1 · 1", "field"), ("Rows", "0 · 1 · 0", "field")])]))
+    W, H = 560, 330
+    _form_box(c, W, H, "Notes")
+    gx, gy, gw, gh = FX + 30, FY + 26 + 30, W - 44, H - 26 - 44
+    cols = [gw // 3, gw // 3, gw - 2 * (gw // 3)]; rows = [36, gh - 36 - 40, 40]
+    # header strips: column and row numbers with stretch, for resizing tracks
+    x = gx
+    for i, cw in enumerate(cols):
+        c.rect(x, gy - 18, cw, 16, fill=WHITE, outline=GRAY); c.ctext(x, gy - 18, cw, 16, f"{i}  ·  stretch 1", DARK, 10); x += cw
+    y = gy
+    for i, rh in enumerate(rows):
+        c.rect(gx - 24, y, 22, rh, fill=WHITE, outline=GRAY); c.ctext(gx - 24, y, 22, rh, str(i), DARK, 10); y += rh
+    # cell lines
+    x = gx
+    for cw in cols[:-1]:
+        x += cw; c.dotted(x, gy, 1, gh)
+    y = gy
+    for rh in rows[:-1]:
+        y += rh; c.dotted(gx, y, gw, 1)
+    c.dotted(gx, gy, gw, gh)
+    c.text(gx + 8, gy + 9, "Subject:", BLACK, 13); c.field(gx + cols[0] + 6, gy + 7, cols[1] + cols[2] - 12, "Weekly report")
+    ty = gy + rows[0] + 6; th = rows[1] - 12
+    c.rect(gx + 6, ty, gw - 12, th, fill=WHITE)
+    c.text(gx + 12, ty + 6, "Notes for the team meeting.", BLACK, 13)
+    c.rect(gx + 3, ty - 3, gw - 6, th + 6, fill=None, outline=BLACK)
+    for hx, hy in [(gx + 2, ty - 4), (gx + gw - 8, ty - 4), (gx + 2, ty + th - 2), (gx + gw - 8, ty + th - 2)]:
+        c.rect(hx, hy, 6, 6, fill=BLACK, outline=None)
+    by = gy + rows[0] + rows[1] + 6
+    c.button(gx + cols[0] + cols[1] + cols[2] - 96, by, 90, 28, "Close", default=True)
+    _lay_tag(c, gx, gy - 20 - 2, 0, 0, "Grid") if False else None
+    return [("6. Grid (after the MVP): drop into a cell; drag a selected widget's edge across cells to span them", c, "NotesArea spans columns 0 to 2")]
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))

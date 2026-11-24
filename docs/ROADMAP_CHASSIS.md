@@ -73,6 +73,52 @@ it snaps to the grid and to neighboring widgets, and a dotted guide appears when
 with others. Dropping adds the widget, gives it a unique name (`TextField1`), and selects it.
 Selected widgets show eight square handles for resizing; arrow keys nudge by one grid step.
 
+### Designing with layouts
+
+Forms can be laid out two ways, and both can be mixed in one form:
+
+- **Fixed positions** (layout: None): drop a widget anywhere; it keeps the x and y you give it, with
+  grid snapping and guides (as above).
+- **Layout managers** (Pushrod 5.5 to 5.10): the form or a container gets a layout, and dropped
+  widgets are *inserted* into it rather than positioned. The layout decides positions and sizes, so
+  forms resize gracefully and adapt to longer text.
+
+The palette has a **Layouts** section (Column, Row, Form, Grid, Stack, Flow, and Spacer). A layout
+can be set on the form or any container in the inspector (Layout = Column), or dropped as a nested
+layout. The designer marks every layout with a dotted outline and a small name tag (designer only;
+nothing extra is drawn at run time).
+
+![1. The form gets a Column layout](mockups/chassis-layout-1.png)
+
+![2. Inserting a Form layout: the bar shows where it goes](mockups/chassis-layout-2.png)
+
+While dragging over a layout, a **black insertion bar** shows where the widget will go (between
+which children); there is no position to set. Dropping into a **Form layout** adds a whole row: a
+label and the field, aligned with the rows above (labels share one right-aligned column).
+
+![3. Dropping a Text Field into the Form layout adds a row](mockups/chassis-layout-3.png)
+
+A **Spacer** (drawn as a spring, only in the designer) takes up extra space. A Row of Spacer,
+Cancel, and OK keeps the buttons right-aligned at any width. Selecting a child shows its own
+properties plus an **"In Row"** (or "In Form", "In Grid") section with its layout settings: stretch,
+alignment, margin, and for grids, row, column, and spans.
+
+![4. A Row with a Spacer keeps OK and Cancel right-aligned](mockups/chassis-layout-4.png)
+
+Drag the form's edge to try sizes: layouts re-arrange live in the designer. When the form gets
+narrower than the Form layout's *wrap below* width, labels move above their fields.
+
+![5. Narrow and wide: the same form re-arranged](mockups/chassis-layout-5.png)
+
+A **Grid** (after the Pushrod MVP) shows numbered row and column headers with each track's stretch;
+drop into a cell, and drag a selected widget's edge across cells to span them.
+
+![6. Grid layout: cells, spans, and track stretch](mockups/chassis-layout-6.png)
+
+**Selecting inside nested layouts.** A **breadcrumb** above the design surface shows the path from
+the form to the selection (`ContactDialog > Column > Row > Spacer1`); click any part to select it,
+or press Escape to select the parent. This replaces a tree view for navigating the form's structure.
+
 ### Inspector: a drawer, not a callout
 
 The inspector is a **drawer on the right**, recommended over a callout:
@@ -146,9 +192,11 @@ Generated code and your code never share a function body, so regenerating can't 
    automatically when the widget is renamed?
 4. **One code file per form** (proposed), or one per project?
 5. **Resource file extension:** `.prsc`, matching the format's magic number?
-6. **Where Chassis lives:** in this repository's workspace (simplest while Pushrod's APIs are
+6. **Default layout for new forms:** fixed positions (classic designer feel) or a Column with a
+   Form layout (resizes well from the start)?
+7. **Where Chassis lives:** in this repository's workspace (simplest while Pushrod's APIs are
    moving), or its own repository from the start?
-7. **Tree view:** the project drawer uses expander sections with lists, so Chassis doesn't need the
+8. **Tree view:** the project drawer uses expander sections with lists, so Chassis doesn't need the
    parked tree view. Is that enough, or should nested resources (menus with submenus) unpark it?
 
 ## Relationship to Pushrod
@@ -192,7 +240,8 @@ The Chassis MVP is a version in which a developer can:
 
 1. Create or open a project: a Cargo crate plus its `.prsc` resource file.
 2. Add a form, drag the core widgets (labels, buttons, check boxes, radio buttons, text fields,
-   separators, group boxes) onto it, move and resize them with grid snapping, and undo any change.
+   separators, group boxes) onto it, either at fixed positions with grid snapping or into Column,
+   Row, and Form layouts that resize with the window, and undo any change.
 3. Edit any widget's properties in the inspector, with names validated as Rust identifiers.
 4. See every event a widget supports (right-click menu and inspector), see which have code, and
    create or open a handler with one click (or double-click for the default event).
@@ -205,7 +254,7 @@ The Chassis MVP is a version in which a developer can:
 |---|---|---|---|---|
 | 1 | Application shell | Main window, three-pane workspace, Designer/Code tabs, commands | 5 | 4 |
 | 2 | Project and resource file | Project model, open/save, project drawer, resource management | 7 | 4 |
-| 3 | Form designer | Design surface, palette, drag and drop, selection, snapping, containers, undo | 9 | 7 |
+| 3 | Form designer | Design surface, palette, drag and drop, selection, snapping, containers, layouts, undo | 9 | 8 |
 | 4 | Inspector | Inspector drawer, property grid, typed editors, names and IDs | 5 | 4 |
 | 5 | Events and code | Event metadata, events menu, indicators, handlers, code view, wiring | 8 | 8 |
 | 6 | Build and run | Code generation rules, build and run, error list, templates | 4 | 2 |
@@ -437,7 +486,7 @@ gets its own issue with mockups when the MVP is in use.
 | 3.5 | Snapping and alignment | Grid snap, guides to neighbors, align and distribute commands | `chassis`, `designer` | Y | Y | M | `designer/snap.rs` |
 | 3.6 | Containers, z-order, and tab order | Drop into group boxes and containers; bring forward; set tab order | `chassis`, `designer` | Y | Y | M | `designer/structure.rs` |
 | 3.7 | Clipboard and undo | Cut, copy, paste, duplicate; every designer change undoable | `chassis`, `designer` | Y | Y | M | `designer/history.rs` |
-| 3.8 | Layout managers in the designer | Place widgets in row, column, form, and grid layouts | `chassis`, `designer` | Y | N | L | `designer/layouts.rs` |
+| 3.8 | Layout managers in the designer | Insert widgets into Column, Row, Form, and Grid layouts; spacers; breadcrumb | `chassis`, `designer` | N | Y | L | `designer/layouts.rs`, `designer/breadcrumb.rs` |
 | 3.9 | Form preview | Run the form live inside Chassis without building | `chassis`, `designer` | Y | N | M | `designer/preview.rs` |
 
 ### 3.1: Design surface
@@ -575,11 +624,49 @@ Duplicate (Ctrl+D) copy widgets with their properties (names made unique; handle
 
 **Documentation.** "Designing forms": undo and clipboard.
 
-### 3.8 and 3.9: Layout managers and form preview (post-MVP)
+### 3.8: Layout managers in the designer
 
-Placing widgets inside Pushrod's row, column, form, and grid layouts (5.5 to 5.7), so designed forms
-resize gracefully; and a preview mode that runs the form live inside Chassis (widgets respond,
-handlers don't run) to check behavior without building.
+**Problem Statement.** Fixed positions break when text gets longer or the window is resized. Forms
+built with layout managers adapt, but only if the designer makes layouts as easy to use as dropping
+widgets at a position.
+
+**Solution / Scope.** As in "Designing with layouts" and its mockups:
+
+- A **Layouts** palette section (Column, Row, Form, Grid, Stack, Flow, Spacer) and a **Layout**
+  property on the form and every container (None, Column, Row, Form, Grid, ...).
+- Dotted outline and name tag on every layout (design overlay only).
+- Dragging over a layout shows an **insertion bar** at the drop position; dropping inserts the
+  widget there. Dropping into a Form layout adds a label-and-field row. Dragging an existing child
+  reorders it within or moves it between layouts.
+- A **Spacer** widget, drawn as a spring in the designer.
+- An **"In \<layout\>"** inspector section for the selected child's layout settings (stretch,
+  alignment, margin; row, column, spans in grids), and the layout's own settings (spacing, margins,
+  label alignment, wrap width) when the layout is selected.
+- **Live resize:** dragging the form's edge re-runs the layouts in the designer.
+- **Breadcrumb** above the design surface for selecting parents in nested layouts; Escape selects
+  the parent.
+
+Column, Row, Form layouts and Spacer are in the Chassis MVP (they are in Pushrod's MVP); Grid, Stack,
+and Flow appear in the palette when Pushrod ships them (5.8 to 5.10).
+
+**Acceptance Criteria.**
+- The contact dialog can be built entirely with layouts, as in mockups 1 to 4
+- Resizing the form in the designer matches the running application
+- Reordering by drag, and undo, work inside layouts
+- Breadcrumb and Escape select parents
+
+**Parallelism / Dependencies.** Requires 3.3, 3.4, 4.2, Pushrod 5.5, 5.6, 5.7 (5.8 to 5.10 when
+available).
+
+**Technical Stack.** Rust, Pushrod.
+
+**Documentation.** "Designing forms": a "Using layouts" section with the mockups' steps as a
+tutorial.
+
+### 3.9: Form preview (post-MVP)
+
+A preview mode that runs the form live inside Chassis (widgets respond, handlers don't run) to check
+behavior without building.
 
 ## Epic 4: Inspector
 
@@ -921,16 +1008,16 @@ line; and project templates (empty application, dialog application, the contacts
    as a Pushrod issue) can start as soon as Pushrod 6.1 lands.
 2. **Shell:** 1.1, 1.2, 1.4, 1.3
 3. **Project:** 2.1, 2.2, 2.3, 2.4
-4. **Designer:** 3.1, 3.2, 3.4, 3.3, 3.5, 3.7, 3.6
+4. **Designer:** 3.1, 3.2, 3.4, 3.3, 3.5, 3.7, 3.6, 3.8
 5. **Inspector:** 4.1, 4.2, 4.3, 4.4
 6. **Events and code:** 5.1, 5.5, 5.4, 5.8, 5.2, 5.3, 5.6, 5.7
 7. **Build:** 6.1, 6.2
 8. **Quality:** 7.1, 7.2, 7.3 (written alongside, finished here) -- **Chassis MVP**
-9. **After the MVP:** 1.5, 2.5, 2.6, 2.7, 3.8, 3.9, 4.5, 6.3, 6.4, 7.4
+9. **After the MVP:** 1.5, 2.5, 2.6, 2.7, 3.9, 4.5, 6.3, 6.4, 7.4
 
 ## Sources
 
-- Mockups: [`docs/mockups/generate.py`](mockups/generate.py) (`chassis-1` to `chassis-4`).
+- Mockups: [`docs/mockups/generate.py`](mockups/generate.py) (`chassis-1` to `chassis-4`, `chassis-layout-1` to `chassis-layout-6`).
 - Pushrod roadmap: [`docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md`](ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md)
   (Epic 6 forms, Epic 11 code editor).
 - Ideas (not names or artwork) from Borland Delphi (form designer, object inspector, F12 form/code
