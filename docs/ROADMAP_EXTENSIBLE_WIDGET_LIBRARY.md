@@ -24,6 +24,7 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Engine separate from design.** The engine (tree, events, invalidation, paint API) and the design layer (widgets, defaults, appearance, themes) are separate modules with written specs (7.6 (#114)).
 - **Use shared foundations.** Text layout (Parley) and accessibility (AccessKit) come from the ecosystem's well-tested crates rather than being reinvented.
 - **Layouts are optional and extensible.** Containers can stay absolutely positioned, as designed forms were on classic systems, or use simple layout managers (row, column, form, grid, stack, flow) and custom ones, so forms resize and adapt to text and fonts.
+- **Fictional sample data only.** Demos, examples, tests, mockups, documentation, and issue text never contain real names or personal information; use placeholders such as Jane Doe, jane.doe@example.com, Anytown, and /home/user (see CONTRIBUTING.md).
 - **Usability first.** A control is added because it makes ordinary applications easier to use, not because another toolkit had it. Ideas that didn't meet that bar are listed under *Parked*.
 - **Self-contained and GPU-first.** Pushrod draws everything itself through SDL2: no OS-native menus, menu bars, dialogs, or controls, so applications look and behave the same everywhere. Each widget paints into its own GPU texture only when invalidated; frames are composed by blitting cached textures; text comes from a glyph atlas texture. SDL2 does the heavy lifting for graphics and input.
 
@@ -1668,8 +1669,8 @@ Like every widget, it can also receive application-defined custom events in `han
 col[0] (root)       col[1] (children of
                     col[0] selection)   col[2] (children of col[1] selection)
 +--------------+    +--------------+    +--------------+
-| Applications▶|    | ken         ▶|    | Documents   ▶|
-|#Users########|--> |#ken#########▶|--> |#Projects####▶|--> col[3] ...
+| Applications▶|    | user        ▶|    | Documents   ▶|
+|#Users########|--> |#user########▶|--> |#Projects####▶|--> col[3] ...
 | System      ▶|    | shared      ▶|    | Music       ▶|
 +--------------+    +--------------+    +--------------+
 ```
@@ -2558,13 +2559,14 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Problem Statement.** There is no CI.
 
-**Solution / Scope.** Workflow installing SDL2/ttf/image dev packages; `cargo fmt --check`, `clippy -D warnings`, `test`, `doc`; Ubuntu and macOS; MSRV 1.86 and stable.
+**Solution / Scope.** Workflow installing SDL2/ttf/image dev packages; `cargo fmt --check`, `clippy -D warnings`, `test`, `doc`; Ubuntu and macOS; MSRV 1.86 and stable. Add a sample-data check that fails on e-mail addresses outside the reserved example domains (example.com/.org/.net) and on home-directory paths containing user names, in examples, tests, docs, and mockups.
 
 **Acceptance Criteria.**
 
 - Runs on PRs and main
 - Fails on warnings, formatting, or tests
 - README badge
+- Sample-data check flags real-looking e-mail addresses and user home paths
 
 **Parallelism / Dependencies.** Parallelizable. Independent; do first.
 
@@ -2594,7 +2596,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Problem Statement.** There is no single place to see every widget.
 
-**Solution / Scope.** `examples/gallery.rs` with labeled tiles; each widget issue adds its tile; README screenshot comes from it.
+**Solution / Scope.** `examples/gallery.rs` with labeled tiles; each widget issue adds its tile; README screenshot comes from it. All sample data in the gallery is fictional (CONTRIBUTING.md).
 
 **Acceptance Criteria.**
 
@@ -2611,7 +2613,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Problem Statement.** Extending Pushrod is the point of the redesign; it needs end-to-end docs.
 
-**Solution / Scope.** Guide: paint-only widget, interactive widget with events and callbacks, behavior and state, input controllers (9.4 (#96)), composites, custom events, registry and properties, testing with `Engine::dispatch` and goldens.
+**Solution / Scope.** Guide: paint-only widget, interactive widget with events and callbacks, behavior and state, input controllers (9.4 (#96)), composites, custom events, registry and properties, testing with `Engine::dispatch` and goldens. Includes the sample-data rule: fictional placeholders only, no real names or PII.
 
 **Acceptance Criteria.**
 
@@ -2646,7 +2648,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Problem Statement.** Contributors (human or AI-assisted) work best against modules with clear boundaries and written contracts. Pushrod's contracts (what a widget must do, how events are routed, what a painter must provide, the form file format) live only in code and issue text.
 
-**Solution / Scope.** Write short specs in `docs/specs/`: `widget.md` (core, paint, events, parts, properties), `events.md` (vocabulary, phases, masks, engine events, ordering guarantees), `paint.md` (Painter trait and cache policy), `forms.md` (links to the form format). Keep the engine (tree, events, invalidation, paint API) separate from the design layer (widget defaults, appearance, theme) in both docs and module layout. Add conformance tests in `tests/conformance/` that check each guarantee (event order, propagation, mask filtering, engine-event emission) so alternative widgets and backends can prove compliance.
+**Solution / Scope.** Write short specs in `docs/specs/`: `widget.md` (core, paint, events, parts, properties), `events.md` (vocabulary, phases, masks, engine events, ordering guarantees), `paint.md` (Painter trait and cache policy), `forms.md` (links to the form format). Keep the engine (tree, events, invalidation, paint API) separate from the design layer (widget defaults, appearance, theme) in both docs and module layout. Add conformance tests in `tests/conformance/` that check each guarantee (event order, propagation, mask filtering, engine-event emission) so alternative widgets and backends can prove compliance. Specs and conformance tests use fictional sample data only.
 
 **Acceptance Criteria.**
 

@@ -59,3 +59,7 @@ examples in the examples directory.
 This is the current state of the example app.
 
 ![App image](examples/example-app.png)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Demos, examples, tests, mockups, and documentation use fictional sample data only: no real names or personal information.
