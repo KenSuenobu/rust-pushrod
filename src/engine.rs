@@ -27,11 +27,14 @@
 //! access to that state, and to the `Widget`s through a [`Ui`] handle, in the style of Visual
 //! Basic event procedures:
 //!
-//! ```rust,no_run
-//! use pushrod::button_widget::ButtonWidget;
+//! The example uses the standard widgets from the `pushrod-widgets` crate; the core itself
+//! contains no widgets other than the window's [`RootWidget`].
+//!
+//! ```rust,ignore
 //! use pushrod::engine::Engine;
 //! use pushrod::geometry::{point, size};
-//! use pushrod::text_widget::{TextJustify, TextWidget};
+//! use pushrod_widgets::button_widget::ButtonWidget;
+//! use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 //! use sdl2::pixels::Color;
 //! use sdl2::ttf::FontStyle;
 //!
@@ -60,11 +63,11 @@
 //! engine.run(sdl, window, AppState::default());
 //! ```
 
-use crate::base_widget::BaseWidget;
 use crate::cache::WidgetCache;
 use crate::event::PushrodEvent;
 use crate::font::FontCache;
-use crate::geometry::{Point, Size};
+use crate::geometry::Size;
+use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::pixels::Color;
@@ -127,13 +130,10 @@ pub struct Engine<S = ()> {
 
 impl<S> Engine<S> {
     /// Creates a new engine given a `Size` and a `frame_rate` in which to refresh the screen.
-    /// Default frame rates are 60 and 120.  A white top-level `Widget` is created with ID `0`.
+    /// Default frame rates are 60 and 120.  A white [`RootWidget`] is created with ID `0`.
     pub fn new(size: Size, frame_rate: u32) -> Self {
         let mut widget_cache = WidgetCache::default();
-        let mut base_widget = BaseWidget::new(Point::new(0, 0), Size::new(size.w, size.h));
-
-        base_widget.set_color(Color::RGBA(255, 255, 255, 255));
-        widget_cache.add(Box::new(base_widget));
+        widget_cache.add(Box::new(RootWidget::new(Size::new(size.w, size.h))));
 
         Self {
             frame_rate,
@@ -191,6 +191,13 @@ impl<S> Engine<S> {
         F: FnMut(&mut S, &mut Ui, &PushrodEvent) + 'static,
     {
         self.event_callbacks.push(Box::new(callback));
+    }
+
+    /// Sets the window's background color: the color of the [`RootWidget`] (ID `0`).
+    pub fn set_background(&mut self, color: Color) {
+        if let Some(root) = self.widget_cache.get_mut(crate::widget::ROOT_WIDGET_ID) {
+            root.set_color(color);
+        }
     }
 
     /// Returns the current `Size` of the managed window.

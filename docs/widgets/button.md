@@ -71,7 +71,8 @@ Requires [1.1](https://github.com/KenSuenobu/rust-pushrod/issues/19), [1.6](http
 
 ## Implementation notes
 
-- **Modules:** `button_widget.rs`, `paint.rs`
+- **Crate:** `pushrod-widgets`, using only the public API of the `pushrod` core. Shared behavior (states, focus, events) comes from the core; anything the widget needs that the core doesn't expose is added to the core first.
+- **Modules:** `pushrod-widgets/src/button_widget.rs`, `src/paint.rs`
 - **Stack:** Rust
 - **Drawing:** paints into its own GPU texture only when invalidated; frames are composed by blitting. No OS-native controls; no per-frame CPU pixel work.
 

@@ -6,14 +6,14 @@ description: A rectangle filled with one color. Use it as a background or a pane
 
 # Base
 
-`BaseWidget` (module `pushrod::base_widget`): a rectangle filled with one color. Use it as a background or a panel that holds other widgets.
+`BaseWidget` (module `pushrod_widgets::base_widget`): a rectangle filled with one color. Use it as a background or a panel that holds other widgets.
 
 ![A Base widget filled with blue](/img/screenshots/base.png)
 
 ## Creating it
 
 ```rust
-use pushrod::base_widget::BaseWidget;
+use pushrod_widgets::base_widget::BaseWidget;
 use pushrod::geometry::{point, size};
 use pushrod::widget::Widget;
 use sdl2::pixels::Color;
@@ -46,7 +46,7 @@ Every widget also has the methods of the `Widget` trait: `get_id`, `get_parent`,
 
 ## Notes
 
-The window's root widget (ID `0`) is a `BaseWidget`. Add other widgets as its children with `engine.add_child_widget(panel_id, widget)` to group and move them together.
+The window's root widget (ID `0`) is the core's `RootWidget`, not a `BaseWidget`; change the window color with `engine.set_background(color)`. Add other widgets as its children with `engine.add_child_widget(panel_id, widget)` to group and move them together.
 
 ## Planned
 

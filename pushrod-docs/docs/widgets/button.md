@@ -6,16 +6,16 @@ description: A push button with a text label that emits `Clicked`.
 
 # Button
 
-`ButtonWidget` (module `pushrod::button_widget`): a push button with a text label that emits `Clicked`.
+`ButtonWidget` (module `pushrod_widgets::button_widget`): a push button with a text label that emits `Clicked`.
 
 ![A Button, normal and pressed](/img/screenshots/button-states.png)
 
 ## Creating it
 
 ```rust
-use pushrod::button_widget::ButtonWidget;
+use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::geometry::{point, size};
-use pushrod::text_widget::TextJustify;
+use pushrod_widgets::text_widget::TextJustify;
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
 

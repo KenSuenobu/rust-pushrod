@@ -10,9 +10,16 @@ documentation it needs. Each widget has its own roadmap in [`docs/widgets/`](doc
 which is the specification for that widget. To change how a widget looks or behaves, edit its
 roadmap file (and its mockup in `docs/mockups/generate.py`) in a pull request, then update the issue.
 
+## Where code goes
+
+- **`pushrod` (core, `src/`):** engine, widget tree, events, `paint` helpers, caches, and shared
+  widget behavior (flags, states, focus, clipping). No widgets except `RootWidget`.
+- **`pushrod-widgets` (`pushrod-widgets/src/`):** the standard widgets. Use only the core's public
+  API; if a widget needs something the core doesn't expose, add it to the core in its own change.
+
 ## Before opening a pull request
 
-- `cargo fmt`, `cargo clippy --all-targets`, and `cargo test` pass.
+- `cargo fmt --all`, `cargo clippy --workspace --all-targets`, and `cargo test --workspace` pass.
 - Documentation changes ship in the same pull request as the code: the Docusaurus site in
   `pushrod-docs/` (each widget has its own page under **Widgets**), rustdoc, examples,
   screenshots, and the changelog. Check the site with `cd pushrod-docs && npm install &&

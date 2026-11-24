@@ -18,10 +18,10 @@
 //! This is a default widget that can be used as a top-level canvas.  It is a basic `Widget`
 //! implementation that fills its background with the desired color.
 
-use crate::font::FontCache;
-use crate::geometry::{Point, Size};
-use crate::paint;
-use crate::widget::{Widget, WidgetCore};
+use pushrod::font::FontCache;
+use pushrod::geometry::{Point, Size};
+use pushrod::paint;
+use pushrod::widget::{Widget, WidgetCore};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 

@@ -18,10 +18,10 @@
 //! This is a simple system `Widget` that fills its background like the `BaseWidget`, and draws a
 //! border of a specific width and color on top of it.
 
-use crate::font::FontCache;
-use crate::geometry::{Point, Size};
-use crate::paint;
-use crate::widget::{Widget, WidgetCore};
+use pushrod::font::FontCache;
+use pushrod::geometry::{Point, Size};
+use pushrod::paint;
+use pushrod::widget::{Widget, WidgetCore};
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;

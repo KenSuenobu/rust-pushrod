@@ -2,6 +2,6 @@
 #
 # Builds the application
 
-cargo build
-cargo doc
+cargo build --workspace
+cargo doc --workspace --no-deps
 

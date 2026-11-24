@@ -6,14 +6,14 @@ description: A filled rectangle with a border of any width and color.
 
 # Box
 
-`BoxWidget` (module `pushrod::box_widget`): a filled rectangle with a border of any width and color.
+`BoxWidget` (module `pushrod_widgets::box_widget`): a filled rectangle with a border of any width and color.
 
 ![A Box widget with a 3-pixel black border](/img/screenshots/box.png)
 
 ## Creating it
 
 ```rust
-use pushrod::box_widget::BoxWidget;
+use pushrod_widgets::box_widget::BoxWidget;
 use pushrod::geometry::{point, size};
 use pushrod::widget::Widget;
 use sdl2::pixels::Color;

@@ -1,22 +1,27 @@
 // Event dispatch tests.  These exercise the WidgetCache and Engine without opening a window.
 
-use pushrod::base_widget::BaseWidget;
-use pushrod::button_widget::ButtonWidget;
 use pushrod::cache::WidgetCache;
 use pushrod::engine::Engine;
 use pushrod::event::PushrodEvent;
 use pushrod::geometry::{point, size};
-use pushrod::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::base_widget::BaseWidget;
+use pushrod_widgets::button_widget::ButtonWidget;
+use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use sdl2::event::Event;
 use sdl2::mouse::{MouseButton, MouseState};
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
 
+const FONT: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../assets/OpenSans-Regular.ttf"
+);
+
 fn button(x: i32, y: i32) -> ButtonWidget {
     ButtonWidget::new(
         point(x, y),
         size(100, 20),
-        String::from("assets/OpenSans-Regular.ttf"),
+        String::from(FONT),
         FontStyle::NORMAL,
         14,
         Color::BLACK,
@@ -193,7 +198,7 @@ fn engine_runs_click_callbacks_with_state_and_widget_access() {
     let label_id = engine.add_widget(TextWidget::new(
         point(10, 50),
         size(200, 20),
-        String::from("assets/OpenSans-Regular.ttf"),
+        String::from(FONT),
         FontStyle::NORMAL,
         14,
         Color::BLACK,

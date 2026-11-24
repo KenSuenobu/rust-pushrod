@@ -24,11 +24,11 @@
 //! selects it again.  `Clicked` is only generated if the mouse button is released while the
 //! button is still selected.
 
-use crate::event::{EventCtx, PushrodEvent};
-use crate::font::FontCache;
-use crate::geometry::{Point, Size};
-use crate::paint::{self, TextJustify, TextStyle};
-use crate::widget::{Widget, WidgetCore};
+use pushrod::event::{EventCtx, PushrodEvent};
+use pushrod::font::FontCache;
+use pushrod::geometry::{Point, Size};
+use pushrod::paint::{self, TextJustify, TextStyle};
+use pushrod::widget::{Widget, WidgetCore};
 use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;

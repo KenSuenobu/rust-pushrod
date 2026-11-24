@@ -26,6 +26,25 @@ first, and only then calling the callbacks once no `Widget` is borrowed, removes
 `Widget`s are stored in a flat list and addressed by ID, with parent and child links by ID, like
 the `OBJECT` tree of a GEM resource.  This keeps forms simple to save, load, and edit visually.
 
+## Crates
+
+Pushrod is a Cargo workspace with two crates:
+
+| Crate | What it contains |
+|---|---|
+| [`pushrod`](src/lib.rs) (this directory) | The core: engine, widget tree and IDs, events and callbacks, `paint` helpers, texture and font caches. No widgets except the window's root. |
+| [`pushrod-widgets`](pushrod-widgets/) | The standard widgets: simple, flat, and predictable. |
+
+```toml
+[dependencies]
+pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+```
+
+`pushrod-widgets` uses only the core's public API, so another widget library can extend it or
+replace it entirely: drop shadows, gradients, tree and graph views, 3D containers, whatever an
+application needs, without changing the core.
+
 ## Writing an application
 
 ```rust
@@ -61,7 +80,7 @@ while let Some(event) = engine.next_event(&mut events) {
 }
 ```
 
-See [`examples/base.rs`](examples/base.rs) for a complete application, and the
+See [`pushrod-widgets/examples/base.rs`](pushrod-widgets/examples/base.rs) for a complete application, and the
 [quick start](pushrod-docs/docs/getting-started/quick-start.mdx) for both styles side by side.
 
 ## Writing a widget
@@ -94,7 +113,7 @@ Pushrod requires Rust 1.86 or newer.
 
 Pushrod follows one rule: **Keep It Stupid Simple.** Widgets are flat: fills, one-pixel borders,
 and text. No glass, no beveled edges, no rounded corners, no shadows. Making things look fancy is up to the
-application. The reasons are performance, a clean and consistent look, usability, and predictable
+application, or to a separate widget library that extends or replaces `pushrod-widgets`. The reasons are performance, a clean and consistent look, usability, and predictable
 behavior. See [DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md).
 
 ## Roadmap
@@ -134,13 +153,13 @@ export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
 ```
 
 And you should be able to not only build the application, but you should be able to run the
-examples in the examples directory.
+examples (`cargo run -p pushrod-widgets --example base`).
 
 ### State of the app
 
 This is the current state of the example app.
 
-![App image](examples/example-app.png)
+![App image](pushrod-widgets/examples/example-app.png)
 
 ## Contributing
 

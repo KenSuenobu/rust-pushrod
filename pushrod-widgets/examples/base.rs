@@ -1,15 +1,18 @@
-use pushrod::base_widget::BaseWidget;
-use pushrod::box_widget::BoxWidget;
-use pushrod::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::event::PushrodEvent;
 use pushrod::geometry::{point, size};
-use pushrod::text_widget::{TextJustify, TextWidget};
 use pushrod::widget::Widget;
+use pushrod_widgets::base_widget::BaseWidget;
+use pushrod_widgets::box_widget::BoxWidget;
+use pushrod_widgets::button_widget::ButtonWidget;
+use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
 
-const FONT: &str = "assets/OpenSans-Regular.ttf";
+const FONT: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../assets/OpenSans-Regular.ttf"
+);
 
 /// Application state, passed mutably to every callback.
 #[derive(Default)]
