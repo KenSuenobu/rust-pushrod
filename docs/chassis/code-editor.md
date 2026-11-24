@@ -67,7 +67,7 @@ Redrawing a whole editor texture on every keystroke is wasteful, and laying out 
 
 ### What it does
 
-A `CodeEditor` widget hosted in a Container-style viewport ([5.3 Container](container.md)) with vertical and horizontal scroll bars. A gutter shows line numbers (current line in black, others gray). Only visible lines are laid out (Parley, [1.18](https://github.com/KenSuenobu/rust-pushrod/issues/111)) and drawn with the glyph atlas ([1.7](https://github.com/KenSuenobu/rust-pushrod/issues/3)); each visible line is cached as its own texture ([1.20](https://github.com/KenSuenobu/rust-pushrod/issues/113)), so typing repaints one line, and scrolling reuses cached lines. The current line has a light band; the caret is a 2 px bar that blinks while focused (timer, [1.5](https://github.com/KenSuenobu/rust-pushrod/issues/21); no blinking in outline mode, [10.1](https://github.com/KenSuenobu/rust-pushrod/issues/105)). Monospace font from the font handles ([1.24](https://github.com/KenSuenobu/rust-pushrod/issues/137)); tab width configurable. **Parts ([5.2](https://github.com/KenSuenobu/rust-pushrod/issues/57)):** `gutter()`, `text_area()`, `scroll_bars()`.
+A `CodeEditor` widget hosted in a Container-style viewport ([5.3 Container](../widgets/container.md)) with vertical and horizontal scroll bars. A gutter shows line numbers (current line in black, others gray). Only visible lines are laid out (Parley, [1.18](https://github.com/KenSuenobu/rust-pushrod/issues/111)) and drawn with the glyph atlas ([1.7](https://github.com/KenSuenobu/rust-pushrod/issues/3)); each visible line is cached as its own texture ([1.20](https://github.com/KenSuenobu/rust-pushrod/issues/113)), so typing repaints one line, and scrolling reuses cached lines. The current line has a light band; the caret is a 2 px bar that blinks while focused (timer, [1.5](https://github.com/KenSuenobu/rust-pushrod/issues/21); no blinking in outline mode, [10.1](https://github.com/KenSuenobu/rust-pushrod/issues/105)). Monospace font from the font handles ([1.24](https://github.com/KenSuenobu/rust-pushrod/issues/137)); tab width configurable. **Parts ([5.2](https://github.com/KenSuenobu/rust-pushrod/issues/57)):** `gutter()`, `text_area()`, `scroll_bars()`.
 
 ### How it looks
 
@@ -94,7 +94,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ### Depends on
 
-Requires [11.1](https://github.com/KenSuenobu/rust-pushrod/issues/142), [1.7](https://github.com/KenSuenobu/rust-pushrod/issues/3), [1.18](https://github.com/KenSuenobu/rust-pushrod/issues/111), [1.20](https://github.com/KenSuenobu/rust-pushrod/issues/113), [5.3 Container](container.md), [1.10](https://github.com/KenSuenobu/rust-pushrod/issues/25), [1.24](https://github.com/KenSuenobu/rust-pushrod/issues/137).
+Requires [11.1](https://github.com/KenSuenobu/rust-pushrod/issues/142), [1.7](https://github.com/KenSuenobu/rust-pushrod/issues/3), [1.18](https://github.com/KenSuenobu/rust-pushrod/issues/111), [1.20](https://github.com/KenSuenobu/rust-pushrod/issues/113), [5.3 Container](../widgets/container.md), [1.10](https://github.com/KenSuenobu/rust-pushrod/issues/25), [1.24](https://github.com/KenSuenobu/rust-pushrod/issues/137).
 
 ### Implementation notes
 
@@ -227,7 +227,7 @@ Finding text is the one navigation feature everyone uses, even in small files.
 
 ### What it does
 
-Ctrl+F opens a find bar in the editor's upper right: a text field ([2.6 Text Field](text-field.md)) with the search text, a match count ("1 of 4"), previous/next glyph buttons ([2.2 Glyph Button](glyph-button.md)), and a close button. Matches are outlined; the current one is selected and scrolled into view. Return/Shift+Return and F3/Shift+F3 step through matches; Escape closes. Options: match case and whole word. (Regex and replace are Tier 2.) Searching runs on the rope without blocking typing.
+Ctrl+F opens a find bar in the editor's upper right: a text field ([2.6 Text Field](../widgets/text-field.md)) with the search text, a match count ("1 of 4"), previous/next glyph buttons ([2.2 Glyph Button](../widgets/glyph-button.md)), and a close button. Matches are outlined; the current one is selected and scrolled into view. Return/Shift+Return and F3/Shift+F3 step through matches; Escape closes. Options: match case and whole word. (Regex and replace are Tier 2.) Searching runs on the rope without blocking typing.
 
 ### How it looks
 
@@ -253,7 +253,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ### Depends on
 
-Requires [11.3](https://github.com/KenSuenobu/rust-pushrod/issues/144), [2.6 Text Field](text-field.md), [2.2 Glyph Button](glyph-button.md).
+Requires [11.3](https://github.com/KenSuenobu/rust-pushrod/issues/144), [2.6 Text Field](../widgets/text-field.md), [2.2 Glyph Button](../widgets/glyph-button.md).
 
 ### Implementation notes
 
