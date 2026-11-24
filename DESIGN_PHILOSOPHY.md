@@ -46,7 +46,7 @@ the rest respond.
 | Pressed or selected | Inverted colors |
 | Disabled | Dithered |
 | Keyboard focus | A dotted outline |
-| Pop-up menus | A hard-edged, solid offset shadow so they read as floating (no blur) |
+| Pop-up menus | The same white body and one-pixel border as any other widget, drawn above what they cover |
 
 Widget frames are rectangles. A shape may be round only when the roundness *is* the control:
 the radio button's circle, the dial, the busy spinner.
@@ -59,7 +59,8 @@ Each widget's exact look and behavior is specified in its own roadmap file under
 - No glass, translucency, or blur.
 - No beveled edges, 3D shading, or embossing.
 - No rounded corners on widgets.
-- No gradients and no soft or blurred shadows.
+- No gradients and no shadows, including under menus and pop-ups. (Pop-up shadows may be
+  reconsidered after the MVP; they aren't needed for the look.)
 - No decorative animation. Animation only where it carries information (a progress bar's busy
   mode, the busy spinner), and it stops when nothing is happening.
 - No OS-native menus, dialogs, or controls.

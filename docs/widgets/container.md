@@ -44,7 +44,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![5.3 step set 2: Resizing and moving the container: the content keeps its size and layout](../mockups/5.3-2.png)
 
-Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
+Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, shadows, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
 
 ## How it responds
 

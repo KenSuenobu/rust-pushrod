@@ -198,7 +198,6 @@ class C:
     def menu(self, x, y, w, items, hover=None):
         """items: list of (label, shortcut, flags) flags in {'sep','disabled','sub','check'}"""
         h = sum(9 if "sep" in f else 22 for _, _, f in items) + 4
-        self.rect(x + 3, y + 3, w, h, fill=DARK, outline=None)   # drop shadow
         self.rect(x, y, w, h, fill=WHITE)
         cy = y + 2
         for n, (label, sc, f) in enumerate(items):

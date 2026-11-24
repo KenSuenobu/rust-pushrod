@@ -18,7 +18,7 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Shared behavior lives in the core.** Flags, states, focus, clipping, and events are implemented once (Epic 1, Epic 5), so a new widget gets them for free.
 - **IDs are the contract.** Widgets are addressed by stable IDs, like the numbered objects in classic resource files. Forms, generated constants, and callbacks all key off IDs.
 - **Runtime first, designer second.** Epic 6 builds everything Chassis needs (registry, properties, form file format, loader/writer, design-mode hooks) into Pushrod itself.
-- **Keep it stupid simple.** Widgets are flat: fills, one-pixel borders, and text. No glass, no bevels, no rounded corners. Fancy looks are up to the application (custom paint, 2.10 (#36); theming hooks, Epic 8, not scheduled). See [`DESIGN_PHILOSOPHY.md`](../DESIGN_PHILOSOPHY.md).
+- **Keep it stupid simple.** Widgets are flat: fills, one-pixel borders, and text. No glass, no bevels, no shadows, no rounded corners. Fancy looks are up to the application (custom paint, 2.10 (#36); theming hooks, Epic 8, not scheduled). See [`DESIGN_PHILOSOPHY.md`](../DESIGN_PHILOSOPHY.md).
 - **Modern names.** Older systems are credited for ideas only. Pushrod's flags, events, and callbacks use plain, modern names, collected in the *Naming* section so they can be reviewed in one place.
 - **Retained, with stable identity.** Widgets persist and keep stable IDs, which is what accessibility trees, caching, incremental updates, and form files all need.
 - **Engine separate from design.** The engine (tree, events, invalidation, paint API) and the design layer (widgets, defaults, appearance, themes) are separate modules with written specs (7.6 (#114)).

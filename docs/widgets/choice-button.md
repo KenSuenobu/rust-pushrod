@@ -29,7 +29,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![3.6 step set 2: Cycle mode: each click advances; Shift-click goes back](../mockups/3.6-2.png)
 
-Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
+Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, shadows, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
 
 ## How it responds
 

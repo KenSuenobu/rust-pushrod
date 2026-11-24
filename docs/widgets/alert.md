@@ -36,7 +36,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![2.9 step set 3: Customized through its parts: bold red message, an extra Help button](../mockups/2.9-3.png)
 
-Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
+Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, shadows, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
 
 ## How it responds
 

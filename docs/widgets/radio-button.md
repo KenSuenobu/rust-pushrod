@@ -25,7 +25,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![2.5 step set 1: 1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared](../mockups/2.5-1.png)
 
-Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
+Drawn flat, in the standard Pushrod style: fills, one-pixel borders, and text; inverted when pressed or selected, dithered when disabled, a dotted outline when focused. No bevels, gradients, shadows, glass, or rounded corners (see the [design philosophy](../../DESIGN_PHILOSOPHY.md)).
 
 ## How it responds
 

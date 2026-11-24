@@ -24,7 +24,7 @@ GUI libraries will instantly feel at home here.
 ## Design philosophy
 
 Pushrod follows one rule: **Keep It Stupid Simple.** Widgets are flat: fills, one-pixel borders,
-and text. No glass, no beveled edges, no rounded corners. Making things look fancy is up to the
+and text. No glass, no beveled edges, no rounded corners, no shadows. Making things look fancy is up to the
 application. The reasons are performance, a clean and consistent look, usability, and predictable
 behavior. See [DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md).
 
