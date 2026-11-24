@@ -710,12 +710,42 @@ def table_view():
     return [("Sorted by Size (descending)", c, "SortChanged when a header is clicked")]
 
 
-@sb("5.3")
-def scroll_view():
-    c = C(330, 140); c.rect(14, 12, 290, 100, fill=WHITE)
-    for n in range(4): c.text(22, 18 + n * 21, f"Line {12 + n} of the content")
-    c.scrollbar(304, 12, 100, True, 0.4, 0.3); c.scrollbar(14, 112, 290, False, 0.0, 0.5)
-    return [("Content clipped; wheel or scroll bars move it", c, "ValueChanged on scroll")]
+CONTENT_ITEMS = [("Name:", 20, 20), ("Email:", 20, 60), ("Phone:", 20, 100), ("Address:", 20, 140), ("City:", 20, 180), ("Notes:", 20, 220)]
+
+def _content(c, ox, oy, clip, scale=1.0):
+    """Draw the fixed-size content (360 x 260, its own 0,0) at ox, oy, clipped to clip=(x, y, w, h)."""
+    cx, cy, cw, ch = clip
+    layer = C(360, 260, bg=WHITE)
+    for label, x, y in CONTENT_ITEMS:
+        layer.text(x, y + 2, label); layer.field(x + 80, y, 220, "")
+    layer.text(6, 242, "0,0 is the content's own origin", MID, 11)
+    crop = layer.img.crop(((cx - ox) * S, (cy - oy) * S, (cx - ox + cw) * S, (cy - oy + ch) * S))
+    c.img.paste(crop, (cx * S, cy * S))
+    c.rect(cx, cy, cw, ch, fill=None)
+
+def _container(c, x, y, w, h, off_x, off_y):
+    """A container at x, y with a w x h frame, showing content from offset (off_x, off_y)."""
+    vw, vh = w - 16, h - 16
+    _content(c, x - off_x, y - off_y, (x, y, vw, vh))
+    c.scrollbar(x + vw, y, vh, True, off_y / max(1, 260 - vh), vh / 260)
+    c.scrollbar(x, y + vh, vw, False, off_x / max(1, 360 - vw), vw / 360)
+    c.rect(x + vw, y + vh, 16, 16, fill=GRAY)
+
+@sb("5.3", 1)
+def container_pan():
+    a = C(270, 170); _container(a, 15, 15, 240, 140, 0, 0)
+    b = C(270, 170); _container(b, 15, 15, 240, 140, 0, 110)
+    d = C(270, 170); _container(d, 15, 15, 240, 140, 120, 110)
+    return [("1. Viewport at the content's 0,0", a, None), ("2. Scrolled down", b, "ViewportChanged { offset: (0, 110) }"),
+            ("3. Scrolled right", d, "ViewportChanged { offset: (120, 110) }")]
+
+@sb("5.3", 2)
+def container_resize_move():
+    a = C(400, 300); _container(a, 15, 15, 240, 140, 0, 0)
+    b = C(400, 300); _container(b, 15, 15, 376, 276, 0, 0)
+    d = C(400, 300); _container(d, 145, 140, 240, 140, 0, 0)
+    return [("1. Container 240 x 140", a, None), ("2. Resized to 376 x 276: more content visible, same content size", b, "ViewportChanged"),
+            ("3. Moved: content positions unchanged", d, None)]
 
 
 @sb("9.8")
