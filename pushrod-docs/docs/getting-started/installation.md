@@ -5,7 +5,7 @@ title: Installation
 
 # Installation
 
-Pushrod needs Rust 1.86 or newer and the SDL2, SDL2_ttf, and SDL2_image development libraries.
+Pushrod needs Rust 1.100 or newer (edition 2024) and the SDL2, SDL2_ttf, and SDL2_image libraries. Install them from your system's package manager as below. The [`bundled` feature](#building-sdl2-from-source-the-bundled-feature) can build SDL2 itself from source.
 
 ## Linux
 
@@ -56,9 +56,25 @@ pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 
 [dependencies.sdl2]
-version = "^0.36.0"
+version = "0.38"
 features = ["ttf", "image", "unsafe_textures"]
 ```
+
+## Building SDL2 from source: the `bundled` feature
+
+Enable `bundled` and Cargo compiles SDL2 from source instead of using the system library. You need a C compiler and CMake.
+
+```toml
+[dependencies]
+pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod", features = ["bundled"] }
+pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+```
+
+`bundled` covers SDL2 only: SDL2_ttf and SDL2_image still come from the system (the `sdl2` crate doesn't build them from source). Add `static-link` as well (`features = ["bundled", "static-link"]`) to link SDL2 into your executable.
+
+:::note
+Pushrod uses the `sdl2` crate's 0.38 series. Version 0.39.0 doesn't compile with the `unsafe_textures` feature that Pushrod needs, so stay on 0.38 if you also depend on `sdl2` directly.
+:::
 
 ## Running the examples
 

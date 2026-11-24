@@ -33,8 +33,8 @@
 
 use crate::event::{EventCtx, PushrodEvent};
 use crate::font::FontCache;
-use crate::geometry::{make_rect, Point};
-use crate::widget::{Widget, WidgetId, ROOT_WIDGET_ID};
+use crate::geometry::{Point, make_rect};
+use crate::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;

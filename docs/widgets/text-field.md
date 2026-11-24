@@ -1,6 +1,6 @@
 # Text Field: widget roadmap
 
-> **Issue:** [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) (2.6) · **Epic 2:** Core dialog widgets · **Release:** MVP (v1) · **Size:** L
+> **Issue:** [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) (2.6) · **Epic 2:** Core dialog widgets · **Release:** MVP (v0.1) · **Size:** L
 > **User docs:** `pushrod-docs/docs/widgets/text-field.md` · **Overview:** [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) · **Rules:** [design philosophy](../../DESIGN_PHILOSOPHY.md)
 
 This file is the specification for this widget: what it is, what it does, and how it responds. To change its look or behavior, edit this file in a pull request (and its mockup in [`docs/mockups/generate.py`](../mockups/generate.py) if the picture changes), then bring the issue in line. If this file and the issue disagree, this file wins.
@@ -72,7 +72,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Depends on
 
-Requires [1.4](https://github.com/KenSuenobu/rust-pushrod/issues/20), [1.5](https://github.com/KenSuenobu/rust-pushrod/issues/21), [1.6](https://github.com/KenSuenobu/rust-pushrod/issues/22), [1.19](https://github.com/KenSuenobu/rust-pushrod/issues/112).
+Requires [1.4](https://github.com/KenSuenobu/rust-pushrod/issues/20), [1.5](https://github.com/KenSuenobu/rust-pushrod/issues/21), [1.6](https://github.com/KenSuenobu/rust-pushrod/issues/22). Pairs with [1.19](https://github.com/KenSuenobu/rust-pushrod/issues/112) (input-method composition arrives in v0.2; plain typing works in v0.1).
 
 ## Implementation notes
 

@@ -365,11 +365,11 @@ impl<S> Engine<S> {
             running: &mut self.running,
         };
 
-        if let PushrodEvent::Clicked(id, _) = event {
-            if let Some(callbacks) = self.click_callbacks.get_mut(id) {
-                for callback in callbacks.iter_mut() {
-                    callback(state, &mut ui);
-                }
+        if let PushrodEvent::Clicked(id, _) = event
+            && let Some(callbacks) = self.click_callbacks.get_mut(id)
+        {
+            for callback in callbacks.iter_mut() {
+                callback(state, &mut ui);
             }
         }
 

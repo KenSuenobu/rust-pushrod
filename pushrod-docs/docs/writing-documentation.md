@@ -5,7 +5,11 @@ title: Writing documentation
 
 # Writing documentation
 
-This site lives in `pushrod-docs/` and is built with [Docusaurus](https://docusaurus.io). Documentation changes ship in the same pull request as the code they describe.
+This site lives in `pushrod-docs/` and is built with [Docusaurus](https://docusaurus.io).
+
+:::important[Documentation is required]
+Every contribution that changes what users see or do includes its documentation in the same pull request: the pages on this site, rustdoc for every public item, screenshots, and a changelog entry. Pull requests without it are not merged. Documentation must be **clean** (plain language, working samples, no placeholders), **up to date** (if your change makes any page wrong, fix that page too), and **maintained** (wrong documentation is a bug). The full rules are in [CONTRIBUTING.md](https://github.com/KenSuenobu/rust-pushrod/blob/main/CONTRIBUTING.md#documentation-is-part-of-every-contribution).
+:::
 
 ## Running the site
 
@@ -49,7 +53,21 @@ Every widget page uses the same sections, in this order (see [Button](./widgets/
 
 ## Code samples
 
-Code samples must compile against the current library. Prefer copying from an example in `examples/` or a test, and keep samples complete enough to paste.
+Code samples must compile against the current library. Prefer copying from an example (`pushrod-widgets/examples/`) or a test, and keep samples complete enough to paste. Import standard widgets from `pushrod_widgets` and everything else from `pushrod`.
+
+## Documenting the code
+
+The site and the code are documented together. Every non-private function, method, and type in
+the library has a full rustdoc header: a summary, then `# Arguments` (every parameter),
+`# Returns`, `# Errors`, `# Panics`, and `# Examples` where they apply. The format and the
+checks that enforce it are in [CONTRIBUTING.md](https://github.com/KenSuenobu/rust-pushrod/blob/main/CONTRIBUTING.md#code-documentation).
+
+## Keeping documentation current
+
+- When you change a name, search the whole site (`grep -r` in `pushrod-docs/docs/`) and the rustdoc for it, and update every mention.
+- When something looks different, retake its screenshots.
+- When you remove a feature, remove its documentation and any links to it.
+- Found something wrong or out of date? Fix it, or open an issue with the `documentation` label. Documentation-only pull requests are welcome.
 
 ## Sample data
 
