@@ -32,6 +32,8 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Test
         run: cargo test --workspace
+      - name: Doc headers on every non-private item
+        run: python3 scripts/check_docs.py
       - name: Rustdoc
         run: cargo doc --workspace --no-deps
         env:

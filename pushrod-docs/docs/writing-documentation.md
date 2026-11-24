@@ -55,6 +55,13 @@ Every widget page uses the same sections, in this order (see [Button](./widgets/
 
 Code samples must compile against the current library. Prefer copying from an example (`pushrod-widgets/examples/`) or a test, and keep samples complete enough to paste. Import standard widgets from `pushrod_widgets` and everything else from `pushrod`.
 
+## Documenting the code
+
+The site and the code are documented together. Every non-private function, method, and type in
+the library has a full rustdoc header: a summary, then `# Arguments` (every parameter),
+`# Returns`, `# Errors`, `# Panics`, and `# Examples` where they apply. The format and the
+checks that enforce it are in [CONTRIBUTING.md](https://github.com/KenSuenobu/rust-pushrod/blob/main/CONTRIBUTING.md#code-documentation).
+
 ## Keeping documentation current
 
 - When you change a name, search the whole site (`grep -r` in `pushrod-docs/docs/`) and the rustdoc for it, and update every mention.

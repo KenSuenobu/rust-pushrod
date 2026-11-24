@@ -24,7 +24,10 @@ use crate::geometry::Size;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
-/// Contains the `TextureStore` components: the optional `Texture`, size, and invalidation flags.
+/// Holds the GPU texture a `Widget` paints into.
+///
+/// Each `Widget`'s [`WidgetCore`](crate::widget::WidgetCore) owns one.  The texture is created
+/// the first time the `Widget` is painted and recreated whenever its size changes.
 #[derive(Default)]
 pub struct TextureStore {
     store: Option<Texture>,
@@ -33,35 +36,54 @@ pub struct TextureStore {
 }
 
 impl TextureStore {
-    /// Retrieves a `&mut Texture` reference to the stored `Texture` object.
+    /// Returns the stored texture for drawing into.
     ///
-    /// Example use:
+    /// # Returns
+    ///
+    /// The texture.
+    ///
+    /// # Panics
+    ///
+    /// Panics if no texture has been created yet (see
+    /// [`create_or_resize_texture`](TextureStore::create_or_resize_texture)).
+    ///
+    /// # Examples
+    ///
     /// ```rust,ignore
-    ///   c.with_texture_canvas(texture_store.get_mut_ref(), |texture| {
+    /// c.with_texture_canvas(texture_store.get_mut_ref(), |texture| {
     ///     texture.set_draw_color(base_color);
     ///     texture.clear();
-    ///
-    ///     texture.set_draw_color(border_color);
-    ///     texture
-    ///       .draw_rect(Rect::new(0, 0, 200, 200))
-    ///       .unwrap();
-    ///   })
-    ///   .unwrap();
+    /// })
+    /// .unwrap();
     /// ```
     pub fn get_mut_ref(&mut self) -> &mut Texture {
         self.store.as_mut().unwrap()
     }
 
-    /// Retrieves a `&Texture` reference object as an optional.  This is a safer way to
-    /// draw, as it will not return an object if `create_or_resize_texture` has been not
-    /// yet been called.
+    /// Returns the stored texture, if one has been created.
+    ///
+    /// # Returns
+    ///
+    /// The texture, or `None` if [`create_or_resize_texture`](TextureStore::create_or_resize_texture)
+    /// has not been called yet.
     pub fn get_optional_ref(&mut self) -> Option<&Texture> {
         self.store.as_ref()
     }
 
-    /// Creates or resizes the texture for drawing.  It will create a new `Texture` object
-    /// to draw against if the `store` object currently does not contain a `Texture`, or if
-    /// the object size has changed.
+    /// Makes sure a texture of the given size exists.
+    ///
+    /// Creates a texture if there is none, or replaces it if the size changed (destroying the old one,
+    /// since `unsafe_textures` textures aren't freed when dropped).  A new texture marks the store as
+    /// invalidated.  Does nothing if a texture of this size already exists.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas whose renderer creates the texture.
+    /// * `size` - The required width and height in pixels.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `SDL2` cannot create the texture.
     pub fn create_or_resize_texture(&mut self, c: &mut Canvas<Window>, size: Size) {
         if self.store.is_none() || self.size.w != size.w || self.size.h != size.h {
             self.size.w = size.w;
@@ -86,24 +108,41 @@ impl TextureStore {
         }
     }
 
-    /// Temporarily removes the `Texture` from the store, so that it can be used as a drawing
-    /// target while the owning `Widget` is borrowed for painting.  Must be followed by `restore`.
+    /// Removes the texture from the store, so it can be drawn into while the owning `Widget` is
+    /// borrowed for painting.
+    ///
+    /// Must be followed by [`restore`](TextureStore::restore).
+    ///
+    /// # Returns
+    ///
+    /// The texture, or `None` if none has been created.
     pub(crate) fn take(&mut self) -> Option<Texture> {
         self.store.take()
     }
 
-    /// Restores a `Texture` that was removed with `take`.
+    /// Puts back a texture removed with [`take`](TextureStore::take).
+    ///
+    /// # Arguments
+    ///
+    /// * `texture` - The texture to store.
     pub(crate) fn restore(&mut self, texture: Texture) {
         self.store = Some(texture);
     }
 
-    /// Returns `true` if the object needs to be redrawn to the screen, `false` otherwise.
+    /// Returns whether the texture has been recreated and needs to be redrawn.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the texture needs to be redrawn.
     pub fn is_invalidated(&self) -> bool {
         self.invalidated
     }
 
-    /// Sets the invalidation flag, forcing the object to be redrawn on the screen if set
-    /// to `true`.
+    /// Sets whether the texture needs to be redrawn.
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - `true` to mark the texture as needing a redraw.
     pub fn set_invalidated(&mut self, state: bool) {
         self.invalidated = state;
     }

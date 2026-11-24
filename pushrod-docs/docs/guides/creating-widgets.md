@@ -5,7 +5,7 @@ title: Creating widgets
 
 # Creating widgets
 
-A widget is a struct that stores a `WidgetCore` and implements the `Widget` trait. Only three functions are required. Everything a widget needs is in the `pushrod` core, so your widgets don't depend on `pushrod-widgets`: the standard widgets are built exactly the same way, with the same public API.
+A widget is a struct that stores a `WidgetCore` and implements the `Widget` trait. Widgets contributed to Pushrod document every non-private function and type with a full header (summary, `# Arguments`, `# Returns`, and so on), as the example below does; see [Writing documentation](../writing-documentation.md#documenting-the-code). Only three functions are required. Everything a widget needs is in the `pushrod` core, so your widgets don't depend on `pushrod-widgets`: the standard widgets are built exactly the same way, with the same public API.
 
 | Function | Purpose |
 |---|---|
@@ -42,6 +42,18 @@ pub struct SwatchWidget {
 }
 
 impl SwatchWidget {
+    /// Creates a swatch showing `first` until it is clicked.
+    ///
+    /// # Arguments
+    ///
+    /// * `origin` - The upper left-hand corner, relative to the parent widget.
+    /// * `size` - The width and height in pixels.
+    /// * `first` - The color shown first.
+    /// * `second` - The color shown after the first click.
+    ///
+    /// # Returns
+    ///
+    /// The new `SwatchWidget`.
     pub fn new(origin: Point, size: Size, first: Color, second: Color) -> Self {
         Self {
             core: WidgetCore::new(origin, size),
@@ -50,25 +62,52 @@ impl SwatchWidget {
         }
     }
 
+    /// Returns the color currently shown.
+    ///
+    /// # Returns
+    ///
+    /// The current color.
     pub fn current_color(&self) -> Color {
         self.colors[self.current]
     }
 }
 
 impl Widget for SwatchWidget {
+    /// Returns the swatch's shared state.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core(&self) -> &WidgetCore {
         &self.core
     }
 
+    /// Returns the swatch's shared state for modification.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
     }
 
+    /// Fills the swatch with its current color and draws a one-pixel black frame.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas, targeting the swatch's texture.
+    /// * `_fc` - The font cache (unused).
     fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
         paint::fill(c, self.current_color());
         paint::border(c, self.get_size(), Color::BLACK, 1);
     }
 
+    /// Switches colors on each left-button release and emits `Clicked`.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event sent to the swatch.
+    /// * `ctx` - The context used to emit `Clicked`.
     fn handle_event(&mut self, event: &PushrodEvent, ctx: &mut EventCtx) {
         if let PushrodEvent::SystemEvent(
             _,

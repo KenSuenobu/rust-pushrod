@@ -56,30 +56,65 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::any::Any;
 
-/// The ID of a `Widget`.  IDs are assigned by the `WidgetCache` in the order in which `Widget`s
-/// are added, starting with the top-level window `Widget` at ID `0`.  IDs are stable for the
-/// lifetime of the `WidgetCache`, which allows forms to be designed and stored by ID.
+/// The ID of a `Widget`.
+///
+/// IDs are assigned by the [`WidgetCache`](crate::cache::WidgetCache) in the order in which
+/// `Widget`s are added, starting with the window's root `Widget` at ID `0`
+/// ([`ROOT_WIDGET_ID`]).  An ID is stable for the lifetime of the `WidgetCache`, which is what
+/// allows forms to be designed, stored, and wired to callbacks by ID.
 pub type WidgetId = u32;
 
-/// The ID of the top-level `Widget` that represents the window itself.
+/// The ID of the window's root `Widget`.
+///
+/// The root is created by the `Engine` (a [`RootWidget`](crate::root_widget::RootWidget)), fills
+/// the window, and is the ancestor of every other `Widget`.  It is its own parent.
 pub const ROOT_WIDGET_ID: WidgetId = 0;
 
-/// State that is shared by every `Widget`.  Store one of these in a `Widget` structure, and
-/// return it from `Widget::core` and `Widget::core_mut`.
+/// The state that every `Widget` shares.
+///
+/// Store one `WidgetCore` in each `Widget` structure and return it from [`Widget::core`] and
+/// [`Widget::core_mut`]; every getter and setter on the `Widget` trait works against it.  It holds
+/// the `Widget`'s ID and parent ID (assigned by the `WidgetCache`), its origin relative to its
+/// parent, its size, its background color, whether it is hidden, whether it needs repainting, and
+/// the GPU texture it paints into.
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::geometry::{point, size};
+/// use pushrod::widget::WidgetCore;
+///
+/// let core = WidgetCore::new(point(10, 20), size(100, 30));
+/// ```
 pub struct WidgetCore {
+    /// The `Widget`'s ID, assigned by the `WidgetCache` when the `Widget` is added.
     pub(crate) id: WidgetId,
+    /// The ID of the parent `Widget`; the root `Widget` is its own parent.
     pub(crate) parent: WidgetId,
     origin: Point,
     size: Size,
     color: Color,
     hidden: bool,
     invalidated: bool,
+    /// The GPU texture the `Widget` paints into, created and resized by the `WidgetCache`.
     pub(crate) texture: TextureStore,
 }
 
 impl WidgetCore {
-    /// Creates a new `WidgetCore` given its `Point` of origin, relative to its parent, and its
-    /// `Size`.  The default color is transparent white.
+    /// Creates the shared state for a new `Widget`.
+    ///
+    /// The `Widget` starts visible, invalidated (so it is painted on the first frame), with a
+    /// transparent white background color.  Its ID and parent are assigned later, when it is added to
+    /// a `WidgetCache`.
+    ///
+    /// # Arguments
+    ///
+    /// * `origin` - The upper left-hand corner of the `Widget`, relative to its parent.
+    /// * `size` - The width and height of the `Widget` in pixels.
+    ///
+    /// # Returns
+    ///
+    /// A new `WidgetCore`, to be stored in a `Widget` structure.
     pub fn new(origin: Point, size: Size) -> Self {
         Self {
             id: 0,
@@ -94,98 +129,175 @@ impl WidgetCore {
     }
 }
 
-/// `Widget` is a drawable, interactive object that is presented in a `Window`.
+/// A drawable, interactive object presented in a window.
 ///
-/// `Widget`s are components that are used to display information to a user, as well as to provide
-/// user-interactable objects.  These make up things like text messages, images, 3D graphics, and
-/// so on.
+/// `Widget`s display information (text, images, graphics) and provide controls the user can
+/// interact with.  Every `Widget` stores a [`WidgetCore`] and implements three functions:
+/// [`core`](Widget::core), [`core_mut`](Widget::core_mut), and [`paint`](Widget::paint).
+/// Interactive `Widget`s also implement [`handle_event`](Widget::handle_event).  Every other
+/// function has a default implementation that works against the `WidgetCore`.
 ///
-/// Only `core`, `core_mut`, and `paint` must be implemented.  `handle_event` defaults to ignoring
-/// all events, and every other function operates on the `WidgetCore`.
+/// `Widget` requires `Any` so that the `WidgetCache` can return a `Widget` as its concrete type
+/// ([`WidgetCache::get_as`](crate::cache::WidgetCache::get_as)).
 pub trait Widget: Any {
-    /// Returns a reference to the shared `WidgetCore` state.
+    /// Returns the `Widget`'s shared state.
+    ///
+    /// # Returns
+    ///
+    /// A reference to the [`WidgetCore`] stored in the `Widget`.
     fn core(&self) -> &WidgetCore;
 
-    /// Returns a mutable reference to the shared `WidgetCore` state.
+    /// Returns the `Widget`'s shared state for modification.
+    ///
+    /// # Returns
+    ///
+    /// A mutable reference to the [`WidgetCore`] stored in the `Widget`.
     fn core_mut(&mut self) -> &mut WidgetCore;
 
-    /// Paints the `Widget` into its own texture.  The canvas passed in is already targeting the
-    /// `Widget`'s texture, so drawing is always done from an origin of `x=0` and `y=0`, bounded by
-    /// `get_size()`.  Use the functions in the [`paint`](crate::paint) module to compose the look
-    /// of the `Widget` (fill, border, text, ...).
+    /// Paints the `Widget` into its own texture.
     ///
-    /// This is only called when the `Widget` is invalidated.
+    /// The canvas is already targeting the `Widget`'s texture, so drawing always starts at `(0, 0)`
+    /// and is bounded by [`get_size`](Widget::get_size).  Compose the look of the `Widget` with the
+    /// functions in the [`paint`](crate::paint) module (`fill`, `border`, `text`).  The `WidgetCache`
+    /// only calls this when the `Widget` is invalidated; between repaints, the texture is reused.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas, targeting this `Widget`'s texture.
+    /// * `fc` - The font cache, used to draw text.
     fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache);
 
-    /// Handles a `PushrodEvent` sent to this `Widget`.  Any events that the `Widget` generates as
-    /// a result (such as `Clicked`) are queued with `ctx.emit()`, and delivered to the
-    /// application's callbacks after event processing completes.
+    /// Handles an event sent to this `Widget`.
     ///
-    /// The default implementation ignores all events.
+    /// The `WidgetCache` sends mouse events to the `Widget` under the pointer (or the `Widget` that
+    /// captured the mouse), and `BoundsChange` events when the pointer enters or leaves it.  Events
+    /// the `Widget` generates in response, such as `Clicked`, are queued with
+    /// [`EventCtx::emit`](crate::event::EventCtx::emit) and delivered to the application after event
+    /// processing completes.  The default implementation ignores every event.
+    ///
+    /// # Arguments
+    ///
+    /// * `_event` - The event sent to this `Widget`.
+    /// * `_ctx` - The context used to queue events the `Widget` generates.
     fn handle_event(&mut self, _event: &PushrodEvent, _ctx: &mut EventCtx) {}
 
-    /// Returns the ID of the `Widget`, assigned by the `WidgetCache`.
+    /// Returns the `Widget`'s ID.
+    ///
+    /// # Returns
+    ///
+    /// The ID assigned by the `WidgetCache` when the `Widget` was added, or `0` if it has not been
+    /// added yet.
     fn get_id(&self) -> WidgetId {
         self.core().id
     }
 
-    /// Returns the ID of the parent of this `Widget`.  The top-level `Widget` is its own parent.
+    /// Returns the ID of the `Widget`'s parent.
+    ///
+    /// # Returns
+    ///
+    /// The parent's ID.  The root `Widget` is its own parent.
     fn get_parent(&self) -> WidgetId {
         self.core().parent
     }
 
-    /// Gets the origin (upper left-hand) coordinate of the `Widget`, relative to its parent.
+    /// Returns the `Widget`'s origin.
+    ///
+    /// # Returns
+    ///
+    /// The upper left-hand corner of the `Widget`, relative to its parent.  Use
+    /// [`WidgetCache::absolute_origin`](crate::cache::WidgetCache::absolute_origin) for window
+    /// coordinates.
     fn get_origin(&self) -> Point {
         self.core().origin
     }
 
-    /// Gets the `Size` (bounds) of the object in `width` and `height`.
+    /// Returns the `Widget`'s size.
+    ///
+    /// # Returns
+    ///
+    /// The width and height of the `Widget` in pixels.
     fn get_size(&self) -> Size {
         self.core().size
     }
 
-    /// Gets the main (background) color of the `Widget`.
+    /// Returns the `Widget`'s main (background) color.
+    ///
+    /// # Returns
+    ///
+    /// The background color.
     fn get_color(&self) -> Color {
         self.core().color
     }
 
-    /// Sets the origin point, relative to the parent `Widget`.
+    /// Moves the `Widget`, and invalidates it.
+    ///
+    /// # Arguments
+    ///
+    /// * `point` - The new upper left-hand corner, relative to the parent `Widget`.
     fn set_origin(&mut self, point: Point) {
         self.core_mut().origin = point;
         self.set_invalidated(true);
     }
 
-    /// Sets the size of the `Widget`.
+    /// Resizes the `Widget`, and invalidates it.  Its texture is resized on the next repaint.
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The new width and height in pixels.
     fn set_size(&mut self, size: Size) {
         self.core_mut().size = size;
         self.set_invalidated(true);
     }
 
-    /// Sets the main (background) color of the `Widget`.
+    /// Sets the `Widget`'s main (background) color, and invalidates it.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The new background color.
     fn set_color(&mut self, color: Color) {
         self.core_mut().color = color;
         self.set_invalidated(true);
     }
 
-    /// Indicates whether or not the `Widget` (and all of its children) are hidden.  Hidden
-    /// `Widget`s are not drawn, and do not receive mouse events.
+    /// Returns whether the `Widget` is hidden.
+    ///
+    /// Hidden `Widget`s and all of their children are not drawn and do not receive mouse events.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` is hidden, `false` if it is shown.
     fn is_hidden(&self) -> bool {
         self.core().hidden
     }
 
-    /// Hides or shows this `Widget` and all of its children.
+    /// Hides or shows the `Widget` and all of its children, and invalidates it.
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - `true` to hide the `Widget`, `false` to show it.
     fn set_hidden(&mut self, state: bool) {
         self.core_mut().hidden = state;
         self.set_invalidated(true);
     }
 
-    /// Indicates whether or not an object needs to be repainted.
+    /// Returns whether the `Widget` needs to be repainted.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` will be repainted into its texture on the next frame.
     fn is_invalidated(&self) -> bool {
         self.core().invalidated
     }
 
-    /// Sets the invalidation state of the object.  When invalidated, the `Widget` is repainted
-    /// into its texture on the next frame, and the screen is refreshed.
+    /// Sets whether the `Widget` needs to be repainted.
+    ///
+    /// Setters call this automatically.  Call it after changing state that affects how the `Widget`
+    /// looks.  An invalidated `Widget` is repainted into its texture on the next frame, and the screen
+    /// is refreshed.
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - `true` to repaint the `Widget` on the next frame.
     fn set_invalidated(&mut self, state: bool) {
         self.core_mut().invalidated = state;
     }

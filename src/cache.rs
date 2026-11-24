@@ -21,7 +21,7 @@
 //! window `Widget` is always ID `0`.
 //!
 //! ```text
-//!   ID 0  BaseWidget (window)
+//!   ID 0  RootWidget (window)
 //!    ├── ID 1  BaseWidget
 //!    │    ├── ID 2  TextWidget      origins are relative to the parent
 //!    │    └── ID 3  ButtonWidget
@@ -41,9 +41,26 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::any::Any;
 
-/// Contains the tree of `Widget`s in a window.  `current_widget_id` is the `Widget` under the
-/// mouse pointer, and `captured_widget_id` is the `Widget` that received a mouse button press,
-/// which continues to receive mouse events until the button is released.
+/// The tree of `Widget`s in a window.
+///
+/// `Widget`s are stored in a flat list, addressed by ID, with each `Widget`'s children kept in
+/// drawing order.  The cache also tracks the `Widget` under the mouse pointer and the `Widget`
+/// that captured the mouse with a button press, routes raw input events to `Widget`s, and draws
+/// them.
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::cache::WidgetCache;
+/// use pushrod::geometry::size;
+/// use pushrod::root_widget::RootWidget;
+///
+/// let mut cache = WidgetCache::new();
+/// let root = cache.add(Box::new(RootWidget::new(size(320, 200))));
+///
+/// assert_eq!(root, 0);
+/// assert_eq!(cache.len(), 1);
+/// ```
 pub struct WidgetCache {
     cache: Vec<Box<dyn Widget>>,
     children: Vec<Vec<WidgetId>>,
@@ -53,8 +70,13 @@ pub struct WidgetCache {
 }
 
 impl WidgetCache {
-    /// Creates a new, empty `WidgetCache`.  The first `Widget` added becomes the top-level
-    /// `Widget` (ID `0`).
+    /// Creates an empty `WidgetCache`.
+    ///
+    /// The first `Widget` added becomes the root `Widget` (ID `0`).
+    ///
+    /// # Returns
+    ///
+    /// A new, empty `WidgetCache`.
     pub fn new() -> Self {
         Self {
             cache: Vec::new(),
@@ -65,16 +87,39 @@ impl WidgetCache {
         }
     }
 
-    /// Adds a `Widget` as a child of the top-level `Widget`, returning its ID.  If the cache is
-    /// empty, the `Widget` becomes the top-level `Widget`.
+    /// Adds a `Widget` as a child of the root `Widget`.
+    ///
+    /// If the cache is empty, the `Widget` becomes the root `Widget` instead.
+    ///
+    /// # Arguments
+    ///
+    /// * `widget` - The `Widget` to add.
+    ///
+    /// # Returns
+    ///
+    /// The ID assigned to the `Widget`.
     pub fn add(&mut self, widget: Box<dyn Widget>) -> WidgetId {
         self.add_child(ROOT_WIDGET_ID, widget)
     }
 
-    /// Adds a `Widget` as a child of `parent`, returning its ID.  The origin of the `Widget` is
-    /// relative to the origin of its parent.
+    /// Adds a `Widget` as a child of another `Widget`.
     ///
-    /// Panics if `parent` does not exist.
+    /// The `Widget`'s origin is relative to its parent's origin, and it is drawn after (on top of)
+    /// the parent's existing children.  If the cache is empty, the `Widget` becomes the root `Widget`
+    /// and `parent` is ignored.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent` - The ID of the parent `Widget`.
+    /// * `widget` - The `Widget` to add.
+    ///
+    /// # Returns
+    ///
+    /// The ID assigned to the `Widget`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the cache is not empty and `parent` does not exist.
     pub fn add_child(&mut self, parent: WidgetId, mut widget: Box<dyn Widget>) -> WidgetId {
         let id = self.cache.len() as WidgetId;
         let parent = if self.cache.is_empty() {
@@ -105,21 +150,45 @@ impl WidgetCache {
     }
 
     /// Returns the number of `Widget`s in the cache.
+    ///
+    /// # Returns
+    ///
+    /// The number of `Widget`s, including the root `Widget`.
     pub fn len(&self) -> usize {
         self.cache.len()
     }
 
-    /// Returns `true` if the cache contains no `Widget`s.
+    /// Returns whether the cache contains no `Widget`s.
+    ///
+    /// # Returns
+    ///
+    /// `true` if no `Widget` (not even a root) has been added.
     pub fn is_empty(&self) -> bool {
         self.cache.is_empty()
     }
 
-    /// Retrieves a `Widget` by ID, `None` if not found.
+    /// Retrieves a `Widget` by ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget` as a trait object, or `None` if the ID does not exist.
     pub fn get(&self, id: WidgetId) -> Option<&dyn Widget> {
         self.cache.get(id as usize).map(|widget| widget.as_ref())
     }
 
-    /// Retrieves a mutable `Widget` by ID, `None` if not found.
+    /// Retrieves a `Widget` by ID for modification.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget` as a mutable trait object, or `None` if the ID does not exist.
     pub fn get_mut(&mut self, id: WidgetId) -> Option<&mut dyn Widget> {
         match self.cache.get_mut(id as usize) {
             Some(widget) => Some(widget.as_mut()),
@@ -127,11 +196,27 @@ impl WidgetCache {
         }
     }
 
-    /// Retrieves a `Widget` by ID as its concrete type, `None` if the ID does not exist or is a
-    /// different type.
+    /// Retrieves a `Widget` by ID as its concrete type.
     ///
-    /// ```rust,ignore
-    /// let text = cache.get_as::<TextWidget>(text_id).unwrap();
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget` as a `T`, or `None` if the ID does not exist or the `Widget` is not a `T`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::cache::WidgetCache;
+    /// use pushrod::geometry::size;
+    /// use pushrod::root_widget::RootWidget;
+    ///
+    /// let mut cache = WidgetCache::new();
+    /// cache.add(Box::new(RootWidget::new(size(320, 200))));
+    ///
+    /// assert!(cache.get_as::<RootWidget>(0).is_some());
     /// ```
     pub fn get_as<T: Widget>(&self, id: WidgetId) -> Option<&T> {
         let widget: &dyn Any = self.cache.get(id as usize)?.as_ref();
@@ -139,15 +224,31 @@ impl WidgetCache {
         widget.downcast_ref::<T>()
     }
 
-    /// Retrieves a mutable `Widget` by ID as its concrete type, `None` if the ID does not exist or
-    /// is a different type.
+    /// Retrieves a `Widget` by ID as its concrete type, for modification.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget` as a mutable `T`, or `None` if the ID does not exist or the `Widget` is not a `T`.
     pub fn get_as_mut<T: Widget>(&mut self, id: WidgetId) -> Option<&mut T> {
         let widget: &mut dyn Any = self.cache.get_mut(id as usize)?.as_mut();
 
         widget.downcast_mut::<T>()
     }
 
-    /// Returns the IDs of the children of a `Widget`, in drawing order.
+    /// Returns the children of a `Widget`.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the parent `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The IDs of the `Widget`'s direct children in drawing order (the last is drawn on top), or an
+    /// empty slice if the `Widget` has no children or does not exist.
     pub fn children_of(&self, id: WidgetId) -> &[WidgetId] {
         self.children
             .get(id as usize)
@@ -155,19 +256,33 @@ impl WidgetCache {
             .unwrap_or(&[])
     }
 
-    /// Returns the ID of the `Widget` currently under the mouse pointer.
+    /// Returns the `Widget` currently under the mouse pointer.
+    ///
+    /// # Returns
+    ///
+    /// The ID of the top-most visible `Widget` under the pointer, as of the last mouse event.
     pub fn get_current_widget(&self) -> WidgetId {
         self.current_widget_id
     }
 
-    /// Forces every visible `Widget` to be copied to the screen on the next frame, such as
-    /// after the window has been exposed.
+    /// Forces the whole window to be redrawn on the next frame.
+    ///
+    /// Every visible `Widget`'s texture is copied to the screen again (textures are not repainted
+    /// unless the `Widget` itself is invalidated).  Used after the window is exposed or resized.
     pub fn invalidate_all(&mut self) {
         self.needs_full_redraw = true;
     }
 
-    /// Returns the origin of a `Widget` in window coordinates, by adding the origins of all of its
-    /// parents.
+    /// Returns the origin of a `Widget` in window coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget`'s upper left-hand corner in window coordinates: its origin plus the origins of
+    /// all of its ancestors.  Returns `(0, 0)` if the ID does not exist.
     pub fn absolute_origin(&self, id: WidgetId) -> Point {
         let mut origin = Point::new(0, 0);
         let mut current = id;
@@ -214,8 +329,19 @@ impl WidgetCache {
         order
     }
 
-    /// Returns the top-most visible `Widget` ID at the given window coordinates.  Returns `0`
-    /// (the top-level `Widget`) if no other `Widget` was found.
+    /// Finds the top-most visible `Widget` at a point in the window.
+    ///
+    /// Hidden `Widget`s and their children are skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - The horizontal window coordinate, in pixels.
+    /// * `y` - The vertical window coordinate, in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The ID of the top-most visible `Widget` containing the point, or `0` (the root `Widget`) if no
+    /// other `Widget` contains it.
     pub fn widget_at(&self, x: i32, y: i32) -> WidgetId {
         for id in self.draw_order().into_iter().rev() {
             let origin = self.absolute_origin(id);
@@ -240,16 +366,23 @@ impl WidgetCache {
         }
     }
 
-    /// This handles the direct events from the `Engine`.  Raw events from the `SDL2` event pump
-    /// are routed to the appropriate `Widget`, and any `PushrodEvent`s that the `Widget`s
-    /// generate are returned, in order, for the `Engine` to deliver to the application.
+    /// Routes a raw input event to the `Widget`s.
     ///
-    /// - Mouse button presses go to the top-most `Widget` under the pointer, which then
-    ///   captures the mouse until the button is released.
-    /// - Mouse motion generates a `BoundsChange` to both the `Widget` that was left and the
-    ///   `Widget` that was entered, then goes to the captured `Widget`, or the `Widget` under
-    ///   the pointer.
-    /// - Mouse button releases go to the captured `Widget`, then release the capture.
+    /// - A mouse button press goes to the top-most `Widget` under the pointer, which captures the
+    ///   mouse until the button is released.
+    /// - Mouse motion sends `BoundsChange` to the `Widget` that was left and the `Widget` that was
+    ///   entered (when they differ), then goes to the capturing `Widget`, or the `Widget` under the
+    ///   pointer.
+    /// - A mouse button release goes to the capturing `Widget`, then ends the capture.
+    /// - Other events are ignored.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The raw `SDL2` event.
+    ///
+    /// # Returns
+    ///
+    /// The `PushrodEvent`s the `Widget`s generated while handling the event, in the order emitted.
     pub fn handle_event(&mut self, event: Event) -> Vec<PushrodEvent> {
         let mut ctx = EventCtx::default();
 
@@ -324,13 +457,26 @@ impl WidgetCache {
         widget.core_mut().texture.restore(texture);
     }
 
-    /// This is the main draw loop for all of the `Widget`s in the cache.  If any `Widget` is
-    /// invalidated, it is repainted into its texture, and then every visible `Widget`'s texture is
-    /// copied to the screen in drawing order.  Copying cached textures is cheap; repainting is
-    /// only done for `Widget`s that changed.
+    /// Repaints changed `Widget`s and redraws the window if anything changed.
     ///
-    /// Returns `true` if the screen was redrawn and needs to be presented, `false` if nothing
+    /// Every invalidated, visible `Widget` is repainted into its texture.  If any `Widget` changed (or
+    /// a full redraw was requested), the window is cleared and every visible `Widget`'s texture is
+    /// copied to the screen in drawing order.  Copying cached textures is cheap; repainting only
+    /// happens for `Widget`s that changed.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The window's canvas.
+    /// * `fc` - The font cache, passed to each `Widget`'s `paint`.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the window was redrawn and the canvas needs to be presented, `false` if nothing
     /// changed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `SDL2` fails to render into a `Widget`'s texture or copy it to the window.
     pub fn draw_loop(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> bool {
         let order = self.draw_order();
         let mut visible = vec![false; self.cache.len()];
@@ -375,6 +521,11 @@ impl WidgetCache {
 }
 
 impl Default for WidgetCache {
+    /// Creates an empty `WidgetCache`; the same as [`WidgetCache::new`].
+    ///
+    /// # Returns
+    ///
+    /// A new, empty `WidgetCache`.
     fn default() -> Self {
         Self::new()
     }
