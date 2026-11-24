@@ -23,6 +23,7 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Retained, with stable identity.** Widgets persist and keep stable IDs, which is what accessibility trees, caching, incremental updates, and form files all need.
 - **Engine separate from design.** The engine (tree, events, invalidation, paint API) and the design layer (widgets, defaults, appearance, themes) are separate modules with written specs (7.6 (#114)).
 - **Use shared foundations.** Text layout (Parley) and accessibility (AccessKit) come from the ecosystem's well-tested crates rather than being reinvented.
+- **Layouts are optional and extensible.** Containers can stay absolutely positioned, as designed forms were on classic systems, or use simple layout managers (row, column, form, grid, stack, flow) and custom ones, so forms resize and adapt to text and fonts.
 - **Usability first.** A control is added because it makes ordinary applications easier to use, not because another toolkit had it. Ideas that didn't meet that bar are listed under *Parked*.
 - **Self-contained and GPU-first.** Pushrod draws everything itself through SDL2: no OS-native menus, menu bars, dialogs, or controls, so applications look and behave the same everywhere. Each widget paints into its own GPU texture only when invalidated; frames are composed by blitting cached textures; text comes from a glyph atlas texture. SDL2 does the heavy lifting for graphics and input.
 
@@ -38,7 +39,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **49 of 89 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **52 of 95 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
@@ -48,7 +49,7 @@ MVP scope: **49 of 89 active issues** (marked **Y** in the MVP column). Everythi
 | 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 20 | 10 |
 | 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 7 | 3 |
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
-| 5 (#15) | Composition, clipping, and layout | Clip children to parents, build widgets from child widgets, scroll views, and autoresizing. | 4 | 2 |
+| 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, scroll views, autoresizing, and simple, extensible layout managers (row, column, form, grid, stack, flow). | 10 | 5 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
 | 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 7 | 7 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
@@ -119,7 +120,7 @@ Where each idea comes from. Pushrod takes the common, proven core of these syste
 | Event routing | Single target (GEM, classic Mac) | Fixed mouse-button roles (Intergraph workstations) | Capture/bubble (GTK); accept/ignore + filters (Qt) |
 | Reusable input handling |  |  | GTK event controllers |
 | Keeping values in sync |  |  | GTK property bindings; Qt property notifications |
-| Layout on resize | Fixed positions | Motif form attachments; NeXTSTEP autoresizing | Qt/GTK layout managers (not adopted: too heavy) |
+| Layout on resize | Fixed-size forms (GEM, AmigaOS) | Motif form attachments; NeXTSTEP autoresizing | Qt/GTK layout managers (adopted as simple, extensible layouts) |
 | Value controls | Hand-built sliders (GEM) | Amiga sliders/scrollers/cycle gadgets; Motif scale/spin box | Qt/GTK sliders, spin buttons, switches |
 | Lists, tables, and hierarchies |  | Amiga list views; Motif lists; NeXTSTEP column browser | Qt/GTK item models and views; Mac Finder column view; Windows report lists |
 | Dialogs and notices | GEM/Mac alerts and modal dialogs | Motif message and file dialogs | GTK info bars; Qt/GTK dialogs |
@@ -175,7 +176,7 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `undo.rs (new)`, `engine.rs` |
 | 1.16 (#82) | Multiple windows | Open additional top-level windows, each with its own widget tree, sharing one application state. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `engine.rs`, `cache.rs` |
 | 1.17 (#104) | Per-state appearance: colors, border, and font for each visual state | Every widget carries appearance attributes for normal, pressed, hovered, focused, disabled, and drag-over, so the look changes automatically as the state changes. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `paint.rs`, `all widgets` |
-| 1.18 (#111) | Text layout engine: shaping, bidi, line breaking, and font fallback (Parley) | Lay out text with a real layout engine and feed its glyph runs into the GPU glyph atlas. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text/layout.rs (new)`, `font.rs`, `paint.rs` |
+| 1.18 (#111) | Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) | Lay out text with a real layout engine and feed its glyph runs into the GPU glyph atlas. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text/layout.rs (new)`, `font.rs`, `paint.rs` |
 | 1.19 (#112) | Input method (IME) support: composition text and candidate window | Show in-progress composition text in fields and position the platform candidate window at the caret. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text_field.rs`, `engine.rs`, `event.rs` |
 | 1.20 (#113) | Layers and invalidation: cache hints, texture memory budget, incremental pipeline | Decide which widgets get their own GPU texture, cap texture memory, and invalidate layout, paint, and compositing separately. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `cache.rs`, `texture.rs`, `widget.rs` |
 
@@ -409,7 +410,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** The root widget keeps its initial size when the window is resized, and high-DPI displays get a scaled, blurry image.
 
-**Solution / Scope.** On window resize, resize the root and apply autoresizing (5.4 (#59)). Create windows with high-DPI support and render textures at physical resolution with a logical coordinate scale so text stays sharp. Emits its engine event (9.10 (#109)).
+**Solution / Scope.** On window resize, resize the root and apply autoresizing (5.4 (#59)). Create windows with high-DPI support and render textures at physical resolution with a logical coordinate scale so text stays sharp. Emits its engine event (9.10 (#109)). With layouts (5.5 (#116)), the window's minimum size comes from the root layout's minimum size hint, and dialogs open at their preferred size.
 
 **Acceptance Criteria.**
 
@@ -417,7 +418,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Text is sharp on a 2x display
 - Emits the corresponding `EngineEvent` (9.10 (#109))
 
-**Parallelism / Dependencies.** Parallelizable. Requires 5.4 (#59).
+**Parallelism / Dependencies.** Parallelizable. Requires 5.4 (#59), 5.5 (#116).
 
 **Technical Stack.** Rust, SDL2 window/high-DPI API
 
@@ -645,18 +646,19 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
-### 1.18 (#111): Text layout engine: shaping, bidi, line breaking, and font fallback (Parley)
+### 1.18 (#111): Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate)
 
 **Problem Statement.** SDL_ttf renders strings but doesn't handle complex scripts, right-to-left text, proper line breaking, font fallback for missing glyphs, or the caret and selection geometry that text fields need. Writing that ourselves would be a large, error-prone project; the ecosystem has converged on shared solutions.
 
-**Solution / Scope.** Use Parley for text layout (shaping, bidirectional text, line breaking, font fallback, alignment) and its cursor/selection geometry for text fields. Glyphs from the layout are rasterized once into the GPU glyph atlas (1.7 (#3)) and drawn by copying atlas rectangles, so the GPU-first design is unchanged. Text layouts are cached per widget and recomputed only when text, font, or width changes. Keep the layout behind a small `TextLayout` trait so Cosmic Text can be swapped in (avoiding a monoculture) and a bitmap-font layout can serve vintage targets (10.4 (#108)).
+**Solution / Scope.** Use Parley for layout only: it computes glyph positions, line breaks, bidi, and font fallback, and provides caret and selection geometry; it does not draw. Pushrod keeps drawing: each glyph from Parley's glyph runs is rasterized once (with swash) into a CPU bitmap, uploaded into the SDL2 glyph-atlas texture (1.7 (#3)), and drawn by copying atlas rectangles with color modulation, so the GPU-first design is unchanged and steady-state text drawing does no CPU rasterization. **Compatibility gate (first step):** a spike in `examples/parley_spike.rs` renders labels and a text field through Parley → glyph bitmap → SDL2 atlas texture. It must show (a) no per-frame CPU rasterization after warm-up, (b) the same texture/blit path as other widgets, and (c) acceptable binary size and startup time. If the spike fails, Parley stays behind an off-by-default `parley` Cargo feature and the default `TextLayout` remains SDL_ttf-based until it passes. Text layouts are cached per widget and recomputed only when text, font, or width changes, and they supply size hints to layout managers (5.5 (#116)). The `TextLayout` trait allows Cosmic Text or a bitmap-font layout (vintage targets, 10.4 (#108); Parley can also build without std via its `libm` feature).
 
 **Acceptance Criteria.**
 
-- Arabic/Hebrew (RTL), CJK, and emoji fallback render correctly in labels and fields
-- Caret and selection geometry from the layout engine drive text fields
-- Layouts cached and recomputed only on text/font/width change
-- `TextLayout` trait with the Parley implementation as default
+- Spike passes the compatibility gate (or Parley is feature-gated off by default with the reason recorded in the issue)
+- Glyphs rasterized once into the SDL2 atlas; steady-state drawing is texture copies only
+- RTL, CJK, and emoji fallback render correctly; caret/selection geometry drives text fields
+- Layouts cached; recomputed only on text/font/width change; provide size hints
+- `TextLayout` trait with Parley as default once the gate passes
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 10.2 (#106).
 
@@ -664,7 +666,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Rustdoc: `TextLayout`, layout caching. README/guides: 'Text' section. Examples: International text sample in the gallery. Screenshots: Gallery tile.
 
-**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [Parley: rich text layout (Linebender)](https://github.com/linebender/parley)
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [Parley (Linebender): rich text layout library](https://github.com/linebender/parley)
 
 ### 1.19 (#112): Input method (IME) support: composition text and candidate window
 
@@ -1869,7 +1871,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Settings dialogs group many controls into pages.
 
-**Solution / Scope.** `TabView`: tab strip + one container per page; switching hides inactive pages (IDs and state preserved). Ctrl+Tab switches pages. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `tabs()`, `pages()`, `add_page(title) -> (tab_id, page_id)`, `remove_page`. Every part can be retrieved and restyled (font, color, text).
+**Solution / Scope.** `TabView`: tab strip + one container per page; switching hides inactive pages (IDs and state preserved). Ctrl+Tab switches pages. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `tabs()`, `pages()`, `add_page(title) -> (tab_id, page_id)`, `remove_page`. Every part can be retrieved and restyled (font, color, text). Pages are held in a stack layout (5.9 (#120)).
 
 #### Look and behavior (proposed)
 
@@ -2013,13 +2015,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Rustdoc: Module docs + `TableModel`. README/guides: Widget list. Examples: File list in example. Screenshots: Gallery tile.
 
-## Epic 5: Composition, clipping, and layout (#15)
+## Epic 5: Composition, clipping, and layout managers (#15)
 
-Clip children to parents, build widgets from child widgets, scroll views, and autoresizing.
+Clip children to parents, composite widgets with retrievable parts, scroll views, autoresizing, and simple, extensible layout managers (row, column, form, grid, stack, flow).
 
-**Problem.** Children draw outside their parents, interactive widgets can't be reused as parts of other widgets, and nothing adapts when a parent is resized.
+**Problem.** Children draw outside their parents, interactive widgets can't be reused as parts, and nothing adapts when a window or parent is resized. Classic systems (GEM, AmigaOS) had no layout managers: forms were fixed-size, and putting a resizable form in a window was very difficult. Modern applications expect forms that resize, adapt to different fonts and translations, and size themselves to their content.
 
-**Scope.** Clip children to their parents, add composite widgets (the reuse mechanism for complex controls), a scroll view, and simple autoresizing. Absolute positioning stays the default, as in a designed form.
+**Scope.** Clip children, add composites with retrievable parts, a scroll view, and autoresizing for absolutely positioned forms. Add a small `Layout` trait with simple built-in managers (row and column, form, then grid, stack, and flow) that applications can extend with their own. Absolute positioning stays available: a container without a layout behaves exactly as today.
 
 **Dependencies.** Clipping (5.1 (#56)) and composites (5.2 (#57)) are MVP and block the complex controls.
 
@@ -2029,6 +2031,12 @@ Clip children to parents, build widgets from child widgets, scroll views, and au
 | 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `cache.rs`, `composite.rs (new)` |
 | 5.3 (#58) | Scroll view | A container whose content is larger than its frame. | `enhancement`, `layout`, `size/M`, `widget` | N | N | M | `scroll_view.rs (new)`, `cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `widget.rs`, `cache.rs` |
+| 5.5 (#116) | Layout manager foundation: Layout trait, size hints, measure and arrange | A small Layout trait any container can use; widgets report minimum, preferred, and maximum sizes; containers measure then arrange their children. | `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | Y | M | `layout/mod.rs (new)`, `widget.rs`, `cache.rs` |
+| 5.6 (#117) | Row and column layouts | Arrange children in a horizontal row or vertical column with spacing, margins, alignment, and stretch. | `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `layout/linear.rs (new)` |
+| 5.7 (#118) | Form layout: aligned label and field rows | Two-column 'Label: field' rows with labels aligned and fields stretching to the available width. | `enhancement`, `layout`, `mvp`, `size/S`, `usability` | N | Y | S | `layout/form.rs (new)` |
+| 5.8 (#119) | Grid layout | Rows and columns of cells with spans, per-row/column stretch, and alignment. | `enhancement`, `layout`, `parallelizable`, `size/M` | Y | N | M | `layout/grid.rs (new)` |
+| 5.9 (#120) | Stack layout (one child visible at a time) | Children occupy the same area; one is shown at a time (pages, wizards, tab contents). | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/stack.rs (new)` |
+| 5.10 (#121) | Flow layout (wrapping rows) | Children placed left to right, wrapping to the next row when the width runs out. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/flow.rs (new)` |
 
 ### 5.1 (#56): Clip children to their parent's bounds
 
@@ -2134,7 +2142,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Designed forms are absolutely positioned, which is simple, but nothing adapts when a window or pane is resized.
 
-**Solution / Scope.** An `Anchors` setting on `WidgetCore` (left, right, top, bottom, plus stretch width/height), applied when the parent's size changes. Absolute positioning remains the default; no constraint solver. Sibling-relative attachments can be revisited only if real forms need them.
+**Solution / Scope.** An `Anchors` setting on `WidgetCore` (left, right, top, bottom, plus stretch width/height), applied when the parent's size changes. Absolute positioning remains the default; no constraint solver. Sibling-relative attachments can be revisited only if real forms need them. Anchors apply to containers without a layout manager; containers with a layout (5.5 (#116)) are arranged by the layout instead.
 
 **Acceptance Criteria.**
 
@@ -2148,6 +2156,173 @@ Like every widget, it can also receive application-defined custom events in `han
 **Documentation.** Rustdoc: `Anchors`. README/guides: Layout section. Examples: Resizable example. Screenshots: n/a.
 
 **Sources.** [Motif reference: form attachments](https://man.archlinux.org/man/XmForm.3.en)
+
+### 5.5 (#116): Layout manager foundation: Layout trait, size hints, measure and arrange
+
+**Problem Statement.** Pushrod only supports absolute positions. Resizable windows, translated text of different lengths, user font sizes, and dialogs that size themselves to their content all need layout managers. Classic Atari and Amiga forms couldn't resize at all, which is a big part of why their dialogs felt rigid.
+
+**Solution / Scope.** Add `SizeHint { min, preferred, max }` (each widget reports it; text widgets measure through the text layout, 1.18 (#111)) and a per-widget `LayoutParams { stretch, alignment, margin }`. Add `trait Layout { fn measure(&self, children: &[ChildInfo], available: Size) -> SizeHint; fn arrange(&self, children: &[ChildInfo], bounds: Rect) -> Vec<Rect>; }`; any container widget can hold `Option<Box<dyn Layout>>` (`set_layout`). Layout runs as its own invalidation level: changing a child's size hint, text, font, or visibility, or resizing the container, marks layout dirty up to the nearest container whose own size doesn't change; measure and arrange run once per frame before painting, and arrange only moves widgets (re-blit) unless their size changed. Without a layout, a container keeps absolute positioning and autoresizing (5.4 (#59)). Applications extend the system by implementing `Layout` for their own managers. Emits `Engine(LayoutChanged { container })` (9.10 (#109)).
+
+```text
+            measure (bottom-up)                   arrange (top-down)
+window  <- SizeHint{min,pref,max} --   window  -- Rect --> 
+  column <- hints of children --        column -- Rects for each child -->
+    label   (text layout size)            label    (moved, re-blit only)
+    field   (min width 120)               field    (resized -> repaint)
+```
+
+**Acceptance Criteria.**
+
+- `SizeHint`, `LayoutParams`, and the `Layout` trait
+- Containers with a layout are measured and arranged once per frame when dirty
+- Layout invalidation stops at containers whose size doesn't change
+- Moving without resizing doesn't repaint
+- Absolute positioning unchanged when no layout is set
+- An application-defined layout works
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.18 (#111), 9.10 (#109).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `layout` module, `Layout` trait, `SizeHint`. README/guides: 'Layouts' section. Examples: Custom layout example. Screenshots: n/a.
+
+**Sources.** [Motif reference: form attachments](https://man.archlinux.org/man/XmForm.3.en)
+
+### 5.6 (#117): Row and column layouts
+
+**Problem Statement.** Most dialogs are rows and columns: a column of fields, a row of buttons aligned to the right.
+
+**Solution / Scope.** `Row` and `Column` layouts with `spacing`, `margins`, cross-axis alignment, and per-child `stretch` (children with stretch share extra space proportionally; others keep their preferred size). A `Spacer` widget (`Spacer::stretch()`) pushes items apart, for example to right-align OK/Cancel. Children respect min/max sizes.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**A column of fields above a right-aligned button row, at two window widths**
+
+![5.6 step set 1: A column of fields above a right-aligned button row, at two window widths](mockups/5.6-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(LayoutChanged { container })` | Children re-arranged | `on_engine_event(..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Row and column with spacing, margins, alignment, stretch
+- Spacer for right/bottom alignment
+- Min/max respected while resizing
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `Row`, `Column`, `Spacer`. README/guides: 'Layouts' section. Examples: Example dialog built with rows and columns. Screenshots: Gallery tile.
+
+### 5.7 (#118): Form layout: aligned label and field rows
+
+**Problem Statement.** Data-entry forms are label/field rows. Aligning labels by hand breaks when text is translated or fonts change.
+
+**Solution / Scope.** `FormLayout::add_row(label, field)`: labels right- (Mac style) or left-aligned in a column sized to the widest label; fields stretch; optional full-width rows (check boxes, group boxes); rows wrap the label above the field when the form gets too narrow. Clicking a label focuses its field (works with mnemonics, 1.12 (#76)).
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Form layout: wide window, then narrow window (labels move above fields)**
+
+![5.7 step set 1: Form layout: wide window, then narrow window (labels move above fields)](mockups/5.7-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(LayoutChanged { container })` | Rows re-arranged | `on_engine_event(..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Labels align to the widest label
+- Fields stretch with the window
+- Narrow mode puts labels above fields
+- Label click focuses its field
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `FormLayout`. README/guides: 'Layouts' section. Examples: Settings form example. Screenshots: Gallery tile.
+
+### 5.8 (#119): Grid layout
+
+**Problem Statement.** Calculator keypads, property sheets, and dashboards need cells aligned in both directions.
+
+**Solution / Scope.** `Grid::place(child, row, col, row_span, col_span)` with per-row and per-column min sizes and stretch factors, spacing, and cell alignment.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Grid with a spanning cell, at two window widths**
+
+![5.8 step set 1: Grid with a spanning cell, at two window widths](mockups/5.8-1.png)
+
+**Acceptance Criteria.**
+
+- Spans, stretch, alignment, spacing
+- Correct min/preferred sizes from cell hints
+
+**Parallelism / Dependencies.** Parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `Grid`. README/guides: 'Layouts' section. Examples: Calculator example. Screenshots: Gallery tile.
+
+### 5.9 (#120): Stack layout (one child visible at a time)
+
+**Problem Statement.** Tab views, wizards, and settings pages switch between pages in the same space.
+
+**Solution / Scope.** `Stack` sized to its largest child (or the current one), showing one child; `set_current(index)` hides the others. Used by the tab view (4.4 (#51)).
+
+**Acceptance Criteria.**
+
+- Switching pages hides others and keeps their state
+- Size policy: largest or current
+
+**Parallelism / Dependencies.** Parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `Stack`. README/guides: 'Layouts' section. Examples: Wizard example. Screenshots: n/a.
+
+### 5.10 (#121): Flow layout (wrapping rows)
+
+**Problem Statement.** Tag lists, icon views, and toolbars that wrap need content to reflow as the width changes.
+
+**Solution / Scope.** `Flow` with horizontal and vertical spacing and row alignment; measure reports the height needed for a given width.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Flow layout reflowing tags at two widths**
+
+![5.10 step set 1: Flow layout reflowing tags at two widths](mockups/5.10-1.png)
+
+**Acceptance Criteria.**
+
+- Reflows on resize
+- Height-for-width measurement
+
+**Parallelism / Dependencies.** Parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `Flow`. README/guides: 'Layouts' section. Examples: Tag list example. Screenshots: Gallery tile.
 
 ## Epic 6: Forms and form files (foundation for Chassis) (#16)
 
@@ -2211,7 +2386,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** Designed forms must be stored compactly and loaded quickly, with programs referring to objects only by number, as every classic system did.
 
-**Solution / Scope.** Header (magic `PRSC`, version, offsets); form table (name, root); object table (type, parent, first child, next sibling, origin, size, behavior, state, anchors, property offset); tag-length-value property blocks so new properties don't break old readers; string pool; image pool; symbol table (names for IDs and actions). Little-endian, std only. Specified in `docs/FORM_FORMAT.md`.
+**Solution / Scope.** Header (magic `PRSC`, version, offsets); form table (name, root); object table (type, parent, first child, next sibling, origin, size, behavior, state, anchors, property offset); tag-length-value property blocks so new properties don't break old readers; string pool; image pool; symbol table (names for IDs and actions). Little-endian, std only. Specified in `docs/FORM_FORMAT.md`. Layouts are stored too: a container's layout kind and parameters, and each child's layout parameters (stretch, alignment, margins, grid cell).
 
 ```text
 +---------------------------+
@@ -2343,7 +2518,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** Chassis will be a drag-and-drop form designer built on Pushrod. It must hit-test every object, draw selection handles, and edit widgets without them reacting.
 
-**Solution / Scope.** `DesignMode` on `WidgetCache`: an event filter (9.3 (#95)) intercepts all input; `design_hit` includes disabled widgets; an overlay draws handles and alignment guides; edits go through the undo stack (1.15 (#81)) and emit `DesignChanged`. Composite parts aren't separately selectable.
+**Solution / Scope.** `DesignMode` on `WidgetCache`: an event filter (9.3 (#95)) intercepts all input; `design_hit` includes disabled widgets; an overlay draws handles and alignment guides; edits go through the undo stack (1.15 (#81)) and emit `DesignChanged`. Composite parts aren't separately selectable. The designer edits layouts as well: choose a container's layout, drag children between cells or rows, and edit spacing, stretch, and alignment.
 
 **Acceptance Criteria.**
 
@@ -2962,7 +3137,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.3 (#7) Broadcast events to all interested widgets — MVP
 - 1.6 (#22) Callback registry for every widget event — MVP
 - 1.13 (#78) Custom application events with payloads — MVP
-- 1.18 (#111) Text layout engine: shaping, bidi, line breaking, and font fallback (Parley) — MVP
+- 1.18 (#111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) — MVP
 - 1.7 (#3) GPU text: font cache with a glyph atlas texture — MVP
 - 7.3 (#71) Widget gallery example — MVP
 - 7.6 (#114) Module boundaries and written specs with conformance tests — MVP
@@ -2996,6 +3171,9 @@ Work in this order. Items in the same step can be done in parallel unless their 
 
 - 5.1 (#56) Clip children to their parent's bounds — MVP
 - 5.2 (#57) Composite widgets: build widgets from parts that applications can retrieve and modify — MVP
+- 5.5 (#116) Layout manager foundation: Layout trait, size hints, measure and arrange — MVP
+- 5.6 (#117) Row and column layouts — MVP
+- 5.7 (#118) Form layout: aligned label and field rows — MVP
 - 3.1 (#39) Scroll bar — MVP
 - 7.2 (#70) Golden-image rendering tests — MVP
 - 7.7 (#115) Performance benchmarks and budgets — MVP
@@ -3033,6 +3211,9 @@ Work in this order. Items in the same step can be done in parallel unless their 
 **8. After MVP: widgets**
 
 - 5.4 (#59) Autoresizing (keep margins or stretch on resize)
+- 5.8 (#119) Grid layout
+- 5.9 (#120) Stack layout (one child visible at a time)
+- 5.10 (#121) Flow layout (wrapping rows)
 - 1.10 (#25) Window resize and high-DPI rendering
 - 5.3 (#58) Scroll view
 - 4.5 (#52) List view
@@ -3118,4 +3299,5 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 - [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 - [Parley: rich text layout (Linebender)](https://github.com/linebender/parley)
 - [AccessKit: cross-platform accessibility infrastructure](https://github.com/AccessKit/accesskit)
+- [Parley (Linebender): rich text layout library](https://github.com/linebender/parley)
 - Apple AppKit documentation for NSStepper, NSSegmentedControl, NSTabView, NSProgressIndicator, NSLevelIndicator, NSComboBox, NSOutlineView (Mac OS X successors of the NeXTSTEP Application Kit)
