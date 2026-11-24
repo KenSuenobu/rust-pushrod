@@ -164,20 +164,13 @@ EXCLUSIVE        (radio groups)
 HIDDEN
 ```
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **The same button in each visual state**
 
-```text
- normal      PRESSED      DISABLED      FOCUSED        HOVERED (optional highlight)
-+------+    +------+     +------+     ..........      +------+
-|  OK  |    |##OK##|     |:.OK.:|     :+------+:      | OK   |
-+------+    +------+     +------+     :|  OK  |:      +------+
-            inverted     dither       :+------+:
-                                      ..........
-```
+![1.1 step set 1: The same button in each visual state](mockups/1.1-1.png)
 
 #### Events and callbacks
 
@@ -417,19 +410,13 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Solution / Scope.** Labels may contain `_` before a character (`"_Save"`); `__` is a literal underscore. `paint::text` draws the character underlined and omits the marker. Each form has a mnemonic table: Alt+letter (or the letter alone when no text field has focus) activates the control: buttons click, check boxes toggle, and a label moves focus to the next focusable widget. Duplicates are reported in debug builds.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Labels with mnemonics: `_` marks the letter, drawn underlined**
 
-```text
- +--------+   +----------+        Name: [______________]
- |  Save  |   |  Cancel  |        -
- |  -     |   |  -       |        ^ Alt+N moves focus to the field after the label
- +--------+   +----------+
- Alt+S clicks Save, Alt+C clicks Cancel (the letter alone works when no text field has focus)
-```
+![1.12 step set 1: Labels with mnemonics: `_` marks the letter, drawn underlined](mockups/1.12-1.png)
 
 #### Events and callbacks
 
@@ -473,13 +460,13 @@ Like every widget, it can also receive application-defined custom events in `han
  Widget::handle_event(&Custom)   on_custom::<Payload>(..)      on_event(..)
 ```
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **No visual; usage sketch**
 
-```text
+```rust
  struct DownloadProgress { percent: u8 }
 
  // background thread
@@ -607,17 +594,13 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 **Solution / Scope.** Add `BoxedLabel` = `fill` + `text` + `border`, reusing `TextStyle`. Kept under 100 lines as the reference example of composing paint helpers.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Normal and disabled**
 
-```text
- +----------------------+     +----------------------+
- |    Boxed caption     |     |::::Boxed:caption:::::|
- +----------------------+     +----------------------+
-```
+![2.1 step set 1: Normal and disabled](mockups/2.1-1.png)
 
 #### Events and callbacks
 
@@ -646,18 +629,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Add `GlyphButton { glyph: char }`: fill + centered glyph + border; inverted while pressed. With `ACTIVATE_ON_PRESS` it fires on press and auto-repeats while held (400 ms delay, then every 100 ms, via timers).
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Pressed (fires immediately) 3. Held: repeats 4. Released 5. Disabled**
 
-```text
-  1        2        3            4        5
- +---+    +---+    +---+        +---+    +---+
- | ^ |    |#^#|    |#^#| x N    | ^ |    |:^:|
- +---+    +---+    +---+        +---+    +---+
-```
+![2.2 step set 1: 1. Idle 2. Pressed (fires immediately) 3. Held: repeats 4. Released 5. Disabled](mockups/2.2-1.png)
 
 #### Events and callbacks
 
@@ -687,37 +665,21 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Behavior comes from flags (1.1 (#19)): `DEFAULT_ACTION` draws a 2 px ring and is triggered by Return; `CANCEL_ACTION` by Escape; `TOGGLE` stays pressed and emits `Toggled`; `ACTIVATE_ON_PRESS` emits `Clicked` on press; `DISMISSES_DIALOG` closes the modal dialog (6.7 (#66)) and reports its ID. Pressed inversion moves to shared state painting.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Push button: 1. idle 2. pressed 3. dragged out (releases) 4. released inside -> Clicked**
 
-```text
-  1            2            3                 4
- +--------+   +--------+   +--------+  <     +--------+
- | Cancel |   |#Cancel#|   | Cancel |        | Cancel |  Clicked
- +--------+   +--------+   +--------+        +--------+
-```
+![2.3 step set 1: Push button: 1. idle 2. pressed 3. dragged out (releases) 4. released inside -> Clicked](mockups/2.3-1.png)
 
 **Default button: 2 px ring, Return activates it**
 
-```text
- ##############
- #+----------+#
- #|    OK    |#
- #+----------+#
- ##############
-```
+![2.3 step set 2: Default button: 2 px ring, Return activates it](mockups/2.3-2.png)
 
 **Toggle button: click stays pressed, click again releases**
 
-```text
- +--------+   click   +--------+   click   +--------+
- |  Bold  |  ----->   |##Bold##|  ----->   |  Bold  |
- +--------+           +--------+           +--------+
-                      Toggled(true)        Toggled(false)
-```
+![2.3 step set 3: Toggle button: click stays pressed, click again releases](mockups/2.3-3.png)
 
 #### Events and callbacks
 
@@ -748,17 +710,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Add `CheckBox`: square + check mark when `CHECKED`, a dash when `INDETERMINATE`, followed by a label. Clicking the box or label toggles and emits `Toggled`; Space toggles when focused; clicking an indeterminate box makes it checked.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Unchecked 2. Pressed 3. Checked 4. Indeterminate 5. Focused 6. Disabled**
 
-```text
- 1                 2                 3                 4                 5                    6
- [ ] Send email    [#] Send email    [X] Send email    [-] Send email    [X] :Send email:     [:] Send:email
-                                                                             ............
-```
+![2.4 step set 1: 1. Unchecked 2. Pressed 3. Checked 4. Indeterminate 5. Focused 6. Disabled](mockups/2.4-1.png)
 
 #### Events and callbacks
 
@@ -787,19 +745,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Add `RadioButton` (circle + label) with the `EXCLUSIVE` behavior. When one becomes checked, exclusive siblings under the same parent are cleared and `Toggled` is emitted for the newly checked one (and `Toggled(false)` for the one cleared). `RadioGroup::new(labels)` builds a labeled group in one call; `ui.checked_in_group(parent)`. Arrow keys move within the group (1.4 (#20)).
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared**
 
-```text
- 1               2               3
- ( ) Small       ( ) Small       ( ) Small
- (*) Medium      (*) Medium      ( ) Medium
- ( ) Large       (#) Large       (*) Large
-                                 Toggled(large, true), Toggled(medium, false)
-```
+![2.5 step set 1: 1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared](mockups/2.5-1.png)
 
 #### Events and callbacks
 
@@ -829,26 +781,17 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Add `TextField`: caret (blinking via timers), selection with Shift+arrows and mouse drag, Home/End, word movement, clipboard via SDL, max length, placeholder text, password mode. Restrict input with an input mask (`"99/99/9999"`, `9` digit, `A` letter, `X` any) or a `Validator` trait (`validate(&str) -> Valid | Intermediate | Invalid`); `IntegerField`/`NumberField` presets with range. Optional built-in label (`with_label("Name:")`). Uses SDL text input events. Emits `TextChanged` on each edit and `EditingFinished` on Return or focus loss.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. empty 2. focused 3. typing 4. selection 5. rejected character 6. disabled**
 
-```text
- 1  Name: [________________]
- 2  Name: [|_______________]
- 3  Name: [Ken|____________]       TextChanged
- 4  Name: [K##|____________]       Shift+Left selects "en" (inverted)
- 5  Name: [Ken|____________]       '#' rejected by the validator: no change
- 6  Name: [:Ken::::::::::::]
-```
+![2.6 step set 1: 1. empty 2. focused 3. typing 4. selection 5. rejected character 6. disabled](mockups/2.6-1.png)
 
 **Input mask `99/99/9999`**
 
-```text
- Date: [__/__/____]   type 1 1 2 4   ->   Date: [11/24/____]
-```
+![2.6 step set 2: Input mask `99/99/9999`](mockups/2.6-2.png)
 
 #### Events and callbacks
 
@@ -881,21 +824,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `ImageWidget` loads an image once with SDL2_image into a shared GPU texture cache keyed by path and copies it with a fit mode: `Center`, `Stretch`, `Fit` (keep aspect), `Tile`. Missing files draw a crossed box instead of panicking.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Fit modes and missing file**
 
-```text
- Center          Stretch         Fit (aspect)    Tile            Missing file
- +----------+    +----------+    +----------+    +----------+    +----------+
- |          |    |##########|    |          |    |##|##|##|#|    |\        /|
- |   ####   |    |##########|    | ######## |    |--+--+--+-|    |  \    /  |
- |   ####   |    |##########|    | ######## |    |##|##|##|#|    |  /    \  |
- |          |    |##########|    |          |    |--+--+--+-|    |/        \|
- +----------+    +----------+    +----------+    +----------+    +----------+
-```
+![2.7 step set 1: Fit modes and missing file](mockups/2.7-1.png)
 
 #### Events and callbacks
 
@@ -923,19 +858,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `IconWidget` = image + caption; click selects (caption inverted), double-click or Return activates.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Selected 3. Activated (double-click)**
 
-```text
- 1            2            3
-  +------+     +------+     +------+
-  | [==] |     | [==] |     | [==] |
-  +------+     +------+     +------+
-   Disk A     ##Disk A##   ##Disk A##  Activated
-```
+![2.8 step set 1: 1. Idle 2. Selected 3. Activated (double-click)](mockups/2.8-1.png)
 
 #### Events and callbacks
 
@@ -963,28 +892,17 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` builds a centered modal form (6.7 (#66)) from existing widgets and calls the completion closure with the chosen button index. Return chooses the default, Escape the last button. Always drawn by Pushrod.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Alert opens centered; the rest of the window is drawn but inert**
 
-```text
- +----------------------------------------------+
- |  /!\   Delete "report.txt"?                  |
- |        This cannot be undone.                |
- |                                              |
- |            ##############    +----------+    |
- |            #+----------+#    |  Cancel  |    |
- |            #|  Delete  |#    +----------+    |
- |            #+----------+#                    |
- |            ##############                    |
- +----------------------------------------------+
-```
+![2.9 step set 1: 1. Alert opens centered; the rest of the window is drawn but inert](mockups/2.9-1.png)
 
 **2. Return = Delete (default), Escape = Cancel  3. Closes; completion gets the index**
 
-```text
+```rust
  ui.alert(AlertKind::Warning, "Delete \"report.txt\"?", "This cannot be undone.",
           &["Delete", "Cancel"], 0, |state, ui, choice| if choice == 0 { /* delete */ });
 ```
@@ -1017,19 +935,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `CustomPaint::new(origin, size, |canvas, size, state| ..)` with an optional event closure. The closure draws into the widget's GPU texture with the SDL2 canvas; it only runs when invalidated.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Drawn entirely by the application's closure**
 
-```text
- +----------------------+
- |         #            |
- |    #    #      #     |
- |    #  # #   #  #     |
- +----------------------+
-```
+![2.10 step set 1: Drawn entirely by the application's closure](mockups/2.10-1.png)
 
 #### Events and callbacks
 
@@ -1059,31 +971,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `MenuBar` and `Menu` widgets built as composites (5.2 (#57)). Items come from actions (9.5 (#97)) or plain labels; support separators, check/radio items, disabled items, submenus, shortcut text, and mnemonics (1.12 (#76)). Menus open on click, track the pointer, draw in the overlay layer above all widgets, and close on outside click or Escape. Never uses the OS menu bar or native menus.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. File opened (overlay) 3. Hovering Save 4. Release: Save triggered**
 
-```text
- 1 +------------------------------------------------+
-   | File  Edit  View                               |
-   +------------------------------------------------+
- 2 +------------------------------------------------+
-   |#File# Edit  View                               |
-   +------------------+-----------------------------+
-   | New       Ctrl+N |
-   | Open...   Ctrl+O |
-   |------------------|
-   | Save      Ctrl+S |
-   |:Revert:::::::::::|   disabled
-   | Recent         > |   submenu
-   |------------------|
-   | Quit      Ctrl+Q |
-   +------------------+
- 3 |#Save######Ctrl+S#|
- 4 menu closes -> the Save action triggers
-```
+![2.11 step set 1: 1. Idle 2. File opened (overlay) 3. Hovering Save 4. Release: Save triggered](mockups/2.11-1.png)
 
 #### Events and callbacks
 
@@ -1113,29 +1007,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Modal form built from the list view (4.5 (#52)), text fields, and buttons: directory, filter, file list, name, OK/Cancel; Open and Save modes. Completion closure receives `Option<PathBuf>`. OS-native dialogs are deliberately not used.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Open dialog**
 
-```text
- +------------------------------------------------+
- | Open                                           |
- | Folder: [/home/ken/projects/________________]  |
- | Filter: [*.rs_____________]                    |
- | +------------------------------------------+-+ |
- | | ..                                       |^| |
- | | src/                                     |#| |
- | |#main.rs##################################|#| |
- | | lib.rs                                   | | |
- | +------------------------------------------+v+ |
- | Name:   [main.rs___________________________]   |
- |                      ##########  +--------+    |
- |                      #  Open  #  | Cancel |    |
- |                      ##########  +--------+    |
- +------------------------------------------------+
-```
+![2.12 step set 1: Open dialog](mockups/2.12-1.png)
 
 #### Events and callbacks
 
@@ -1164,21 +1042,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Optional `tooltip` text on `WidgetCore` (actions supply it automatically). After a delay (600 ms), draw a bordered text box in the overlay layer near the pointer; hide it on movement, click, or key press.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Pointer rests 2. After 600 ms 3. Pointer moves: hidden**
 
-```text
- 1                       2                                3
- +------+                +------+                         +------+
- | Save | <              | Save | <                       | Save |    <
- +------+                +------+                         +------+
-                           +-----------------------+
-                           | Save the current file |
-                           +-----------------------+
-```
+![2.13 step set 1: 1. Pointer rests 2. After 600 ms 3. Pointer moves: hidden](mockups/2.13-1.png)
 
 #### Events and callbacks
 
@@ -1205,17 +1075,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `Separator::horizontal(width)` / `vertical(height)`: a 1 px line (optionally etched as two lines). Display only.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Horizontal and vertical**
 
-```text
- Name:    [__________]       |
- ----------------------      |   (vertical)
- Address: [__________]       |
-```
+![2.14 step set 1: Horizontal and vertical](mockups/2.14-1.png)
 
 #### Events and callbacks
 
@@ -1241,17 +1107,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `Toolbar` composite of tool buttons created from actions (9.5 (#97)): icon and/or text, toggle actions stay pressed, disabled actions gray out, tooltips from the action. Overflow items move into a '>>' menu.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Toolbar with a toggled Bold and a disabled Paste**
 
-```text
- +----------------------------------------------+
- | [New] [Open] [Save] | [#B#] [ I ] | [:Paste:] |
- +----------------------------------------------+
-```
+![2.15 step set 1: Toolbar with a toggled Bold and a disabled Paste](mockups/2.15-1.png)
 
 #### Events and callbacks
 
@@ -1280,17 +1142,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `StatusBar` with a message area (`show_message(text, timeout)`) and permanent fields; actions' status text appears while their menu item is hovered.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Status bar**
 
-```text
- +--------------------------------------------------+
- | Saved report.txt                  | Ln 12, Col 4 |
- +--------------------------------------------------+
-```
+![2.16 step set 1: Status bar](mockups/2.16-1.png)
 
 #### Events and callbacks
 
@@ -1317,15 +1175,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `Switch`: track with a knob; click or drag toggles; Space when focused. Emits `Toggled`.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Off, on, disabled**
 
-```text
- Wi-Fi  [##|    ]  off      Wi-Fi  [    |##]  on       Wi-Fi  [::|::::]
-```
+![2.17 step set 1: Off, on, disabled](mockups/2.17-1.png)
 
 #### Events and callbacks
 
@@ -1351,19 +1207,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `TextArea` in a scroll view: line wrapping, caret and selection across lines, clipboard, undo (1.15 (#81)), read-only mode for logs, `append` for log output. Only visible lines are painted from the glyph atlas.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Editing with a selection**
 
-```text
- +----------------------------------------+-+
- | Dear Ken,                              |^|
- | Thanks for the ##############          |#|
- | update.|                               | |
- +----------------------------------------+v+
-```
+![2.18 step set 1: Editing with a selection](mockups/2.18-1.png)
 
 #### Events and callbacks
 
@@ -1391,21 +1241,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `widget.set_context_menu(menu)` or `on_context_menu(id, |state, ui, at| -> Option<Menu>)` to build it dynamically. Opens on secondary click, long-press, or the Menu key, at the pointer, in the overlay layer; reuses `Menu` (2.11 (#37)) and actions (9.5 (#97)).
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Right-click on a list row**
 
-```text
- | Bananas     |
- |#Cherries####|  <- right-click
- | Dates  +-------------+
-          | Cut         |
-          | Copy        |
-          | Delete      |
-          +-------------+
-```
+![2.19 step set 1: Right-click on a list row](mockups/2.19-1.png)
 
 #### Events and callbacks
 
@@ -1434,17 +1276,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `MessageBar` at the top of a form: icon, text, optional action buttons, close box; slides in by animating its height.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Message bar with an action**
 
-```text
- +--------------------------------------------------------+
- | (i) Connection lost. Retrying in 5 s.   [Retry now] [x] |
- +--------------------------------------------------------+
-```
+![2.20 step set 1: Message bar with an action](mockups/2.20-1.png)
 
 #### Events and callbacks
 
@@ -1490,31 +1328,17 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 
 **Solution / Scope.** `ScrollBar` composite (5.2 (#57)): two glyph buttons (activate-on-press with auto-repeat), a track, and a draggable thumb sized by `visible / total`. Value 0.0 to 1.0 plus page size; clicking the track pages. Emits `ValueChanged`.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Track clicked below thumb (page down) 3. Thumb dragged 4. Down arrow held**
 
-```text
-  1      2      3        4
- +-+    +-+    +-+      +-+
- |^|    |^|    |^|      |^|
- +-+    +-+    +-+      +-+
- |#|    | |    | |      | |
- |#|    | |    | |      | |
- | |    |#|    |#| <    |#|
- | |    |#|    |#|      |#|
- +-+    +-+    +-+      +-+
- |v|    |v|    |v|      |#|
- +-+    +-+    +-+      +-+
-```
+![3.1 step set 1: 1. Idle 2. Track clicked below thumb (page down) 3. Thumb dragged 4. Down arrow held](mockups/3.1-1.png)
 
 **Horizontal**
 
-```text
- [<][#####               ][>]
-```
+![3.1 step set 2: Horizontal](mockups/3.1-2.png)
 
 #### Events and callbacks
 
@@ -1543,18 +1367,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `Slider { min, max, value, step, ticks, show_value }`: track + knob; drag or click; arrow keys when focused; optional value text beside it. Emits `ValueChanged` continuously and `EditingFinished` on release.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Dragging 3. Ticks with snap 4. Disabled**
 
-```text
- 1  Volume  |------[#]------------|  40
- 2  Volume  |-------------[#]-----|  75
- 3  Volume  |---+---+--[#]--+---+-|  50
- 4  Volume  |::::::[:]::::::::::::|  40
-```
+![3.2 step set 1: 1. Idle 2. Dragging 3. Ticks with snap 4. Disabled](mockups/3.2-1.png)
 
 #### Events and callbacks
 
@@ -1585,19 +1404,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `GroupBox`: border with a gap at the top-left for the title. Children are added normally.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Group box**
 
-```text
- +- Size ---------------------+
- |  ( ) Small                 |
- |  (*) Medium                |
- |  ( ) Large                 |
- +----------------------------+
-```
+![3.3 step set 1: Group box](mockups/3.3-1.png)
 
 #### Events and callbacks
 
@@ -1626,27 +1439,17 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `ChoiceButton { items, selected, mode }`. `Popup` mode opens an overlay list positioned so the current item sits under the pointer. `Cycle` mode advances on each click (Shift-click goes back) without a list: the most compact choice for two to five options. Emits `SelectionChanged`.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Popup mode: 1. closed 2. open, current item under pointer 3. Large chosen**
 
-```text
- 1  Size: [ Medium       v]
- 2  Size: +---------------+
-          | Small         |
-          |#Medium########|
-          | Large         |
-          +---------------+
- 3  Size: [ Large        v]   SelectionChanged
-```
+![3.6 step set 1: Popup mode: 1. closed 2. open, current item under pointer 3. Large chosen](mockups/3.6-1.png)
 
 **Cycle mode: each click advances; Shift-click goes back**
 
-```text
- Align: [@ Left   ]  click  ->  [@ Center ]  click  ->  [@ Right  ]  click  ->  [@ Left   ]
-```
+![3.6 step set 2: Cycle mode: each click advances; Shift-click goes back](mockups/3.6-2.png)
 
 #### Events and callbacks
 
@@ -1675,17 +1478,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `Expander { title, expanded }`: triangle + title; toggling hides or shows the child subtree and resizes the expander (autoresizing 5.4 (#59) moves following siblings if configured). Emits `Toggled`.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Collapsed and expanded**
 
-```text
- > Advanced options              v Advanced options
-                                   [X] Verbose logging
-                                   Retries: [  3 ][^v]
-```
+![3.10 step set 1: Collapsed and expanded](mockups/3.10-1.png)
 
 #### Events and callbacks
 
@@ -1712,22 +1511,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `DatePicker`: a masked text field (2.6 (#32)) plus a button that opens a month calendar in the overlay (arrows for month/year, keyboard navigation, today highlighted). Emits `ValueChanged`.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Calendar open**
 
-```text
- Due: [11/24/2026][v]
-      +----------------------+
-      | <   November 2026  > |
-      | Su Mo Tu We Th Fr Sa |
-      |  1  2  3  4  5  6  7 |
-      | ...                  |
-      | 22 23 #24 25 26 27 28 |
-      +----------------------+
-```
+![3.11 step set 1: Calendar open](mockups/3.11-1.png)
 
 #### Events and callbacks
 
@@ -1773,23 +1563,13 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 
 **Solution / Scope.** `ProgressBar { min, max, value, indeterminate }`: border + filled part; busy mode animates a moving block with ticks (1.5 (#21)). Display only.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **0%, 40%, busy**
 
-```text
- 0%    +------------------------------+
-       |                              |
-       +------------------------------+
- 40%   +------------------------------+
-       |############                  |
-       +------------------------------+
- busy  +------------------------------+     +------------------------------+
-       |    ######                    | ->  |                ######        |
-       +------------------------------+     +------------------------------+
-```
+![4.1 step set 1: 0%, 40%, busy](mockups/4.1-1.png)
 
 #### Events and callbacks
 
@@ -1816,20 +1596,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `SpinBox` = numeric text field (2.6 (#32)) + two glyph buttons with auto-repeat; Up/Down keys and the wheel adjust; typed values are clamped on `EditingFinished`.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Up held 3. Out-of-range typing clamps 4. Disabled**
 
-```text
- 1  Copies: [    3 ][^]
-                    [v]
- 2  Copies: [    4 ][#]   ... 5, 6, 7 while held
-                    [v]
- 3  Copies: [   99 ]  ->  Return  ->  [   50 ]   (max 50)
- 4  Copies: [::::3:][:]
-```
+![4.2 step set 1: 1. Idle 2. Up held 3. Out-of-range typing clamps 4. Disabled](mockups/4.2-1.png)
 
 #### Events and callbacks
 
@@ -1858,27 +1631,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `TabView`: tab strip + one container per page; switching hides inactive pages (IDs and state preserved). Ctrl+Tab switches pages. Emits `SelectionChanged`.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. General active 2. Advanced chosen**
 
-```text
- 1
- +---------+----------+---------+
- | General | Advanced | Network |
- |         +----------+---------+----------+
- |  Name: [________________]               |
- |  [X] Start at login                     |
- +-----------------------------------------+
- 2
- +---------+----------+---------+
- | General | Advanced | Network |
- +---------+          +---------+----------+
- |  Cache:  |------[#]--------|  128 MB    |
- +-----------------------------------------+
-```
+![4.4 step set 1: 1. General active 2. Advanced chosen](mockups/4.4-1.png)
 
 #### Events and callbacks
 
@@ -1908,22 +1667,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `ListView` in a scroll view, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Click selects 3. Shift-click extends 4. Double-click activates**
 
-```text
- 1                     2                     3
- +----------------+-+  +----------------+-+  +----------------+-+
- | Apples         |^|  | Apples         |^|  | Apples         |^|
- | Bananas        |#|  |#Bananas########|#|  |#Bananas########|#|
- | Cherries       |#|  | Cherries       |#|  |#Cherries#######|#|
- | Dates          | |  | Dates          | |  |#Dates##########| |
- +----------------+v+  +----------------+v+  +----------------+v+
- 4  double-click "Cherries" -> Activated
-```
+![4.5 step set 1: 1. Idle 2. Click selects 3. Shift-click extends 4. Double-click activates](mockups/4.5-1.png)
 
 #### Events and callbacks
 
@@ -1954,21 +1704,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** Composite of `TextField` + arrow + overlay `ListView`; typing filters; choosing fills the field.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Typing filters 3. Chosen**
 
-```text
- 1  Font: [Helvetica_______][v]
- 2  Font: [Co|_____________][v]
-          +-------------------+
-          |#Courier###########|
-          | Courier New       |
-          +-------------------+
- 3  Font: [Courier_________][v]
-```
+![4.6 step set 1: 1. Idle 2. Typing filters 3. Chosen](mockups/4.6-1.png)
 
 #### Events and callbacks
 
@@ -1997,20 +1739,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Solution / Scope.** `TableView` extending the list view: column headers, resizable columns, click a header to sort (via the model), per-column alignment; a `TableModel` supplies cells.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Sorted by Size**
 
-```text
- +---------------+--------+------------+-+
- | Name          | Size v | Modified   |^|
- +---------------+--------+------------+-+
- |#report.txt####|##12 KB#|#11/24/2026#|#|
- | notes.md      |   4 KB | 11/20/2026 | |
- +---------------+--------+------------+v+
-```
+![4.9 step set 1: Sorted by Size](mockups/4.9-1.png)
 
 #### Events and callbacks
 
@@ -2101,22 +1836,13 @@ ScrollBar (composite, id 12)
 
 **Solution / Scope.** `ScrollView` with a content container offset by the scroll position, scroll bars as needed, wheel and keyboard scrolling, `scroll_to(rect)` to keep the focused widget visible.
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Content clipped; wheel or bars move it**
 
-```text
- +----------------------------+-+
- | Line 12 of the content     |^|
- | Line 13                    |#|
- | Line 14                    |#|
- | Line 15                    | |
- +----------------------------+v+
- |<|#######                 |>| |
- +---------------------------+-+-+
-```
+![5.3 step set 1: Content clipped; wheel or bars move it](mockups/5.3-1.png)
 
 #### Events and callbacks
 
@@ -2704,21 +2430,13 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Solution / Scope.** `DragSource` and `DropTarget` controllers (9.4 (#96)): the source provides a typed payload and a drag image (a GPU texture following the pointer); targets declare accepted types, highlight on hover, and receive `Dropped { id, payload }`. Escape cancels. Files dropped onto the window from the OS arrive as `Dropped` with paths (via SDL's drop events).
 
-#### Look and behavior (proposed; edit this section to clarify)
+#### Look and behavior (proposed)
 
-Each frame is one step of the interaction. `#` marks inverted (selected) areas, `:` marks the disabled dither, `|` in a field is the caret.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Drag starts 2. Over an accepting target (highlighted) 3. Dropped**
 
-```text
- 1  | Apples   |          | Basket        |
-    |#Bananas##| <- press and move
- 2               [Bananas]-> +===============+
-                             # Basket        #   highlighted
-                             +===============+
- 3                           | Basket        |
-                             |  Bananas      |   Dropped { payload: "Bananas" }
-```
+![9.8 step set 1: 1. Drag starts 2. Over an accepting target (highlighted) 3. Dropped](mockups/9.8-1.png)
 
 #### Events and callbacks
 
