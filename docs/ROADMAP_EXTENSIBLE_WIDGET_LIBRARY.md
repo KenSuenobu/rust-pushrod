@@ -35,7 +35,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **43 of 83 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **44 of 84 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
@@ -49,7 +49,7 @@ MVP scope: **43 of 83 active issues** (marked **Y** in the MVP column). Everythi
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
 | 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 5 | 5 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
-| 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 9 | 3 |
+| 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 10 | 4 |
 | 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target. | 4 | 1 |
 
 ```mermaid
@@ -113,13 +113,15 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Visual states:** `PRESSED`, `CHECKED`, `INDETERMINATE`, `DISABLED`, `FOCUSED`, `HOVERED`, `DRAG_OVER`
 
-**Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`
+**Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`, `ENGINE`
 
-**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Custom`, `Raw`
+**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
 
-**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`
+**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`
 
 **Drawing modes:** `Live`, `Outline`, `Auto`
+
+**Engine events:** `DrawingModeChanged`, `EventMaskChanged`, `FocusChanged`, `ModalOpened`, `ModalClosed`, `MenuOpened`, `MenuClosed`, `WidgetAdded`, `WidgetRemoved`, `WidgetReparented`, `FormLoaded`, `DragStarted`, `DragEnded`, `TooltipShown`, `TooltipHidden`, `TimerFired`, `WindowOpened`, `WindowClosed`, `ScaleFactorChanged`, `ActionChanged`, `IdleStarted`, `IdleEnded`
 
 ## Epic 1: Core: behavior flags, focus, timing, and performance (#11)
 
@@ -171,7 +173,7 @@ HIDDEN
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **The same button in each visual state**
 
@@ -207,7 +209,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Classic event loops waited only for the kinds of events an application asked for, which kept them fast and idle when nothing relevant happened. Pushrod's run loop processes every SDL event, and every pointer event is routed even to widgets that never handle events. (Original issue #6.)
 
-**Solution / Scope.** One `EventMask` type with classes `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`. **Run-loop mask:** `Engine::set_event_mask` / `Ui::set_event_mask` (changeable at run time). Events outside the mask are dropped before routing and callbacks; SDL event types that only feed masked-out classes are disabled at the source with `EventPump::disable_event`, so SDL never queues them. Close requests are always delivered (1.11 (#26)). With no `TIMER` class and nothing animating, the loop blocks on `wait_event_timeout` instead of polling, so idle applications use no CPU. **Widget mask:** default trait method `event_mask()` returning `EventMask::NONE`; routing, propagation (9.2 (#94)), and broadcasts skip widgets whose mask excludes the event. An event is handled only if it passes both masks.
+**Solution / Scope.** One `EventMask` type with classes `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`. **Run-loop mask:** `Engine::set_event_mask` / `Ui::set_event_mask` (changeable at run time). Events outside the mask are dropped before routing and callbacks; SDL event types that only feed masked-out classes are disabled at the source with `EventPump::disable_event`, so SDL never queues them. Close requests are always delivered (1.11 (#26)). With no `TIMER` class and nothing animating, the loop blocks on `wait_event_timeout` instead of polling, so idle applications use no CPU. **Widget mask:** default trait method `event_mask()` returning `EventMask::NONE`; routing, propagation (9.2 (#94)), and broadcasts skip widgets whose mask excludes the event. An event is handled only if it passes both masks. Changing either mask emits `Engine(EventMaskChanged { scope, old, new })` (9.10 (#109)).
 
 ```text
 SDL2 ──(types disabled at source for masked classes)──> event pump
@@ -260,7 +262,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** There is no keyboard focus. Every desktop system lets users move between fields with Tab, use arrow keys within a group, press Return for the default button, and press Escape to cancel.
 
-**Solution / Scope.** Track `focused` in `WidgetCache`. Clicking a `FOCUSABLE` widget focuses it. Tab/Shift-Tab moves between focus groups in ID order (the order designed in the form); arrow keys move within a group (for example a radio group). Return activates the `DEFAULT_ACTION` widget of the current form; Escape (and Cmd-. on macOS) activates `CANCEL_ACTION`. Focus changes emit `FocusLost` then `FocusGained`. SDL text input starts and stops with focus on text widgets. `Ui::set_focus(id)`, `Ui::focused()`.
+**Solution / Scope.** Track `focused` in `WidgetCache`. Clicking a `FOCUSABLE` widget focuses it. Tab/Shift-Tab moves between focus groups in ID order (the order designed in the form); arrow keys move within a group (for example a radio group). Return activates the `DEFAULT_ACTION` widget of the current form; Escape (and Cmd-. on macOS) activates `CANCEL_ACTION`. Focus changes emit `FocusLost` then `FocusGained`. SDL text input starts and stops with focus on text widgets. `Ui::set_focus(id)`, `Ui::focused()`. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -268,6 +270,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Return/Escape activate default/cancel
 - `FocusGained`/`FocusLost` delivered and tested
 - `Ui::set_focus`/`Ui::focused`
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.1 (#19), 9.1 (#93), 9.2 (#94).
 
@@ -281,7 +284,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** Applications and widgets need time-based events: caret blinking, auto-repeat on arrow buttons, indeterminate progress, clocks. Work that should run when nothing else is pending (deferred layout, incremental loading) needs an idle hook.
 
-**Solution / Scope.** `Engine::on_timer(interval, repeat, |state, ui| ..) -> TimerId`, `Ui::cancel_timer(id)`. Widgets with `TIMER` in their mask receive `Tick { elapsed }` once per frame while they request animation (`ctx.request_animation()`). `Engine::on_idle(|state, ui| ..)` runs once per loop iteration when the event queue is empty. Timers fire from the run loop based on `Instant`.
+**Solution / Scope.** `Engine::on_timer(interval, repeat, |state, ui| ..) -> TimerId`, `Ui::cancel_timer(id)`. Widgets with `TIMER` in their mask receive `Tick { elapsed }` once per frame while they request animation (`ctx.request_animation()`). `Engine::on_idle(|state, ui| ..)` runs once per loop iteration when the event queue is empty. Timers fire from the run loop based on `Instant`. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -289,6 +292,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Timers can be cancelled from callbacks
 - `Tick` only flows while a widget requests animation
 - Idle callbacks run only when no events are pending
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.2 (#6).
 
@@ -341,7 +345,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** Widgets can only be added. Opening and closing dialogs, list rows, and Chassis editing need removal, reparenting, and stacking-order changes.
 
-**Solution / Scope.** `WidgetCache::remove(id)` removes a subtree, leaves a tombstone so other IDs stay stable, destroys its textures, and emits `Removed`. `reparent(id, parent)` and `set_stacking_index(id, index)` among siblings. Focus, hover, and pointer capture pointing into a removed subtree are cleared.
+**Solution / Scope.** `WidgetCache::remove(id)` removes a subtree, leaves a tombstone so other IDs stay stable, destroys its textures, and emits `Removed`. `reparent(id, parent)` and `set_stacking_index(id, index)` among siblings. Focus, hover, and pointer capture pointing into a removed subtree are cleared. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -349,6 +353,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Removed textures are destroyed
 - Focus/hover/capture cleared safely
 - Tests for remove, reparent, reorder
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
 
@@ -378,12 +383,13 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** The root widget keeps its initial size when the window is resized, and high-DPI displays get a scaled, blurry image.
 
-**Solution / Scope.** On window resize, resize the root and apply autoresizing (5.4 (#59)). Create windows with high-DPI support and render textures at physical resolution with a logical coordinate scale so text stays sharp.
+**Solution / Scope.** On window resize, resize the root and apply autoresizing (5.4 (#59)). Create windows with high-DPI support and render textures at physical resolution with a logical coordinate scale so text stays sharp. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
 - Resizing resizes the root and redraws
 - Text is sharp on a 2x display
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 5.4 (#59).
 
@@ -417,7 +423,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Labels with mnemonics: `_` marks the letter, drawn underlined**
 
@@ -467,7 +473,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **No visual; usage sketch**
 
@@ -546,13 +552,14 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Pushrod drives one window. Tool palettes, inspectors (Chassis), and secondary documents need more.
 
-**Solution / Scope.** `Ui::open_window(title, size) -> WindowId` creates an SDL window with its own canvas and `WidgetCache`; events carry the window ID; widget IDs are unique per window; callbacks receive the window in `Ui`. Closing a window emits `CloseRequested` for that window.
+**Solution / Scope.** `Ui::open_window(title, size) -> WindowId` creates an SDL window with its own canvas and `WidgetCache`; events carry the window ID; widget IDs are unique per window; callbacks receive the window in `Ui`. Closing a window emits `CloseRequested` for that window. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
 - Two windows render and receive input independently
 - Callbacks can reach widgets in any window
 - Closing one window doesn't end the application unless it's the last
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
 
@@ -574,7 +581,7 @@ state change ──> effective style = appearance[state] ⟶ falls back to appea
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **One button through its states with a custom appearance (hover = blue, pressed = dark blue)**
 
@@ -650,7 +657,7 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Normal and disabled**
 
@@ -685,7 +692,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Pressed (fires immediately) 3. Held: repeats 4. Released 5. Disabled**
 
@@ -721,7 +728,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Push button: 1. idle 2. pressed 3. dragged out (releases) 4. released inside -> Clicked**
 
@@ -766,7 +773,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Unchecked 2. Pressed 3. Checked 4. Indeterminate 5. Focused 6. Disabled**
 
@@ -801,7 +808,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared**
 
@@ -837,7 +844,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. empty 2. focused 3. typing 4. selection 5. rejected character 6. disabled**
 
@@ -880,7 +887,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Fit modes and missing file**
 
@@ -914,7 +921,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Selected 3. Activated (double-click)**
 
@@ -948,7 +955,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Alert opens centered; the rest of the window is drawn but inert**
 
@@ -996,7 +1003,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Drawn entirely by the application's closure**
 
@@ -1028,11 +1035,11 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Desktop applications need menus that look and behave the same on every platform.
 
-**Solution / Scope.** `MenuBar` and `Menu` widgets built as composites (5.2 (#57)). Items come from actions (9.5 (#97)) or plain labels; support separators, check/radio items, disabled items, submenus, shortcut text, and mnemonics (1.12 (#76)). Menus open on click, track the pointer, draw in the overlay layer above all widgets, and close on outside click or Escape. Never uses the OS menu bar or native menus. **Parts (5.2 (#57)):** `MenuBar::menus()`, `Menu::items()`, `add_item`, `insert_item`, `remove_item`, `add_separator`; each item is a part with its own font and color. Every part can be retrieved and restyled (font, color, text).
+**Solution / Scope.** `MenuBar` and `Menu` widgets built as composites (5.2 (#57)). Items come from actions (9.5 (#97)) or plain labels; support separators, check/radio items, disabled items, submenus, shortcut text, and mnemonics (1.12 (#76)). Menus open on click, track the pointer, draw in the overlay layer above all widgets, and close on outside click or Escape. Never uses the OS menu bar or native menus. **Parts (5.2 (#57)):** `MenuBar::menus()`, `Menu::items()`, `add_item`, `insert_item`, `remove_item`, `add_separator`; each item is a part with its own font and color. Every part can be retrieved and restyled (font, color, text). Emits its engine event (9.10 (#109)).
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. File opened (overlay) 3. Hovering Save 4. Release: Save triggered**
 
@@ -1052,6 +1059,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - Submenus and keyboard navigation
 - No OS-native menu APIs on any platform
 - Parts are retrievable and modifiable as described
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.12 (#76), 5.1 (#56), 5.2 (#57), 9.5 (#97).
 
@@ -1069,7 +1077,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Open dialog**
 
@@ -1101,11 +1109,11 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Icon buttons and terse labels are hard to learn without explanation.
 
-**Solution / Scope.** Optional `tooltip` text on `WidgetCore` (actions supply it automatically). After a delay (600 ms), draw a bordered text box in the overlay layer near the pointer; hide it on movement, click, or key press.
+**Solution / Scope.** Optional `tooltip` text on `WidgetCore` (actions supply it automatically). After a delay (600 ms), draw a bordered text box in the overlay layer near the pointer; hide it on movement, click, or key press. Emits its engine event (9.10 (#109)).
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Pointer rests 2. After 600 ms 3. Pointer moves: hidden**
 
@@ -1123,6 +1131,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Appears after the delay and hides correctly
 - Stays inside the window; never under the pointer
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 5.1 (#56).
 
@@ -1138,7 +1147,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Horizontal and vertical**
 
@@ -1170,7 +1179,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Toolbar with a toggled Bold and a disabled Paste**
 
@@ -1206,7 +1215,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Status bar**
 
@@ -1240,7 +1249,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Off, on, disabled**
 
@@ -1272,7 +1281,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Editing with a selection**
 
@@ -1306,7 +1315,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Right-click on a list row**
 
@@ -1341,7 +1350,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Message bar with an action**
 
@@ -1395,7 +1404,7 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Track clicked below thumb (page down) 3. Thumb dragged 4. Down arrow held**
 
@@ -1435,7 +1444,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Dragging 3. Ticks with snap 4. Disabled**
 
@@ -1472,7 +1481,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Group box**
 
@@ -1507,7 +1516,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Popup mode: 1. closed 2. open, current item under pointer 3. Large chosen**
 
@@ -1557,7 +1566,7 @@ col[0] (root)       col[1] (children of
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Selecting in each column fills the next one**
 
@@ -1601,7 +1610,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Collapsed and expanded**
 
@@ -1634,7 +1643,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Calendar open**
 
@@ -1687,7 +1696,7 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **0%, 40%, busy**
 
@@ -1720,7 +1729,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Up held 3. Out-of-range typing clamps 4. Disabled**
 
@@ -1756,7 +1765,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. General active 2. Advanced chosen**
 
@@ -1793,7 +1802,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Click selects 3. Shift-click extends 4. Double-click activates**
 
@@ -1831,7 +1840,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Idle 2. Typing filters 3. Chosen**
 
@@ -1867,7 +1876,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Sorted by Size**
 
@@ -1948,7 +1957,7 @@ Alert (composite, id 40)
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **An alert customized through its parts: bold red message, an extra Help button**
 
@@ -1986,7 +1995,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Content clipped; wheel or bars move it**
 
@@ -2132,13 +2141,14 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** The point of form files is that code doesn't rebuild the UI: the application loads the form and attaches callbacks.
 
-**Solution / Scope.** `Engine::load_form(file, "main") -> FormHandle` creates widgets via the registry, applies properties, and maps form-local object numbers to `WidgetId`s (`form.id(main::OK)`).
+**Solution / Scope.** `Engine::load_form(file, "main") -> FormHandle` creates widgets via the registry, applies properties, and maps form-local object numbers to `WidgetId`s (`form.id(main::OK)`). Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
 - Loaded form renders identically to the code-built version (golden)
 - IDs resolve via generated constants
 - Errors name object and property
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 6.3 (#62).
 
@@ -2186,13 +2196,14 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** Alerts, file choosers, and settings dialogs need modal behavior: input goes only to the dialog until it is dismissed.
 
-**Solution / Scope.** `ui.open_modal(root, |state, ui, dismissed_by| ..)`. While open, input goes only to the modal subtree (the rest is drawn but inert), focus starts on the first focusable widget, Return/Escape map to default/cancel, and a `DISMISSES_DIALOG` control closes it. Modals nest.
+**Solution / Scope.** `ui.open_modal(root, |state, ui, dismissed_by| ..)`. While open, input goes only to the modal subtree (the rest is drawn but inert), focus starts on the first focusable widget, Return/Escape map to default/cancel, and a `DISMISSES_DIALOG` control closes it. Modals nest. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
 - Input blocked outside the top modal
 - Dismissing control reported
 - Nested modals
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.8 (#23), 2.3 (#29).
 
@@ -2413,12 +2424,13 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 | 9.7 (#99) | Callback handles: disconnect, block, and unblock | Every registration returns a handle to remove or temporarily silence the callback. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `engine.rs` |
 | 9.8 (#100) | Drag and drop within the application | Drag data between widgets (list to list, file icon to drop zone) with drop targets and feedback. | `enhancement`, `events`, `parallelizable`, `size/L`, `usability` | Y | N | L | `dnd.rs (new)`, `cache.rs` |
 | 9.9 (#101) | Pointer cursor per widget | Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links). | `enhancement`, `events`, `parallelizable`, `size/S`, `usability` | Y | N | S | `widget.rs`, `cache.rs` |
+| 9.10 (#109) | Engine events: every internal action Pushrod performs emits an event | A system-wide EngineEvent for each internal action (mode changes, focus, modals, menus, tree changes, forms, drags, timers, window changes), broadcast to widgets and callbacks. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | Y | M | `event.rs`, `engine.rs`, `cache.rs` |
 
 ### 9.1 (#93): Event vocabulary: modern event names and structure
 
 **Problem Statement.** PR #10 inherited `BoundsChange`, `Clicked(u32, u8)`, and `SystemEvent`. Names should say what happened in plain modern terms, carry named fields, and cover pointer, keyboard, focus, semantic, lifecycle, window, time, and custom events consistently, so every other issue uses the same words.
 
-**Solution / Scope.** Replace `PushrodEvent` with `pushrod::Event` (struct variants, named fields). **Pointer:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked { id, button, count }`, `Scrolled { id, delta }`. **Keyboard:** `KeyPressed { id, key, modifiers, repeat }`, `KeyReleased`, `TextEntered { id, text }`. **Focus:** `FocusGained`, `FocusLost`. **Semantic (emitted by widgets):** `Activated`, `Toggled { checked }`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered { action }`, `ContextMenuRequested { position }`, `PropertyChanged { name }`. **Lifecycle:** `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`. **Window:** `WindowResized`, `WindowFocusChanged`, `CloseRequested`. **Time:** `Tick { elapsed }`. **Extension:** `Custom(CustomEvent)` (1.13 (#78)), `Raw(sdl2::event::Event)` for anything not yet mapped. `BoundsChange` becomes `PointerExited` + `PointerEntered`. Each event has `kind() -> EventKind` (used by masks and the callback registry) and `widget() -> Option<WidgetId>`.
+**Solution / Scope.** Replace `PushrodEvent` with `pushrod::Event` (struct variants, named fields). **Pointer:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked { id, button, count }`, `Scrolled { id, delta }`. **Keyboard:** `KeyPressed { id, key, modifiers, repeat }`, `KeyReleased`, `TextEntered { id, text }`. **Focus:** `FocusGained`, `FocusLost`. **Semantic (emitted by widgets):** `Activated`, `Toggled { checked }`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered { action }`, `ContextMenuRequested { position }`, `PropertyChanged { name }`. **Lifecycle:** `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`. **Window:** `WindowResized`, `WindowFocusChanged`, `CloseRequested`. **Time:** `Tick { elapsed }`. **Engine:** `Engine(EngineEvent)` for actions Pushrod performs internally (9.10 (#109)). **Extension:** `Custom(CustomEvent)` (1.13 (#78)), `Raw(sdl2::event::Event)` for anything not yet mapped. `BoundsChange` becomes `PointerExited` + `PointerEntered`. Each event has `kind() -> EventKind` (used by masks and the callback registry) and `widget() -> Option<WidgetId>`.
 
 ```text
 PR #10                     ->  this issue
@@ -2517,7 +2529,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Problem Statement.** The same command (Save, Bold, Undo) appears in a menu, a toolbar, a button, and a keyboard shortcut. Without a shared object, applications must keep their enabled and checked states in sync by hand.
 
-**Solution / Scope.** `Action { id, label, icon, shortcut, tooltip, status_text, checkable, checked, enabled }` registered with `engine.add_action(..)`. Menus, toolbars, and buttons created from an action reflect its state automatically; changing `enabled` or `checked` updates every control. Triggering any of them emits `Triggered { action }` and runs `on_action(action, |state, ui| ..)`. Shortcuts are scoped to the application, window, or a widget subtree, with standard platform shortcuts (`StandardShortcut::Save` = Ctrl+S / Cmd+S). Action groups make checkable actions exclusive.
+**Solution / Scope.** `Action { id, label, icon, shortcut, tooltip, status_text, checkable, checked, enabled }` registered with `engine.add_action(..)`. Menus, toolbars, and buttons created from an action reflect its state automatically; changing `enabled` or `checked` updates every control. Triggering any of them emits `Triggered { action }` and runs `on_action(action, |state, ui| ..)`. Shortcuts are scoped to the application, window, or a widget subtree, with standard platform shortcuts (`StandardShortcut::Save` = Ctrl+S / Cmd+S). Action groups make checkable actions exclusive. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -2525,6 +2537,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 - Disabling an action disables every control
 - Shortcuts trigger actions; platform-standard keys map correctly
 - Exclusive action groups
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 9.1 (#93), 1.6 (#22).
 
@@ -2577,11 +2590,11 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Problem Statement.** Moving items by dragging is a basic desktop interaction.
 
-**Solution / Scope.** `DragSource` and `DropTarget` controllers (9.4 (#96)): the source provides a typed payload and a drag image (a GPU texture following the pointer); targets declare accepted types, highlight on hover, and receive `Dropped { id, payload }`. Escape cancels. Files dropped onto the window from the OS arrive as `Dropped` with paths (via SDL's drop events).
+**Solution / Scope.** `DragSource` and `DropTarget` controllers (9.4 (#96)): the source provides a typed payload and a drag image (a GPU texture following the pointer); targets declare accepted types, highlight on hover, and receive `Dropped { id, payload }`. Escape cancels. Files dropped onto the window from the OS arrive as `Dropped` with paths (via SDL's drop events). Emits its engine event (9.10 (#109)).
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Drag starts 2. Over an accepting target (highlighted) 3. Dropped**
 
@@ -2600,6 +2613,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - Drag between two lists
 - Drop highlighting and cancel
 - OS file drops delivered
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.4 (#96), 5.1 (#56).
 
@@ -2624,6 +2638,47 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Rustdoc: `set_cursor`. README/guides: Usability section. Examples: n/a. Screenshots: n/a.
 
+### 9.10 (#109): Engine events: every internal action Pushrod performs emits an event
+
+**Problem Statement.** Applications can only react to what they can observe. Today Pushrod changes things internally (moves focus, opens a modal dialog, switches drawing mode, adds or removes widgets) without telling anyone, so applications can't keep a status line, log, preference, or custom widget in sync.
+
+**Solution / Scope.** Add `Event::Engine(EngineEvent)`: one variant per internal action, each with the details an application needs. Initial set: `DrawingModeChanged { old, new, reason }` (10.1 (#105)), `EventMaskChanged { scope, old, new }` (1.2 (#6)), `FocusChanged { old, new }` (1.4 (#20)), `ModalOpened { root }` / `ModalClosed { root, dismissed_by }` (6.7 (#66)), `MenuOpened` / `MenuClosed` (2.11 (#37)), `WidgetAdded` / `WidgetRemoved` / `WidgetReparented` (1.8 (#23)), `FormLoaded { form, root }` (6.4 (#63)), `DragStarted` / `DragEnded { dropped }` (9.8 (#100)), `TooltipShown` / `TooltipHidden` (2.13 (#77)), `TimerFired { timer }` (1.5 (#21)), `WindowOpened` / `WindowClosed` (1.16 (#82)), `ScaleFactorChanged` (1.10 (#25)), `ActionChanged { action }` (9.5 (#97)), `IdleStarted` / `IdleEnded`. Engine events are broadcast after the action has completed: to widgets whose mask includes the `ENGINE` class (with an optional filter by kind), then to `engine.on_engine_event(|state, ui, &EngineEvent| ..)` and `on_event`. They never trigger further internal actions by themselves, so they can't loop. **Standing rule for the project:** any issue that adds an internal action must add its `EngineEvent` variant and emit it; the guide (7.4 (#72)) and review checklist say so.
+
+```text
+internal action (e.g. ui.set_drawing_mode(Outline))
+        │ completes
+        v
+Engine(DrawingModeChanged { old: Live, new: Outline, reason: Application })
+        │ broadcast (after the action, never re-entrant)
+        ├──> widgets with ENGINE in their mask (optionally filtered by kind)
+        ├──> on_engine_event(|state, ui, ev| ..)
+        └──> on_event(..)
+```
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(EngineEvent)` | After any internal action completes | `on_engine_event(..)`, widgets with the ENGINE mask, `on_event(..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- `EngineEvent` enum with the initial variants above (those whose features exist are emitted now; the rest are added by their issues)
+- Broadcast after completion to masked widgets and `on_engine_event`
+- Kind filter for widgets and callbacks
+- No re-entrant loops (engine events never trigger internal actions on their own)
+- Guide and PR checklist state the rule
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 9.1 (#93), 1.2 (#6).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `EngineEvent` (every variant documented with when it fires). README/guides: 'Engine events' section with the full list. Examples: Example status line that shows focus and drawing-mode changes. Screenshots: n/a.
+
+**Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
+
 ## Epic 10: Rendering backends, drawing modes, and vintage hardware (#103)
 
 Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target.
@@ -2636,7 +2691,7 @@ Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral p
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 10.1 (#105) | Drawing modes: live or outline feedback while moving and resizing | Live mode redraws content as things move; outline mode shows only a dotted rectangle until the move ends, for slow GPUs and vintage hardware. | `core`, `enhancement`, `parallelizable`, `performance`, `portability`, `size/M` | Y | N | M | `engine.rs`, `cache.rs`, `controllers.rs` |
+| 10.1 (#105) | Drawing modes: live or outline feedback while moving and resizing | Live mode redraws content as things move; outline mode shows only a dotted rectangle until the move ends. Switchable at run time, with a system-wide event. | `core`, `enhancement`, `parallelizable`, `performance`, `portability`, `size/M` | Y | N | M | `engine.rs`, `cache.rs`, `controllers.rs` |
 | 10.2 (#106) | Backend-neutral paint API (SDL2 backend by default) | Widgets paint through a small Painter trait instead of an SDL2 canvas, so other backends become possible without touching widgets. | `core`, `enhancement`, `mvp`, `portability`, `size/M` | N | Y | M | `paint.rs`, `widget.rs`, `cache.rs`, `texture.rs`, `backend/sdl2.rs (new)` |
 | 10.3 (#107) | no_std + alloc core crate | Split the widget tree, events, and widgets into a core crate that builds without the standard library. | `core`, `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-core (new crate)`, `Cargo workspace` |
 | 10.4 (#108) | Experimental: Atari ST / TOS backend | Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing. | `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-tos (new crate)` |
@@ -2645,11 +2700,11 @@ Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral p
 
 **Problem Statement.** Moving or resizing something (a dragged item, a split divider, a column width, a window or panel, objects in Chassis) normally repaints content continuously. On slow GPUs, software renderers, and vintage machines that's too slow and looks jerky.
 
-**Solution / Scope.** `Engine::set_drawing_mode(DrawingMode::Live | DrawingMode::Outline | DrawingMode::Auto)`, overridable per widget. **Live:** content follows the pointer and repaints as it moves. **Outline:** only a dotted (inverted where the backend supports it) rectangle is drawn in the overlay layer while dragging; the real move or resize, and its repaint, happen once on release. Value controls follow the same rule: in outline mode the slider and scroll-bar thumbs still move, but `ValueChanged` and dependent repaints (for example scrolled content) happen on release. **Auto** measures frame time and switches to outline when frames take longer than a threshold. Drag controllers (9.4 (#96)) implement it, so every widget that drags gets it for free.
+**Solution / Scope.** `Engine::set_drawing_mode(DrawingMode::Live | DrawingMode::Outline | DrawingMode::Auto)`, overridable per widget. **Live:** content follows the pointer and repaints as it moves. **Outline:** only a dotted (inverted where the backend supports it) rectangle is drawn in the overlay layer while dragging; the real move or resize, and its repaint, happen once on release. Value controls follow the same rule: in outline mode the slider and scroll-bar thumbs still move, but `ValueChanged` and dependent repaints (for example scrolled content) happen on release. **Auto** measures frame time and switches to outline when frames take longer than a threshold. Drag controllers (9.4 (#96)) implement it, so every widget that drags gets it for free. **Run-time switching:** `ui.set_drawing_mode(mode)` (and `Engine::set_drawing_mode` at startup) can be called at any time, for example from a preferences check box; an interaction already in progress finishes in the mode it started in. Every change, whether by the application or by Auto, broadcasts `Engine(DrawingModeChanged { old, new, reason: Application | Auto })` (9.10 (#109)) to all widgets with the `ENGINE` mask class and to `on_engine_event` callbacks, so applications and widgets can respond (for example turn off animations or show an indicator).
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Live mode: the dragged panel repaints at every position**
 
@@ -2664,6 +2719,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 | Event emitted | When | Application callback |
 |---|---|---|
 | `Moved / Resized { id }` | Live: continuously; Outline: once on release | `on_event(..)` |
+| `Engine(DrawingModeChanged { old, new, reason })` | Mode switched by the application or by Auto | `on_engine_event(..)`; widgets with the ENGINE mask |
 
 Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
 
@@ -2673,8 +2729,10 @@ Like every widget, it can also receive application-defined custom events in `han
 - Outline mode performs no content repaint until release
 - Value controls defer change events and dependent repaints in outline mode
 - Auto switches based on measured frame time
+- `ui.set_drawing_mode` switches at run time; in-progress interactions finish in their starting mode
+- Each change broadcasts `DrawingModeChanged { old, new, reason }`
 
-**Parallelism / Dependencies.** Parallelizable. Requires 9.4 (#96).
+**Parallelism / Dependencies.** Parallelizable. Requires 9.4 (#96), 9.10 (#109).
 
 **Technical Stack.** Rust
 
@@ -2748,6 +2806,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 9.1 (#93) Event vocabulary: modern event names and structure — MVP
 - 1.1 (#19) Widget behavior flags and visual states — MVP
 - 1.2 (#6) Event masks for the run loop and for widgets — MVP
+- 9.10 (#109) Engine events: every internal action Pushrod performs emits an event — MVP
 - 1.3 (#7) Broadcast events to all interested widgets — MVP
 - 1.6 (#22) Callback registry for every widget event — MVP
 - 1.13 (#78) Custom application events with payloads — MVP
