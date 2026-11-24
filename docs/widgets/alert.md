@@ -1,6 +1,6 @@
 # Alert: widget roadmap
 
-> **Issue:** [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) (2.9) · **Epic 2:** Core dialog widgets · **Release:** MVP (v1) · **Size:** M
+> **Issue:** [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) (2.9) · **Epic 2:** Core dialog widgets · **Release:** MVP (v0.1) · **Size:** M
 > **User docs:** `pushrod-docs/docs/widgets/alert.md` · **Overview:** [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) · **Rules:** [design philosophy](../../DESIGN_PHILOSOPHY.md)
 
 This file is the specification for this widget: what it is, what it does, and how it responds. To change its look or behavior, edit this file in a pull request (and its mockup in [`docs/mockups/generate.py`](../mockups/generate.py) if the picture changes), then bring the issue in line. If this file and the issue disagree, this file wins.

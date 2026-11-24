@@ -102,10 +102,15 @@ KISS applies to the whole library, not just to drawing:
 
 - **Few dependencies.** Nothing new at run time without a strong reason.
 - **Self-contained.** SDL2 for graphics and input; Pushrod draws everything else.
+- **Backends are crates.** The core and the widgets don't name SDL; a backend crate
+  (`pushrod-sdl2` today, `pushrod-sdl3` later) supplies windows, input, and textures, so moving
+  to a new SDL version doesn't touch applications or widget libraries.
 - **One event model.** Every internal action emits an event. Handle events with callbacks
   registered by widget ID, or with your own event loop; both use the same events.
 - **IDs are the contract.** Widgets are addressed by stable IDs, so forms built in a designer
   and code written by hand work the same way.
+- **Documentation ships with the code.** Every user-visible change includes its documentation
+  in the same pull request (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - **Fictional sample data.** Demos, examples, tests, mockups, and documentation never contain
   real names or personal information (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 

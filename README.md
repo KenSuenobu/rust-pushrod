@@ -41,6 +41,9 @@ pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 ```
 
+SDL2 support is moving into its own backend crate, `pushrod-sdl2` (roadmap 10.6), so the core and
+the widgets won't depend on SDL at all and an SDL3 backend can drop in later.
+
 `pushrod-widgets` uses only the core's public API, so another widget library can extend it or
 replace it entirely: drop shadows, gradients, tree and graph views, 3D containers, whatever an
 application needs, without changing the core.

@@ -27,6 +27,8 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Fictional sample data only.** Demos, examples, tests, mockups, documentation, and issue text never contain real names or personal information; use placeholders such as Jane Doe, jane.doe@example.com, Anytown, and /home/user (see CONTRIBUTING.md).
 - **Documented as it's built.** The Docusaurus site in `pushrod-docs/` has a five-minute quick start, guides for applications, events, and widgets, and one page per widget under **Widgets**. Every issue lists the pages it adds or updates, and the docs ship in the same PR as the code.
 - **Core and widgets are separate crates.** `pushrod` is the core (engine, tree, events, paint helpers); `pushrod-widgets` holds the standard widgets and uses only public core API. Other widget libraries can extend or replace it (1.22), so a fancier look never requires changing the core.
+- **Backends are crates.** The core and the widgets never name SDL. `pushrod-sdl2` implements the backend today; `pushrod-sdl3` (10.5) and an Atari ST backend (10.4) plug in the same way, so applications switch by changing one dependency.
+- **Documentation ships with the code.** Every user-visible change includes its Docusaurus pages, rustdoc, screenshots, and changelog entry in the same pull request; outdated documentation is a bug (CONTRIBUTING.md).
 - **Usability first.** A control is added because it makes ordinary applications easier to use, not because another toolkit had it. Ideas that didn't meet that bar are listed under *Parked*.
 - **Self-contained and GPU-first.** Pushrod draws everything itself through SDL2: no OS-native menus, menu bars, dialogs, or controls, so applications look and behave the same everywhere. Each widget paints into its own GPU texture only when invalidated; frames are composed by blitting cached textures; text comes from a glyph atlas texture. SDL2 does the heavy lifting for graphics and input.
 
@@ -39,25 +41,30 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 3. Handle events with a modern event model (clear event names, capture/bubble propagation, reusable input controllers) and Visual Basic-style callbacks (`on_click`, `on_toggle`, `on_value_change`, `on_text_change`, custom events, timers).
 4. Compose new widgets from paint helpers or from other widgets (composites), with children clipped to their parents.
 5. **Load a form from a binary form file by ID**, with generated ID constants, and run it as a modal dialog, which is the runtime foundation that Chassis needs.
-6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
-7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
+6. Rely on CI, golden-image tests, a widget gallery, a reference application built only with Pushrod, a guide for writing widgets, and documentation for everything.
+7. Draw everything through a backend crate (SDL2 today, SDL3 later) into GPU textures, with no OS-native UI, no per-frame CPU pixel work, sharp rendering on high-DPI displays, and no SDL types in the core or widget APIs.
 
-MVP scope: **56 of 104 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **63 of 111 active issues**, delivered in two release stages. The MVP column shows each issue's stage, and GitHub milestones match.
+
+- **v0.1: dialog applications** (53 issues): Build and ship real dialog-style applications: core, backends, events, focus, the core widgets, composition, layouts, high-DPI, modal dialogs, CI, docs, and the first crates.io release.
+- **v0.2: forms (MVP complete)** (10 issues): Forms and form files (the runtime foundation for Chassis), plus input methods, mnemonics, accessibility, and written specs. Completes the MVP.
+
+Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, multiple windows, the SDL3 backend, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
-| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 22 | 15 |
+| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 25 | 19 |
 | 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 22 | 10 |
 | 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 9 | 3 |
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 7 | 1 |
 | 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers. | 10 | 6 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
-| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 8 | 8 |
+| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 10 | 10 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: an optional theme layer for pushrod-widgets. Not scheduled; different looks can already be built as separate widget libraries (1.22). | 2 | 0 |
 | 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 11 | 5 |
-| 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target. | 4 | 1 |
+| 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Backend crates (SDL2 now, SDL3 later) with no SDL in the core, a backend-neutral paint API, high-DPI, live vs. outline drawing for slow and vintage machines, a no_std core, and an experimental Atari ST backend. | 6 | 2 |
 
 ```mermaid
 flowchart LR
@@ -156,6 +163,8 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Engine events:** `DrawingModeChanged`, `EventMaskChanged`, `FocusChanged`, `ModalOpened`, `ModalClosed`, `MenuOpened`, `MenuClosed`, `WidgetAdded`, `WidgetRemoved`, `WidgetReparented`, `FormLoaded`, `DragStarted`, `DragEnded`, `TooltipShown`, `TooltipHidden`, `TimerFired`, `WindowOpened`, `WindowClosed`, `ScaleFactorChanged`, `ActionChanged`, `IdleStarted`, `IdleEnded`
 
+**Crates:** `pushrod`, `pushrod-widgets`, `pushrod-sdl2`, `pushrod-sdl3`
+
 ## Epic 1: Core: behavior flags, focus, timing, and performance (#11)
 
 Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing.
@@ -168,28 +177,31 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 1.1 (#19) | Widget behavior flags and visual states | Behavior flags (toggle, default, cancel, exclusive, focusable, ...) and visual states (pressed, checked, disabled, ...) on every widget. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `src/widget.rs`, `src/paint.rs`, `src/cache.rs` |
-| 1.2 (#6) | Event masks for the run loop and for widgets | Filter events for the whole run loop and per widget, so only events in the mask are handled. | `core`, `enhancement`, `mvp`, `performance`, `size/M` | N | Y | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs`, `src/widget.rs` |
-| 1.3 (#7) | Broadcast events to all interested widgets | Window-level and application-wide events go to every widget whose mask includes them. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `src/cache.rs`, `src/engine.rs` |
-| 1.4 (#20) | Keyboard focus, Tab order, and Return/Escape | Focusable widgets take keyboard focus; Tab moves it; Return and Escape trigger the default and cancel buttons. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `src/cache.rs`, `src/engine.rs`, `src/widget.rs` |
-| 1.5 (#21) | Timers and idle callbacks | Repeating/one-shot timers, per-widget ticks for animation, and idle callbacks. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `src/engine.rs`, `src/event.rs` |
-| 1.6 (#22) | Callback registry for every widget event | on_click, on_press, on_release, on_hover, on_toggle, on_value_change, on_selection_change, on_text_change, on_editing_finished, on_activate, on_key_press, on_focus_change. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `src/engine.rs` |
-| 1.7 (#3) | GPU text: font cache with a glyph atlas texture | Load each font once, rasterize glyphs once into a GPU atlas, and draw text by blitting glyphs. | `core`, `enhancement`, `mvp`, `parallelizable`, `performance`, `size/M` | Y | Y | M | `src/font.rs`, `src/paint.rs`, `src/cache.rs`, `src/engine.rs` |
-| 1.8 (#23) | Edit the widget tree at run time: remove, reparent, reorder | Remove widgets and change parent or stacking order without breaking IDs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `src/cache.rs`, `src/engine.rs` |
+| 1.1 (#19) | Widget behavior flags and visual states | Behavior flags (toggle, default, cancel, exclusive, focusable, ...) and visual states (pressed, checked, disabled, ...) on every widget. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/widget.rs`, `src/paint.rs`, `src/cache.rs` |
+| 1.2 (#6) | Event masks for the run loop and for widgets | Filter events for the whole run loop and per widget, so only events in the mask are handled. | `core`, `enhancement`, `mvp`, `performance`, `size/M` | N | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs`, `src/widget.rs` |
+| 1.3 (#7) | Broadcast events to all interested widgets | Window-level and application-wide events go to every widget whose mask includes them. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/cache.rs`, `src/engine.rs` |
+| 1.4 (#20) | Keyboard focus, Tab order, and Return/Escape | Focusable widgets take keyboard focus; Tab moves it; Return and Escape trigger the default and cancel buttons. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/cache.rs`, `src/engine.rs`, `src/widget.rs` |
+| 1.5 (#21) | Timers and idle callbacks | Repeating/one-shot timers, per-widget ticks for animation, and idle callbacks. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs`, `src/event.rs` |
+| 1.6 (#22) | Callback registry for every widget event | on_click, on_press, on_release, on_hover, on_toggle, on_value_change, on_selection_change, on_text_change, on_editing_finished, on_activate, on_key_press, on_focus_change. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs` |
+| 1.7 (#3) | GPU text: font cache with a glyph atlas texture | Load each font once, rasterize glyphs once into a GPU atlas, and draw text by blitting glyphs. | `core`, `enhancement`, `mvp`, `parallelizable`, `performance`, `size/M` | Y | v0.1 | M | `src/font.rs`, `src/paint.rs`, `src/cache.rs`, `src/engine.rs` |
+| 1.8 (#23) | Edit the widget tree at run time: remove, reparent, reorder | Remove widgets and change parent or stacking order without breaking IDs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/cache.rs`, `src/engine.rs` |
 | 1.9 (#24) | Dirty-rectangle redraw | Only re-blit the screen regions that changed. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `src/cache.rs`, `src/engine.rs` |
-| 1.10 (#25) | Window resize and high-DPI rendering | The root widget follows the window size; crisp rendering on high-DPI displays. | `core`, `enhancement`, `parallelizable`, `size/M` | Y | N | M | `src/engine.rs`, `src/cache.rs`, `src/geometry.rs` |
+| 1.10 (#25) | High-DPI rendering and window resize | The root widget follows the window size; crisp rendering on high-DPI displays. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/engine.rs`, `src/cache.rs`, `src/geometry.rs` |
 | 1.11 (#26) | Application lifecycle: startup and close-request callbacks | Run code before the first frame; confirm or veto closing the window. | `core`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/engine.rs` |
-| 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | Y | S | `src/paint.rs`, `src/cache.rs`, `pushrod-widgets/src/button_widget.rs`, `pushrod-widgets/src/text_widget.rs` |
-| 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
-| 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/L`, `usability` | Y | Y | L | `src/accessibility.rs (new)`, `src/widget.rs`, `src/engine.rs` |
+| 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | v0.2 | S | `src/paint.rs`, `src/cache.rs`, `pushrod-widgets/src/button_widget.rs`, `pushrod-widgets/src/text_widget.rs` |
+| 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
+| 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/L`, `usability` | Y | v0.2 | L | `src/accessibility.rs (new)`, `src/widget.rs`, `src/engine.rs` |
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `src/undo.rs (new)`, `src/engine.rs` |
 | 1.16 (#82) | Multiple windows: separate OS windows, each with its own engine | Open additional operating-system windows (dialogs, palettes, inspectors), each driven by its own engine instance and widget tree. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `src/engine.rs`, `src/cache.rs` |
-| 1.17 (#104) | Per-state appearance: colors, border, and font for each visual state | Every widget carries appearance attributes for normal, pressed, hovered, focused, disabled, and drag-over, so the look changes automatically as the state changes. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `src/widget.rs`, `src/paint.rs`, `pushrod-widgets (all widgets)` |
-| 1.18 (#111) | Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) | Lay out text with a real layout engine and feed its glyph runs into the GPU glyph atlas. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text/layout.rs (new)`, `src/font.rs`, `src/paint.rs` |
-| 1.19 (#112) | Input method (IME) support: composition text and candidate window | Show in-progress composition text in fields and position the platform candidate window at the caret. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `pushrod-widgets/src/text_field.rs`, `src/engine.rs`, `src/event.rs` |
+| 1.17 (#104) | Per-state appearance: colors, border, and font for each visual state | Every widget carries appearance attributes for normal, pressed, hovered, focused, disabled, and drag-over, so the look changes automatically as the state changes. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/widget.rs`, `src/paint.rs`, `pushrod-widgets (all widgets)` |
+| 1.18 (#111) | Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) | Lay out text with a real layout engine and feed its glyph runs into the GPU glyph atlas. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `text/layout.rs (new)`, `src/font.rs`, `src/paint.rs` |
+| 1.19 (#112) | Input method (IME) support: composition text and candidate window | Show in-progress composition text in fields and position the platform candidate window at the caret. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | v0.2 | M | `pushrod-widgets/src/text_field.rs`, `src/engine.rs`, `src/event.rs` |
 | 1.20 (#113) | Layers and invalidation: cache hints, texture memory budget, incremental pipeline | Decide which widgets get their own GPU texture, cap texture memory, and invalidate layout, paint, and compositing separately. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `src/cache.rs`, `src/texture.rs`, `src/widget.rs` |
-| 1.21 (#130) | Split the standard widgets into the pushrod-widgets crate | Make Pushrod a Cargo workspace: `pushrod` is the core, and the standard widgets move to their own crate, `pushrod-widgets`. | `architecture`, `enhancement`, `mvp`, `size/S` | N | Y | S | `Cargo.toml (workspace)`, `src/root_widget.rs (new)`, `pushrod-widgets/ (new crate)` |
+| 1.21 (#130) | Split the standard widgets into the pushrod-widgets crate | Make Pushrod a Cargo workspace: `pushrod` is the core, and the standard widgets move to their own crate, `pushrod-widgets`. | `architecture`, `enhancement`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml (workspace)`, `src/root_widget.rs (new)`, `pushrod-widgets/ (new crate)` |
 | 1.22 (#131) | Widget libraries: extend or replace pushrod-widgets | Make it straightforward for a separate crate to add widgets alongside pushrod-widgets, or to replace it with a different look. | `architecture`, `enhancement`, `extensibility`, `parallelizable`, `size/M` | Y | N | M | `src/registry.rs`, `pushrod-widgets/src/lib.rs`, `examples/widget-library/ (new crate)` |
+| 1.23 (#136) | Public API polish before publishing: builders, prelude, and stability | Make the public API pleasant and stable before crates.io: builders with defaults, preludes, non-exhaustive enums, and consistent names. | `api`, `enhancement`, `mvp`, `parallelizable`, `size/M`, `usability` | Y | v0.1 | M | `src/lib.rs`, `pushrod-widgets (all widgets)` |
+| 1.24 (#137) | Fonts: shared font handles and a built-in default font | Replace per-widget font file paths with shared `Font` handles, and ship a default font so applications work without any font files. | `api`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `text`, `usability` | Y | v0.1 | S | `src/font.rs`, `assets/ (font and license)` |
+| 1.25 (#138) | Errors: return Result instead of panicking | Library code reports failures (fonts, images, windows, unknown widget IDs) as `Result` values instead of panicking. | `api`, `enhancement`, `mvp`, `parallelizable`, `reliability`, `size/S` | Y | v0.1 | S | `src/error.rs (new)`, `src/font.rs`, `src/engine.rs`, `src/cache.rs` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
@@ -417,19 +429,19 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/dirty-rectangle-redraw.md` ("Dirty-rectangle redraw", Concepts, new). Guides: n/a. Rustdoc: `draw_loop` docs. Examples: n/a. Screenshots: n/a.
 
-### 1.10 (#25): Window resize and high-DPI rendering
+### 1.10 (#25): High-DPI rendering and window resize
 
 **Problem Statement.** The root widget keeps its initial size when the window is resized, and high-DPI displays get a scaled, blurry image.
 
-**Solution / Scope.** On window resize, resize the root and apply autoresizing (5.4 (#59)). Create windows with high-DPI support and render textures at physical resolution with a logical coordinate scale so text stays sharp. Emits its engine event (9.10 (#109)). With layouts (5.5 (#116)), the window's minimum size comes from the root layout's minimum size hint, and dialogs open at their preferred size.
+**Solution / Scope.** **High-DPI (MVP):** widgets work in logical coordinates; windows are created high-DPI aware, and each widget's texture is rendered at physical resolution (logical size times the window's scale factor), so text and lines stay sharp. One-pixel borders scale to whole physical pixels (1 px at 1x, 2 px at 2x). The scale factor is available to `paint` and changes when a window moves to a different display (engine event, 9.10 (#109)). **Resize:** on window resize, resize the root; containers with a layout (5.5 (#116)) re-arrange, and the window's minimum size comes from the root layout's minimum size hint. Autoresizing anchors (5.4 (#59)) apply after the MVP.
 
 **Acceptance Criteria.**
 
-- Resizing resizes the root and redraws
-- Text is sharp on a 2x display
-- Emits the corresponding `EngineEvent` (9.10 (#109))
+- Sharp text and lines at 1x, 1.5 (#21)x, and 2x
+- Moving a window between displays re-renders at the new scale
+- Resizing re-runs layouts and respects minimum size
 
-**Parallelism / Dependencies.** Parallelizable. Requires 5.4 (#59), 5.5 (#116).
+**Parallelism / Dependencies.** Parallelizable. Requires 5.5 (#116), 10.2 (#106). Pairs with 5.4 (#59) (autoresizing) after the MVP.
 
 **Technical Stack.** Rust, SDL2 window/high-DPI API
 
@@ -774,6 +786,61 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/widget-libraries.md` ("Widget libraries", Concepts, update). Guides: update the guide or concept page covering: Widget libraries. Rustdoc: `WidgetRegistry` registration per library. Examples: `examples/widget-library/`. Screenshots: n/a.
 
+### 1.23 (#136): Public API polish before publishing: builders, prelude, and stability
+
+**Problem Statement.** Constructors take many positional arguments (`ButtonWidget::new` takes nine), and every new event or option would be a breaking change. With two crates and third-party widget libraries, the core's public API is a contract.
+
+**Solution / Scope.** **Construction:** short constructors with sensible defaults plus chained setters (`Button::new("OK").at(20, 60).size(120, 24)`), or a builder where a widget has many options; the default font, colors, and size come from the engine (1.24 (#137)). **Names:** decide once whether widget types keep the `Widget` suffix (`ButtonWidget`) or drop it (`Button`), and apply it across the crates and the roadmap. **Stability:** `#[non_exhaustive]` on public enums (events, keys) and option structs; `#[must_use]` where results matter; `Debug` on public types. **Preludes:** `pushrod::prelude` and `pushrod_widgets::prelude` export what applications normally use. **Policy:** semantic versioning; after the first release, `cargo-semver-checks` runs in CI.
+
+**Acceptance Criteria.**
+
+- No public constructor needs more than three required arguments
+- Public enums are `#[non_exhaustive]`
+- Quick start uses the preludes
+- Naming decision recorded in the roadmap's Naming section
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.21 (#130), 9.1 (#93), 1.24 (#137), 1.25 (#138).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/creating-an-application.md` ("Creating an application", Guides, update). Guides: update the guide or concept page covering: quick start, creating an application, every widget page's Creating it section. Rustdoc: constructors, builders, preludes. Examples: all examples updated. Screenshots: n/a.
+
+### 1.24 (#137): Fonts: shared font handles and a built-in default font
+
+**Problem Statement.** Every text widget takes a font file path, size, and style, so applications repeat them everywhere and the quick start fails unless it runs from a directory containing `assets/`.
+
+**Solution / Scope.** A `Font { family, size, style }` handle, cheap to clone, resolved by the font cache (1.7 (#3)). Fonts are registered once (`engine.fonts().load("Body", path)` or from bytes). The core embeds one default font (an OFL-licensed sans serif, with its license file) so `Font::default()` works with no files at all; applications can change the default. Widgets use the engine's default font unless given one.
+
+**Acceptance Criteria.**
+
+- Quick start runs from any directory with no font files
+- Widgets accept a `Font` handle; no file paths in widget constructors
+- Embedded font's license included and noted in the docs
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.7 (#3).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text-and-fonts.md` ("Text and fonts", Concepts, new). Guides: update the guide or concept page covering: a new Text and fonts page, quick start. Rustdoc: `Font`, `FontCache::load`, default font. Examples: examples drop font paths. Screenshots: n/a.
+
+### 1.25 (#138): Errors: return Result instead of panicking
+
+**Problem Statement.** Library code calls `unwrap()` on font loading, texture creation, and SDL initialization, so a missing file or driver problem crashes the application instead of letting it recover or report the problem.
+
+**Solution / Scope.** A `pushrod::Error` enum (backend initialization, font, image, texture, unknown widget ID, form file) implementing `std::error::Error`, and `Result` on every fallible public function. No `unwrap`/`expect` in library code except documented invariants, enforced with `clippy::unwrap_used` and `clippy::expect_used` outside tests. Errors that happen inside the event loop are reported through an `Error` engine event (9.10 (#109)) rather than a panic.
+
+**Acceptance Criteria.**
+
+- No `unwrap`/`expect` in library code (lints enforced)
+- Missing font or image returns an error, not a panic
+- Error event delivered for failures during the run loop
+
+**Parallelism / Dependencies.** Parallelizable. Requires 9.10 (#109).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/creating-an-application.md` ("Creating an application", Guides, update). Guides: update the guide or concept page covering: a new Errors section in creating an application. Rustdoc: `pushrod::Error`, fallible functions. Examples: examples handle errors with `?`. Screenshots: n/a.
+
 ## Epic 2: Core dialog widgets (#12)
 
 The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more.
@@ -786,20 +853,20 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 2.1 (#27) | Boxed label widget | Text with background and border. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/boxed_label.rs (new)` |
-| 2.2 (#28) | Glyph button (small single-character button) | A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. | `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/glyph_button.rs (new)` |
-| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | Y | S | `pushrod-widgets/src/button_widget.rs`, `src/paint.rs` |
-| 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/check_box.rs (new)` |
-| 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/radio_button.rs (new)`, `src/cache.rs` |
-| 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `enhancement`, `mvp`, `size/L`, `widget` | N | Y | L | `pushrod-widgets/src/text_field.rs (new)`, `src/paint.rs` |
-| 2.7 (#33) | Image widget | Display a PNG/BMP image centered, stretched, scaled to fit, or tiled. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/image_widget.rs (new)`, `src/texture.rs` |
+| 2.1 (#27) | Boxed label widget | Text with background and border. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/boxed_label.rs (new)` |
+| 2.2 (#28) | Glyph button (small single-character button) | A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. | `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/glyph_button.rs (new)` |
+| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | v0.1 | S | `pushrod-widgets/src/button_widget.rs`, `src/paint.rs` |
+| 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/check_box.rs (new)` |
+| 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/radio_button.rs (new)`, `src/cache.rs` |
+| 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `enhancement`, `mvp`, `size/L`, `widget` | N | v0.1 | L | `pushrod-widgets/src/text_field.rs (new)`, `src/paint.rs` |
+| 2.7 (#33) | Image widget | Display a PNG/BMP image centered, stretched, scaled to fit, or tiled. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/image_widget.rs (new)`, `src/texture.rs` |
 | 2.8 (#34) | Icon widget (picture with caption) | Picture with a caption, selectable and double-clickable, like desktop icons. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/icon_widget.rs (new)` |
-| 2.9 (#35) | Alert dialog | One-call modal alert with icon, message, and up to three buttons. | `enhancement`, `forms`, `mvp`, `size/M`, `widget` | N | Y | M | `pushrod-widgets/src/alert.rs (new)`, `src/engine.rs` |
-| 2.10 (#36) | Custom paint widget (closure-drawn) | One-off custom drawing without writing a widget struct. | `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/custom_paint.rs (new)` |
+| 2.9 (#35) | Alert dialog | One-call modal alert with icon, message, and up to three buttons. | `enhancement`, `forms`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/alert.rs (new)`, `src/engine.rs` |
+| 2.10 (#36) | Custom paint widget (closure-drawn) | One-off custom drawing without writing a widget struct. | `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/custom_paint.rs (new)` |
 | 2.11 (#37) | Menu bar and drop-down menus (drawn by Pushrod) | Menu bar with drop-down menus, separators, check marks, submenus, shortcuts, and mnemonics. | `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/menu.rs (new)`, `src/cache.rs`, `src/engine.rs` |
 | 2.12 (#38) | File chooser dialog (drawn by Pushrod) | Choose a file or directory with a consistent look on every platform. | `enhancement`, `forms`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/file_chooser.rs (new)` |
 | 2.13 (#77) | Tooltips | Short help text shown after the pointer rests on a widget. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `src/cache.rs`, `pushrod-widgets/src/tooltip.rs (new)` |
-| 2.14 (#83) | Separator line | Horizontal or vertical divider line. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/separator.rs (new)` |
+| 2.14 (#83) | Separator line | Horizontal or vertical divider line. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/separator.rs (new)` |
 | 2.15 (#84) | Toolbar | A row of icon/text buttons bound to actions. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `pushrod-widgets/src/toolbar.rs (new)` |
 | 2.16 (#85) | Status bar | A strip at the bottom of the window for messages and status fields. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/status_bar.rs (new)` |
 | 2.17 (#86) | Switch (on/off slide toggle) | A sliding on/off switch for settings that take effect immediately. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/switch.rs (new)` |
@@ -843,7 +910,7 @@ One-of-many selection among sibling widgets. **Widget roadmap:** [`docs/widgets/
 
 Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. **Widget roadmap:** [`docs/widgets/text-field.md`](widgets/text-field.md) (look, behavior, events, acceptance criteria).
 
-**Dependencies.** Requires 1.4 (#20), 1.5 (#21), 1.6 (#22), 1.19 (#112).
+**Dependencies.** Requires 1.4 (#20), 1.5 (#21), 1.6 (#22). Pairs with 1.19 (#112) (input-method composition arrives in v0.2; plain typing works in v0.1).
 
 ### 2.7 (#33): Image widget
 
@@ -953,9 +1020,9 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 3.1 (#39) | Scroll bar | Vertical/horizontal scroll bar with arrows and a proportional thumb. | `enhancement`, `mvp`, `size/M`, `widget` | N | Y | M | `pushrod-widgets/src/scroll_bar.rs (new)` |
-| 3.2 (#40) | Slider | Horizontal/vertical slider with range, optional ticks, and value label. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/slider.rs (new)` |
-| 3.3 (#41) | Group box (titled frame) | A frame with a title in its top border, grouping related controls. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/group_box.rs (new)` |
+| 3.1 (#39) | Scroll bar | Vertical/horizontal scroll bar with arrows and a proportional thumb. | `enhancement`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/scroll_bar.rs (new)` |
+| 3.2 (#40) | Slider | Horizontal/vertical slider with range, optional ticks, and value label. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/slider.rs (new)` |
+| 3.3 (#41) | Group box (titled frame) | A frame with a title in its top border, grouping related controls. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/group_box.rs (new)` |
 | 3.6 (#44) | Choice button: pop-up list and click-to-cycle modes | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | `enhancement`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/choice_button.rs (new)` |
 | 3.7 (#45) | Column browser (multi-column hierarchical browser) | Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. | `enhancement`, `parallelizable`, `size/L`, `usability`, `widget` | Y | N | L | `pushrod-widgets/src/column_browser.rs (new)` |
 | 3.9 (#47) | Split view (panes with draggable dividers) | Two or more panes side by side or stacked, separated by dividers the user drags to resize them. | `enhancement`, `layout`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/split_view.rs (new)` |
@@ -1029,7 +1096,7 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 4.1 (#48) | Progress bar | A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `pushrod-widgets/src/progress_bar.rs (new)` |
+| 4.1 (#48) | Progress bar | A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/progress_bar.rs (new)` |
 | 4.2 (#49) | Spin box | Numeric field with up/down arrows, range, and step. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/spin_box.rs (new)` |
 | 4.4 (#51) | Tab view | Tabs that switch between pages of controls. | `enhancement`, `layout`, `parallelizable`, `size/M`, `widget` | Y | N | M | `pushrod-widgets/src/tab_view.rs (new)` |
 | 4.5 (#52) | List view | Scrolling list with single/multiple selection, backed by a data source. | `enhancement`, `size/L`, `widget` | N | N | L | `pushrod-widgets/src/list_view.rs (new)` |
@@ -1091,13 +1158,13 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 5.1 (#56) | Clip children to their parent's bounds | Children never draw or receive input outside their parent. | `core`, `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `src/cache.rs` |
-| 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | Y | M | `src/widget.rs`, `src/cache.rs`, `src/composite.rs (new)` |
-| 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | Y | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
+| 5.1 (#56) | Clip children to their parent's bounds | Children never draw or receive input outside their parent. | `core`, `enhancement`, `layout`, `mvp`, `size/S` | N | v0.1 | S | `src/cache.rs` |
+| 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/widget.rs`, `src/cache.rs`, `src/composite.rs (new)` |
+| 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | v0.1 | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
-| 5.5 (#116) | Layout manager foundation: Layout trait, size hints, measure and arrange | A small Layout trait any container can use; widgets report minimum, preferred, and maximum sizes; containers measure then arrange their children. | `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | Y | M | `layout/mod.rs (new)`, `src/widget.rs`, `src/cache.rs` |
-| 5.6 (#117) | Row and column layouts | Arrange children in a horizontal row or vertical column with spacing, margins, alignment, and stretch. | `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `layout/linear.rs (new)` |
-| 5.7 (#118) | Form layout: aligned label and field rows | Two-column 'Label: field' rows with labels aligned and fields stretching to the available width. | `enhancement`, `layout`, `mvp`, `size/S`, `usability` | N | Y | S | `layout/form.rs (new)` |
+| 5.5 (#116) | Layout manager foundation: Layout trait, size hints, measure and arrange | A small Layout trait any container can use; widgets report minimum, preferred, and maximum sizes; containers measure then arrange their children. | `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | v0.1 | M | `layout/mod.rs (new)`, `src/widget.rs`, `src/cache.rs` |
+| 5.6 (#117) | Row and column layouts | Arrange children in a horizontal row or vertical column with spacing, margins, alignment, and stretch. | `enhancement`, `layout`, `mvp`, `size/S` | N | v0.1 | S | `layout/linear.rs (new)` |
+| 5.7 (#118) | Form layout: aligned label and field rows | Two-column 'Label: field' rows with labels aligned and fields stretching to the available width. | `enhancement`, `layout`, `mvp`, `size/S`, `usability` | N | v0.1 | S | `layout/form.rs (new)` |
 | 5.8 (#119) | Grid layout | Rows and columns of cells with spans, per-row/column stretch, and alignment. | `enhancement`, `layout`, `parallelizable`, `size/M` | Y | N | M | `layout/grid.rs (new)` |
 | 5.9 (#120) | Stack layout (one child visible at a time) | Children occupy the same area; one is shown at a time (pages, wizards, tab contents). | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/stack.rs (new)` |
 | 5.10 (#121) | Flow layout (wrapping rows) | Children placed left to right, wrapping to the next row when the width runs out. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/flow.rs (new)` |
@@ -1372,13 +1439,13 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 6.1 (#60) | Widget registry and factory | Create widgets by type name, the prerequisite for loading forms. | `chassis`, `core`, `enhancement`, `forms`, `mvp`, `size/S` | N | Y | S | `src/registry.rs (new)` |
-| 6.2 (#61) | Property introspection: list, get, and set widget properties by name | Each widget describes its properties for saving, loading, bindings, and the Chassis inspector. | `chassis`, `core`, `enhancement`, `forms`, `mvp`, `size/M` | N | Y | M | `src/widget.rs`, `src/properties.rs (new)`, `pushrod-widgets (all widgets)` |
-| 6.3 (#62) | Form file format (binary, versioned) | The binary file that stores forms: object table by ID, string and image pools, symbols. | `chassis`, `enhancement`, `forms`, `mvp`, `size/L` | N | Y | L | `docs/FORM_FORMAT.md (new)`, `form/format.rs (new)` |
-| 6.4 (#63) | Form loader: build a form from a file with stable IDs | Load a form and attach callbacks by ID or name. | `chassis`, `enhancement`, `forms`, `mvp`, `size/M` | N | Y | M | `form/loader.rs (new)`, `src/engine.rs` |
-| 6.5 (#64) | Form writer: save a widget subtree to a file | Serialize any subtree into the form format. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `form/writer.rs (new)` |
-| 6.6 (#65) | Generate ID constants from a form file | build.rs helper and CLI that emit Rust constants for named objects. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `form/codegen.rs (new)` |
-| 6.7 (#66) | Modal dialogs: run a form until a dismissing control is chosen | Open a form modally; the result is the ID of the control that dismissed it. | `core`, `enhancement`, `forms`, `mvp`, `size/M` | N | Y | M | `src/engine.rs`, `src/cache.rs` |
+| 6.1 (#60) | Widget registry and factory | Create widgets by type name, the prerequisite for loading forms. | `chassis`, `core`, `enhancement`, `forms`, `mvp`, `size/S` | N | v0.2 | S | `src/registry.rs (new)` |
+| 6.2 (#61) | Property introspection: list, get, and set widget properties by name | Each widget describes its properties for saving, loading, bindings, and the Chassis inspector. | `chassis`, `core`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.2 | M | `src/widget.rs`, `src/properties.rs (new)`, `pushrod-widgets (all widgets)` |
+| 6.3 (#62) | Form file format (binary, versioned) | The binary file that stores forms: object table by ID, string and image pools, symbols. | `chassis`, `enhancement`, `forms`, `mvp`, `size/L` | N | v0.2 | L | `docs/FORM_FORMAT.md (new)`, `form/format.rs (new)` |
+| 6.4 (#63) | Form loader: build a form from a file with stable IDs | Load a form and attach callbacks by ID or name. | `chassis`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.2 | M | `form/loader.rs (new)`, `src/engine.rs` |
+| 6.5 (#64) | Form writer: save a widget subtree to a file | Serialize any subtree into the form format. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `form/writer.rs (new)` |
+| 6.6 (#65) | Generate ID constants from a form file | build.rs helper and CLI that emit Rust constants for named objects. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `size/S` | Y | v0.2 | S | `form/codegen.rs (new)` |
+| 6.7 (#66) | Modal dialogs: run a form until a dismissing control is chosen | Open a form modally; the result is the ID of the control that dismissed it. | `core`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.1 | M | `src/engine.rs`, `src/cache.rs` |
 | 6.8 (#67) | Bind actions by name from form files | Form files name the action a control triggers; applications register handlers by name. | `chassis`, `enhancement`, `forms`, `parallelizable`, `size/S` | Y | N | S | `src/engine.rs`, `form/loader.rs` |
 | 6.9 (#68) | Design-mode hooks for Chassis | Select, move, resize, and edit widgets without triggering their behavior. | `chassis`, `enhancement`, `forms`, `parallelizable`, `size/L` | Y | N | L | `src/cache.rs`, `src/engine.rs`, `src/design.rs (new)` |
 
@@ -1582,20 +1649,22 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 7.1 (#69) | CI: build, test, clippy, fmt, doc with SDL2 | Every PR is built and tested on Linux and macOS. | `ci`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `.github/workflows/ci.yml (new)` |
-| 7.2 (#70) | Golden-image rendering tests | Render each widget and state and compare with reference PNGs. | `ci`, `enhancement`, `mvp`, `size/M` | N | Y | M | `tests/visual.rs (new)`, `tests/golden/ (new)` |
-| 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `pushrod-widgets/examples/gallery.rs (new)` |
-| 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
-| 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | Y | S | `Cargo.toml`, `CHANGELOG.md (new)` |
-| 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
-| 7.7 (#115) | Performance benchmarks and budgets | Measure frame time, input latency, memory per widget, and startup; fail CI on regressions. | `ci`, `mvp`, `parallelizable`, `performance`, `size/S` | Y | Y | S | `benches/ (new)`, `.github/workflows/ci.yml` |
-| 7.8 (#122) | Documentation site: build pushrod-docs in CI and publish it | Build the Docusaurus site on every PR (broken links fail) and publish it to GitHub Pages, with the API reference linked. | `ci`, `documentation`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `.github/workflows/docs.yml (new)`, `pushrod-docs/` |
+| 7.1 (#69) | CI: build, test, clippy, fmt, doc with SDL2 | Every PR is built and tested on Linux and macOS. | `ci`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `.github/workflows/ci.yml (new)` |
+| 7.2 (#70) | Golden-image rendering tests | Render each widget and state and compare with reference PNGs. | `ci`, `enhancement`, `mvp`, `size/M` | N | v0.1 | M | `tests/visual.rs (new)`, `tests/golden/ (new)` |
+| 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-widgets/examples/gallery.rs (new)` |
+| 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
+| 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
+| 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
+| 7.7 (#115) | Performance benchmarks and budgets | Measure frame time, input latency, memory per widget, and startup; fail CI on regressions. | `ci`, `mvp`, `parallelizable`, `performance`, `size/S` | Y | v0.1 | S | `benches/ (new)`, `.github/workflows/ci.yml` |
+| 7.8 (#122) | Documentation site: build pushrod-docs in CI and publish it | Build the Docusaurus site on every PR (broken links fail) and publish it to GitHub Pages, with the API reference linked. | `ci`, `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `.github/workflows/docs.yml (new)`, `pushrod-docs/` |
+| 7.9 (#139) | Easy installation: bundled SDL, static linking, and platform guides | Make installing Pushrod painless on Linux, macOS, and Windows, including building SDL from source. | `build`, `documentation`, `mvp`, `parallelizable`, `size/S`, `usability` | Y | v0.1 | S | `Cargo.toml`, `.github/workflows/ci.yml`, `pushrod-docs/` |
+| 7.10 (#140) | Reference application: a real app built only with Pushrod | A small but complete application, maintained in the repository, that exercises the MVP together and surfaces API problems early. | `example`, `mvp`, `parallelizable`, `quality`, `size/M`, `usability` | Y | v0.1 | M | `pushrod-widgets/examples/contacts/ (new)` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
 
 **Problem Statement.** There is no CI.
 
-**Solution / Scope.** Workflow installing SDL2/ttf/image dev packages; `cargo fmt --check`, `clippy -D warnings`, `test`, `doc`; Ubuntu and macOS; MSRV 1.86 and stable. Add a sample-data check that fails on e-mail addresses outside the reserved example domains (example.com/.org/.net) and on home-directory paths containing user names, in examples, tests, docs, and mockups.
+**Solution / Scope.** **Done in #133:** GitHub Actions running `cargo fmt --check`, `clippy -D warnings`, tests, and rustdoc with `-D warnings` on Ubuntu with Rust 1.100.0 (the minimum supported version) and latest stable, plus a sample-data check for e-mail addresses outside example.com/.org/.net. **Remaining:** macOS and Windows runners; extend the sample-data check to home-directory paths containing user names; keep `rust-version` at the latest stable Rust as new releases ship.
 
 **Acceptance Criteria.**
 
@@ -1656,7 +1725,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 - Compiling examples for each section
 - Linked from README and crate docs
 
-**Parallelism / Dependencies.** Parallelizable. Best after 5.2 (#57), 6.2 (#61), 9.4 (#96); start earlier.
+**Parallelism / Dependencies.** Parallelizable. Requires 5.2 (#57), 9.4 (#96). Pairs with 6.2 (#61) (the registry and properties chapter is added in v0.2).
 
 **Technical Stack.** Markdown, rustdoc
 
@@ -1666,7 +1735,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Problem Statement.** #1 and #8 asked about crates.io; metadata points at the old crate; no changelog.
 
-**Solution / Scope.** Fix URLs, add `CHANGELOG.md` starting with PR #10, choose a version above previously published ones, `cargo publish --dry-run` in CI, publish after the MVP. Publish both crates, `pushrod` first and then `pushrod-widgets`, with matching versions.
+**Solution / Scope.** Fix URLs, add `CHANGELOG.md` starting with PR #10, choose a version above previously published ones, `cargo publish --dry-run` in CI, publish after the MVP. Publish the crates in dependency order (`pushrod`, `pushrod-sdl2`, `pushrod-widgets`) with matching versions. The names `pushrod` and `pushrod-widgets` already exist on crates.io: confirm ownership (`cargo owner --list`) before publishing, and reserve `pushrod-sdl2` and `pushrod-sdl3`. Publish v0.1 (dialog applications) and v0.2 (forms); v1.0 follows once the MVP has been used in real applications.
 
 **Acceptance Criteria.**
 
@@ -1724,7 +1793,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Problem Statement.** The `pushrod-docs` Docusaurus site exists, but nothing builds it automatically, so broken links or stale pages could merge, and it isn't published anywhere.
 
-**Solution / Scope.** Add a workflow that runs `npm ci && npm run build` in `pushrod-docs` on every PR (Docusaurus fails on broken links) and deploys `main` to GitHub Pages at `/rust-pushrod/`. Publish rustdoc output alongside it (`/rust-pushrod/api/`) and link it from the navbar. Add a check that every widget module in `src/` has a page in `pushrod-docs/docs/widgets/`, and that code samples marked as checked compile (a doc-sample test crate).
+**Solution / Scope.** **Done in #133:** `npm ci && npm run build` in `pushrod-docs` on every PR. **Remaining:** deploy `main` to GitHub Pages at `/rust-pushrod/`. Publish rustdoc output alongside it (`/rust-pushrod/api/`) and link it from the navbar. Add a check that every widget module in `src/` has a page in `pushrod-docs/docs/widgets/`, and that code samples marked as checked compile (a doc-sample test crate).
 
 **Acceptance Criteria.**
 
@@ -1739,6 +1808,43 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Technical Stack.** GitHub Actions, Node (Docusaurus), rustdoc
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/writing-documentation.md` ("Writing documentation", Writing documentation, update). Guides: Writing documentation page: how CI checks docs. Rustdoc: API reference linked from the site. Examples: n/a. Screenshots: n/a.
+
+### 7.9 (#139): Easy installation: bundled SDL, static linking, and platform guides
+
+**Problem Statement.** Installing the SDL2, SDL2_ttf, and SDL2_image system libraries is the biggest hurdle for new users, especially on Windows and macOS.
+
+**Solution / Scope.** **Done in #133:** `bundled` and `static-link` features passed through to `sdl2`, and documented. `bundled` builds SDL2 only; SDL2_ttf and SDL2_image still come from the system. **Remaining:** a CI job that builds with `bundled` on macOS and Windows; step-by-step installation pages per platform; after 10.6 (#134), the features live on the backend crate, and once text and images no longer need SDL2_ttf/SDL2_image (10.6 (#134)), `bundled` produces a fully self-contained build.
+
+**Acceptance Criteria.**
+
+- CI builds with `bundled` on macOS and Windows
+- Installation pages for Linux, macOS, and Windows tested from a clean machine
+- With 10.6 (#134) complete, `bundled` needs no system libraries
+
+**Parallelism / Dependencies.** Parallelizable. Requires 7.1 (#69).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/getting-started/installation.md` ("Installation", Getting started, update). Guides: update the guide or concept page covering: installation. Rustdoc: feature flags. Examples: n/a. Screenshots: n/a.
+
+### 7.10 (#140): Reference application: a real app built only with Pushrod
+
+**Problem Statement.** The gallery shows widgets one at a time. Problems with focus, layout, dialogs, resizing, and API ergonomics only show up when widgets are combined into a real application.
+
+**Solution / Scope.** A contact-card editor with fictional data (Jane Doe, jane.doe@example.com, Anytown): a scrollable list of contacts in a Container, text fields with validation, check boxes and radio buttons, a slider, default and cancel buttons, an alert to confirm deletion, keyboard navigation, window resizing with layouts, and high-DPI rendering. Each MVP stage updates it: v0.1 builds its window in code; v0.2 loads the same window from a form file. Golden-image tests cover its main screens. Every friction found while building it is filed as an issue.
+
+**Acceptance Criteria.**
+
+- Runs on Linux, macOS, and Windows
+- Fully usable with the keyboard alone
+- v0.2 version loads its window from a form file
+- Golden images in CI
+
+**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 2.9 (#35), 5.3 (#58), 5.6 (#117), 1.10 (#25).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/reference-application.md` ("Reference application", Guides, new). Guides: update the guide or concept page covering: a new Reference application tutorial that walks through it. Rustdoc: n/a. Examples: the app itself. Screenshots: Screenshots of its main screens.
 
 ## Epic 8: Theming and skins (distant future) (#18)
 
@@ -1799,17 +1905,17 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 9.1 (#93) | Event vocabulary: modern event names and structure | Define Pushrod's event enum and naming once; rename the PR #10 events. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | Y | M | `src/event.rs`, `src/cache.rs`, `src/engine.rs`, `pushrod-widgets/src/button_widget.rs`, `tests/` |
-| 9.2 (#94) | Event propagation: capture, target, and bubble phases with handled/ignored | Input events travel from the window down to the target widget and back up to its parents, and any widget can mark them handled. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | Y | M | `src/cache.rs`, `src/widget.rs`, `src/event.rs` |
+| 9.1 (#93) | Event vocabulary: modern event names and structure | Define Pushrod's event enum and naming once; rename the PR #10 events. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/event.rs`, `src/cache.rs`, `src/engine.rs`, `pushrod-widgets/src/button_widget.rs`, `tests/` |
+| 9.2 (#94) | Event propagation: capture, target, and bubble phases with handled/ignored | Input events travel from the window down to the target widget and back up to its parents, and any widget can mark them handled. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/cache.rs`, `src/widget.rs`, `src/event.rs` |
 | 9.3 (#95) | Event filters: observe or intercept another widget's events | Install a filter that sees a widget's (or the whole application's) events first and can stop them. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `src/cache.rs`, `src/engine.rs` |
-| 9.4 (#96) | Reusable input controllers: click, drag, scroll, hover, long-press, key | Composable input handlers that widgets attach instead of re-implementing press/drag/release logic. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | Y | M | `src/controllers.rs (new)`, `src/widget.rs`, `pushrod-widgets/src/button_widget.rs` |
+| 9.4 (#96) | Reusable input controllers: click, drag, scroll, hover, long-press, key | Composable input handlers that widgets attach instead of re-implementing press/drag/release logic. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/controllers.rs (new)`, `src/widget.rs`, `pushrod-widgets/src/button_widget.rs` |
 | 9.5 (#97) | Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons | One action object drives every menu item, toolbar button, and shortcut that performs the same command, keeping enabled/checked state in sync. | `core`, `enhancement`, `events`, `size/M`, `usability` | N | N | M | `src/action.rs (new)`, `src/engine.rs`, `pushrod-widgets/src/menu.rs`, `pushrod-widgets/src/toolbar.rs` |
 | 9.6 (#98) | Property bindings: keep two properties in sync | Bind a source widget property to a target property, one-way or two-way, with optional conversion. | `enhancement`, `events`, `parallelizable`, `size/M` | Y | N | M | `src/binding.rs (new)`, `src/engine.rs` |
 | 9.7 (#99) | Callback handles: disconnect, block, and unblock | Every registration returns a handle to remove or temporarily silence the callback. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `src/engine.rs` |
 | 9.8 (#100) | Drag and drop within the application | Drag data between widgets (list to list, file icon to drop zone) with drop targets and feedback. | `enhancement`, `events`, `parallelizable`, `size/L`, `usability` | Y | N | L | `src/dnd.rs (new)`, `src/cache.rs` |
 | 9.9 (#101) | Pointer cursor per widget | Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links). | `enhancement`, `events`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
-| 9.10 (#109) | Engine events: every internal action Pushrod performs emits an event | A system-wide EngineEvent for each internal action (mode changes, focus, modals, menus, tree changes, forms, drags, timers, window changes), broadcast to widgets and callbacks. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | Y | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
-| 9.11 (#124) | Event-loop style: keep parity with callbacks | Everything delivered to callbacks is also returned by next_event, and both styles can be combined. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `src/engine.rs`, `src/event.rs` |
+| 9.10 (#109) | Engine events: every internal action Pushrod performs emits an event | A system-wide EngineEvent for each internal action (mode changes, focus, modals, menus, tree changes, forms, drags, timers, window changes), broadcast to widgets and callbacks. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
+| 9.11 (#124) | Event-loop style: keep parity with callbacks | Everything delivered to callbacks is also returned by next_event, and both styles can be combined. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs`, `src/event.rs` |
 
 ### 9.1 (#93): Event vocabulary: modern event names and structure
 
@@ -2086,7 +2192,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ## Epic 10: Rendering backends, drawing modes, and vintage hardware (#103)
 
-Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target.
+Backend crates (SDL2 now, SDL3 later) with no SDL in the core, a backend-neutral paint API, high-DPI, live vs. outline drawing for slow and vintage machines, a no_std core, and an experimental Atari ST backend.
 
 **Problem.** Pushrod should run well on slow GPUs and, ideally, on vintage hardware such as the Atari ST. Two things stand in the way: dragging and resizing redraw content continuously (expensive on slow hardware), and widgets paint directly onto an SDL2 canvas, which ties every widget to SDL2.
 
@@ -2097,9 +2203,11 @@ Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral p
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 10.1 (#105) | Drawing modes: live or outline feedback while moving and resizing | Live mode redraws content as things move; outline mode shows only a dotted rectangle until the move ends. Switchable at run time, with a system-wide event. | `core`, `enhancement`, `parallelizable`, `performance`, `portability`, `size/M` | Y | N | M | `src/engine.rs`, `src/cache.rs`, `src/controllers.rs` |
-| 10.2 (#106) | Backend-neutral paint API (SDL2 backend by default) | Widgets paint through a small Painter trait instead of an SDL2 canvas, so other backends become possible without touching widgets. | `core`, `enhancement`, `mvp`, `portability`, `size/M` | N | Y | M | `src/paint.rs`, `src/widget.rs`, `src/cache.rs`, `src/texture.rs`, `backend/sdl2.rs (new)` |
-| 10.3 (#107) | no_std + alloc core crate | Split the widget tree, events, and widgets into a core crate that builds without the standard library. | `core`, `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-core (new crate)`, `Cargo workspace` |
+| 10.2 (#106) | Backend-neutral paint API (SDL2 backend by default) | Widgets paint through a small Painter trait instead of an SDL2 canvas, so other backends become possible without touching widgets. | `core`, `enhancement`, `mvp`, `portability`, `size/M` | N | v0.1 | M | `src/paint.rs`, `src/widget.rs`, `src/cache.rs`, `src/texture.rs`, `backend/sdl2.rs (new)` |
+| 10.3 (#107) | no_std + alloc core crate | Split the widget tree, events, and widgets into a core crate that builds without the standard library. | `core`, `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `src/lib.rs`, `Cargo.toml`, `pushrod-widgets/Cargo.toml` |
 | 10.4 (#108) | Experimental: Atari ST / TOS backend | Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing. | `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-tos (new crate)` |
+| 10.6 (#134) | Backend crates: keep SDL out of the core and the widgets | Move everything SDL-specific into a `pushrod-sdl2` backend crate, so `pushrod` and `pushrod-widgets` have no SDL dependency and a future SDL3 backend is a drop-in swap. | `architecture`, `enhancement`, `mvp`, `parallelizable`, `rendering`, `size/L` | Y | v0.1 | L | `src/backend.rs (new)`, `src/engine.rs`, `src/event.rs`, `src/geometry.rs`, `pushrod-sdl2/ (new crate)`, `pushrod-widgets (all widgets)` |
+| 10.5 (#135) | SDL3 backend (pushrod-sdl3) | A second backend crate on SDL3, a drop-in replacement for pushrod-sdl2. | `enhancement`, `parallelizable`, `platform`, `rendering`, `size/M` | Y | N | M | `pushrod-sdl3/ (new crate)` |
 
 ### 10.1 (#105): Drawing modes: live or outline feedback while moving and resizing
 
@@ -2147,7 +2255,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** `Widget::paint` takes `&mut sdl2::render::Canvas<Window>`, so every widget depends on SDL2. Changing that signature after dozens of widgets exist would be expensive, and it is the main obstacle to software rendering and vintage targets.
 
-**Solution / Scope.** Introduce `trait Painter { fn fill(&mut self, color); fn fill_rect(..); fn rect(..); fn line(..); fn text(..) -> Size; fn image(..); fn dither(..); fn clip(..) }` (kept small: only what `paint` helpers need) and change `Widget::paint(&self, p: &mut dyn Painter)`. The default `Sdl2Painter` keeps today's design exactly: each widget paints into its own GPU texture when invalidated and frames are blits of cached textures. A backend also declares a `CachePolicy` (`TextureCache` on GPUs; `DirectDraw` on memory-poor systems, painting invalidated widgets straight to the screen with clipping). The SDL2 backend remains the default; nothing changes for applications.
+**Solution / Scope.** Introduce `trait Painter { fn fill(&mut self, color); fn fill_rect(..); fn rect(..); fn line(..); fn text(..) -> Size; fn image(..); fn dither(..); fn clip(..) }` (kept small: only what `paint` helpers need) and change `Widget::paint(&self, p: &mut dyn Painter)`. The default `Sdl2Painter` keeps today's design exactly: each widget paints into its own GPU texture when invalidated and frames are blits of cached textures. A backend also declares a `CachePolicy` (`TextureCache` on GPUs; `DirectDraw` on memory-poor systems, painting invalidated widgets straight to the screen with clipping). The SDL2 backend remains the default; nothing changes for applications. `Widget::paint` takes Pushrod's own `Painter`, never an SDL type, so widget libraries never compile against a specific SDL version (10.6 (#134)).
 
 **Acceptance Criteria.**
 
@@ -2156,7 +2264,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - A headless test backend records paint calls for unit tests
 - Cache policy is backend-selected
 
-**Parallelism / Dependencies.** Not parallelizable. Requires PR #10. Do before the widget count grows.
+**Parallelism / Dependencies.** Not parallelizable. Requires PR #10. Gate: must land before the widget epics and before v1, together with 10.6 (#134).
 
 **Technical Stack.** Rust
 
@@ -2166,14 +2274,14 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Vintage targets have no Rust standard library; Rust's m68k bare-metal target builds only `core` and `alloc`.
 
-**Solution / Scope.** Move the widget tree, events, paint helpers, and form loader into `pushrod-core` (`#![no_std]` + `alloc`), with time, files, and threads behind small traits provided by the platform crate. `pushrod` (SDL2, std) re-exports it, so applications don't change. `pushrod-widgets` gains a default `std` feature so the standard widgets also build on no_std targets. The split follows the module boundaries and specs in 7.6 (#114).
+**Solution / Scope.** Once SDL lives only in backend crates (10.6 (#134)), make the `pushrod` core itself `#![no_std]` + `alloc`, with `std` as a default feature; time, files, and threads go through the `Backend` trait. `pushrod-widgets` follows (default `std` feature). This is what lets the Atari ST backend (10.4 (#108)) reuse the core and the standard widgets unchanged. The split follows the module boundaries and specs in 7.6 (#114).
 
 **Acceptance Criteria.**
 
 - `pushrod-core` builds for a `no_std` target with `alloc`
 - `pushrod` API unchanged
 
-**Parallelism / Dependencies.** Parallelizable. Requires 10.2 (#106).
+**Parallelism / Dependencies.** Parallelizable. Requires 10.6 (#134), 7.6 (#114).
 
 **Technical Stack.** Rust (core, alloc)
 
@@ -2201,83 +2309,127 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html); [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST); [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
 
+### 10.6 (#134): Backend crates: keep SDL out of the core and the widgets
+
+**Problem Statement.** SDL2 types appear throughout the public API: `Widget::paint` takes `&mut Canvas<Window>`, `PushrodEvent::SystemEvent` wraps `sdl2::event::Event`, `Engine::run` takes `Sdl` and `Window`, and widgets use `sdl2::pixels::Color`. Every widget library would compile against SDL2 directly, so moving to SDL3 (or to the Atari ST, 10.4 (#108)) would break all of them. The Rust SDL3 bindings are still being migrated, so the switch isn't urgent, but the API has to be ready before v1 freezes it.
+
+**Solution / Scope.** **Core (`pushrod`):** no SDL dependency. It defines the `Painter` trait (10.2 (#106)), a `Backend` trait (create and resize windows, deliver input, manage widget textures, clock, clipboard, open URLs), and its own value types: `Color`, `Point`/`Size`/`Rect`, `Key`/`Modifiers`/`MouseButton`, and the input events of the event vocabulary (9.1 (#93)). No `sdl2` type appears in any public signature. **`pushrod-sdl2`:** implements `Backend` and `Painter` with SDL2, keeping today's design exactly: one GPU texture per widget, repainted only when invalidated, frames composed by blitting, text from the glyph atlas. The `bundled` and `static-link` features move here. **`pushrod-widgets`:** depends on `pushrod` only. **Applications** pick a backend: `pushrod_sdl2::run(engine, WindowSettings { title, size, .. }, state)` (and the event-loop style, 9.11 (#124)). **Testing:** a `HeadlessBackend` in the core (no window, records paint calls) replaces SDL in unit tests, so tests run without a display. With text rasterized by swash (1.18 (#111)) and images decoded in Rust, the SDL2_ttf and SDL2_image libraries are no longer needed, so the backend needs only SDL itself: simpler to port, and `bundled` becomes fully self-contained.
+
+**Acceptance Criteria.**
+
+- `cargo tree -p pushrod` and `cargo tree -p pushrod-widgets` show no `sdl2`
+- No SDL type in any public signature of the core or the widgets
+- `pushrod-sdl2` reproduces today's rendering (golden images unchanged)
+- Tests run on the headless backend without a display
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.2 (#106), 9.1 (#93), 1.21 (#130). Do before the widget count grows.
+
+**Technical Stack.** Rust, SDL2 (backend crate only)
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/backends.md` ("Backends", Platforms, new). Guides: update the guide or concept page covering: installation (choosing a backend), Widget libraries, a new Backends page. Rustdoc: `Backend`, `Painter`, `pushrod_sdl2::run`, `HeadlessBackend`. Examples: examples use `pushrod_sdl2::run`. Screenshots: n/a.
+
+### 10.5 (#135): SDL3 backend (pushrod-sdl3)
+
+**Problem Statement.** SDL3 is SDL's current major version. Pushrod should be able to move to it without changing applications or widget libraries.
+
+**Solution / Scope.** Implement `Backend` and `Painter` (10.6 (#134)) on the `sdl3` crate with the same texture-per-widget design. Switching an application is a one-line `Cargo.toml` change plus `pushrod_sdl3::run`. Start when the Rust SDL3 bindings have a stable release; until then, track their migration status. The golden-image tests (7.2 (#70)) must pass unchanged on both backends.
+
+**Acceptance Criteria.**
+
+- The gallery and reference application run on SDL3 unchanged
+- Golden images match the SDL2 backend
+- pushrod-sdl2 keeps working; applications choose either
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.6 (#134), 7.2 (#70).
+
+**Technical Stack.** Rust, SDL3 (sdl3 crate)
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/backends.md` ("Backends", Platforms, update). Guides: update the guide or concept page covering: Backends. Rustdoc: `pushrod_sdl3::run`. Examples: examples run with either backend. Screenshots: n/a.
+
 ## Work Order
 
 Work in this order. Items in the same step can be done in parallel unless their dependencies say otherwise.
 
 **1. Foundation (do first, mostly parallel)**
 
-- 1.21 (#130) Split the standard widgets into the pushrod-widgets crate — MVP
-- 7.1 (#69) CI: build, test, clippy, fmt, doc with SDL2 — MVP
-- 7.8 (#122) Documentation site: build pushrod-docs in CI and publish it — MVP
-- 9.1 (#93) Event vocabulary: modern event names and structure — MVP
-- 10.2 (#106) Backend-neutral paint API (SDL2 backend by default) — MVP
-- 1.1 (#19) Widget behavior flags and visual states — MVP
-- 1.2 (#6) Event masks for the run loop and for widgets — MVP
-- 9.10 (#109) Engine events: every internal action Pushrod performs emits an event — MVP
-- 9.11 (#124) Event-loop style: keep parity with callbacks — MVP
-- 1.3 (#7) Broadcast events to all interested widgets — MVP
-- 1.6 (#22) Callback registry for every widget event — MVP
-- 1.13 (#78) Custom application events with payloads — MVP
-- 1.18 (#111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) — MVP
-- 1.7 (#3) GPU text: font cache with a glyph atlas texture — MVP
-- 7.3 (#71) Widget gallery example — MVP
-- 7.6 (#114) Module boundaries and written specs with conformance tests — MVP
+- 1.21 (#130) Split the standard widgets into the pushrod-widgets crate — MVP v0.1
+- 7.1 (#69) CI: build, test, clippy, fmt, doc with SDL2 — MVP v0.1
+- 7.8 (#122) Documentation site: build pushrod-docs in CI and publish it — MVP v0.1
+- 9.1 (#93) Event vocabulary: modern event names and structure — MVP v0.1
+- 10.2 (#106) Backend-neutral paint API (SDL2 backend by default) — MVP v0.1
+- 1.1 (#19) Widget behavior flags and visual states — MVP v0.1
+- 1.2 (#6) Event masks for the run loop and for widgets — MVP v0.1
+- 9.10 (#109) Engine events: every internal action Pushrod performs emits an event — MVP v0.1
+- 9.11 (#124) Event-loop style: keep parity with callbacks — MVP v0.1
+- 1.3 (#7) Broadcast events to all interested widgets — MVP v0.1
+- 1.6 (#22) Callback registry for every widget event — MVP v0.1
+- 1.13 (#78) Custom application events with payloads — MVP v0.1
+- 1.18 (#111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) — MVP v0.1
+- 1.7 (#3) GPU text: font cache with a glyph atlas texture — MVP v0.1
+- 7.3 (#71) Widget gallery example — MVP v0.1
+- 7.6 (#114) Module boundaries and written specs with conformance tests — MVP v0.2
 
 **2. Input model**
 
-- 9.2 (#94) Event propagation: capture, target, and bubble phases with handled/ignored — MVP
-- 9.4 (#96) Reusable input controllers: click, drag, scroll, hover, long-press, key — MVP
-- 1.4 (#20) Keyboard focus, Tab order, and Return/Escape — MVP
-- 1.19 (#112) Input method (IME) support: composition text and candidate window — MVP
-- 1.17 (#104) Per-state appearance: colors, border, and font for each visual state — MVP
-- 1.12 (#76) Keyboard mnemonics: underlined shortcut letters — MVP
-- 1.5 (#21) Timers and idle callbacks — MVP
+- 9.2 (#94) Event propagation: capture, target, and bubble phases with handled/ignored — MVP v0.1
+- 9.4 (#96) Reusable input controllers: click, drag, scroll, hover, long-press, key — MVP v0.1
+- 1.4 (#20) Keyboard focus, Tab order, and Return/Escape — MVP v0.1
+- 1.19 (#112) Input method (IME) support: composition text and candidate window — MVP v0.2
+- 1.17 (#104) Per-state appearance: colors, border, and font for each visual state — MVP v0.1
+- 1.12 (#76) Keyboard mnemonics: underlined shortcut letters — MVP v0.2
+- 1.5 (#21) Timers and idle callbacks — MVP v0.1
+- 10.6 (#134) Backend crates: keep SDL out of the core and the widgets — MVP v0.1
+- 1.25 (#138) Errors: return Result instead of panicking — MVP v0.1
+- 1.24 (#137) Fonts: shared font handles and a built-in default font — MVP v0.1
+- 1.23 (#136) Public API polish before publishing: builders, prelude, and stability — MVP v0.1
 
 **3. Core dialog widgets**
 
-- 2.10 (#36) Custom paint widget (closure-drawn) — MVP
-- 2.1 (#27) Boxed label widget — MVP
-- 2.14 (#83) Separator line — MVP
-- 3.3 (#41) Group box (titled frame) — MVP
-- 2.7 (#33) Image widget — MVP
-- 2.2 (#28) Glyph button (small single-character button) — MVP
-- 2.3 (#29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog — MVP
-- 2.4 (#30) Check box with indeterminate state — MVP
-- 2.5 (#31) Radio buttons and radio groups — MVP
-- 4.1 (#48) Progress bar — MVP
-- 3.2 (#40) Slider — MVP
-- 2.6 (#32) Text field: single-line entry with input masks, validation, and numeric mode — MVP
+- 2.10 (#36) Custom paint widget (closure-drawn) — MVP v0.1
+- 2.1 (#27) Boxed label widget — MVP v0.1
+- 2.14 (#83) Separator line — MVP v0.1
+- 3.3 (#41) Group box (titled frame) — MVP v0.1
+- 2.7 (#33) Image widget — MVP v0.1
+- 2.2 (#28) Glyph button (small single-character button) — MVP v0.1
+- 2.3 (#29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog — MVP v0.1
+- 2.4 (#30) Check box with indeterminate state — MVP v0.1
+- 2.5 (#31) Radio buttons and radio groups — MVP v0.1
+- 4.1 (#48) Progress bar — MVP v0.1
+- 3.2 (#40) Slider — MVP v0.1
+- 2.6 (#32) Text field: single-line entry with input masks, validation, and numeric mode — MVP v0.1
 
 **4. Composition**
 
-- 5.1 (#56) Clip children to their parent's bounds — MVP
-- 5.2 (#57) Composite widgets: build widgets from parts that applications can retrieve and modify — MVP
-- 5.5 (#116) Layout manager foundation: Layout trait, size hints, measure and arrange — MVP
-- 5.6 (#117) Row and column layouts — MVP
-- 5.7 (#118) Form layout: aligned label and field rows — MVP
-- 3.1 (#39) Scroll bar — MVP
-- 5.3 (#58) Container: a scrollable viewport onto fixed-size content — MVP
-- 7.2 (#70) Golden-image rendering tests — MVP
-- 7.7 (#115) Performance benchmarks and budgets — MVP
+- 5.1 (#56) Clip children to their parent's bounds — MVP v0.1
+- 5.2 (#57) Composite widgets: build widgets from parts that applications can retrieve and modify — MVP v0.1
+- 5.5 (#116) Layout manager foundation: Layout trait, size hints, measure and arrange — MVP v0.1
+- 5.6 (#117) Row and column layouts — MVP v0.1
+- 5.7 (#118) Form layout: aligned label and field rows — MVP v0.1
+- 3.1 (#39) Scroll bar — MVP v0.1
+- 5.3 (#58) Container: a scrollable viewport onto fixed-size content — MVP v0.1
+- 7.2 (#70) Golden-image rendering tests — MVP v0.1
+- 7.7 (#115) Performance benchmarks and budgets — MVP v0.1
+- 1.10 (#25) High-DPI rendering and window resize — MVP v0.1
+- 7.9 (#139) Easy installation: bundled SDL, static linking, and platform guides — MVP v0.1
 
 **5. Forms runtime**
 
-- 6.1 (#60) Widget registry and factory — MVP
-- 6.2 (#61) Property introspection: list, get, and set widget properties by name — MVP
-- 1.14 (#80) Accessibility: expose widgets to screen readers — MVP
-- 6.3 (#62) Form file format (binary, versioned) — MVP
-- 6.4 (#63) Form loader: build a form from a file with stable IDs — MVP
-- 6.5 (#64) Form writer: save a widget subtree to a file — MVP
-- 6.6 (#65) Generate ID constants from a form file — MVP
-- 1.8 (#23) Edit the widget tree at run time: remove, reparent, reorder — MVP
-- 6.7 (#66) Modal dialogs: run a form until a dismissing control is chosen — MVP
-- 2.9 (#35) Alert dialog — MVP
+- 6.1 (#60) Widget registry and factory — MVP v0.2
+- 6.2 (#61) Property introspection: list, get, and set widget properties by name — MVP v0.2
+- 1.14 (#80) Accessibility: expose widgets to screen readers — MVP v0.2
+- 6.3 (#62) Form file format (binary, versioned) — MVP v0.2
+- 6.4 (#63) Form loader: build a form from a file with stable IDs — MVP v0.2
+- 6.5 (#64) Form writer: save a widget subtree to a file — MVP v0.2
+- 6.6 (#65) Generate ID constants from a form file — MVP v0.2
+- 1.8 (#23) Edit the widget tree at run time: remove, reparent, reorder — MVP v0.1
+- 6.7 (#66) Modal dialogs: run a form until a dismissing control is chosen — MVP v0.1
+- 2.9 (#35) Alert dialog — MVP v0.1
 
 **6. MVP release**
 
-- 7.4 (#72) Guide: writing widgets and composites — MVP
-- 7.5 (#73) Changelog, Cargo metadata, and crates.io release — MVP
+- 7.10 (#140) Reference application: a real app built only with Pushrod — MVP v0.1
+- 7.4 (#72) Guide: writing widgets and composites — MVP v0.1
+- 7.5 (#73) Changelog, Cargo metadata, and crates.io release — MVP v0.1
 
 **7. After MVP: events and commands**
 
@@ -2297,7 +2449,6 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 5.8 (#119) Grid layout
 - 5.9 (#120) Stack layout (one child visible at a time)
 - 5.10 (#121) Flow layout (wrapping rows)
-- 1.10 (#25) Window resize and high-DPI rendering
 - 4.5 (#52) List view
 - 3.7 (#45) Column browser (multi-column hierarchical browser)
 - 4.2 (#49) Spin box
@@ -2333,6 +2484,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 10.4 (#108) Experimental: Atari ST / TOS backend
 - 1.20 (#113) Layers and invalidation: cache hints, texture memory budget, incremental pipeline
 - 1.22 (#131) Widget libraries: extend or replace pushrod-widgets
+- 10.5 (#135) SDL3 backend (pushrod-sdl3)
 
 **10. Distant future**
 
