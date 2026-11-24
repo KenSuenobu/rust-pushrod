@@ -3,6 +3,10 @@
 Pushrod is a library that uses the SDL2 library to interact with the operating system, and uses
 OpenGL for the drawing layer.
 
+## Documentation
+
+The documentation site lives in [`pushrod-docs/`](pushrod-docs/) (Docusaurus). It has a five-minute quick start, guides for creating applications, handling events, and creating widgets, and a page for every widget. To preview it: `cd pushrod-docs && npm install && npm start`.
+
 ## Summary
 
 Pushrod is small, simple, and lightweight.  It combines the two classic ways of writing GUI
