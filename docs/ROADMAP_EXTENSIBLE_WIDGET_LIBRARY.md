@@ -41,7 +41,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **54 of 97 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **55 of 97 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
@@ -51,7 +51,7 @@ MVP scope: **54 of 97 active issues** (marked **Y** in the MVP column). Everythi
 | 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 20 | 10 |
 | 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 7 | 3 |
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
-| 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, scroll views, autoresizing, and simple, extensible layout managers (row, column, form, grid, stack, flow). | 10 | 5 |
+| 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers. | 10 | 6 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
 | 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 8 | 8 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
@@ -141,9 +141,9 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`, `ENGINE`
 
-**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
+**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `ViewportChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
 
-**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`, `next_event (event-loop style)`
+**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_viewport_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`, `next_event (event-loop style)`
 
 **Drawing modes:** `Live`, `Outline`, `Auto`
 
@@ -333,7 +333,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** `on_click` and the catch-all `on_event` only cover buttons. Value controls, text fields, lists, and focus all need their own clearly named callbacks.
 
-**Solution / Scope.** Add per-widget registration methods mapping one-to-one onto the event vocabulary (9.1 (#93)): `on_click`, `on_press` (mouse button went down on the widget), `on_release` (went up, inside or outside), `on_activate`, `on_toggle(|state, ui, checked|)`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change(|state, ui, gained|)`, `on_hover(|state, ui, inside|)`. All share one internal map keyed by `(WidgetId, EventKind)` and return a `CallbackId` (9.7 (#99)).
+**Solution / Scope.** Add per-widget registration methods mapping one-to-one onto the event vocabulary (9.1 (#93)): `on_click`, `on_press` (mouse button went down on the widget), `on_release` (went up, inside or outside), `on_activate`, `on_toggle(|state, ui, checked|)`, `on_value_change`, `on_viewport_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change(|state, ui, gained|)`, `on_hover(|state, ui, inside|)`. All share one internal map keyed by `(WidgetId, EventKind)` and return a `CallbackId` (9.7 (#99)).
 
 **Acceptance Criteria.**
 
@@ -1389,7 +1389,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Notes, descriptions, and logs need multi-line text, which a single-line field can't provide.
 
-**Solution / Scope.** `TextArea` in a scroll view: line wrapping, caret and selection across lines, clipboard, undo (1.15 (#81)), read-only mode for logs, `append` for log output. Only visible lines are painted from the glyph atlas.
+**Solution / Scope.** `TextArea` in a container: line wrapping, caret and selection across lines, clipboard, undo (1.15 (#81)), read-only mode for logs, `append` for log output. Only visible lines are painted from the glyph atlas.
 
 #### Look and behavior (proposed)
 
@@ -1510,7 +1510,7 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 
 ### 3.1 (#39): Scroll bar
 
-**Problem Statement.** Scroll views, lists, and text areas need scroll bars; older systems made applications assemble them by hand.
+**Problem Statement.** Containers, lists, and text areas need scroll bars; older systems made applications assemble them by hand.
 
 **Solution / Scope.** `ScrollBar` composite (5.2 (#57)): two glyph buttons (activate-on-press with auto-repeat), a track, and a draggable thumb sized by `visible / total`. Value 0.0 to 1.0 plus page size; clicking the track pages. Emits `ValueChanged`. **Parts (5.2 (#57)):** `ScrollBarParts { up, down, track, thumb }` (colors and glyphs customizable). Every part can be retrieved and restyled (font, color, text).
 
@@ -1664,7 +1664,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Hierarchies (folders, settings categories, class trees, mail folders) are easiest to navigate when the whole path stays visible. NeXTSTEP's column browser shows column 0 as the root; selecting an item in column 0 fills column 1 with its children, selecting in column 1 fills column 2, and so on, with the path always on screen.
 
-**Solution / Scope.** `ColumnBrowser` composite (5.2 (#57)) of list-view columns (4.5 (#52)) inside a horizontal scroll view (5.3 (#58)). Data comes from a `BrowserModel` trait: `children(&path) -> Vec<BrowserItem>`, `is_leaf(&path)`, optional icon and label per item. Selecting an item in column *n* replaces every column to the right with a new column *n+1* listing that item's children; selecting a leaf clears the columns to the right (an optional preview pane can show leaf details). Branch items show a ▶ marker. When columns overflow the width, the view scrolls horizontally to keep the newest column visible. Columns have a fixed default width and can be resized by dragging the divider between them. Keyboard: Up/Down move within a column, Right enters the selected branch (moving focus to the next column), Left returns to the parent column, typing jumps to a matching item, Return activates. Double-click or Return on a leaf emits `Activated`. **Parts (5.2 (#57)):** `columns()` returns each column's list-view ID; columns can be restyled like any list view; `path()` and `set_path()` read and set the selection. The file chooser (2.12 (#38)) can offer a column mode built on it.
+**Solution / Scope.** `ColumnBrowser` composite (5.2 (#57)) of list-view columns (4.5 (#52)) inside a horizontal container (5.3 (#58)). Data comes from a `BrowserModel` trait: `children(&path) -> Vec<BrowserItem>`, `is_leaf(&path)`, optional icon and label per item. Selecting an item in column *n* replaces every column to the right with a new column *n+1* listing that item's children; selecting a leaf clears the columns to the right (an optional preview pane can show leaf details). Branch items show a ▶ marker. When columns overflow the width, the view scrolls horizontally to keep the newest column visible. Columns have a fixed default width and can be resized by dragging the divider between them. Keyboard: Up/Down move within a column, Right enters the selected branch (moving focus to the next column), Left returns to the parent column, typing jumps to a matching item, Return activates. Double-click or Return on a leaf emits `Activated`. **Parts (5.2 (#57)):** `columns()` returns each column's list-view ID; columns can be restyled like any list view; `path()` and `set_path()` read and set the selection. The file chooser (2.12 (#38)) can offer a column mode built on it.
 
 ```text
 col[0] (root)       col[1] (children of
@@ -1910,7 +1910,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Lists are needed by file choosers, combo boxes, and most applications.
 
-**Solution / Scope.** `ListView` in a scroll view, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates. **Parts (5.2 (#57)):** `rows()` (visible row parts), per-row style via a `row_style` callback for model-driven rows. Every part can be retrieved and restyled (font, color, text). The `ListModel` reports changes as ranges (`inserted(range)`, `removed(range)`, `changed(range)`, `reset`) so the view updates incrementally, and row widgets are recycled as the list scrolls (virtualization).
+**Solution / Scope.** `ListView` in a container, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates. **Parts (5.2 (#57)):** `rows()` (visible row parts), per-row style via a `row_style` callback for model-driven rows. Every part can be retrieved and restyled (font, color, text). The `ListModel` reports changes as ranges (`inserted(range)`, `removed(range)`, `changed(range)`, `reset`) so the view updates incrementally, and row widgets are recycled as the list scrolls (virtualization).
 
 #### Look and behavior (proposed)
 
@@ -2019,7 +2019,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ## Epic 5: Composition, clipping, and layout managers (#15)
 
-Clip children to parents, composite widgets with retrievable parts, scroll views, autoresizing, and simple, extensible layout managers (row, column, form, grid, stack, flow).
+Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers.
 
 **Problem.** Children draw outside their parents, interactive widgets can't be reused as parts, and nothing adapts when a window or parent is resized. Classic systems (GEM, AmigaOS) had no layout managers: forms were fixed-size, and putting a resizable form in a window was very difficult. Modern applications expect forms that resize, adapt to different fonts and translations, and size themselves to their content.
 
@@ -2031,7 +2031,7 @@ Clip children to parents, composite widgets with retrievable parts, scroll views
 |---|---|---|---|---|---|---|---|
 | 5.1 (#56) | Clip children to their parent's bounds | Children never draw or receive input outside their parent. | `core`, `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `cache.rs` |
 | 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `cache.rs`, `composite.rs (new)` |
-| 5.3 (#58) | Scroll view | A container whose content is larger than its frame. | `enhancement`, `layout`, `size/M`, `widget` | N | N | M | `scroll_view.rs (new)`, `cache.rs` |
+| 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | Y | M | `container.rs (new)`, `cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `widget.rs`, `cache.rs` |
 | 5.5 (#116) | Layout manager foundation: Layout trait, size hints, measure and arrange | A small Layout trait any container can use; widgets report minimum, preferred, and maximum sizes; containers measure then arrange their children. | `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | Y | M | `layout/mod.rs (new)`, `widget.rs`, `cache.rs` |
 | 5.6 (#117) | Row and column layouts | Arrange children in a horizontal row or vertical column with spacing, margins, alignment, and stretch. | `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `layout/linear.rs (new)` |
@@ -2042,7 +2042,7 @@ Clip children to parents, composite widgets with retrievable parts, scroll views
 
 ### 5.1 (#56): Clip children to their parent's bounds
 
-**Problem Statement.** A child partly outside its parent draws over neighbors and receives input outside the parent; scroll views need clipping.
+**Problem Statement.** A child partly outside its parent draws over neighbors and receives input outside the parent; containers need clipping.
 
 **Solution / Scope.** Each widget's visible rectangle is its rectangle intersected with its ancestors'. Blits use cropped source/destination rectangles; hit testing uses the visible rectangle. Overlays (menus, tooltips, pop-ups) opt out.
 
@@ -2106,39 +2106,63 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/guides/composite-widgets.md` ("Composite Widgets", Guides, new). Guides: 'Writing a composite widget' guide. Rustdoc: `composite` module. Examples: Composite example. Screenshots: n/a.
 
-### 5.3 (#58): Scroll view
+### 5.3 (#58): Container: a scrollable viewport onto fixed-size content
 
-**Problem Statement.** Lists, text areas, and long forms need a scrolling viewport.
+**Problem Statement.** Applications with scrollable areas (long settings pages, document views, canvases, large forms) need a place to put widgets that is larger than the space on screen. The content must behave like a form: it has its own width, height, and 0,0 origin, and resizing or moving the container must not change the content or shift widgets within it.
 
-**Solution / Scope.** `ScrollView` with a content container offset by the scroll position, scroll bars as needed, wheel and keyboard scrolling, `scroll_to(rect)` to keep the focused widget visible. **Parts (5.2 (#57)):** `ScrollViewParts { content, vertical, horizontal }`. Every part can be retrieved and restyled (font, color, text).
+**Solution / Scope.** Add `Container`, a widget that holds children on a **content area**: `Container::new(origin, viewport_size, content_size)`; children are added with `add_child` at positions relative to the content's 0,0, exactly like a form. The container's frame is the **viewport**: resizing the container (`set_size`) changes only how much content is visible; `content_size` stays the same unless the application changes it (`set_content_size`). Moving the container (`set_origin`) moves the viewport on screen; content positions never shift. The viewport is panned by `scroll_offset` (the content point shown at the viewport's upper-left corner), clamped to the content bounds: vertical and horizontal scroll bars appear automatically when the content is larger than the viewport (or `ScrollBars::Always/Never`), and the mouse wheel, Page Up/Down, Home/End, and arrow keys (when focused) pan it too. API: `scroll_offset()`, `scroll_to(point)`, `scroll_by(dx, dy)`, `ensure_visible(rect)` (also used to keep the focused widget in view), `viewport()` (the visible content rectangle). Children are clipped to the viewport (5.1 (#56)) and hit-tested through it. On the GPU, panning only changes which part of the content is blitted: children that didn't change are not repainted. Content size can be `Fixed` (default), `FitChildren` (grows to the children's extent), or `FollowWidth` (content width follows the viewport, height fixed or fit: for long vertical forms); a layout manager (5.5 (#116)) can also arrange the content. A form loaded from a file (6.4 (#63)) can be placed in a container. **Parts (5.2 (#57)):** `ContainerParts { content, vertical, horizontal, corner }`. Emits `ViewportChanged { id, offset }` whenever the viewport pans or resizes.
+
+```text
+content (fixed size, its own 0,0)            screen
++-----------------------------------+
+|0,0                                |       container origin (anywhere)
+|      +------------------+         |            +------------------+-+
+|      | viewport         |  ---------------->  | visible content  |^|
+|      | (scroll_offset   |         |            |                  |#|
+|      |  = top-left)     |         |            +------------------+v+
+|      +------------------+         |            |<|####          |>| |
+|                                   |            +--------------------+
++-----------------------------------+
+resize container -> viewport grows/shrinks; content size unchanged
+move container   -> viewport moves on screen; content positions unchanged
+```
 
 #### Look and behavior (proposed)
 
 Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
-**Content clipped; wheel or bars move it**
+**Panning: the viewport moves over fixed content**
 
-![5.3 step set 1: Content clipped; wheel or bars move it](mockups/5.3-1.png)
+![5.3 step set 1: Panning: the viewport moves over fixed content](mockups/5.3-1.png)
+
+**Resizing and moving the container: the content keeps its size and layout**
+
+![5.3 step set 2: Resizing and moving the container: the content keeps its size and layout](mockups/5.3-2.png)
 
 #### Events and callbacks
 
 | Event emitted | When | Application callback |
 |---|---|---|
-| `ValueChanged { id }` | Scroll position changes; read `scroll_offset()` | `on_value_change(id, ..)` |
+| `ViewportChanged { id, offset }` | The viewport pans (scroll bar, wheel, keys, or code) or the container is resized | `on_viewport_change(id, ..)` |
+| (part events) | Scroll bars and other parts | callbacks on part IDs |
 
 Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
 
 **Acceptance Criteria.**
 
-- Scrolls with bars, wheel, keys
-- Focused widget scrolled into view
-- Parts are retrievable and modifiable as described
+- Children positioned relative to the content's 0,0; content size independent of the container size
+- Resizing the container changes only the visible area; moving it doesn't shift content
+- Scroll bars appear when needed (or always/never); wheel and keyboard pan; offset clamped to content bounds
+- `scroll_to`, `scroll_by`, `ensure_visible`, `viewport()`; focused widgets scrolled into view
+- Children clipped to and hit-tested through the viewport; panning doesn't repaint unchanged children
+- Content size modes Fixed, FitChildren, FollowWidth; works with a layout manager and with a loaded form
+- `ViewportChanged` emitted on pan and resize
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 3.1 (#39), 5.1 (#56), 5.2 (#57).
 
 **Technical Stack.** Rust
 
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/scroll-view.md` ("Scroll View", Widgets, new). Guides: Layout section. Rustdoc: Module docs. Examples: Long form in a scroll view. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/container.md` ("Container", Widgets, new). Guides: update the guide or concept page covering: widget tree and coordinates (content coordinates). Rustdoc: `Container`, `ContainerParts`, `ScrollBars`, `ContentSize`. Examples: Long settings form inside a container. Screenshots: Container screenshots (scrolled, resized, moved).
 
 ### 5.4 (#59): Autoresizing (keep margins or stretch on resize)
 
@@ -2781,7 +2805,7 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 
 **Problem Statement.** PR #10 inherited `BoundsChange`, `Clicked(u32, u8)`, and `SystemEvent`. Names should say what happened in plain modern terms, carry named fields, and cover pointer, keyboard, focus, semantic, lifecycle, window, time, and custom events consistently, so every other issue uses the same words.
 
-**Solution / Scope.** Replace `PushrodEvent` with `pushrod::Event` (struct variants, named fields). **Pointer:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked { id, button, count }`, `Scrolled { id, delta }`. **Keyboard:** `KeyPressed { id, key, modifiers, repeat }`, `KeyReleased`, `TextEntered { id, text }`. **Focus:** `FocusGained`, `FocusLost`. **Semantic (emitted by widgets):** `Activated`, `Toggled { checked }`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered { action }`, `ContextMenuRequested { position }`, `PropertyChanged { name }`. **Lifecycle:** `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`. **Window:** `WindowResized`, `WindowFocusChanged`, `CloseRequested`. **Time:** `Tick { elapsed }`. **Engine:** `Engine(EngineEvent)` for actions Pushrod performs internally (9.10 (#109)). **Extension:** `Custom(CustomEvent)` (1.13 (#78)), `Raw(sdl2::event::Event)` for anything not yet mapped. `BoundsChange` becomes `PointerExited` + `PointerEntered`. Each event has `kind() -> EventKind` (used by masks and the callback registry) and `widget() -> Option<WidgetId>`.
+**Solution / Scope.** Replace `PushrodEvent` with `pushrod::Event` (struct variants, named fields). **Pointer:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked { id, button, count }`, `Scrolled { id, delta }`. **Keyboard:** `KeyPressed { id, key, modifiers, repeat }`, `KeyReleased`, `TextEntered { id, text }`. **Focus:** `FocusGained`, `FocusLost`. **Semantic (emitted by widgets):** `Activated`, `Toggled { checked }`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered { action }`, `ContextMenuRequested { position }`, `PropertyChanged { name }`, `ViewportChanged { offset }`. **Lifecycle:** `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`. **Window:** `WindowResized`, `WindowFocusChanged`, `CloseRequested`. **Time:** `Tick { elapsed }`. **Engine:** `Engine(EngineEvent)` for actions Pushrod performs internally (9.10 (#109)). **Extension:** `Custom(CustomEvent)` (1.13 (#78)), `Raw(sdl2::event::Event)` for anything not yet mapped. `BoundsChange` becomes `PointerExited` + `PointerEntered`. Each event has `kind() -> EventKind` (used by masks and the callback registry) and `widget() -> Option<WidgetId>`.
 
 ```text
 PR #10                     ->  this issue
@@ -3222,6 +3246,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 5.6 (#117) Row and column layouts — MVP
 - 5.7 (#118) Form layout: aligned label and field rows — MVP
 - 3.1 (#39) Scroll bar — MVP
+- 5.3 (#58) Container: a scrollable viewport onto fixed-size content — MVP
 - 7.2 (#70) Golden-image rendering tests — MVP
 - 7.7 (#115) Performance benchmarks and budgets — MVP
 
@@ -3262,7 +3287,6 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 5.9 (#120) Stack layout (one child visible at a time)
 - 5.10 (#121) Flow layout (wrapping rows)
 - 1.10 (#25) Window resize and high-DPI rendering
-- 5.3 (#58) Scroll view
 - 4.5 (#52) List view
 - 3.7 (#45) Column browser (multi-column hierarchical browser)
 - 4.2 (#49) Spin box
