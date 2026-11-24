@@ -26,6 +26,17 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+/// A filled rectangle with a border of any width and color.
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::geometry::{point, size};
+/// use pushrod_widgets::box_widget::BoxWidget;
+/// use sdl2::pixels::Color;
+///
+/// let frame = BoxWidget::new(point(20, 40), size(100, 100), Color::BLUE, 3);
+/// ```
 pub struct BoxWidget {
     core: WidgetCore,
     border_color: Color,
@@ -33,15 +44,30 @@ pub struct BoxWidget {
 }
 
 impl Widget for BoxWidget {
+    /// Returns the box's shared state.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core(&self) -> &WidgetCore {
         &self.core
     }
 
+    /// Returns the box's shared state for modification.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
     }
 
-    /// Fills the background, then draws the border.
+    /// Fills the box with its color, then draws the border inside its edges.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas, targeting the box's texture.
+    /// * `_fc` - The font cache (unused).
     fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
         paint::fill(c, self.get_color());
         paint::border(c, self.get_size(), self.border_color, self.border_width);
@@ -49,8 +75,18 @@ impl Widget for BoxWidget {
 }
 
 impl BoxWidget {
-    /// Creates a new `BoxWidget` based on its point of origin, size, border color, and border width.
-    /// Any borders with a width of 0 will not be drawn.
+    /// Creates a box.  Its fill color is transparent until set with `set_color`.
+    ///
+    /// # Arguments
+    ///
+    /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
+    /// * `size` - The width and height in pixels.
+    /// * `border_color` - The border color.
+    /// * `border_width` - The border width in pixels; `0` draws no border.
+    ///
+    /// # Returns
+    ///
+    /// The new `BoxWidget`.
     pub fn new(origin: Point, size: Size, border_color: Color, border_width: u8) -> Self {
         Self {
             core: WidgetCore::new(origin, size),
@@ -59,24 +95,40 @@ impl BoxWidget {
         }
     }
 
-    /// Sets the border width in pixels.
+    /// Sets the border width, and invalidates the box.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The border width in pixels; `0` draws no border.
     pub fn set_border_width(&mut self, width: u8) {
         self.border_width = width;
         self.set_invalidated(true);
     }
 
-    /// Sets the border color, which can be a `Color::RGB` or `Color::RGBA`.
+    /// Sets the border color, and invalidates the box.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The border color.
     pub fn set_border_color(&mut self, color: Color) {
         self.border_color = color;
         self.set_invalidated(true);
     }
 
-    /// Retrieves the border width in pixels.
+    /// Returns the border width.
+    ///
+    /// # Returns
+    ///
+    /// The border width in pixels.
     pub fn get_border_width(&self) -> u8 {
         self.border_width
     }
 
-    /// Retrieves the border color.
+    /// Returns the border color.
+    ///
+    /// # Returns
+    ///
+    /// The border color.
     pub fn get_border_color(&self) -> Color {
         self.border_color
     }

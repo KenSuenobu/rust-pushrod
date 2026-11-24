@@ -13,23 +13,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # Fonts
+//!
+//! The `FontCache` loads TrueType fonts through SDL2_ttf and renders text into GPU textures for
+//! the [`paint::text`](crate::paint::text) helper.  The `Engine` owns one `FontCache` and passes
+//! it to every `Widget::paint` call.
+
 use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture, TextureQuery};
 use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::video::Window;
 use std::path::Path;
 
+/// Loads fonts and renders text into textures.
+///
+/// The `Engine` owns one and passes it to [`Widget::paint`](crate::widget::Widget::paint).
 pub struct FontCache {
     ttf_context: Sdl2TtfContext,
 }
 
 impl FontCache {
+    /// Initializes SDL2_ttf and creates a font cache.
+    ///
+    /// # Returns
+    ///
+    /// The new `FontCache`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if SDL2_ttf cannot be initialized.
     pub fn new() -> Self {
         Self {
             ttf_context: sdl2::ttf::init().map_err(|e| e.to_string()).unwrap(),
         }
     }
 
+    /// Renders text into a new texture.
+    ///
+    /// The text is drawn with antialiasing and wrapped at `width` pixels.  The caller owns the
+    /// returned texture and must destroy it when done (`unsafe { texture.destroy() }`), because
+    /// `unsafe_textures` textures aren't freed when dropped.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas whose renderer creates the texture.
+    /// * `font_name` - Path to the TrueType font file.
+    /// * `font_size` - The font size in points.
+    /// * `font_style` - The font style (normal, bold, italic, ...).
+    /// * `font_color` - The text color.
+    /// * `text` - The text to render.
+    /// * `width` - The width in pixels at which to wrap the text.
+    ///
+    /// # Returns
+    ///
+    /// The texture, and its width and height in pixels.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the font file cannot be loaded or the text cannot be rendered.
     #[allow(clippy::too_many_arguments)]
     pub fn render_text(
         &mut self,
@@ -66,6 +107,15 @@ impl FontCache {
 }
 
 impl Default for FontCache {
+    /// Creates a font cache; the same as [`FontCache::new`].
+    ///
+    /// # Returns
+    ///
+    /// The new `FontCache`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if SDL2_ttf cannot be initialized.
     fn default() -> Self {
         Self::new()
     }

@@ -10,6 +10,57 @@ documentation it needs. Each widget has its own roadmap in [`docs/widgets/`](doc
 which is the specification for that widget. To change how a widget looks or behaves, edit its
 roadmap file (and its mockup in `docs/mockups/generate.py`) in a pull request, then update the issue.
 
+## Code documentation
+
+Every function, method, struct, enum, trait, type alias, and constant that isn't private is
+fully documented in the code, in the same pull request that adds or changes it. That includes
+`pub(crate)` items, every function declared in a trait, and every method in a trait
+implementation. Only private items (no `pub`) may go without a header, though a short comment
+is still welcome.
+
+A function's header has a one-line summary, then whatever detail a caller needs, then these
+sections, in this order, whenever they apply:
+
+```rust
+/// Adds a `Widget` as a child of another `Widget`.
+///
+/// The `Widget`'s origin is relative to its parent's origin, and it is drawn on top of the
+/// parent's existing children.
+///
+/// # Arguments
+///
+/// * `parent` - The ID of the parent `Widget`.
+/// * `widget` - The `Widget` to add.
+///
+/// # Returns
+///
+/// The ID assigned to the `Widget`.
+///
+/// # Errors
+///
+/// (For functions returning `Result`) when each error is returned.
+///
+/// # Panics
+///
+/// Panics if `parent` does not exist.
+///
+/// # Examples
+///
+/// (For the main entry points) a short example that compiles.
+pub fn add_child(&mut self, parent: WidgetId, widget: Box<dyn Widget>) -> WidgetId {
+```
+
+- **`# Arguments`:** every parameter except `self`, as ``* `name` - description``.
+- **`# Returns`:** whenever the function returns a value.
+- **`# Errors`** and **`# Panics`:** whenever the function can fail or panic.
+- **Types:** what the type is for, and how to create and use it. Public fields and enum
+  variants get their own `///` line.
+
+This is checked automatically: both crates enable `missing_docs`,
+`clippy::missing_panics_doc`, and `clippy::missing_errors_doc`, and `python3
+scripts/check_docs.py` checks the rest (headers on `pub(crate)` items and trait methods, every
+parameter under `# Arguments`, and `# Returns`). Run it before opening a pull request.
+
 ## Where code goes
 
 - **`pushrod` (core, `src/`):** engine, widget tree, events, `paint` helpers, caches, and shared

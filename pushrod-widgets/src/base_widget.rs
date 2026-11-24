@@ -25,28 +25,67 @@ use pushrod::widget::{Widget, WidgetCore};
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-/// BaseWidget structure containing only the shared `WidgetCore` state.
+/// A rectangle filled with one color.
+///
+/// Use it as a background, or as a panel that holds other `Widget`s (add them with
+/// `Engine::add_child_widget`).
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::geometry::{point, size};
+/// use pushrod::widget::Widget;
+/// use pushrod_widgets::base_widget::BaseWidget;
+/// use sdl2::pixels::Color;
+///
+/// let mut panel = BaseWidget::new(point(10, 10), size(200, 100));
+/// panel.set_color(Color::RGB(220, 220, 220));
+/// ```
 pub struct BaseWidget {
     core: WidgetCore,
 }
 
 impl Widget for BaseWidget {
+    /// Returns the panel's shared state.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core(&self) -> &WidgetCore {
         &self.core
     }
 
+    /// Returns the panel's shared state for modification.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
     }
 
-    /// Fills the background with the `Widget`'s color.
+    /// Fills the panel with its color.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas, targeting the panel's texture.
+    /// * `_fc` - The font cache (unused).
     fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
         paint::fill(c, self.get_color());
     }
 }
 
 impl BaseWidget {
-    /// Creates a new `BaseWidget` given the `Point` of origin and its `Size`.
+    /// Creates a panel.  Its color is transparent until set with `set_color`.
+    ///
+    /// # Arguments
+    ///
+    /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
+    /// * `size` - The width and height in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The new `BaseWidget`.
     pub fn new(origin: Point, size: Size) -> Self {
         Self {
             core: WidgetCore::new(origin, size),

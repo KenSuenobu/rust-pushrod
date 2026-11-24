@@ -29,28 +29,54 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-/// The window's top-level `Widget`: a flat fill of its color.
+/// The window's root `Widget`: a flat fill of its color.
+///
+/// The `Engine` creates one as `Widget` `0` for every window.  It is the parent of every other
+/// `Widget`.
 pub struct RootWidget {
     core: WidgetCore,
 }
 
 impl Widget for RootWidget {
+    /// Returns the root `Widget`'s shared state.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core(&self) -> &WidgetCore {
         &self.core
     }
 
+    /// Returns the root `Widget`'s shared state for modification.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
     }
 
-    /// Fills the window with the root's color.
+    /// Fills the window with the root `Widget`'s color.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas, targeting the root `Widget`'s texture.
+    /// * `_fc` - The font cache (unused).
     fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
         paint::fill(c, self.get_color());
     }
 }
 
 impl RootWidget {
-    /// Creates a root `Widget` covering a window of the given `Size`, filled with white.
+    /// Creates a root `Widget` covering a window, filled with white.
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The size of the window in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The new `RootWidget`.
     pub fn new(size: Size) -> Self {
         let mut root = Self {
             core: WidgetCore::new(Point::new(0, 0), size),
