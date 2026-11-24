@@ -840,6 +840,52 @@ def outline_mode():
     return [("1. Drag starts", a, None), ("2. Dragging: only the outline moves", b, "no content repaint"), ("3. Released: one repaint", d, "Moved")]
 
 
+CJK_FONT = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"   # any CJK-capable font works
+
+def _cjk(size=14):
+    key = ("cjk", size)
+    if key not in _fonts:
+        try:
+            _fonts[key] = ImageFont.truetype(CJK_FONT, size * S)
+        except OSError:
+            _fonts[key] = font(size)
+    return _fonts[key]
+
+def _ime_field(c, x, y, committed, composing, sel=None, candidates=None, hot=0):
+    c.rect(x, y, 230, 26, fill=WHITE); c.rect(x - 2, y - 2, 234, 30, outline=BLACK)
+    tx = x + 4
+    f = _cjk(14)
+    c.d.text((tx * S, (y + 2) * S), committed, fill=BLACK, font=f)
+    tx += c.d.textlength(committed, font=f) / S
+    if composing:
+        w = c.d.textlength(composing, font=f) / S
+        if sel:
+            a, b = sel
+            sx = tx + c.d.textlength(composing[:a], font=f) / S; sw = c.d.textlength(composing[a:b], font=f) / S
+            c.line(sx, y + 22, sx + sw, y + 22, BLACK, 2)
+        c.d.text((tx * S, (y + 2) * S), composing, fill=BLACK, font=f)
+        c.line(tx, y + 23, tx + w, y + 23, BLACK, 1)
+        caret = tx + w
+    else:
+        caret = tx
+    c.line(caret, y + 5, caret, y + 21)
+    if candidates:
+        cx0 = x + 4 + c.d.textlength(committed, font=f) / S
+        c.rect(int(cx0), y + 32, 120, 22 * len(candidates) + 4, fill=WHITE)
+        for n, cand in enumerate(candidates):
+            cy = y + 34 + n * 22
+            if n == hot: c.rect(int(cx0) + 1, cy, 118, 22, fill=BLACK, outline=None)
+            c.d.text(((cx0 + 6) * S, (cy + 1) * S), f"{n + 1}  {cand}", fill=WHITE if n == hot else BLACK, font=_cjk(13))
+
+@sb("1.19")
+def ime():
+    out = []
+    a = C(312, 120); a.text(12, 18, "Name:"); _ime_field(a, 62, 16, "", "にほんご"); out.append(("1. Composing (underlined, not yet in the text)", a, "CompositionUpdated"))
+    b = C(312, 150); b.text(12, 18, "Name:"); _ime_field(b, 62, 16, "", "日本語", sel=(0, 3), candidates=["日本語", "にほんご", "ニホンゴ"]); out.append(("2. Converting: candidates at the caret", b, None))
+    d = C(312, 120); d.text(12, 18, "Name:"); _ime_field(d, 62, 16, "日本語", ""); out.append(("3. Committed", d, "TextEntered, TextChanged"))
+    return out
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
