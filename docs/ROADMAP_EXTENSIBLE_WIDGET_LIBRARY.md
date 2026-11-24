@@ -41,16 +41,16 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **55 of 97 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **55 of 102 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
 | 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 20 | 14 |
-| 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 20 | 10 |
-| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 7 | 3 |
-| 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
+| 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 22 | 10 |
+| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 9 | 3 |
+| 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 7 | 1 |
 | 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers. | 10 | 6 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
 | 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 8 | 8 |
@@ -141,7 +141,7 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`, `ENGINE`
 
-**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `ViewportChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
+**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `AccessoryClicked`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `ViewportChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
 
 **Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_viewport_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`, `next_event (event-loop style)`
 
@@ -176,7 +176,7 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `event.rs`, `engine.rs`, `cache.rs` |
 | 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/L`, `usability` | Y | Y | L | `accessibility.rs (new)`, `widget.rs`, `engine.rs` |
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `undo.rs (new)`, `engine.rs` |
-| 1.16 (#82) | Multiple windows | Open additional top-level windows, each with its own widget tree, sharing one application state. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `engine.rs`, `cache.rs` |
+| 1.16 (#82) | Multiple windows: separate OS windows, each with its own engine | Open additional operating-system windows (dialogs, palettes, inspectors), each driven by its own engine instance and widget tree. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `engine.rs`, `cache.rs` |
 | 1.17 (#104) | Per-state appearance: colors, border, and font for each visual state | Every widget carries appearance attributes for normal, pressed, hovered, focused, disabled, and drag-over, so the look changes automatically as the state changes. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `paint.rs`, `all widgets` |
 | 1.18 (#111) | Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) | Lay out text with a real layout engine and feed its glyph runs into the GPU glyph atlas. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text/layout.rs (new)`, `font.rs`, `paint.rs` |
 | 1.19 (#112) | Input method (IME) support: composition text and candidate window | Show in-progress composition text in fields and position the platform candidate window at the caret. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text_field.rs`, `engine.rs`, `event.rs` |
@@ -580,18 +580,18 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/undo-and-redo-command-stack.md` ("Undo and redo command stack", Concepts, new). Guides: Undo section. Rustdoc: `undo` module. Examples: Text field with undo. Screenshots: n/a.
 
-### 1.16 (#82): Multiple windows
+### 1.16 (#82): Multiple windows: separate OS windows, each with its own engine
 
 **Problem Statement.** Pushrod drives one window. Tool palettes, inspectors (Chassis), and secondary documents need more.
 
-**Solution / Scope.** `Ui::open_window(title, size) -> WindowId` creates an SDL window with its own canvas and `WidgetCache`; events carry the window ID; widget IDs are unique per window; callbacks receive the window in `Ui`. Closing a window emits `CloseRequested` for that window. Emits its engine event (9.10 (#109)).
+**Solution / Scope.** Each window is a real OS window (an SDL window) driven by its own `Engine` instance with its own widget tree, IDs, focus, and drawing; Pushrod draws everything inside it, while the frame (title bar, close, resize) belongs to the operating system. An `Application` owns the SDL context and a set of engines keyed by window ID, routes each SDL event to the engine for its window, and runs them in one loop (callbacks or `next_event`, 9.11 (#124)). Application state is shared: callbacks receive the state and a `Ui` for their own window, plus `ui.app()` to open, find, or close other windows (`open_window(title, size) -> WindowId`). Closing a window emits `CloseRequested` for that window (vetoable, 1.11 (#26)) and `WindowClosed` (9.10 (#109)); the application ends when the last window closes unless configured otherwise. Modal dialogs can be separate windows or in-window forms (6.7 (#66)).
 
 **Acceptance Criteria.**
 
-- Two windows render and receive input independently
-- Callbacks can reach widgets in any window
+- Two OS windows, each with its own engine and widget tree, render and receive input independently
+- Shared application state; callbacks can open, find, and close other windows
 - Closing one window doesn't end the application unless it's the last
-- Emits the corresponding `EngineEvent` (9.10 (#109))
+- Works in both callback and event-loop styles
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
 
@@ -760,6 +760,8 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | 2.18 (#87) | Multi-line text area | Multi-line plain-text editing with scrolling, selection, clipboard, and undo. | `enhancement`, `size/L`, `widget` | N | N | L | `text_area.rs (new)` |
 | 2.19 (#88) | Context menus | Right-click (or long-press) pop-up menus for a widget. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `menu.rs`, `cache.rs` |
 | 2.20 (#89) | Message bar (non-modal inline notice) | A dismissible banner for warnings and information that doesn't block the window. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `message_bar.rs (new)` |
+| 2.21 (#125) | Image button | A button that shows an image, or an image with a text label, with the full button behavior. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `image_button.rs (new)` |
+| 2.22 (#126) | Link label | Clickable text that looks like a link and opens a URL or runs a callback. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `link_label.rs (new)` |
 
 ### 2.1 (#27): Boxed label widget
 
@@ -952,7 +954,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** There is no text input. Fields need a caret, selection, clipboard, and a way to restrict and validate input.
 
-**Solution / Scope.** Add `TextField`: caret (blinking via timers), selection with Shift+arrows and mouse drag, Home/End, word movement, clipboard via SDL, max length, placeholder text, password mode. Restrict input with an input mask (`"99/99/9999"`, `9` digit, `A` letter, `X` any) or a `Validator` trait (`validate(&str) -> Valid | Intermediate | Invalid`); `IntegerField`/`NumberField` presets with range. Optional built-in label (`with_label("Name:")`). Uses SDL text input events. Emits `TextChanged` on each edit and `EditingFinished` on Return or focus loss. Input method composition is handled per 1.19 (#112).
+**Solution / Scope.** Add `TextField`: caret (blinking via timers), selection with Shift+arrows and mouse drag, Home/End, word movement, clipboard via SDL, max length, placeholder text, password mode. Restrict input with an input mask (`"99/99/9999"`, `9` digit, `A` letter, `X` any) or a `Validator` trait (`validate(&str) -> Valid | Intermediate | Invalid`); `IntegerField`/`NumberField` presets with range. Optional built-in label (`with_label("Name:")`). Uses SDL text input events. Emits `TextChanged` on each edit and `EditingFinished` on Return or focus loss. Input method composition is handled per 1.19 (#112). **Accessories:** a text field can show glyph buttons *inside* its editable area, at the leading and/or trailing edge (`with_leading(Accessory)`, `with_trailing(Accessory)`); text never runs underneath them. Built-in accessories: `Clear` (×, shown only when the field has text; clears it and emits `TextChanged`), `Search` (magnifier, leading, decorative or clickable), `RevealPassword` (eye, toggles password masking), and `Custom(glyph)` (emits `AccessoryClicked { id, which }`). `TextField::search()` is a preset: search glyph leading, clear trailing, `EditingFinished` on Return.
 
 #### Look and behavior (proposed)
 
@@ -966,6 +968,10 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![2.6 step set 2: Input mask `99/99/9999`](mockups/2.6-2.png)
 
+**Accessories: search field with clear button, password with reveal**
+
+![2.6 step set 3: Accessories: search field with clear button, password with reveal](mockups/2.6-3.png)
+
 #### Events and callbacks
 
 | Event emitted | When | Application callback |
@@ -973,6 +979,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 | `TextChanged { id }` | Every edit; read `text()` | `on_text_change(id, ..)` |
 | `EditingFinished { id }` | Return or focus loss (validate here) | `on_editing_finished(id, ..)` |
 | `KeyPressed { id, key, modifiers }` | Keys while focused | `on_key_press(id, ..)` |
+| `AccessoryClicked { id, which }` | A custom accessory glyph is clicked (Clear and RevealPassword act on their own) | `on_event(..)` |
 
 Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
 
@@ -982,6 +989,8 @@ Like every widget, it can also receive application-defined custom events in `han
 - Masks and validators reject invalid input
 - Numeric mode with range
 - `EditingFinished` on Return and focus loss
+- Leading/trailing accessories inside the edit area; text never overlaps them
+- `Clear`, `Search`, `RevealPassword`, and custom accessories; `TextField::search()` preset
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.5 (#21), 1.6 (#22), 1.19 (#112).
 
@@ -1287,7 +1296,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Frequent commands should be one click away.
 
-**Solution / Scope.** `Toolbar` composite of tool buttons created from actions (9.5 (#97)): icon and/or text, toggle actions stay pressed, disabled actions gray out, tooltips from the action. Overflow items move into a '>>' menu. **Parts (5.2 (#57)):** `items()`, `add_action`, `insert_action`, `remove_item`; each tool button is a part. Every part can be retrieved and restyled (font, color, text).
+**Solution / Scope.** `Toolbar` composite of tool buttons created from actions (9.5 (#97)): icon and/or text, toggle actions stay pressed, disabled actions gray out, tooltips from the action. Overflow items move into a '>>' menu. **Parts (5.2 (#57)):** `items()`, `add_action`, `insert_action`, `remove_item`; each tool button is a part. Every part can be retrieved and restyled (font, color, text). Tool buttons are image buttons (2.21 (#125)).
 
 #### Look and behavior (proposed)
 
@@ -1311,7 +1320,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - Overflow menu when too narrow
 - Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 9.5 (#97), 5.2 (#57), 2.7 (#33).
+**Parallelism / Dependencies.** Parallelizable. Requires 9.5 (#97), 5.2 (#57), 2.21 (#125).
 
 **Technical Stack.** Rust
 
@@ -1488,6 +1497,75 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/message-bar.md` ("Message Bar", Widgets, new). Guides: Usability section. Rustdoc: Module docs. Examples: Example shows a connection warning. Screenshots: Gallery tile.
 
+### 2.21 (#125): Image button
+
+**Problem Statement.** Toolbars, palettes, and compact dialogs need buttons that show a picture instead of, or next to, text.
+
+**Solution / Scope.** `ImageButton` with an image (from the image cache, 2.7 (#33)) and optional label; `ImagePosition::{Only, Left, Right, Above, Below}`; optional separate images per state (normal, pressed, disabled, hovered), otherwise the pressed state inverts and disabled dithers like other widgets. Supports every button behavior (default, cancel, toggle, activate-on-press, 2.3 (#29)) and mnemonics. **Parts (5.2 (#57)):** `ImageButtonParts { image, label }`.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Image only, image left of label, image above label; normal, pressed, toggled, disabled**
+
+![2.21 step set 1: Image only, image left of label, image above label; normal, pressed, toggled, disabled](mockups/2.21-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Clicked { id, button, count }` | Released inside (or pressed, with activate-on-press) | `on_click(id, ..)` |
+| `Toggled { id, checked }` | Toggle image buttons | `on_toggle(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Image only, and image with label in each position
+- Per-state images or automatic pressed/disabled looks
+- All button behaviors and mnemonics work
+
+**Parallelism / Dependencies.** Parallelizable. Requires 2.3 (#29), 2.7 (#33), 5.2 (#57).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/image-button.md` ("Image Button", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `ImageButton`, `ImagePosition`. Examples: Toolbar-style buttons in the gallery. Screenshots: Gallery tile.
+
+### 2.22 (#126): Link label
+
+**Problem Statement.** 'Learn more', 'Forgot password?', and similar secondary actions read better as links than as buttons.
+
+**Solution / Scope.** `LinkLabel { text, target: Option<String> }`: underlined text in the link color, pointer cursor (9.9 (#101)) on hover, focusable with a dotted focus outline, activated by click, Return, or Space. With a URL target it opens the system browser (SDL's open-URL support) after the application's `on_activate` callback has had a chance to cancel; without a target it only emits `Activated`. Visited state optional. Appearance per state through 1.17 (#104).
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Normal, hovered, focused, visited**
+
+![2.22 step set 1: Normal, hovered, focused, visited](mockups/2.22-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Activated { id }` | Clicked, or Return/Space when focused | `on_activate(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Click, Return, and Space activate
+- URL targets open the system browser unless the callback cancels
+- Hover cursor and focus outline
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.4 (#20), 1.6 (#22).
+
+**Technical Stack.** Rust, SDL2 (open URL)
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/link-label.md` ("Link Label", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `LinkLabel`. Examples: 'Learn more' link in the gallery. Screenshots: Gallery tile.
+
 ## Epic 3: Value and choice controls (#13)
 
 Scroll bar, slider, group box, choice button, expander, and date picker.
@@ -1505,8 +1583,10 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 | 3.3 (#41) | Group box (titled frame) | A frame with a title in its top border, grouping related controls. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `group_box.rs (new)` |
 | 3.6 (#44) | Choice button: pop-up list and click-to-cycle modes | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | `enhancement`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `choice_button.rs (new)` |
 | 3.7 (#45) | Column browser (multi-column hierarchical browser) | Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. | `enhancement`, `parallelizable`, `size/L`, `usability`, `widget` | Y | N | L | `column_browser.rs (new)` |
+| 3.9 (#47) | Split view (panes with draggable dividers) | Two or more panes side by side or stacked, separated by dividers the user drags to resize them. | `enhancement`, `layout`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `split_view.rs (new)` |
 | 3.10 (#90) | Expander (collapsible section) | A titled section that shows or hides its contents when clicked. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `expander.rs (new)` |
 | 3.11 (#91) | Date picker | A date field with a drop-down month calendar. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `date_picker.rs (new)` |
+| 3.12 (#127) | Dial (rotary knob) | A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `dial.rs (new)` |
 
 ### 3.1 (#39): Scroll bar
 
@@ -1714,6 +1794,43 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
 
+### 3.9 (#47): Split view (panes with draggable dividers)
+
+**Problem Statement.** List-and-detail screens, editors with a sidebar, and browsers with a preview need panes the user can resize.
+
+**Solution / Scope.** `SplitView` (horizontal or vertical) holding two or more panes; each pane is a container for child widgets (often a Container, 5.3 (#58)). Dividers are drawn between panes; dragging one resizes its neighbors, respecting each pane's minimum size and optional maximum; double-clicking a divider collapses the smaller pane (if collapsible) and restores it. When the split view is resized, extra space goes to panes by stretch factor (default: the last pane). Divider positions can be set (`set_position(divider, px)`), read, and saved by the application. Dragging follows the drawing mode (10.1 (#105)): live repaint or an outline until release. **Parts (5.2 (#57)):** `panes()`, `dividers()`.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Dragging the divider between a list and a detail pane**
+
+![3.9 step set 1: Dragging the divider between a list and a detail pane](mockups/3.9-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `ValueChanged { id }` | A divider moved (on release in outline mode); read `positions()` | `on_value_change(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Dragging a divider resizes neighboring panes within their min/max
+- Collapsible panes; double-click to collapse/restore
+- Extra space distributed by stretch factor
+- Positions settable and readable; outline mode supported
+
+**Parallelism / Dependencies.** Parallelizable. Requires 5.2 (#57), 5.5 (#116), 9.4 (#96).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/split-view.md` ("Split View", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `SplitView`. Examples: List-and-detail example. Screenshots: Gallery tile.
+
+**Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+
 ### 3.10 (#90): Expander (collapsible section)
 
 **Problem Statement.** Advanced options clutter dialogs; hiding them behind a disclosure keeps simple cases simple.
@@ -1781,6 +1898,41 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/date-picker.md` ("Date Picker", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
+### 3.12 (#127): Dial (rotary knob)
+
+**Problem Statement.** Some values are naturally rotary (volume, pan, gain, angle), and a dial takes less space than a slider.
+
+**Solution / Scope.** `Dial { min, max, value, step, wrapping, notches }`: circle with an indicator line and optional notch marks around the rim; drag vertically or circularly to turn, mouse wheel and arrow keys step, Page Up/Down page. `wrapping` lets the value roll over (angles). Optional value text below. Emits `ValueChanged` continuously and `EditingFinished` on release; outline drawing mode defers dependent work to release (10.1 (#105)).
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Turning a dial: idle, dragging, focused, disabled**
+
+![3.12 step set 1: Turning a dial: idle, dragging, focused, disabled](mockups/3.12-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `ValueChanged { id }` | While turning | `on_value_change(id, ..)` |
+| `EditingFinished { id }` | Drag released | `on_editing_finished(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Drag, wheel, and keys change the value within range
+- Wrapping mode for angles
+- Notches and optional value text
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 9.4 (#96).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/dial.md` ("Dial", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `Dial`. Examples: Volume dial in the gallery. Screenshots: Gallery tile.
+
 ## Epic 4: Lists, tables, progress, spin boxes, and tabs (#14)
 
 Progress bar, spin box, tab view, list view, table view, and combo box.
@@ -1799,12 +1951,13 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 | 4.5 (#52) | List view | Scrolling list with single/multiple selection, backed by a data source. | `enhancement`, `size/L`, `widget` | N | N | L | `list_view.rs (new)` |
 | 4.6 (#53) | Combo box | Text field with a drop-down list of suggestions. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `combo_box.rs (new)` |
 | 4.9 (#92) | Table view | Multi-column list with headers, column resizing, and sorting. | `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `table_view.rs (new)` |
+| 4.10 (#128) | Busy spinner | A small animated indicator for work of unknown length, for use inline or on buttons. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `spinner.rs (new)` |
 
 ### 4.1 (#48): Progress bar
 
 **Problem Statement.** Long operations need visible progress.
 
-**Solution / Scope.** `ProgressBar { min, max, value, indeterminate }`: border + filled part; busy mode animates a moving block with ticks (1.5 (#21)). Display only.
+**Solution / Scope.** `ProgressBar { max, value: Option<f64> }` with the same semantics as the HTML `<progress>` element: a value between 0 and `max` shows a determinate bar; no value (`set_indeterminate()` or `value: None`) shows the indeterminate busy animation (a block moving back and forth, driven by timer ticks, 1.5 (#21); reduced to a static striped bar in outline drawing mode, 10.1 (#105)). Display only.
 
 #### Look and behavior (proposed)
 
@@ -1824,8 +1977,9 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Acceptance Criteria.**
 
-- Fill proportional to value
-- Busy mode animates without callbacks
+- Determinate fill proportional to value / max
+- `None` value shows the indeterminate animation without callbacks
+- Static in outline drawing mode
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21).
 
@@ -2016,6 +2170,40 @@ Like every widget, it can also receive application-defined custom events in `han
 **Technical Stack.** Rust
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/table-view.md` ("Table View", Widgets, new). Guides: Widget list. Rustdoc: Module docs + `TableModel`. Examples: File list in example. Screenshots: Gallery tile.
+
+### 4.10 (#128): Busy spinner
+
+**Problem Statement.** Short waits of unknown length (connecting, loading a list) need a compact busy indicator that fits next to a label or inside a button, where a progress bar doesn't fit.
+
+**Solution / Scope.** `Spinner { running, size }`: a ring of segments with one highlighted segment rotating, driven by timer ticks (1.5 (#21)) only while running and visible (no ticks when stopped, so idle applications stay idle). `start()`, `stop()`, optional `hide_when_stopped`. In outline drawing mode (10.1 (#105)) and on vintage backends it shows a static hourglass glyph instead of animating. Display only.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Spinner frames while running, stopped, and the outline-mode fallback**
+
+![4.10 step set 1: Spinner frames while running, stopped, and the outline-mode fallback](mockups/4.10-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| (none) | Display only; control with `start()` / `stop()` | n/a |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Animates only while running and visible
+- Static fallback in outline mode
+- Fits inline with text and inside buttons
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/spinner.md` ("Spinner", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `Spinner`. Examples: Spinner next to a 'Connecting...' label. Screenshots: Gallery tile.
 
 ## Epic 5: Composition, clipping, and layout managers (#15)
 
@@ -3298,6 +3486,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 3.11 (#91) Date picker
 - 2.11 (#37) Menu bar and drop-down menus (drawn by Pushrod)
 - 2.13 (#77) Tooltips
+- 2.21 (#125) Image button
 - 2.15 (#84) Toolbar
 - 2.16 (#85) Status bar
 - 2.17 (#86) Switch (on/off slide toggle)
@@ -3306,11 +3495,15 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 2.20 (#89) Message bar (non-modal inline notice)
 - 2.8 (#34) Icon widget (picture with caption)
 - 2.12 (#38) File chooser dialog (drawn by Pushrod)
+- 2.22 (#126) Link label
+- 3.12 (#127) Dial (rotary knob)
+- 4.10 (#128) Busy spinner
+- 3.9 (#47) Split view (panes with draggable dividers)
 
 **9. After MVP: platform and Chassis**
 
 - 1.9 (#24) Dirty-rectangle redraw
-- 1.16 (#82) Multiple windows
+- 1.16 (#82) Multiple windows: separate OS windows, each with its own engine
 - 6.8 (#67) Bind actions by name from form files
 - 6.9 (#68) Design-mode hooks for Chassis
 - 10.3 (#107) no_std + alloc core crate
@@ -3331,10 +3524,10 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 | 3.4 (#42) | Matrix of cells (grid of buttons with selection modes) | Radio groups (2.5 (#31)) and the choice button (3.6 (#44)) cover the common cases; palettes can be built from buttons. |
 | 3.5 (#43) | Labeled field rows | Text fields with built-in labels (2.6 (#32)) cover this. |
 | 3.8 (#46) | Color well and picker | Rarely needed in ordinary dialogs; revisit if the Chassis inspector needs it. |
-| 3.9 (#47) | Split view (draggable pane dividers) | Application-layout feature rather than a dialog control; revisit after forms ship. |
 | 4.3 (#50) | Segmented control | Radio groups and the choice button's cycle mode cover the same choices. |
 | 4.7 (#54) | Level indicator | The progress bar covers capacity displays. |
 | 4.8 (#55) | Outline view (expandable tree list) | Specialized; revisit once the list view is in use. |
+| 3.13 (#129) | Font chooser | Specialized; most applications don't let users pick fonts. Revisit alongside the color picker. |
 
 ## Existing issues
 
