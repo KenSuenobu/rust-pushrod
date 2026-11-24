@@ -1,12 +1,21 @@
 use pushrod::base_widget::BaseWidget;
 use pushrod::box_widget::BoxWidget;
+use pushrod::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
+use pushrod::event::PushrodEvent;
 use pushrod::geometry::{point, size};
-use pushrod::widget::{SystemWidget, Widget};
+use pushrod::text_widget::{TextJustify, TextWidget};
+use pushrod::widget::Widget;
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
-use pushrod::button_widget::ButtonWidget;
-use pushrod::text_widget::{TextJustify, TextWidget};
+
+const FONT: &str = "assets/OpenSans-Regular.ttf";
+
+/// Application state, passed mutably to every callback.
+#[derive(Default)]
+struct AppState {
+    clicks: u32,
+}
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -17,141 +26,102 @@ pub fn main() {
         .opengl()
         .build()
         .unwrap();
-    let mut engine = Engine::new(size(800, 600), 30);
+    let mut engine: Engine<AppState> = Engine::new(size(800, 600), 30);
 
-    let mut base_widget = BaseWidget::new(point(20, 20), size(760, 560));
-    base_widget.set_color(Color::RGBA(127, 127, 127, 255));
-    let base_widget_id = engine.add_widget(SystemWidget::Base(Box::new(base_widget)));
+    // A gray panel.  Every other widget is a child of the panel, so their origins are relative
+    // to the panel's upper left-hand corner (20, 20).
+    let mut panel = BaseWidget::new(point(20, 20), size(760, 560));
+    panel.set_color(Color::RGBA(127, 127, 127, 255));
+    let panel_id = engine.add_widget(panel);
 
-    eprintln!("Added base widget ID: {}", base_widget_id);
-
-    let mut text_widget = TextWidget::new(point(40, 30), size(180, 18),
-        String::from("assets/OpenSans-Regular.ttf"), sdl2::ttf::FontStyle::NORMAL, 14,
-        Color::WHITE, TextJustify::Left, String::from("Welcome to Pushrod!"),
+    let mut welcome = TextWidget::new(
+        point(20, 10),
+        size(180, 18),
+        String::from(FONT),
+        FontStyle::NORMAL,
+        14,
+        Color::WHITE,
+        TextJustify::Left,
+        String::from("Welcome to Pushrod!"),
     );
-    text_widget.set_color(Color::RGBA(127, 127, 127, 255));
-    let text_widget_id1 = engine.add_widget(SystemWidget::Text(Box::new(text_widget)));
+    welcome.set_color(Color::RGBA(127, 127, 127, 255));
+    engine.add_child_widget(panel_id, welcome);
 
-    eprintln!("Added text widget ID: {}", text_widget_id1);
-
-    let mut box_widget1 = BoxWidget::new(point(40, 60), size(100, 100), Color::BLUE, 3);
+    let mut box_widget1 = BoxWidget::new(point(20, 40), size(100, 100), Color::BLUE, 3);
     box_widget1.set_color(Color::CYAN);
-    let box_widget_id1 = engine.add_widget(SystemWidget::Box(Box::new(box_widget1)));
+    engine.add_child_widget(panel_id, box_widget1);
 
-    eprintln!("Added box widget ID: {}", box_widget_id1);
-
-    let mut box_widget2 = BoxWidget::new(point(180, 60), size(100, 100), Color::GREEN, 5);
+    let mut box_widget2 = BoxWidget::new(point(160, 40), size(100, 100), Color::GREEN, 5);
     box_widget2.set_color(Color::GRAY);
-    let box_widget_id2 = engine.add_widget(SystemWidget::Box(Box::new(box_widget2)));
+    engine.add_child_widget(panel_id, box_widget2);
 
-    eprintln!("Added box widget ID: {}", box_widget_id2);
-
-    let mut box_widget3 = BoxWidget::new(point(320, 60), size(100, 100), Color::RED, 10);
+    let mut box_widget3 = BoxWidget::new(point(300, 40), size(100, 100), Color::RED, 10);
     box_widget3.set_color(Color::MAGENTA);
-    let box_widget_id3 = engine.add_widget(SystemWidget::Box(Box::new(box_widget3)));
+    engine.add_child_widget(panel_id, box_widget3);
 
-    eprintln!("Added box widget ID: {}", box_widget_id3);
+    let button_id = engine.add_child_widget(
+        panel_id,
+        ButtonWidget::new(
+            point(20, 160),
+            size(120, 20),
+            String::from(FONT),
+            FontStyle::NORMAL,
+            14,
+            Color::BLACK,
+            TextJustify::Center,
+            String::from("Click me"),
+            2,
+        ),
+    );
 
-    let mut button1_widget = ButtonWidget::new(point(40, 180), size(120, 20),
-        String::from("assets/OpenSans-Regular.ttf"), FontStyle::NORMAL, 14, Color::BLACK,
-        TextJustify::Center, String::from("Click me"), 2);
-    button1_widget.set_id(1);
-    let button_widget_id1 = engine.add_widget(SystemWidget::Button(Box::new(button1_widget)));
+    let mut status = TextWidget::new(
+        point(160, 161),
+        size(300, 18),
+        String::from(FONT),
+        FontStyle::NORMAL,
+        14,
+        Color::WHITE,
+        TextJustify::Left,
+        String::from("Not clicked yet."),
+    );
+    status.set_color(Color::RGBA(127, 127, 127, 255));
+    let status_id = engine.add_child_widget(panel_id, status);
 
-    eprintln!("Added button widget ID: {}", button_widget_id1);
+    let quit_id = engine.add_child_widget(
+        panel_id,
+        ButtonWidget::new(
+            point(20, 200),
+            size(120, 20),
+            String::from(FONT),
+            FontStyle::NORMAL,
+            14,
+            Color::BLACK,
+            TextJustify::Center,
+            String::from("Quit"),
+            2,
+        ),
+    );
 
-    // let mut new_base_widget = BaseWidget::new(make_points(100, 100), make_size(600, 400));
-    //
-    // new_base_widget
-    //     .get_config()
-    //     .set_color(CONFIG_COLOR_BORDER, Color::RGB(0, 0, 0));
-    // new_base_widget
-    //     .get_config()
-    //     .set_numeric(CONFIG_BORDER_WIDTH, 2);
-    //
-    // new_base_widget
-    //     .get_callbacks()
-    //     .on_mouse_entered(|x, _widgets, _layouts| {
-    //         x.get_config()
-    //             .set_color(CONFIG_COLOR_BASE, Color::RGB(255, 0, 0));
-    //         x.get_config().set_invalidated(true);
-    //         _widgets[0]
-    //             .widget
-    //             .borrow_mut()
-    //             .get_config()
-    //             .set_invalidated(true);
-    //         eprintln!("Mouse Entered");
-    //     });
-    //
-    // new_base_widget
-    //     .get_callbacks()
-    //     .on_mouse_exited(|x, _widgets, _layouts| {
-    //         x.get_config()
-    //             .set_color(CONFIG_COLOR_BASE, Color::RGB(255, 255, 255));
-    //         x.get_config().set_invalidated(true);
-    //         _widgets[0]
-    //             .widget
-    //             .borrow_mut()
-    //             .get_config()
-    //             .set_invalidated(true);
-    //         eprintln!("Mouse Exited");
-    //     });
-    //
-    // new_base_widget
-    //     .get_callbacks()
-    //     .on_mouse_moved(|_widget, _widgets, _layouts, points| {
-    //         eprintln!("Mouse Moved: {:?}", points);
-    //     });
-    //
-    // new_base_widget
-    //     .get_callbacks()
-    //     .on_mouse_scrolled(|_widget, _widgets, _layouts, points| {
-    //         eprintln!("Mouse Scrolled: {:?}", points);
-    //     });
-    //
-    // new_base_widget.get_callbacks().on_mouse_clicked(
-    //     |_widget, _widgets, _layouts, button, clicks, state| {
-    //         eprintln!(
-    //             "Mouse Clicked: button={} clicks={} state={}",
-    //             button, clicks, state
-    //         );
-    //     },
-    // );
-    //
-    // engine.add_widget(Box::new(new_base_widget), String::from("widget1"));
-    //
-    // engine.on_exit(|engine| {
-    //     let buttons: Vec<_> = vec![
-    //         ButtonData {
-    //             flags: MessageBoxButtonFlag::RETURNKEY_DEFAULT,
-    //             button_id: 1,
-    //             text: "Yes",
-    //         },
-    //         ButtonData {
-    //             flags: MessageBoxButtonFlag::ESCAPEKEY_DEFAULT,
-    //             button_id: 2,
-    //             text: "No",
-    //         },
-    //     ];
-    //
-    //     let res = show_message_box(
-    //         MessageBoxFlag::WARNING,
-    //         buttons.as_slice(),
-    //         "Quit",
-    //         "Are you sure?",
-    //         None,
-    //         None,
-    //     )
-    //         .unwrap();
-    //
-    //     if let ClickedButton::CustomButton(x) = res {
-    //         if x.button_id == 1 {
-    //             return true;
-    //         }
-    //     }
-    //
-    //     false
-    // });
+    // Visual Basic-style event procedures: each callback gets the application state, and a
+    // `Ui` handle to find and change any widget by its ID.
+    engine.on_click(button_id, move |state, ui| {
+        state.clicks += 1;
 
-    engine.run(sdl_context, window);
+        ui.get_mut::<TextWidget>(status_id)
+            .unwrap()
+            .set_text(format!("Clicked {} time(s).", state.clicks));
+    });
+
+    engine.on_click(quit_id, |_state, ui| ui.shutdown());
+
+    // Receives every event generated by every widget.
+    engine.on_event(|_state, _ui, event| {
+        if let PushrodEvent::Clicked(id, clicks) = event {
+            eprintln!("[example] Widget {} clicked ({} click(s))", id, clicks);
+        }
+    });
+
+    let state = engine.run(sdl_context, window, AppState::default());
+
+    eprintln!("[example] Exiting after {} click(s).", state.clicks);
 }

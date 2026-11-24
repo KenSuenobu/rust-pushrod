@@ -33,12 +33,13 @@
 
 pub mod base_widget;
 pub mod box_widget;
+pub mod button_widget;
 pub mod cache;
 pub mod engine;
 pub mod event;
+pub mod font;
 pub mod geometry;
+pub mod paint;
+pub mod text_widget;
 pub mod texture;
 pub mod widget;
-pub mod font;
-pub mod text_widget;
-pub mod button_widget;

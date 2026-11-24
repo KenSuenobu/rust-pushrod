@@ -17,199 +17,176 @@
 //!
 //! A UI element that exists in a window, whether visible or otherwise, that consumes and
 //! alternatively generates events.
+//!
+//! Every `Widget` owns a [`WidgetCore`], which stores the state that all `Widget`s share: the
+//! ID, parent ID, origin, size, color, visibility, invalidation flag, and GPU texture.  The
+//! `Widget` trait provides default implementations for all of the getters and setters against
+//! the `WidgetCore`, so a new `Widget` only needs to implement three functions:
+//!
+//! ```rust,no_run
+//! use pushrod::font::FontCache;
+//! use pushrod::paint;
+//! use pushrod::widget::{Widget, WidgetCore};
+//! use sdl2::render::Canvas;
+//! use sdl2::video::Window;
+//!
+//! pub struct MyWidget {
+//!     core: WidgetCore,
+//! }
+//!
+//! impl Widget for MyWidget {
+//!     fn core(&self) -> &WidgetCore { &self.core }
+//!     fn core_mut(&mut self) -> &mut WidgetCore { &mut self.core }
+//!
+//!     fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
+//!         paint::fill(c, self.get_color());
+//!     }
+//! }
+//! ```
+//!
+//! If the compiler is happy, the `Widget` is complete: there are no lists of `Widget` types to
+//! update elsewhere in the library.
 
-use crate::base_widget::BaseWidget;
-use crate::box_widget::BoxWidget;
-use crate::event::PushrodEvent;
+use crate::event::{EventCtx, PushrodEvent};
+use crate::font::FontCache;
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
 use sdl2::pixels::Color;
-use sdl2::render::{Canvas, Texture};
+use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::any::Any;
-use crate::button_widget::ButtonWidget;
-use crate::font::FontCache;
-use crate::text_widget::TextWidget;
+
+/// The ID of a `Widget`.  IDs are assigned by the `WidgetCache` in the order in which `Widget`s
+/// are added, starting with the top-level window `Widget` at ID `0`.  IDs are stable for the
+/// lifetime of the `WidgetCache`, which allows forms to be designed and stored by ID.
+pub type WidgetId = u32;
+
+/// The ID of the top-level `Widget` that represents the window itself.
+pub const ROOT_WIDGET_ID: WidgetId = 0;
+
+/// State that is shared by every `Widget`.  Store one of these in a `Widget` structure, and
+/// return it from `Widget::core` and `Widget::core_mut`.
+pub struct WidgetCore {
+    pub(crate) id: WidgetId,
+    pub(crate) parent: WidgetId,
+    origin: Point,
+    size: Size,
+    color: Color,
+    hidden: bool,
+    invalidated: bool,
+    pub(crate) texture: TextureStore,
+}
+
+impl WidgetCore {
+    /// Creates a new `WidgetCore` given its `Point` of origin, relative to its parent, and its
+    /// `Size`.  The default color is transparent white.
+    pub fn new(origin: Point, size: Size) -> Self {
+        Self {
+            id: 0,
+            parent: ROOT_WIDGET_ID,
+            origin,
+            size,
+            color: Color::RGBA(255, 255, 255, 0),
+            hidden: false,
+            invalidated: true,
+            texture: TextureStore::default(),
+        }
+    }
+}
 
 /// `Widget` is a drawable, interactive object that is presented in a `Window`.
 ///
 /// `Widget`s are components that are used to display information to a user, as well as to provide
 /// user-interactable objects.  These make up things like text messages, images, 3D graphics, and
 /// so on.
-pub trait Widget {
-    /// Returns the ID of the `Widget`, assigned by the `Engine`.
-    fn get_id(&self) -> i32;
+///
+/// Only `core`, `core_mut`, and `paint` must be implemented.  `handle_event` defaults to ignoring
+/// all events, and every other function operates on the `WidgetCore`.
+pub trait Widget: Any {
+    /// Returns a reference to the shared `WidgetCore` state.
+    fn core(&self) -> &WidgetCore;
 
-    /// Sets the ID of the `Widget`
-    fn set_id(&mut self, id: i32);
+    /// Returns a mutable reference to the shared `WidgetCore` state.
+    fn core_mut(&mut self) -> &mut WidgetCore;
 
-    /// Returns the pure form of the object for casting, if required.  This is used internally by
-    /// the `Pushrod` event system, and should always just return `self`.  (See #impl_widget_base
-    /// macro)
-    fn as_any(&self) -> &dyn Any;
+    /// Paints the `Widget` into its own texture.  The canvas passed in is already targeting the
+    /// `Widget`'s texture, so drawing is always done from an origin of `x=0` and `y=0`, bounded by
+    /// `get_size()`.  Use the functions in the [`paint`](crate::paint) module to compose the look
+    /// of the `Widget` (fill, border, text, ...).
+    ///
+    /// This is only called when the `Widget` is invalidated.
+    fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache);
 
-    /// Gets the origin (upper left-hand) coordinate of the `Widget`.  This is the physical location
-    /// of the `Widget` on the screen.
-    fn get_origin(&self) -> &Point;
+    /// Handles a `PushrodEvent` sent to this `Widget`.  Any events that the `Widget` generates as
+    /// a result (such as `Clicked`) are queued with `ctx.emit()`, and delivered to the
+    /// application's callbacks after event processing completes.
+    ///
+    /// The default implementation ignores all events.
+    fn handle_event(&mut self, _event: &PushrodEvent, _ctx: &mut EventCtx) {}
+
+    /// Returns the ID of the `Widget`, assigned by the `WidgetCache`.
+    fn get_id(&self) -> WidgetId {
+        self.core().id
+    }
+
+    /// Returns the ID of the parent of this `Widget`.  The top-level `Widget` is its own parent.
+    fn get_parent(&self) -> WidgetId {
+        self.core().parent
+    }
+
+    /// Gets the origin (upper left-hand) coordinate of the `Widget`, relative to its parent.
+    fn get_origin(&self) -> Point {
+        self.core().origin
+    }
 
     /// Gets the `Size` (bounds) of the object in `width` and `height`.
-    fn get_size(&self) -> &Size;
+    fn get_size(&self) -> Size {
+        self.core().size
+    }
 
-    /// Gets the color of the `Widget`.
-    fn get_color(&self) -> Color;
+    /// Gets the main (background) color of the `Widget`.
+    fn get_color(&self) -> Color {
+        self.core().color
+    }
 
-    /// Sets the origin point.
-    fn set_origin(&mut self, point: Point);
+    /// Sets the origin point, relative to the parent `Widget`.
+    fn set_origin(&mut self, point: Point) {
+        self.core_mut().origin = point;
+        self.set_invalidated(true);
+    }
 
-    /// Sets the size of the `Widget`.  Sub-`Widget` objects must also be resized.
-    fn set_size(&mut self, size: Size);
+    /// Sets the size of the `Widget`.
+    fn set_size(&mut self, size: Size) {
+        self.core_mut().size = size;
+        self.set_invalidated(true);
+    }
 
-    /// Sets the invalidation state of the object.  When invalidated, it indicates to the
-    /// `Engine` that it needs to be refreshed in the main screen, or not.  Note, any `Widget`s that
-    /// introduce multiple sub-`Widget`s into their drawing stack also need to be set invalidated
-    /// when the top-level is set.  Otherwise, you may exhibit unwanted or odd behavior.
-    fn set_invalidated(&mut self, state: bool);
+    /// Sets the main (background) color of the `Widget`.
+    fn set_color(&mut self, color: Color) {
+        self.core_mut().color = color;
+        self.set_invalidated(true);
+    }
 
-    /// Sets the main color of the `Widget`.
-    fn set_color(&mut self, color: Color);
+    /// Indicates whether or not the `Widget` (and all of its children) are hidden.  Hidden
+    /// `Widget`s are not drawn, and do not receive mouse events.
+    fn is_hidden(&self) -> bool {
+        self.core().hidden
+    }
 
-    /// Indicates whether or not an object needs to be redrawn.  This only needs to be implemented
-    /// on the top-level `Widget`, unless a sub-`Widget` object changes state based on a timer or
-    /// some other reason.
-    ///
-    /// On an invalidation event, the system will call the `draw` method and re-draw its contents,
-    /// saving that contents to a texture, and displaying it to the screen during the draw cycle.
-    fn is_invalidated(&self) -> bool;
+    /// Hides or shows this `Widget` and all of its children.
+    fn set_hidden(&mut self, state: bool) {
+        self.core_mut().hidden = state;
+        self.set_invalidated(true);
+    }
 
-    /// Retrieves the `TextureStore` for the `Widget`.  The `TextureStore` is the object's
-    /// drawing GPU texture that gets blitted to the screen.  Only update the texture if
-    /// invalidated.
-    fn get_texture(&mut self) -> &mut TextureStore;
+    /// Indicates whether or not an object needs to be repainted.
+    fn is_invalidated(&self) -> bool {
+        self.core().invalidated
+    }
 
-    /// Function that responds to a wrapped event from `SDL2`, and generates an optional
-    /// `PushrodEvent` as a result of the event processing.
-    ///
-    /// If an event is generated by the `Widget` after handling an event, it should be returned as
-    /// an optional return.  Otherwise, if the `Widget` consumes the event without generating a
-    /// responding event, it should return `None`.  **Most** `Widget`s will return `None`, however,
-    /// something like a timer or other widget could create a custom event.  If so, it should be
-    /// returned here so that other `Widget` objects, or the underlying application, can handle
-    /// the event appropriately.
-    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]>;
-
-    /// Copies the image stored inside the `Widget` to the screen.  If the `Widget` doesn't
-    /// actually _draw_ anything, it can return `None`.  Otherwise, it returns a reference
-    /// to the stored `Texture`.
-    ///
-    /// Drawing is conducted from an origin of `x=0` and `y=0` as the base coordinates.  The only other
-    /// bounds that should be referenced are the `size` coordinates, meaning the `width` and
-    /// `height` of the object.
-    ///
-    /// All drawing is always done from an origin point, as the actual `Widget`'s `get_origin`
-    /// point is indicated to the `Pushrod` system as to where the `Widget` should be drawn in
-    /// the user viewable space (canvas).
-    fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture>;
-}
-
-/// System Widgets.
-pub enum SystemWidget {
-    /// Stores a `BaseWidget`, one of the simplest drawing `Widget` objects.
-    Base(Box<BaseWidget>),
-
-    /// Stores a `BoxWidget`, an object that contains `BaseWidget` and draws a border with a width and color.
-    Box(Box<BoxWidget>),
-
-    /// Stores a `TextWidget`, an object that contains `BaseWidget` and renders text with a specific font name,
-    /// font size, text color, and text.
-    Text(Box<TextWidget>),
-
-    /// Stores a `ButtonWidget`, an object that contains a `BaseWidget` and a `TextWidget`, drawing a black border,
-    /// around the frame of the button, and a 3D-like appearance within its specified border width.
-    Button(Box<ButtonWidget>),
-
-    /// Stores a custom `Widget`.
-    Custom(Box<dyn Widget>),
-}
-
-/// impl_widget_base! macro is used as a shortcut for any `impl` that does not implement its own
-/// custom functionality for any of the base functions in `Widget`, aside from `handle_event`
-/// and `draw`.
-///
-/// Any functions that introduce this macro into the `impl` section of the `Widget` must create
-/// the following support objects in the `struct` that defined the `Widget`:
-///
-/// ```rust,no_run
-/// struct MyWidget {
-///   /// ID of the widgetI'
-///   id: u32,
-///
-///   /// Point of origin of the current `Widget`
-///   origin: Point,
-///
-///   /// Size of the widget.
-///   size: Size,
-///
-///   /// Store for the invalidation draw flag.
-///   invalidated: bool,
-///
-///   /// Store for the drawing texture.
-///   texture: TextureStore,
-///
-///   /// Store for the base widget against which drawing occurs.
-///   base_widget: BaseWidget,
-///   ...,
-/// }
-/// ```
-///
-/// Note, any `Widget` that is drawn must draw against the `base_widget`, which utilizes the
-/// object inheritance using composition.
-#[macro_export]
-macro_rules! impl_widget_base {
-    () => {
-        /// Default implementation, returning the object structure as an `Any`.
-        fn as_any(&self) -> &dyn Any { self }
-
-        /// Default implementation, returns the ID of this `Widget`.
-        fn get_id(&self) -> i32 { self.id }
-
-        /// Default implementation, returns the `Point` of origin of this `Widget`.
-        fn get_origin(&self) -> &Point { &self.origin }
-
-        /// Default implementation, returns the `Size` of this `Widget`.
-        fn get_size(&self) -> &Size { &self.size }
-
-        /// Default implementation, returns the color of this `Widget`.
-        fn get_color(&self) -> Color { self.base_widget.get_color() }
-
-        /// Default implementation, sets the `ID` of this `Widget`.
-        fn set_id(&mut self, id: i32) { self.id = id; }
-
-        /// Default implementation, sets the `Point` of origin of this object.
-        fn set_origin(&mut self, point: Point) { self.origin = point; }
-
-        /// Default implementation, sets the `Size` of the `Widget` and its base.
-        fn set_size(&mut self, size: Size) {
-            self.size = size;
-            self.base_widget.set_size(size);
-            self.set_invalidated(true);
-        }
-
-        /// Default implementation, sets the invalidation flag.
-        fn set_invalidated(&mut self, state: bool) {
-            self.invalidated = state;
-            self.base_widget.set_invalidated(state);
-        }
-
-        /// Default implementation, sets the `Color` of the `Widget` and its base.
-        fn set_color(&mut self, color: Color) {
-            self.base_widget.set_color(color);
-            self.set_invalidated(true);
-        }
-
-        /// Default implementation, returns the invalidation flag.
-        fn is_invalidated(&self) -> bool { self.invalidated }
-
-        /// Default implementation, returns the mutable `Widget` `Texture`.
-        fn get_texture(&mut self) -> &mut TextureStore { &mut self.texture }
-    };
+    /// Sets the invalidation state of the object.  When invalidated, the `Widget` is repainted
+    /// into its texture on the next frame, and the screen is refreshed.
+    fn set_invalidated(&mut self, state: bool) {
+        self.core_mut().invalidated = state;
+    }
 }

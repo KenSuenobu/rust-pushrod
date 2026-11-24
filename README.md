@@ -5,21 +5,73 @@ OpenGL for the drawing layer.
 
 ## Summary
 
-The original version of the library was a callback-based library, but this has changed.  The design
-philosophy was that callbacks were a better design, however, this uncovered several design flaws.  First,
-passing in mutable references to the top-level object that caused an event was almost impossible without
-a series of cast objects.  Second, performance suffered as a result of the custom code that was
-written to support said functionality.
+Pushrod is small, simple, and lightweight.  It combines the two classic ways of writing GUI
+applications:
 
-After researching other libraries, it became obvious that using an event-based system was a better
-approach.  Therefore, Pushrod now uses an event-based system to handle messaging.
+- **An event queue, like GEM on the Atari ST.**  SDL2 events are routed to the `Widget` under
+  the mouse.  `Widget`s change their own state, and queue any events they generate (such as
+  `Clicked`).
+- **Event procedures, like Visual Basic.**  After the queue is processed, each event is delivered
+  to the callbacks registered for that `Widget`.  Callbacks receive mutable access to your
+  application state and to every `Widget` in the window, by ID.
 
-The benefits to this are great - the main benefits being that each window now has its own event handler:
-every window that displays a new dialog contains its own window event handler.  This allows for global
-access to the widget store, the containing object, and the event handler.
+An earlier version of Pushrod called callbacks directly from inside the `Widget`s, which made it
+nearly impossible to pass mutable references to the rest of the application.  Queueing events
+first, and only then calling the callbacks once no `Widget` is borrowed, removes that problem.
 
-Developers who have written GUI applications on the Atari ST, Macintosh, Amiga, and other event-based
-GUI libraries will instantly feel at home here.
+`Widget`s are stored in a flat list and addressed by ID, with parent and child links by ID, like
+the `OBJECT` tree of a GEM resource.  This keeps forms simple to save, load, and edit visually.
+
+## Writing an application
+
+```rust
+#[derive(Default)]
+struct AppState {
+    clicks: u32,
+}
+
+let mut engine: Engine<AppState> = Engine::new(size(800, 600), 30);
+
+let label = engine.add_widget(TextWidget::new(/* ... */));
+let button = engine.add_widget(ButtonWidget::new(/* ... */));
+
+engine.on_click(button, move |state, ui| {
+    state.clicks += 1;
+    ui.get_mut::<TextWidget>(label)
+        .unwrap()
+        .set_text(format!("Clicked {} times", state.clicks));
+});
+
+let state = engine.run(sdl_context, window, AppState::default());
+```
+
+See [`examples/base.rs`](examples/base.rs) for a complete application.
+
+## Writing a widget
+
+A `Widget` stores a `WidgetCore` (ID, origin, size, color, visibility, texture) and implements
+three functions.  Everything else has a default implementation.  Appearance is composed from the
+functions in the `paint` module (`fill`, `border`, `text`):
+
+```rust
+pub struct PanelWidget {
+    core: WidgetCore,
+}
+
+impl Widget for PanelWidget {
+    fn core(&self) -> &WidgetCore { &self.core }
+    fn core_mut(&mut self) -> &mut WidgetCore { &mut self.core }
+
+    fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
+        paint::fill(c, self.get_color());
+        paint::border(c, self.get_size(), Color::BLACK, 1);
+    }
+}
+```
+
+Interactive `Widget`s also implement `handle_event`, and call `ctx.emit(...)` to generate events.
+
+Pushrod requires Rust 1.86 or newer.
 
 ## Installing on Ubuntu Linux
 
