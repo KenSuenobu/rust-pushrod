@@ -35,13 +35,13 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **41 of 78 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **43 of 83 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
-| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 16 | 10 |
+| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 17 | 11 |
 | 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 20 | 10 |
 | 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 7 | 3 |
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
@@ -50,6 +50,7 @@ MVP scope: **41 of 78 active issues** (marked **Y** in the MVP column). Everythi
 | 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 5 | 5 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
 | 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 9 | 3 |
+| 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target. | 4 | 1 |
 
 ```mermaid
 flowchart LR
@@ -100,6 +101,7 @@ Where each idea comes from. Pushrod takes the common, proven core of these syste
 | Value controls | Hand-built sliders (GEM) | Amiga sliders/scrollers/cycle gadgets; Motif scale/spin box | Qt/GTK sliders, spin buttons, switches |
 | Lists, tables, and hierarchies |  | Amiga list views; Motif lists; NeXTSTEP column browser | Qt/GTK item models and views; Mac Finder column view; Windows report lists |
 | Dialogs and notices | GEM/Mac alerts and modal dialogs | Motif message and file dialogs | GTK info bars; Qt/GTK dialogs |
+| Drawing while moving | Outline dragging (GEM, classic Mac) |  | 'Show contents while dragging' options (later desktops) |
 
 Intergraph is thinly represented: public documentation for the Environ V forms toolkit is scarce, so it needs first-hand input before it informs more issues.
 
@@ -109,13 +111,15 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Behavior flags:** `FOCUSABLE`, `TOGGLE`, `DEFAULT_ACTION`, `CANCEL_ACTION`, `DISMISSES_DIALOG`, `ACTIVATE_ON_PRESS`, `EXCLUSIVE`, `HIDDEN`
 
-**Visual states:** `PRESSED`, `CHECKED`, `INDETERMINATE`, `DISABLED`, `FOCUSED`, `HOVERED`
+**Visual states:** `PRESSED`, `CHECKED`, `INDETERMINATE`, `DISABLED`, `FOCUSED`, `HOVERED`, `DRAG_OVER`
 
 **Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`
 
 **Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Custom`, `Raw`
 
-**Callbacks:** `on_click`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_hover`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`
+**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`
+
+**Drawing modes:** `Live`, `Outline`, `Auto`
 
 ## Epic 1: Core: behavior flags, focus, timing, and performance (#11)
 
@@ -134,7 +138,7 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.3 (#7) | Broadcast events to all interested widgets | Window-level and application-wide events go to every widget whose mask includes them. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `cache.rs`, `engine.rs` |
 | 1.4 (#20) | Keyboard focus, Tab order, and Return/Escape | Focusable widgets take keyboard focus; Tab moves it; Return and Escape trigger the default and cancel buttons. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `cache.rs`, `engine.rs`, `widget.rs` |
 | 1.5 (#21) | Timers and idle callbacks | Repeating/one-shot timers, per-widget ticks for animation, and idle callbacks. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs`, `event.rs` |
-| 1.6 (#22) | Callback registry for every widget event | on_click, on_toggle, on_value_change, on_selection_change, on_text_change, on_editing_finished, on_activate, on_key_press, on_focus_change, on_hover. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs` |
+| 1.6 (#22) | Callback registry for every widget event | on_click, on_press, on_release, on_hover, on_toggle, on_value_change, on_selection_change, on_text_change, on_editing_finished, on_activate, on_key_press, on_focus_change. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs` |
 | 1.7 (#3) | GPU text: font cache with a glyph atlas texture | Load each font once, rasterize glyphs once into a GPU atlas, and draw text by blitting glyphs. | `core`, `enhancement`, `mvp`, `parallelizable`, `performance`, `size/M` | Y | Y | M | `font.rs`, `paint.rs`, `cache.rs`, `engine.rs` |
 | 1.8 (#23) | Edit the widget tree at run time: remove, reparent, reorder | Remove widgets and change parent or stacking order without breaking IDs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `cache.rs`, `engine.rs` |
 | 1.9 (#24) | Dirty-rectangle redraw | Only re-blit the screen regions that changed. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `cache.rs`, `engine.rs` |
@@ -145,12 +149,13 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `parallelizable`, `size/L`, `usability` | Y | N | L | `accessibility.rs (new)`, `widget.rs`, `engine.rs` |
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `undo.rs (new)`, `engine.rs` |
 | 1.16 (#82) | Multiple windows | Open additional top-level windows, each with its own widget tree, sharing one application state. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `engine.rs`, `cache.rs` |
+| 1.17 (#104) | Per-state appearance: colors, border, and font for each visual state | Every widget carries appearance attributes for normal, pressed, hovered, focused, disabled, and drag-over, so the look changes automatically as the state changes. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `paint.rs`, `all widgets` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
 **Problem Statement.** Every classic system stored what an object can do and how it currently looks as flags on the object itself, so selection, default buttons, and disabled appearance worked the same everywhere and could be saved in form files. Pushrod widgets only have `hidden`, so each widget would reinvent these behaviors and the form file (6.3 (#62)) would have nothing generic to store.
 
-**Solution / Scope.** Add two bitflag types to `WidgetCore`. `Behavior`: `FOCUSABLE`, `TOGGLE` (stays pressed after a click), `DEFAULT_ACTION` (activated by Return), `CANCEL_ACTION` (activated by Escape), `DISMISSES_DIALOG` (closes the enclosing modal dialog and reports itself, 6.7 (#66)), `ACTIVATE_ON_PRESS` (fires on press, not release), `EXCLUSIVE` (one-of-many among siblings, 2.5 (#31)), `HIDDEN`. `VisualState`: `PRESSED`, `CHECKED`, `INDETERMINATE` (mixed/tri-state), `DISABLED`, `FOCUSED`, `HOVERED`. Default trait methods `behavior()`, `set_behavior()`, `state()`, `set_state()`, `is_enabled()`, `set_enabled()`. `HIDDEN` backs the existing `set_hidden`. `paint::state_overlay` draws DISABLED (a cached 50% dither texture copied with alpha), FOCUSED (dotted outline), and INDETERMINATE generically. Disabled widgets receive no input.
+**Solution / Scope.** Add two bitflag types to `WidgetCore`. `Behavior`: `FOCUSABLE`, `TOGGLE` (stays pressed after a click), `DEFAULT_ACTION` (activated by Return), `CANCEL_ACTION` (activated by Escape), `DISMISSES_DIALOG` (closes the enclosing modal dialog and reports itself, 6.7 (#66)), `ACTIVATE_ON_PRESS` (fires on press, not release), `EXCLUSIVE` (one-of-many among siblings, 2.5 (#31)), `HIDDEN`. `VisualState`: `PRESSED` (shown while the mouse button is held on it; no flags = normal), `CHECKED`, `INDETERMINATE` (mixed/tri-state), `DISABLED`, `FOCUSED`, `HOVERED` (pointer inside), `DRAG_OVER` (a drag is over it, 9.8 (#100)). Default trait methods `behavior()`, `set_behavior()`, `state()`, `set_state()`, `is_enabled()`, `set_enabled()`. `HIDDEN` backs the existing `set_hidden`. `paint::state_overlay` draws DISABLED (a cached 50% dither texture copied with alpha), FOCUSED (dotted outline), and INDETERMINATE generically. Disabled widgets receive no input.
 
 ```text
 Behavior (what it does)          VisualState (how it looks now)
@@ -160,7 +165,7 @@ DEFAULT_ACTION   (Return)        INDETERMINATE
 CANCEL_ACTION    (Escape)        DISABLED
 DISMISSES_DIALOG                 FOCUSED
 ACTIVATE_ON_PRESS                HOVERED
-EXCLUSIVE        (radio groups)
+EXCLUSIVE        (radio groups)  DRAG_OVER
 HIDDEN
 ```
 
@@ -295,7 +300,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** `on_click` and the catch-all `on_event` only cover buttons. Value controls, text fields, lists, and focus all need their own clearly named callbacks.
 
-**Solution / Scope.** Add per-widget registration methods mapping one-to-one onto the event vocabulary (9.1 (#93)): `on_click`, `on_activate`, `on_toggle(|state, ui, checked|)`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change(|state, ui, gained|)`, `on_hover(|state, ui, inside|)`. All share one internal map keyed by `(WidgetId, EventKind)` and return a `CallbackId` (9.7 (#99)).
+**Solution / Scope.** Add per-widget registration methods mapping one-to-one onto the event vocabulary (9.1 (#93)): `on_click`, `on_press` (mouse button went down on the widget), `on_release` (went up, inside or outside), `on_activate`, `on_toggle(|state, ui, checked|)`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change(|state, ui, gained|)`, `on_hover(|state, ui, inside|)`. All share one internal map keyed by `(WidgetId, EventKind)` and return a `CallbackId` (9.7 (#99)).
 
 **Acceptance Criteria.**
 
@@ -554,6 +559,55 @@ Like every widget, it can also receive application-defined custom events in `han
 **Technical Stack.** Rust, SDL2 windows
 
 **Documentation.** Rustdoc: Window API. README/guides: Windows section. Examples: Example with a second window. Screenshots: n/a.
+
+### 1.17 (#104): Per-state appearance: colors, border, and font for each visual state
+
+**Problem Statement.** Today a widget's look is hard-coded per state (the button inverts when pressed). Applications can't say 'this button turns blue on hover' or 'this field gets a thicker border when focused', and every widget re-implements its own state colors.
+
+**Solution / Scope.** Add `StateStyle { background, foreground, border_color, border_width, font: Option<TextStyle> }` and an `Appearance` on `WidgetCore` holding one `StateStyle` per visual state: `normal`, `pressed`, `hovered`, `focused`, `disabled`, `checked`, `drag_over`. Unset fields fall back to `normal`, and `normal` falls back to the built-in defaults (today's look: pressed = inverted). `paint` helpers read the *effective* style for the current state (`self.style()`), so widgets get state-dependent appearance without code. API: `set_style(VisualState::HOVERED, StateStyle { background: Some(..), .. })`, `appearance_mut()`. State changes (pointer enter/exit, press/release, drag in/out, focus) invalidate only when the effective style actually changes. Appearance is a property (6.2 (#61)), so form files and Chassis store it, and parts of composites (5.2 (#57)) have their own.
+
+```text
+state change ──> effective style = appearance[state] ⟶ falls back to appearance.normal ⟶ built-in default
+                  │
+                  └─> repaint only if the effective style changed
+```
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**One button through its states with a custom appearance (hover = blue, pressed = dark blue)**
+
+![1.17 step set 1: One button through its states with a custom appearance (hover = blue, pressed = dark blue)](mockups/1.17-1.png)
+
+**A drop target in its drag-over state**
+
+![1.17 step set 2: A drop target in its drag-over state](mockups/1.17-2.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `PointerEntered / PointerExited { id }` | Pointer moves in or out (hover state) | `on_hover(id, ..)` |
+| `PointerPressed / PointerReleased { id }` | Mouse button down / up on the widget (pressed state) | `on_press(id, ..)`, `on_release(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- `StateStyle` and `Appearance` on every widget with fallback to normal and built-in defaults
+- Hover, press/release, focus, disabled, checked, and drag-over switch the effective style automatically
+- Default look unchanged (golden images identical)
+- Repaint only when the effective style changes
+- Stored in form files
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.1 (#19), 9.1 (#93).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `StateStyle`, `Appearance`, `Widget::style`. README/guides: 'Appearance and states' section. Examples: Example: hover color on a button. Screenshots: Gallery tile per state.
+
+**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
 ## Epic 2: Core dialog widgets (#12)
 
@@ -2570,6 +2624,120 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Rustdoc: `set_cursor`. README/guides: Usability section. Examples: n/a. Screenshots: n/a.
 
+## Epic 10: Rendering backends, drawing modes, and vintage hardware (#103)
+
+Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target.
+
+**Problem.** Pushrod should run well on slow GPUs and, ideally, on vintage hardware such as the Atari ST. Two things stand in the way: dragging and resizing redraw content continuously (expensive on slow hardware), and widgets paint directly onto an SDL2 canvas, which ties every widget to SDL2.
+
+**Scope.** Add a feedback mode (live or outline) for anything that moves or resizes; route all painting through a small backend-neutral `Painter` trait whose default backend is SDL2 with GPU texture caching; split out a `no_std` + `alloc` core; then explore an Atari ST/TOS backend. SDL2 remains the default and does the heavy lifting on modern systems.
+
+**Dependencies.** The backend-neutral paint API (10.2 (#106)) is MVP and should land before the widget count grows. Drawing modes (10.1 (#105)) follow the input controllers (9.4 (#96)). The no_std core (10.3 (#107)) and the Atari ST backend (10.4 (#108)) are future work.
+
+| Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
+|---|---|---|---|---|---|---|---|
+| 10.1 (#105) | Drawing modes: live or outline feedback while moving and resizing | Live mode redraws content as things move; outline mode shows only a dotted rectangle until the move ends, for slow GPUs and vintage hardware. | `core`, `enhancement`, `parallelizable`, `performance`, `portability`, `size/M` | Y | N | M | `engine.rs`, `cache.rs`, `controllers.rs` |
+| 10.2 (#106) | Backend-neutral paint API (SDL2 backend by default) | Widgets paint through a small Painter trait instead of an SDL2 canvas, so other backends become possible without touching widgets. | `core`, `enhancement`, `mvp`, `portability`, `size/M` | N | Y | M | `paint.rs`, `widget.rs`, `cache.rs`, `texture.rs`, `backend/sdl2.rs (new)` |
+| 10.3 (#107) | no_std + alloc core crate | Split the widget tree, events, and widgets into a core crate that builds without the standard library. | `core`, `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-core (new crate)`, `Cargo workspace` |
+| 10.4 (#108) | Experimental: Atari ST / TOS backend | Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing. | `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-tos (new crate)` |
+
+### 10.1 (#105): Drawing modes: live or outline feedback while moving and resizing
+
+**Problem Statement.** Moving or resizing something (a dragged item, a split divider, a column width, a window or panel, objects in Chassis) normally repaints content continuously. On slow GPUs, software renderers, and vintage machines that's too slow and looks jerky.
+
+**Solution / Scope.** `Engine::set_drawing_mode(DrawingMode::Live | DrawingMode::Outline | DrawingMode::Auto)`, overridable per widget. **Live:** content follows the pointer and repaints as it moves. **Outline:** only a dotted (inverted where the backend supports it) rectangle is drawn in the overlay layer while dragging; the real move or resize, and its repaint, happen once on release. Value controls follow the same rule: in outline mode the slider and scroll-bar thumbs still move, but `ValueChanged` and dependent repaints (for example scrolled content) happen on release. **Auto** measures frame time and switches to outline when frames take longer than a threshold. Drag controllers (9.4 (#96)) implement it, so every widget that drags gets it for free.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Live mode: the dragged panel repaints at every position**
+
+![10.1 step set 1: Live mode: the dragged panel repaints at every position](mockups/10.1-1.png)
+
+**Outline mode: only an outline moves; the panel repaints once on release**
+
+![10.1 step set 2: Outline mode: only an outline moves; the panel repaints once on release](mockups/10.1-2.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Moved / Resized { id }` | Live: continuously; Outline: once on release | `on_event(..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Live, Outline, and Auto modes for drag, resize, divider, and column-width interactions
+- Outline mode performs no content repaint until release
+- Value controls defer change events and dependent repaints in outline mode
+- Auto switches based on measured frame time
+
+**Parallelism / Dependencies.** Parallelizable. Requires 9.4 (#96).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `DrawingMode`. README/guides: 'Slow hardware' section. Examples: Example toggles the mode at run time. Screenshots: n/a.
+
+### 10.2 (#106): Backend-neutral paint API (SDL2 backend by default)
+
+**Problem Statement.** `Widget::paint` takes `&mut sdl2::render::Canvas<Window>`, so every widget depends on SDL2. Changing that signature after dozens of widgets exist would be expensive, and it is the main obstacle to software rendering and vintage targets.
+
+**Solution / Scope.** Introduce `trait Painter { fn fill(&mut self, color); fn fill_rect(..); fn rect(..); fn line(..); fn text(..) -> Size; fn image(..); fn dither(..); fn clip(..) }` (kept small: only what `paint` helpers need) and change `Widget::paint(&self, p: &mut dyn Painter)`. The default `Sdl2Painter` keeps today's design exactly: each widget paints into its own GPU texture when invalidated and frames are blits of cached textures. A backend also declares a `CachePolicy` (`TextureCache` on GPUs; `DirectDraw` on memory-poor systems, painting invalidated widgets straight to the screen with clipping). The SDL2 backend remains the default; nothing changes for applications.
+
+**Acceptance Criteria.**
+
+- All widgets paint through `Painter`; no widget imports `sdl2::render`
+- SDL2 backend renders pixel-identical goldens
+- A headless test backend records paint calls for unit tests
+- Cache policy is backend-selected
+
+**Parallelism / Dependencies.** Not parallelizable. Requires PR #10. Do before the widget count grows.
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: `Painter` trait, `Sdl2Painter`, `CachePolicy`. README/guides: 'Backends' section. Examples: Test backend used in widget tests. Screenshots: n/a.
+
+### 10.3 (#107): no_std + alloc core crate
+
+**Problem Statement.** Vintage targets have no Rust standard library; Rust's m68k bare-metal target builds only `core` and `alloc`.
+
+**Solution / Scope.** Move the widget tree, events, widgets, paint helpers, and form loader into `pushrod-core` (`#![no_std]` + `alloc`), with time, files, and threads behind small traits provided by the platform crate. `pushrod` (SDL2, std) re-exports it, so applications don't change.
+
+**Acceptance Criteria.**
+
+- `pushrod-core` builds for a `no_std` target with `alloc`
+- `pushrod` API unchanged
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.2 (#106).
+
+**Technical Stack.** Rust (core, alloc)
+
+**Documentation.** Rustdoc: Crate layout. README/guides: 'Backends' section. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html)
+
+### 10.4 (#108): Experimental: Atari ST / TOS backend
+
+**Problem Statement.** It would be ideal for a Pushrod application to run on the Atari ST. Rust can already produce TOS programs for the 68000, but SDL2 isn't available there and an 8 MHz 68000 with 512 KB to 4 MB of RAM can't afford a texture per widget.
+
+**Solution / Scope.** A `pushrod-tos` platform crate on top of `pushrod-core` (10.3 (#107)), built for Rust's `m68k-unknown-none-elf` target with `build-std` (core, alloc) and linked into a `.PRG`. Backend options to evaluate: (a) draw directly into screen memory (monochrome 640x400 first, then low/medium resolution bitplanes) with a fixed bitmap font; (b) use the VDI; (c) use SDL 1.2 (#6)'s Atari port. Input from the IKBD/GEMDOS. Defaults for the platform: `DrawingMode::Outline`, `CachePolicy::DirectDraw`, bitmap font instead of the glyph atlas. Start with a hello-world form (label + button + callback) running in Hatari, then on hardware.
+
+**Acceptance Criteria.**
+
+- A Pushrod form with a button and callback runs in the Hatari emulator
+- Size and speed measured and documented
+- Runs on real ST hardware
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.1 (#105), 10.2 (#106), 10.3 (#107).
+
+**Technical Stack.** Rust nightly (`build-std`), m68k, TOS, Hatari
+
+**Documentation.** Rustdoc: `pushrod-tos` README. README/guides: 'Vintage hardware' section. Examples: Hello-world form PRG. Screenshots: n/a.
+
+**Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html); [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST); [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
+
 ## Work Order
 
 Work in this order. Items in the same step can be done in parallel unless their dependencies say otherwise.
@@ -2585,12 +2753,14 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.13 (#78) Custom application events with payloads — MVP
 - 1.7 (#3) GPU text: font cache with a glyph atlas texture — MVP
 - 7.3 (#71) Widget gallery example — MVP
+- 10.2 (#106) Backend-neutral paint API (SDL2 backend by default) — MVP
 
 **2. Input model**
 
 - 9.2 (#94) Event propagation: capture, target, and bubble phases with handled/ignored — MVP
 - 9.4 (#96) Reusable input controllers: click, drag, scroll, hover, long-press, key — MVP
 - 1.4 (#20) Keyboard focus, Tab order, and Return/Escape — MVP
+- 1.17 (#104) Per-state appearance: colors, border, and font for each visual state — MVP
 - 1.12 (#76) Keyboard mnemonics: underlined shortcut letters — MVP
 - 1.5 (#21) Timers and idle callbacks — MVP
 
@@ -2643,6 +2813,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 9.9 (#101) Pointer cursor per widget
 - 1.11 (#26) Application lifecycle: startup and close-request callbacks
 - 1.15 (#81) Undo and redo command stack
+- 10.1 (#105) Drawing modes: live or outline feedback while moving and resizing
 
 **8. After MVP: widgets**
 
@@ -2676,6 +2847,8 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.16 (#82) Multiple windows
 - 6.8 (#67) Bind actions by name from form files
 - 6.9 (#68) Design-mode hooks for Chassis
+- 10.3 (#107) no_std + alloc core crate
+- 10.4 (#108) Experimental: Atari ST / TOS backend
 
 **10. Distant future**
 
@@ -2724,4 +2897,7 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 - [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
 - [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html)
 - [GObject: property bindings (GBinding)](https://docs.gtk.org/gobject/class.Binding.html)
+- [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html)
+- [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST)
+- [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
 - Apple AppKit documentation for NSStepper, NSSegmentedControl, NSTabView, NSProgressIndicator, NSLevelIndicator, NSComboBox, NSOutlineView (Mac OS X successors of the NeXTSTEP Application Kit)
