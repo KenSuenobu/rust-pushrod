@@ -18,7 +18,7 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Shared behavior lives in the core.** Flags, states, focus, clipping, and events are implemented once (Epic 1, Epic 5), so a new widget gets them for free.
 - **IDs are the contract.** Widgets are addressed by stable IDs, like the numbered objects in classic resource files. Forms, generated constants, and callbacks all key off IDs.
 - **Runtime first, designer second.** Epic 6 builds everything Chassis needs (registry, properties, form file format, loader/writer, design-mode hooks) into Pushrod itself.
-- **Same look.** New widgets use the current flat, black-and-white style. Theming is Epic 8 and is not scheduled.
+- **Keep it stupid simple.** Widgets are flat: fills, one-pixel borders, and text. No glass, no bevels, no rounded corners. Fancy looks are up to the application (custom paint, 2.10 (#36); theming hooks, Epic 8, not scheduled). See [`DESIGN_PHILOSOPHY.md`](../DESIGN_PHILOSOPHY.md).
 - **Modern names.** Older systems are credited for ideas only. Pushrod's flags, events, and callbacks use plain, modern names, collected in the *Naming* section so they can be reviewed in one place.
 - **Retained, with stable identity.** Widgets persist and keep stable IDs, which is what accessibility trees, caching, incremental updates, and form files all need.
 - **Engine separate from design.** The engine (tree, events, invalidation, paint API) and the design layer (widgets, defaults, appearance, themes) are separate modules with written specs (7.6 (#114)).
@@ -88,6 +88,12 @@ flowchart LR
                           |       v
   application code:  engine.on_click(form.id(main::OK), |state, ui| ...)
 ```
+
+## Widget roadmaps
+
+Each widget has its own roadmap in [`docs/widgets/`](widgets/README.md), the specification for what it is, what it does, how it looks, and how it responds. This file keeps the core, event, form, and release work, and the order everything is built in.
+
+[Boxed Label](widgets/boxed-label.md) · [Glyph Button](widgets/glyph-button.md) · [Button](widgets/button.md) · [Check Box](widgets/check-box.md) · [Radio Button](widgets/radio-button.md) · [Text Field](widgets/text-field.md) · [Image](widgets/image.md) · [Icon](widgets/icon.md) · [Alert](widgets/alert.md) · [Custom Paint](widgets/custom-paint.md) · [Menu Bar and Menus](widgets/menu-bar-and-menus.md) · [File Chooser](widgets/file-chooser.md) · [Tooltip](widgets/tooltip.md) · [Separator](widgets/separator.md) · [Toolbar](widgets/toolbar.md) · [Status Bar](widgets/status-bar.md) · [Switch](widgets/switch.md) · [Text Area](widgets/text-area.md) · [Context Menu](widgets/context-menu.md) · [Message Bar](widgets/message-bar.md) · [Image Button](widgets/image-button.md) · [Link Label](widgets/link-label.md) · [Scroll Bar](widgets/scroll-bar.md) · [Slider](widgets/slider.md) · [Group Box](widgets/group-box.md) · [Choice Button](widgets/choice-button.md) · [Column Browser](widgets/column-browser.md) · [Split View](widgets/split-view.md) · [Expander](widgets/expander.md) · [Date Picker](widgets/date-picker.md) · [Dial](widgets/dial.md) · [Progress Bar](widgets/progress-bar.md) · [Spin Box](widgets/spin-box.md) · [Tab View](widgets/tab-view.md) · [List View](widgets/list-view.md) · [Combo Box](widgets/combo-box.md) · [Table View](widgets/table-view.md) · [Spinner](widgets/spinner.md) · [Container](widgets/container.md)
 
 ## Modern foundations
 
@@ -742,7 +748,7 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 |---|---|---|---|---|---|---|---|
 | 2.1 (#27) | Boxed label widget | Text with background and border. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `boxed_label.rs (new)` |
 | 2.2 (#28) | Glyph button (small single-character button) | A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. | `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `glyph_button.rs (new)` |
-| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | Drive ButtonWidget behavior from behavior flags. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | Y | S | `button_widget.rs`, `paint.rs` |
+| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | Y | S | `button_widget.rs`, `paint.rs` |
 | 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `check_box.rs (new)` |
 | 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `radio_button.rs (new)`, `cache.rs` |
 | 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `enhancement`, `mvp`, `size/L`, `widget` | N | Y | L | `text_field.rs (new)`, `paint.rs` |
@@ -765,806 +771,135 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 ### 2.1 (#27): Boxed label widget
 
-**Problem Statement.** Boxed labels (text with a background and border) are common in dialogs and status areas, but need two stacked widgets today.
+Text with background and border. **Widget roadmap:** [`docs/widgets/boxed-label.md`](widgets/boxed-label.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `BoxedLabel` = `fill` + `text` + `border`, reusing `TextStyle`. Kept under 100 lines as the reference example of composing paint helpers.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Normal and disabled**
-
-![2.1 step set 1: Normal and disabled](mockups/2.1-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Renders background, centered text, border
-- Display only (empty event mask)
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/boxed-label.md` ("Boxed Label", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+**Dependencies.** Requires PR #10.
 
 ### 2.2 (#28): Glyph button (small single-character button)
 
-**Problem Statement.** Scroll bars, spin boxes, and title gadgets need a small button showing one symbol, often repeating while held.
+A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. **Widget roadmap:** [`docs/widgets/glyph-button.md`](widgets/glyph-button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `GlyphButton { glyph: char }`: fill + centered glyph + border; inverted while pressed. With `ACTIVATE_ON_PRESS` it fires on press and auto-repeats while held (400 ms delay, then every 100 ms, via timers).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Pressed (fires immediately) 3. Held: repeats 4. Released 5. Disabled**
-
-![2.2 step set 1: 1. Idle 2. Pressed (fires immediately) 3. Held: repeats 4. Released 5. Disabled](mockups/2.2-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id }` | On press, then on each auto-repeat | `on_click(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Centered glyph
-- Pressed state inverts
-- Activate-on-press with auto-repeat
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.5 (#21).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/glyph-button.md` ("Glyph Button", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.1 (#19), 1.5 (#21).
 
 ### 2.3 (#29): Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog
 
-**Problem Statement.** `ButtonWidget` is only a push button. Dialogs need a visibly distinct default button (Return), a cancel button (Escape), toggle buttons, buttons that fire on press, and buttons that close a dialog.
+A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. **Widget roadmap:** [`docs/widgets/button.md`](widgets/button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Behavior comes from flags (1.1 (#19)): `DEFAULT_ACTION` draws a 2 px ring and is triggered by Return; `CANCEL_ACTION` by Escape; `TOGGLE` stays pressed and emits `Toggled`; `ACTIVATE_ON_PRESS` emits `Clicked` on press; `DISMISSES_DIALOG` closes the modal dialog (6.7 (#66)) and reports its ID. Pressed inversion moves to shared state painting.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Push button: 1. idle 2. pressed 3. dragged out (releases) 4. released inside -> Clicked**
-
-![2.3 step set 1: Push button: 1. idle 2. pressed 3. dragged out (releases) 4. released inside -> Clicked](mockups/2.3-1.png)
-
-**Default button: 2 px ring, Return activates it**
-
-![2.3 step set 2: Default button: 2 px ring, Return activates it](mockups/2.3-2.png)
-
-**Toggle button: click stays pressed, click again releases**
-
-![2.3 step set 3: Toggle button: click stays pressed, click again releases](mockups/2.3-3.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id, button, count }` | Push/default/cancel: release inside; activate-on-press: press | `on_click(id, ..)` |
-| `Toggled { id, checked }` | Toggle button changes state | `on_toggle(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Each flag combination behaves as described and is tested
-- Default button is recognizable at a glance
-- No regression in PR #10 click tests
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/button.md` ("Button", Widgets, update). Guides: n/a. Rustdoc: Behavior table on `ButtonWidget`. Examples: OK (default) / Cancel in example. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.4 (#30): Check box with indeterminate state
 
-**Problem Statement.** A first-class check box is expected everywhere, including a 'mixed' state when it summarizes several items.
+Box with a check mark and label; toggles checked; optional mixed state. **Widget roadmap:** [`docs/widgets/check-box.md`](widgets/check-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `CheckBox`: square + check mark when `CHECKED`, a dash when `INDETERMINATE`, followed by a label. Clicking the box or label toggles and emits `Toggled`; Space toggles when focused; clicking an indeterminate box makes it checked.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Unchecked 2. Pressed 3. Checked 4. Indeterminate 5. Focused 6. Disabled**
-
-![2.4 step set 1: 1. Unchecked 2. Pressed 3. Checked 4. Indeterminate 5. Focused 6. Disabled](mockups/2.4-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | Click, Space, or mnemonic | `on_toggle(id, ..)` |
-| `FocusGained / FocusLost { id }` | Keyboard focus moves | `on_focus_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Click, Space, and mnemonic toggle
-- Indeterminate renders and resolves on click
-- Label click toggles
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/check-box.md` ("Check Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Example + gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.5 (#31): Radio buttons and radio groups
 
-**Problem Statement.** Choosing exactly one of a few options is everywhere; selecting one radio button must clear its siblings, which needs core support.
+One-of-many selection among sibling widgets. **Widget roadmap:** [`docs/widgets/radio-button.md`](widgets/radio-button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `RadioButton` (circle + label) with the `EXCLUSIVE` behavior. When one becomes checked, exclusive siblings under the same parent are cleared and `Toggled` is emitted for the newly checked one (and `Toggled(false)` for the one cleared). `RadioGroup::new(labels)` builds a labeled group in one call; `ui.checked_in_group(parent)`. Arrow keys move within the group (1.4 (#20)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared**
-
-![2.5 step set 1: 1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared](mockups/2.5-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | A radio becomes checked or is cleared | `on_toggle(id, ..)`; `ui.checked_in_group(parent)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Exactly one exclusive sibling is checked after any change
-- Works for any widget with `EXCLUSIVE`
-- Arrow keys move within the group
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/radio-button.md` ("Radio Button", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Size picker in example. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.6 (#32): Text field: single-line entry with input masks, validation, and numeric mode
 
-**Problem Statement.** There is no text input. Fields need a caret, selection, clipboard, and a way to restrict and validate input.
+Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. **Widget roadmap:** [`docs/widgets/text-field.md`](widgets/text-field.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `TextField`: caret (blinking via timers), selection with Shift+arrows and mouse drag, Home/End, word movement, clipboard via SDL, max length, placeholder text, password mode. Restrict input with an input mask (`"99/99/9999"`, `9` digit, `A` letter, `X` any) or a `Validator` trait (`validate(&str) -> Valid | Intermediate | Invalid`); `IntegerField`/`NumberField` presets with range. Optional built-in label (`with_label("Name:")`). Uses SDL text input events. Emits `TextChanged` on each edit and `EditingFinished` on Return or focus loss. Input method composition is handled per 1.19 (#112). **Accessories:** a text field can show glyph buttons *inside* its editable area, at the leading and/or trailing edge (`with_leading(Accessory)`, `with_trailing(Accessory)`); text never runs underneath them. Built-in accessories: `Clear` (×, shown only when the field has text; clears it and emits `TextChanged`), `Search` (magnifier, leading, decorative or clickable), `RevealPassword` (eye, toggles password masking), and `Custom(glyph)` (emits `AccessoryClicked { id, which }`). `TextField::search()` is a preset: search glyph leading, clear trailing, `EditingFinished` on Return.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. empty 2. focused 3. typing 4. selection 5. rejected character 6. disabled**
-
-![2.6 step set 1: 1. empty 2. focused 3. typing 4. selection 5. rejected character 6. disabled](mockups/2.6-1.png)
-
-**Input mask `99/99/9999`**
-
-![2.6 step set 2: Input mask `99/99/9999`](mockups/2.6-2.png)
-
-**Accessories: search field with clear button, password with reveal**
-
-![2.6 step set 3: Accessories: search field with clear button, password with reveal](mockups/2.6-3.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `TextChanged { id }` | Every edit; read `text()` | `on_text_change(id, ..)` |
-| `EditingFinished { id }` | Return or focus loss (validate here) | `on_editing_finished(id, ..)` |
-| `KeyPressed { id, key, modifiers }` | Keys while focused | `on_key_press(id, ..)` |
-| `AccessoryClicked { id, which }` | A custom accessory glyph is clicked (Clear and RevealPassword act on their own) | `on_event(..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Typing, deleting, caret movement, selection, copy/paste
-- Masks and validators reject invalid input
-- Numeric mode with range
-- `EditingFinished` on Return and focus loss
-- Leading/trailing accessories inside the edit area; text never overlaps them
-- `Clear`, `Search`, `RevealPassword`, and custom accessories; `TextField::search()` preset
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.5 (#21), 1.6 (#22), 1.19 (#112).
-
-**Technical Stack.** Rust, SDL2 text input and clipboard
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/text-field.md` ("Text Field", Widgets, new). Guides: Widget list. Rustdoc: Module docs incl. mask characters. Examples: Name and age fields in example. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
+**Dependencies.** Requires 1.4 (#20), 1.5 (#21), 1.6 (#22), 1.19 (#112).
 
 ### 2.7 (#33): Image widget
 
-**Problem Statement.** There is no way to show a bitmap.
+Display a PNG/BMP image centered, stretched, scaled to fit, or tiled. **Widget roadmap:** [`docs/widgets/image.md`](widgets/image.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ImageWidget` loads an image once with SDL2_image into a shared GPU texture cache keyed by path and copies it with a fit mode: `Center`, `Stretch`, `Fit` (keep aspect), `Tile`. Missing files draw a crossed box instead of panicking.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Fit modes and missing file**
-
-![2.7 step set 1: Fit modes and missing file](mockups/2.7-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id }` | Only if made clickable | `on_click(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Loads PNG and BMP
-- Fit modes render as documented
-- Missing files don't panic
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust, sdl2::image
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/image.md` ("Image", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Logo in example. Screenshots: Gallery tile.
+**Dependencies.** Requires PR #10.
 
 ### 2.8 (#34): Icon widget (picture with caption)
 
-**Problem Statement.** Launchers, file views, and tool palettes use icons with captions.
+Picture with a caption, selectable and double-clickable, like desktop icons. **Widget roadmap:** [`docs/widgets/icon.md`](widgets/icon.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `IconWidget` = image + caption; click selects (caption inverted), double-click or Return activates.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Selected 3. Activated (double-click)**
-
-![2.8 step set 1: 1. Idle 2. Selected 3. Activated (double-click)](mockups/2.8-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id, count }` | Click selects | `on_click(id, ..)` |
-| `Activated { id }` | Double-click or Return | `on_activate(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Selection inverts the caption
-- Double-click and Return emit `Activated`
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 2.7 (#33).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/icon.md` ("Icon", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.6 (#22), 2.7 (#33).
 
 ### 2.9 (#35): Alert dialog
 
-**Problem Statement.** Every system has a one-call alert (icon, message, a few buttons). Pushrod has no modal dialogs.
+One-call modal alert with icon, message, and up to three buttons. **Widget roadmap:** [`docs/widgets/alert.md`](widgets/alert.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` builds a centered modal form (6.7 (#66)) from existing widgets and calls the completion closure with the chosen button index. Return chooses the default, Escape the last button. Always drawn by Pushrod. **Parts (5.2 (#57)):** `AlertParts { icon, title, message, buttons }`; `add_button`, `remove_button`, `set_default_button`. Every part can be retrieved and restyled (font, color, text). Example: `let a = ui.alert(..); ui.get_mut::<TextWidget>(a.parts().message)?.set_font_color(Color::RED); a.add_button(ui, "Help");`
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Alert opens centered; the rest of the window is drawn but inert**
-
-![2.9 step set 1: 1. Alert opens centered; the rest of the window is drawn but inert](mockups/2.9-1.png)
-
-**2. Return = Delete (default), Escape = Cancel  3. Closes; completion gets the index**
-
-```rust
- ui.alert(AlertKind::Warning, "Delete \"report.txt\"?", "This cannot be undone.",
-          &["Delete", "Cancel"], 0, |state, ui, choice| if choice == 0 { /* delete */ });
-```
-
-**Customized through its parts: bold red message, an extra Help button**
-
-![2.9 step set 3: Customized through its parts: bold red message, an extra Help button](mockups/2.9-3.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (completion) | A button is chosen | Completion closure `FnOnce(&mut S, &mut Ui, usize)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Modal: nothing else receives input while open
-- Return/Escape behave as described
-- Completion closure gets the index
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 2.3 (#29), 6.7 (#66), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/alert.md` ("Alert", Widgets, new). Guides: Dialogs section. Rustdoc: `alert` module. Examples: Quit confirmation (1.11 (#26)). Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 2.3 (#29), 6.7 (#66), 5.2 (#57).
 
 ### 2.10 (#36): Custom paint widget (closure-drawn)
 
-**Problem Statement.** A full `Widget` impl is a lot of ceremony for a one-off drawing (a chart, a preview).
+One-off custom drawing without writing a widget struct. **Widget roadmap:** [`docs/widgets/custom-paint.md`](widgets/custom-paint.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `CustomPaint::new(origin, size, |canvas, size, state| ..)` with an optional event closure. The closure draws into the widget's GPU texture with the SDL2 canvas; it only runs when invalidated.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Drawn entirely by the application's closure**
-
-![2.10 step set 1: Drawn entirely by the application's closure](mockups/2.10-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (any) | Whatever the optional event closure emits or posts | `on_click`, `on_value_change`, `on_custom::<T>` as appropriate |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Closure paints into the texture
-- Optional event closure receives events
-- Example draws a chart
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/custom-paint.md` ("Custom Paint", Widgets, new). Guides: Linked from 'Writing a widget'. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+**Dependencies.** Requires PR #10.
 
 ### 2.11 (#37): Menu bar and drop-down menus (drawn by Pushrod)
 
-**Problem Statement.** Desktop applications need menus that look and behave the same on every platform.
+Menu bar with drop-down menus, separators, check marks, submenus, shortcuts, and mnemonics. **Widget roadmap:** [`docs/widgets/menu-bar-and-menus.md`](widgets/menu-bar-and-menus.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `MenuBar` and `Menu` widgets built as composites (5.2 (#57)). Items come from actions (9.5 (#97)) or plain labels; support separators, check/radio items, disabled items, submenus, shortcut text, and mnemonics (1.12 (#76)). Menus open on click, track the pointer, draw in the overlay layer above all widgets, and close on outside click or Escape. Never uses the OS menu bar or native menus. **Parts (5.2 (#57)):** `MenuBar::menus()`, `Menu::items()`, `add_item`, `insert_item`, `remove_item`, `add_separator`; each item is a part with its own font and color. Every part can be retrieved and restyled (font, color, text). Emits its engine event (9.10 (#109)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. File opened (overlay) 3. Hovering Save 4. Release: Save triggered**
-
-![2.11 step set 1: 1. Idle 2. File opened (overlay) 3. Hovering Save 4. Release: Save triggered](mockups/2.11-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Triggered { action }` | Item chosen by mouse, shortcut, or mnemonic | `on_action(action, ..)` (9.5 (#97)) or `on_click(item_id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Menus open, track, select, and close correctly
-- Submenus and keyboard navigation
-- No OS-native menu APIs on any platform
-- Parts are retrievable and modifiable as described
-- Emits the corresponding `EngineEvent` (9.10 (#109))
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.12 (#76), 5.1 (#56), 5.2 (#57), 9.5 (#97).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/menu-bar-and-menus.md` ("Menu Bar and Menus", Widgets, new). Guides: Menus section. Rustdoc: `menu` module. Examples: File/Edit menus in example. Screenshots: Gallery tile.
-
-**Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
+**Dependencies.** Requires 1.1 (#19), 1.12 (#76), 5.1 (#56), 5.2 (#57), 9.5 (#97).
 
 ### 2.12 (#38): File chooser dialog (drawn by Pushrod)
 
-**Problem Statement.** Applications need to open and save files; native dialogs would break the consistent look.
+Choose a file or directory with a consistent look on every platform. **Widget roadmap:** [`docs/widgets/file-chooser.md`](widgets/file-chooser.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Modal form built from the list view (4.5 (#52)), text fields, and buttons: directory, filter, file list, name, OK/Cancel; Open and Save modes. Completion closure receives `Option<PathBuf>`. OS-native dialogs are deliberately not used. **Parts (5.2 (#57)):** `FileChooserParts { folder, filter, list, name, buttons }`; `add_button` (for example 'New Folder'), `add_filter_choice`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Open dialog**
-
-![2.12 step set 1: Open dialog](mockups/2.12-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (completion) | Open or Cancel | Completion closure `FnOnce(&mut S, &mut Ui, Option<PathBuf>)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Navigate, filter, choose; keyboard operable
-- Returns None on cancel
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 6.7 (#66), 5.2 (#57).
-
-**Technical Stack.** Rust std::fs
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/file-chooser.md` ("File Chooser", Widgets, new). Guides: Dialogs section. Rustdoc: Module docs. Examples: Open button in example. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 2.6 (#32), 4.5 (#52), 6.7 (#66), 5.2 (#57).
 
 ### 2.13 (#77): Tooltips
 
-**Problem Statement.** Icon buttons and terse labels are hard to learn without explanation.
+Short help text shown after the pointer rests on a widget. **Widget roadmap:** [`docs/widgets/tooltip.md`](widgets/tooltip.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Optional `tooltip` text on `WidgetCore` (actions supply it automatically). After a delay (600 ms), draw a bordered text box in the overlay layer near the pointer; hide it on movement, click, or key press. Emits its engine event (9.10 (#109)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Pointer rests 2. After 600 ms 3. Pointer moves: hidden**
-
-![2.13 step set 1: 1. Pointer rests 2. After 600 ms 3. Pointer moves: hidden](mockups/2.13-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Purely visual | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Appears after the delay and hides correctly
-- Stays inside the window; never under the pointer
-- Emits the corresponding `EngineEvent` (9.10 (#109))
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 5.1 (#56).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/tooltip.md` ("Tooltip", Widgets, new). Guides: Usability section. Rustdoc: `set_tooltip`. Examples: Tooltips on example buttons. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21), 5.1 (#56).
 
 ### 2.14 (#83): Separator line
 
-**Problem Statement.** Dialogs group content with simple lines; today that needs a 1-pixel BoxWidget.
+Horizontal or vertical divider line. **Widget roadmap:** [`docs/widgets/separator.md`](widgets/separator.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Separator::horizontal(width)` / `vertical(height)`: a 1 px line (optionally etched as two lines). Display only.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Horizontal and vertical**
-
-![2.14 step set 1: Horizontal and vertical](mockups/2.14-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Horizontal and vertical render correctly
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/separator.md` ("Separator", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires PR #10.
 
 ### 2.15 (#84): Toolbar
 
-**Problem Statement.** Frequent commands should be one click away.
+A row of icon/text buttons bound to actions. **Widget roadmap:** [`docs/widgets/toolbar.md`](widgets/toolbar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Toolbar` composite of tool buttons created from actions (9.5 (#97)): icon and/or text, toggle actions stay pressed, disabled actions gray out, tooltips from the action. Overflow items move into a '>>' menu. **Parts (5.2 (#57)):** `items()`, `add_action`, `insert_action`, `remove_item`; each tool button is a part. Every part can be retrieved and restyled (font, color, text). Tool buttons are image buttons (2.21 (#125)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Toolbar with a toggled Bold and a disabled Paste**
-
-![2.15 step set 1: Toolbar with a toggled Bold and a disabled Paste](mockups/2.15-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Triggered { action }` | A tool button is clicked | `on_action(action, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Buttons reflect action state
-- Overflow menu when too narrow
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 9.5 (#97), 5.2 (#57), 2.21 (#125).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/toolbar.md` ("Toolbar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Toolbar in example. Screenshots: Gallery tile.
-
-**Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
+**Dependencies.** Requires 9.5 (#97), 5.2 (#57), 2.21 (#125).
 
 ### 2.16 (#85): Status bar
 
-**Problem Statement.** Applications show transient messages ('Saved') and permanent status (line/column) at the bottom of the window.
+A strip at the bottom of the window for messages and status fields. **Widget roadmap:** [`docs/widgets/status-bar.md`](widgets/status-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `StatusBar` with a message area (`show_message(text, timeout)`) and permanent fields; actions' status text appears while their menu item is hovered. **Parts (5.2 (#57)):** `fields()`, `add_field`, `remove_field`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Status bar**
-
-![2.16 step set 1: Status bar](mockups/2.16-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Timed messages clear themselves
-- Hovered action status text appears
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/status-bar.md` ("Status Bar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Status bar in example. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21), 5.2 (#57).
 
 ### 2.17 (#86): Switch (on/off slide toggle)
 
-**Problem Statement.** Settings that apply immediately read more clearly as a switch than as a check box.
+A sliding on/off switch for settings that take effect immediately. **Widget roadmap:** [`docs/widgets/switch.md`](widgets/switch.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Switch`: track with a knob; click or drag toggles; Space when focused. Emits `Toggled`.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Off, on, disabled**
-
-![2.17 step set 1: Off, on, disabled](mockups/2.17-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | State changes | `on_toggle(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Click, drag, Space toggle
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/switch.md` ("Switch", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.18 (#87): Multi-line text area
 
-**Problem Statement.** Notes, descriptions, and logs need multi-line text, which a single-line field can't provide.
+Multi-line plain-text editing with scrolling, selection, clipboard, and undo. **Widget roadmap:** [`docs/widgets/text-area.md`](widgets/text-area.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `TextArea` in a container: line wrapping, caret and selection across lines, clipboard, undo (1.15 (#81)), read-only mode for logs, `append` for log output. Only visible lines are painted from the glyph atlas.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Editing with a selection**
-
-![2.18 step set 1: Editing with a selection](mockups/2.18-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `TextChanged { id }` | Every edit | `on_text_change(id, ..)` |
-| `EditingFinished { id }` | Focus loss | `on_editing_finished(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Editing, selection, clipboard, undo
-- Smooth with 10,000 lines
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 2.6 (#32), 5.3 (#58), 1.7 (#3).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/text-area.md` ("Text Area", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Notes area in example. Screenshots: Gallery tile.
+**Dependencies.** Requires 2.6 (#32), 5.3 (#58), 1.7 (#3).
 
 ### 2.19 (#88): Context menus
 
-**Problem Statement.** Commands that apply to one object (a list row, a text selection) belong in a menu that appears where the user clicked.
+Right-click (or long-press) pop-up menus for a widget. **Widget roadmap:** [`docs/widgets/context-menu.md`](widgets/context-menu.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `widget.set_context_menu(menu)` or `on_context_menu(id, |state, ui, at| -> Option<Menu>)` to build it dynamically. Opens on secondary click, long-press, or the Menu key, at the pointer, in the overlay layer; reuses `Menu` (2.11 (#37)) and actions (9.5 (#97)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Right-click on a list row**
-
-![2.19 step set 1: Right-click on a list row](mockups/2.19-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ContextMenuRequested { id, position }` | Secondary click / long-press / Menu key | `on_context_menu(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Opens on secondary click, long-press, and Menu key
-- Dynamic menus via callback
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.11 (#37), 9.4 (#96).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/context-menu.md` ("Context Menu", Widgets, new). Guides: Menus section. Rustdoc: Context menu API. Examples: Context menu on a list. Screenshots: Gallery tile.
-
-**Sources.** [MAME wiki: Intergraph InterPro / CLIX / Environ V](https://wiki.mamedev.org/index.php/Driver:InterPro)
+**Dependencies.** Requires 2.11 (#37), 9.4 (#96).
 
 ### 2.20 (#89): Message bar (non-modal inline notice)
 
-**Problem Statement.** Many messages don't need a modal alert ('Connection lost, retrying'); blocking the user is worse usability.
+A dismissible banner for warnings and information that doesn't block the window. **Widget roadmap:** [`docs/widgets/message-bar.md`](widgets/message-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `MessageBar` at the top of a form: icon, text, optional action buttons, close box; slides in by animating its height. **Parts (5.2 (#57)):** `MessageBarParts { icon, message, buttons, close }`; `add_button`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Message bar with an action**
-
-![2.20 step set 1: Message bar with an action](mockups/2.20-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id }` | Action button or close box | `on_click(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Shows, hides, and dismisses
-- Action buttons fire callbacks
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 2.3 (#29), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/message-bar.md` ("Message Bar", Widgets, new). Guides: Usability section. Rustdoc: Module docs. Examples: Example shows a connection warning. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21), 2.3 (#29), 5.2 (#57).
 
 ### 2.21 (#125): Image button
 
-**Problem Statement.** Toolbars, palettes, and compact dialogs need buttons that show a picture instead of, or next to, text.
+A button that shows an image, or an image with a text label, with the full button behavior. **Widget roadmap:** [`docs/widgets/image-button.md`](widgets/image-button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ImageButton` with an image (from the image cache, 2.7 (#33)) and optional label; `ImagePosition::{Only, Left, Right, Above, Below}`; optional separate images per state (normal, pressed, disabled, hovered), otherwise the pressed state inverts and disabled dithers like other widgets. Supports every button behavior (default, cancel, toggle, activate-on-press, 2.3 (#29)) and mnemonics. **Parts (5.2 (#57)):** `ImageButtonParts { image, label }`.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Image only, image left of label, image above label; normal, pressed, toggled, disabled**
-
-![2.21 step set 1: Image only, image left of label, image above label; normal, pressed, toggled, disabled](mockups/2.21-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id, button, count }` | Released inside (or pressed, with activate-on-press) | `on_click(id, ..)` |
-| `Toggled { id, checked }` | Toggle image buttons | `on_toggle(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Image only, and image with label in each position
-- Per-state images or automatic pressed/disabled looks
-- All button behaviors and mnemonics work
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.3 (#29), 2.7 (#33), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/image-button.md` ("Image Button", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `ImageButton`, `ImagePosition`. Examples: Toolbar-style buttons in the gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 2.3 (#29), 2.7 (#33), 5.2 (#57).
 
 ### 2.22 (#126): Link label
 
-**Problem Statement.** 'Learn more', 'Forgot password?', and similar secondary actions read better as links than as buttons.
+Clickable text that looks like a link and opens a URL or runs a callback. **Widget roadmap:** [`docs/widgets/link-label.md`](widgets/link-label.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `LinkLabel { text, target: Option<String> }`: underlined text in the link color, pointer cursor (9.9 (#101)) on hover, focusable with a dotted focus outline, activated by click, Return, or Space. With a URL target it opens the system browser (SDL's open-URL support) after the application's `on_activate` callback has had a chance to cancel; without a target it only emits `Activated`. Visited state optional. Appearance per state through 1.17 (#104).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Normal, hovered, focused, visited**
-
-![2.22 step set 1: Normal, hovered, focused, visited](mockups/2.22-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Activated { id }` | Clicked, or Return/Space when focused | `on_activate(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Click, Return, and Space activate
-- URL targets open the system browser unless the callback cancels
-- Hover cursor and focus outline
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.4 (#20), 1.6 (#22).
-
-**Technical Stack.** Rust, SDL2 (open URL)
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/link-label.md` ("Link Label", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `LinkLabel`. Examples: 'Learn more' link in the gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.4 (#20), 1.6 (#22).
 
 ## Epic 3: Value and choice controls (#13)
 
@@ -1590,348 +925,57 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 
 ### 3.1 (#39): Scroll bar
 
-**Problem Statement.** Containers, lists, and text areas need scroll bars; older systems made applications assemble them by hand.
+Vertical/horizontal scroll bar with arrows and a proportional thumb. **Widget roadmap:** [`docs/widgets/scroll-bar.md`](widgets/scroll-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ScrollBar` composite (5.2 (#57)): two glyph buttons (activate-on-press with auto-repeat), a track, and a draggable thumb sized by `visible / total`. Value 0.0 to 1.0 plus page size; clicking the track pages. Emits `ValueChanged`. **Parts (5.2 (#57)):** `ScrollBarParts { up, down, track, thumb }` (colors and glyphs customizable). Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Track clicked below thumb (page down) 3. Thumb dragged 4. Down arrow held**
-
-![3.1 step set 1: 1. Idle 2. Track clicked below thumb (page down) 3. Thumb dragged 4. Down arrow held](mockups/3.1-1.png)
-
-**Horizontal**
-
-![3.1 step set 2: Horizontal](mockups/3.1-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | Position changes; read `value()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Drag, arrows with repeat, track paging
-- Thumb size reflects proportion
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.5 (#21), 1.6 (#22), 2.2 (#28), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/scroll-bar.md` ("Scroll Bar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
+**Dependencies.** Requires 1.5 (#21), 1.6 (#22), 2.2 (#28), 5.2 (#57).
 
 ### 3.2 (#40): Slider
 
-**Problem Statement.** There is no way to pick a value from a range.
+Horizontal/vertical slider with range, optional ticks, and value label. **Widget roadmap:** [`docs/widgets/slider.md`](widgets/slider.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Slider { min, max, value, step, ticks, show_value }`: track + knob; drag or click; arrow keys when focused; optional value text beside it. Emits `ValueChanged` continuously and `EditingFinished` on release.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Dragging 3. Ticks with snap 4. Disabled**
-
-![3.2 step set 1: 1. Idle 2. Dragging 3. Ticks with snap 4. Disabled](mockups/3.2-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | While dragging and on key/click | `on_value_change(id, ..)` |
-| `EditingFinished { id }` | Drag released | `on_editing_finished(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Drag/click set value within range
-- Ticks and snapping
-- Keyboard adjusts
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/slider.md` ("Slider", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Volume slider in example. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.6 (#22).
 
 ### 3.3 (#41): Group box (titled frame)
 
-**Problem Statement.** Dialogs group related controls inside a titled frame.
+A frame with a title in its top border, grouping related controls. **Widget roadmap:** [`docs/widgets/group-box.md`](widgets/group-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `GroupBox`: border with a gap at the top-left for the title. Children are added normally.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Group box**
-
-![3.3 step set 1: Group box](mockups/3.3-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Container only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Title interrupts the border
-- Works as the parent of a radio group
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/group-box.md` ("Group Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Group the radio buttons in the example. Screenshots: Gallery tile.
-
-**Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires PR #10.
 
 ### 3.6 (#44): Choice button: pop-up list and click-to-cycle modes
 
-**Problem Statement.** Choosing one option from a list shouldn't always require radio buttons that take up space.
+Pick one of several options compactly, as a pop-up list or a click-to-cycle button. **Widget roadmap:** [`docs/widgets/choice-button.md`](widgets/choice-button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ChoiceButton { items, selected, mode }`. `Popup` mode opens an overlay list positioned so the current item sits under the pointer. `Cycle` mode advances on each click (Shift-click goes back) without a list: the most compact choice for two to five options. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `items()`, `add_item`, `remove_item`; the pop-up list's rows are parts. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Popup mode: 1. closed 2. open, current item under pointer 3. Large chosen**
-
-![3.6 step set 1: Popup mode: 1. closed 2. open, current item under pointer 3. Large chosen](mockups/3.6-1.png)
-
-**Cycle mode: each click advances; Shift-click goes back**
-
-![3.6 step set 2: Cycle mode: each click advances; Shift-click goes back](mockups/3.6-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Selection changes; read `selected()` | `on_selection_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Popup opens over the current item; selects by mouse/keyboard
-- Cycle mode advances and reverses
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/choice-button.md` ("Choice Button", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
+**Dependencies.** Requires 1.6 (#22), 5.1 (#56), 5.2 (#57).
 
 ### 3.7 (#45): Column browser (multi-column hierarchical browser)
 
-**Problem Statement.** Hierarchies (folders, settings categories, class trees, mail folders) are easiest to navigate when the whole path stays visible. NeXTSTEP's column browser shows column 0 as the root; selecting an item in column 0 fills column 1 with its children, selecting in column 1 fills column 2, and so on, with the path always on screen.
+Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. **Widget roadmap:** [`docs/widgets/column-browser.md`](widgets/column-browser.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ColumnBrowser` composite (5.2 (#57)) of list-view columns (4.5 (#52)) inside a horizontal container (5.3 (#58)). Data comes from a `BrowserModel` trait: `children(&path) -> Vec<BrowserItem>`, `is_leaf(&path)`, optional icon and label per item. Selecting an item in column *n* replaces every column to the right with a new column *n+1* listing that item's children; selecting a leaf clears the columns to the right (an optional preview pane can show leaf details). Branch items show a ▶ marker. When columns overflow the width, the view scrolls horizontally to keep the newest column visible. Columns have a fixed default width and can be resized by dragging the divider between them. Keyboard: Up/Down move within a column, Right enters the selected branch (moving focus to the next column), Left returns to the parent column, typing jumps to a matching item, Return activates. Double-click or Return on a leaf emits `Activated`. **Parts (5.2 (#57)):** `columns()` returns each column's list-view ID; columns can be restyled like any list view; `path()` and `set_path()` read and set the selection. The file chooser (2.12 (#38)) can offer a column mode built on it.
-
-```text
-col[0] (root)       col[1] (children of
-                    col[0] selection)   col[2] (children of col[1] selection)
-+--------------+    +--------------+    +--------------+
-| Applications▶|    | user        ▶|    | Documents   ▶|
-|#Users########|--> |#user########▶|--> |#Projects####▶|--> col[3] ...
-| System      ▶|    | shared      ▶|    | Music       ▶|
-+--------------+    +--------------+    +--------------+
-```
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Selecting in each column fills the next one**
-
-![3.7 step set 1: Selecting in each column fills the next one](mockups/3.7-1.png)
-
-**Many columns: the view scrolls horizontally to keep the newest column visible**
-
-![3.7 step set 2: Many columns: the view scrolls horizontally to keep the newest column visible](mockups/3.7-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | The selected path changes; read `path()` | `on_selection_change(id, ..)` |
-| `Activated { id }` | Double-click or Return on a leaf | `on_activate(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Selecting in column n fills column n+1 and clears columns to its right
-- Leaf selection clears columns to the right; optional preview pane
-- Horizontal scrolling keeps the newest column visible; column widths are resizable
-- Keyboard navigation: Up/Down, Right into a branch, Left to parent, type-ahead, Return
-- `path()`/`set_path()`, `columns()` part access
-- Works with a filesystem model and an in-memory tree model
-
-**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52), 5.2 (#57), 5.3 (#58).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/column-browser.md` ("Column Browser", Widgets, new). Guides: Widget list. Rustdoc: Module docs + `BrowserModel`. Examples: Filesystem browser example. Screenshots: Gallery tile.
-
-**Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
+**Dependencies.** Requires 4.5 (#52), 5.2 (#57), 5.3 (#58).
 
 ### 3.9 (#47): Split view (panes with draggable dividers)
 
-**Problem Statement.** List-and-detail screens, editors with a sidebar, and browsers with a preview need panes the user can resize.
+Two or more panes side by side or stacked, separated by dividers the user drags to resize them. **Widget roadmap:** [`docs/widgets/split-view.md`](widgets/split-view.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `SplitView` (horizontal or vertical) holding two or more panes; each pane is a container for child widgets (often a Container, 5.3 (#58)). Dividers are drawn between panes; dragging one resizes its neighbors, respecting each pane's minimum size and optional maximum; double-clicking a divider collapses the smaller pane (if collapsible) and restores it. When the split view is resized, extra space goes to panes by stretch factor (default: the last pane). Divider positions can be set (`set_position(divider, px)`), read, and saved by the application. Dragging follows the drawing mode (10.1 (#105)): live repaint or an outline until release. **Parts (5.2 (#57)):** `panes()`, `dividers()`.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Dragging the divider between a list and a detail pane**
-
-![3.9 step set 1: Dragging the divider between a list and a detail pane](mockups/3.9-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | A divider moved (on release in outline mode); read `positions()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Dragging a divider resizes neighboring panes within their min/max
-- Collapsible panes; double-click to collapse/restore
-- Extra space distributed by stretch factor
-- Positions settable and readable; outline mode supported
-
-**Parallelism / Dependencies.** Parallelizable. Requires 5.2 (#57), 5.5 (#116), 9.4 (#96).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/split-view.md` ("Split View", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `SplitView`. Examples: List-and-detail example. Screenshots: Gallery tile.
-
-**Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 5.2 (#57), 5.5 (#116), 9.4 (#96).
 
 ### 3.10 (#90): Expander (collapsible section)
 
-**Problem Statement.** Advanced options clutter dialogs; hiding them behind a disclosure keeps simple cases simple.
+A titled section that shows or hides its contents when clicked. **Widget roadmap:** [`docs/widgets/expander.md`](widgets/expander.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Expander { title, expanded }`: triangle + title; toggling hides or shows the child subtree and resizes the expander (autoresizing 5.4 (#59) moves following siblings if configured). Emits `Toggled`.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Collapsed and expanded**
-
-![3.10 step set 1: Collapsed and expanded](mockups/3.10-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | Expanded/collapsed | `on_toggle(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Click, Space, and mnemonic toggle
-- Children hidden and shown
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 5.4 (#59).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/expander.md` ("Expander", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Advanced options in example. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.1 (#19), 5.4 (#59).
 
 ### 3.11 (#91): Date picker
 
-**Problem Statement.** Typing dates is error-prone; forms commonly need a date.
+A date field with a drop-down month calendar. **Widget roadmap:** [`docs/widgets/date-picker.md`](widgets/date-picker.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `DatePicker`: a masked text field (2.6 (#32)) plus a button that opens a month calendar in the overlay (arrows for month/year, keyboard navigation, today highlighted). Emits `ValueChanged`. **Parts (5.2 (#57)):** `DatePickerParts { field, button, calendar }`; day cells are parts of the calendar. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Calendar open**
-
-![3.11 step set 1: Calendar open](mockups/3.11-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | Date chosen or typed; read `date()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Calendar navigation by mouse and keyboard
-- Typed and picked dates agree
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/date-picker.md` ("Date Picker", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 2.6 (#32), 5.1 (#56), 5.2 (#57).
 
 ### 3.12 (#127): Dial (rotary knob)
 
-**Problem Statement.** Some values are naturally rotary (volume, pan, gain, angle), and a dial takes less space than a slider.
+A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. **Widget roadmap:** [`docs/widgets/dial.md`](widgets/dial.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Dial { min, max, value, step, wrapping, notches }`: circle with an indicator line and optional notch marks around the rim; drag vertically or circularly to turn, mouse wheel and arrow keys step, Page Up/Down page. `wrapping` lets the value roll over (angles). Optional value text below. Emits `ValueChanged` continuously and `EditingFinished` on release; outline drawing mode defers dependent work to release (10.1 (#105)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Turning a dial: idle, dragging, focused, disabled**
-
-![3.12 step set 1: Turning a dial: idle, dragging, focused, disabled](mockups/3.12-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | While turning | `on_value_change(id, ..)` |
-| `EditingFinished { id }` | Drag released | `on_editing_finished(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Drag, wheel, and keys change the value within range
-- Wrapping mode for angles
-- Notches and optional value text
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 9.4 (#96).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/dial.md` ("Dial", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `Dial`. Examples: Volume dial in the gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.6 (#22), 9.4 (#96).
 
 ## Epic 4: Lists, tables, progress, spin boxes, and tabs (#14)
 
@@ -1945,7 +989,7 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 4.1 (#48) | Progress bar | Determinate bar and indeterminate busy mode. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `progress_bar.rs (new)` |
+| 4.1 (#48) | Progress bar | A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `progress_bar.rs (new)` |
 | 4.2 (#49) | Spin box | Numeric field with up/down arrows, range, and step. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `spin_box.rs (new)` |
 | 4.4 (#51) | Tab view | Tabs that switch between pages of controls. | `enhancement`, `layout`, `parallelizable`, `size/M`, `widget` | Y | N | M | `tab_view.rs (new)` |
 | 4.5 (#52) | List view | Scrolling list with single/multiple selection, backed by a data source. | `enhancement`, `size/L`, `widget` | N | N | L | `list_view.rs (new)` |
@@ -1955,255 +999,45 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 
 ### 4.1 (#48): Progress bar
 
-**Problem Statement.** Long operations need visible progress.
+A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). **Widget roadmap:** [`docs/widgets/progress-bar.md`](widgets/progress-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ProgressBar { max, value: Option<f64> }` with the same semantics as the HTML `<progress>` element: a value between 0 and `max` shows a determinate bar; no value (`set_indeterminate()` or `value: None`) shows the indeterminate busy animation (a block moving back and forth, driven by timer ticks, 1.5 (#21); reduced to a static striped bar in outline drawing mode, 10.1 (#105)). Display only.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**0%, 40%, busy**
-
-![4.1 step set 1: 0%, 40%, busy](mockups/4.1-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only; set with `set_value()` (often from a custom event, 1.13 (#78)) | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Determinate fill proportional to value / max
-- `None` value shows the indeterminate animation without callbacks
-- Static in outline drawing mode
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/progress-bar.md` ("Progress Bar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Progress fed by a custom event. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21).
 
 ### 4.2 (#49): Spin box
 
-**Problem Statement.** Numbers within a range are easier to adjust with arrows than by typing.
+Numeric field with up/down arrows, range, and step. **Widget roadmap:** [`docs/widgets/spin-box.md`](widgets/spin-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `SpinBox` = numeric text field (2.6 (#32)) + two glyph buttons with auto-repeat; Up/Down keys and the wheel adjust; typed values are clamped on `EditingFinished`. **Parts (5.2 (#57)):** `SpinBoxParts { field, up, down }`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Up held 3. Out-of-range typing clamps 4. Disabled**
-
-![4.2 step set 1: 1. Idle 2. Up held 3. Out-of-range typing clamps 4. Disabled](mockups/4.2-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | Value changes; read `value()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Arrows, keys, wheel adjust within range
-- Typed values clamp
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.2 (#28), 2.6 (#32), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/spin-box.md` ("Spin Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
+**Dependencies.** Requires 2.2 (#28), 2.6 (#32), 5.2 (#57).
 
 ### 4.4 (#51): Tab view
 
-**Problem Statement.** Settings dialogs group many controls into pages.
+Tabs that switch between pages of controls. **Widget roadmap:** [`docs/widgets/tab-view.md`](widgets/tab-view.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `TabView`: tab strip + one container per page; switching hides inactive pages (IDs and state preserved). Ctrl+Tab switches pages. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `tabs()`, `pages()`, `add_page(title) -> (tab_id, page_id)`, `remove_page`. Every part can be retrieved and restyled (font, color, text). Pages are held in a stack layout (5.9 (#120)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. General active 2. Advanced chosen**
-
-![4.4 step set 1: 1. General active 2. Advanced chosen](mockups/4.4-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Active page changes; read `selected_page()` | `on_selection_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Switching hides/shows pages
-- Hidden controls keep state and IDs
-- Ctrl+Tab
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/tab-view.md` ("Tab View", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Settings dialog example. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.1 (#19), 5.2 (#57).
 
 ### 4.5 (#52): List view
 
-**Problem Statement.** Lists are needed by file choosers, combo boxes, and most applications.
+Scrolling list with single/multiple selection, backed by a data source. **Widget roadmap:** [`docs/widgets/list-view.md`](widgets/list-view.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ListView` in a container, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates. **Parts (5.2 (#57)):** `rows()` (visible row parts), per-row style via a `row_style` callback for model-driven rows. Every part can be retrieved and restyled (font, color, text). The `ListModel` reports changes as ranges (`inserted(range)`, `removed(range)`, `changed(range)`, `reset`) so the view updates incrementally, and row widgets are recycled as the list scrolls (virtualization).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Click selects 3. Shift-click extends 4. Double-click activates**
-
-![4.5 step set 1: 1. Idle 2. Click selects 3. Shift-click extends 4. Double-click activates](mockups/4.5-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Selection changes; read `selected_rows()` | `on_selection_change(id, ..)` |
-| `Activated { id }` | Double-click or Return | `on_activate(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Smooth with 10,000 rows
-- Selection modes and keyboard navigation
-- Model change notifications update the view
-- Parts are retrievable and modifiable as described
-- Range-based model notifications; row widgets recycled while scrolling
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 5.3 (#58), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/list-view.md` ("List View", Widgets, new). Guides: Widget list. Rustdoc: Module docs + `ListModel`. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.6 (#22), 5.3 (#58), 5.2 (#57).
 
 ### 4.6 (#53): Combo box
 
-**Problem Statement.** Choosing common values while allowing free entry needs a combo box.
+Text field with a drop-down list of suggestions. **Widget roadmap:** [`docs/widgets/combo-box.md`](widgets/combo-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Composite of `TextField` + arrow + overlay `ListView`; typing filters; choosing fills the field. **Parts (5.2 (#57)):** `ComboBoxParts { field, button, list }`; `add_item`, `remove_item`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Typing filters 3. Chosen**
-
-![4.6 step set 1: 1. Idle 2. Typing filters 3. Chosen](mockups/4.6-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `TextChanged { id }` | Typing | `on_text_change(id, ..)` |
-| `SelectionChanged { id }` | Item chosen from the list | `on_selection_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Typing filters; arrow opens; choosing fills
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/combo-box.md` ("Combo Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 2.6 (#32), 4.5 (#52), 5.1 (#56), 5.2 (#57).
 
 ### 4.9 (#92): Table view
 
-**Problem Statement.** Records with several fields (files with size and date, orders, logs) need columns.
+Multi-column list with headers, column resizing, and sorting. **Widget roadmap:** [`docs/widgets/table-view.md`](widgets/table-view.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `TableView` extending the list view: column headers, resizable columns, click a header to sort (via the model), per-column alignment; a `TableModel` supplies cells. **Parts (5.2 (#57)):** `columns()`, `add_column`, `remove_column`; header cells are parts. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Sorted by Size**
-
-![4.9 step set 1: Sorted by Size](mockups/4.9-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Row selection | `on_selection_change(id, ..)` |
-| `Activated { id }` | Double-click or Return | `on_activate(id, ..)` |
-| `SortChanged { id, column, ascending }` | Header clicked | `on_event(..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Columns resize and sort
-- Only visible cells painted
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/table-view.md` ("Table View", Widgets, new). Guides: Widget list. Rustdoc: Module docs + `TableModel`. Examples: File list in example. Screenshots: Gallery tile.
+**Dependencies.** Requires 4.5 (#52), 5.2 (#57).
 
 ### 4.10 (#128): Busy spinner
 
-**Problem Statement.** Short waits of unknown length (connecting, loading a list) need a compact busy indicator that fits next to a label or inside a button, where a progress bar doesn't fit.
+A small animated indicator for work of unknown length, for use inline or on buttons. **Widget roadmap:** [`docs/widgets/spinner.md`](widgets/spinner.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Spinner { running, size }`: a ring of segments with one highlighted segment rotating, driven by timer ticks (1.5 (#21)) only while running and visible (no ticks when stopped, so idle applications stay idle). `start()`, `stop()`, optional `hide_when_stopped`. In outline drawing mode (10.1 (#105)) and on vintage backends it shows a static hourglass glyph instead of animating. Display only.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Spinner frames while running, stopped, and the outline-mode fallback**
-
-![4.10 step set 1: Spinner frames while running, stopped, and the outline-mode fallback](mockups/4.10-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only; control with `start()` / `stop()` | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Animates only while running and visible
-- Static fallback in outline mode
-- Fits inline with text and inside buttons
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/spinner.md` ("Spinner", Widgets, new). Guides: none beyond the widget page (the **Widgets** group lists it automatically); link it from related guides where useful. Rustdoc: `Spinner`. Examples: Spinner next to a 'Connecting...' label. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21).
 
 ## Epic 5: Composition, clipping, and layout managers (#15)
 
@@ -2296,61 +1130,9 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ### 5.3 (#58): Container: a scrollable viewport onto fixed-size content
 
-**Problem Statement.** Applications with scrollable areas (long settings pages, document views, canvases, large forms) need a place to put widgets that is larger than the space on screen. The content must behave like a form: it has its own width, height, and 0,0 origin, and resizing or moving the container must not change the content or shift widgets within it.
+A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. **Widget roadmap:** [`docs/widgets/container.md`](widgets/container.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `Container`, a widget that holds children on a **content area**: `Container::new(origin, viewport_size, content_size)`; children are added with `add_child` at positions relative to the content's 0,0, exactly like a form. The container's frame is the **viewport**: resizing the container (`set_size`) changes only how much content is visible; `content_size` stays the same unless the application changes it (`set_content_size`). Moving the container (`set_origin`) moves the viewport on screen; content positions never shift. The viewport is panned by `scroll_offset` (the content point shown at the viewport's upper-left corner), clamped to the content bounds: vertical and horizontal scroll bars appear automatically when the content is larger than the viewport (or `ScrollBars::Always/Never`), and the mouse wheel, Page Up/Down, Home/End, and arrow keys (when focused) pan it too. API: `scroll_offset()`, `scroll_to(point)`, `scroll_by(dx, dy)`, `ensure_visible(rect)` (also used to keep the focused widget in view), `viewport()` (the visible content rectangle). Children are clipped to the viewport (5.1 (#56)) and hit-tested through it. On the GPU, panning only changes which part of the content is blitted: children that didn't change are not repainted. Content size can be `Fixed` (default), `FitChildren` (grows to the children's extent), or `FollowWidth` (content width follows the viewport, height fixed or fit: for long vertical forms); a layout manager (5.5 (#116)) can also arrange the content. A form loaded from a file (6.4 (#63)) can be placed in a container. **Parts (5.2 (#57)):** `ContainerParts { content, vertical, horizontal, corner }`. Emits `ViewportChanged { id, offset }` whenever the viewport pans or resizes.
-
-```text
-content (fixed size, its own 0,0)            screen
-+-----------------------------------+
-|0,0                                |       container origin (anywhere)
-|      +------------------+         |            +------------------+-+
-|      | viewport         |  ---------------->  | visible content  |^|
-|      | (scroll_offset   |         |            |                  |#|
-|      |  = top-left)     |         |            +------------------+v+
-|      +------------------+         |            |<|####          |>| |
-|                                   |            +--------------------+
-+-----------------------------------+
-resize container -> viewport grows/shrinks; content size unchanged
-move container   -> viewport moves on screen; content positions unchanged
-```
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Panning: the viewport moves over fixed content**
-
-![5.3 step set 1: Panning: the viewport moves over fixed content](mockups/5.3-1.png)
-
-**Resizing and moving the container: the content keeps its size and layout**
-
-![5.3 step set 2: Resizing and moving the container: the content keeps its size and layout](mockups/5.3-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ViewportChanged { id, offset }` | The viewport pans (scroll bar, wheel, keys, or code) or the container is resized | `on_viewport_change(id, ..)` |
-| (part events) | Scroll bars and other parts | callbacks on part IDs |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Children positioned relative to the content's 0,0; content size independent of the container size
-- Resizing the container changes only the visible area; moving it doesn't shift content
-- Scroll bars appear when needed (or always/never); wheel and keyboard pan; offset clamped to content bounds
-- `scroll_to`, `scroll_by`, `ensure_visible`, `viewport()`; focused widgets scrolled into view
-- Children clipped to and hit-tested through the viewport; panning doesn't repaint unchanged children
-- Content size modes Fixed, FitChildren, FollowWidth; works with a layout manager and with a loaded form
-- `ViewportChanged` emitted on pan and resize
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 3.1 (#39), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/container.md` ("Container", Widgets, new). Guides: update the guide or concept page covering: widget tree and coordinates (content coordinates). Rustdoc: `Container`, `ContainerParts`, `ScrollBars`, `ContentSize`. Examples: Long settings form inside a container. Screenshots: Container screenshots (scrolled, resized, moved).
+**Dependencies.** Requires 3.1 (#39), 5.1 (#56), 5.2 (#57).
 
 ### 5.4 (#59): Autoresizing (keep margins or stretch on resize)
 

@@ -21,6 +21,19 @@ access to the widget store, the containing object, and the event handler.
 Developers who have written GUI applications on the Atari ST, Macintosh, Amiga, and other event-based
 GUI libraries will instantly feel at home here.
 
+## Design philosophy
+
+Pushrod follows one rule: **Keep It Stupid Simple.** Widgets are flat: fills, one-pixel borders,
+and text. No glass, no beveled edges, no rounded corners. Making things look fancy is up to the
+application. The reasons are performance, a clean and consistent look, usability, and predictable
+behavior. See [DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md).
+
+## Roadmap
+
+The [roadmap](docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) covers the core, events, forms, and
+release plan. Each widget has its own roadmap in [docs/widgets](docs/widgets/README.md) that
+specifies what it is, what it does, how it looks, and how it responds.
+
 ## Installing on Ubuntu Linux
 
 ```shell

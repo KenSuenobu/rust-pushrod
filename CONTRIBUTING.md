@@ -1,9 +1,14 @@
 # Contributing to Pushrod
 
-Thanks for helping. The plan of record is the roadmap in
+Thanks for helping. Read [DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md) first: Pushrod keeps
+everything simple, flat, and predictable.
+
+The plan of record is the roadmap in
 [`docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md`](docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md);
 each issue there describes the problem, scope, acceptance criteria, mockups, and the
-documentation it needs.
+documentation it needs. Each widget has its own roadmap in [`docs/widgets/`](docs/widgets/README.md),
+which is the specification for that widget. To change how a widget looks or behaves, edit its
+roadmap file (and its mockup in `docs/mockups/generate.py`) in a pull request, then update the issue.
 
 ## Before opening a pull request
 
@@ -14,7 +19,8 @@ documentation it needs.
   npm run build` (broken links fail the build). Each issue's *Documentation (Docusaurus)*
   section names the pages to add or update.
 - New widgets follow the existing drawing style (`paint::fill`, `paint::border`,
-  `paint::text`) and draw everything through Pushrod; no OS-native controls.
+  `paint::text`) and draw everything through Pushrod; no OS-native controls, and no glass,
+  bevels, gradients, or rounded corners ([DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md)).
 - Any internal action you add emits an engine event (see roadmap issue 9.10).
 
 ## Sample data and privacy
