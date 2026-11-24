@@ -12,6 +12,10 @@ Needs:  Pillow  (pip install pillow)
 
 To change a mockup, edit the frame functions below and re-run; keep frames
 simple so they stay faithful to what Pushrod can draw.
+
+Sample data must be fictional: no real names, e-mail addresses, places,
+paths, or other personal information. Use placeholders such as "Jane Doe",
+"jane.doe@example.com", "Anytown", and "/home/user" (see CONTRIBUTING.md).
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -194,7 +198,6 @@ class C:
     def menu(self, x, y, w, items, hover=None):
         """items: list of (label, shortcut, flags) flags in {'sep','disabled','sub','check'}"""
         h = sum(9 if "sep" in f else 22 for _, _, f in items) + 4
-        self.rect(x + 3, y + 3, w, h, fill=DARK, outline=None)   # drop shadow
         self.rect(x, y, w, h, fill=WHITE)
         cy = y + 2
         for n, (label, sc, f) in enumerate(items):
@@ -364,10 +367,10 @@ def radios():
 def text_field():
     steps = [("1. Empty", dict(text="", placeholder="Your name"), None),
              ("2. Focused", dict(text="", caret=0, focused=True), None),
-             ("3. Typing", dict(text="Ken", caret=3, focused=True), "TextChanged"),
-             ("4. Selection", dict(text="Ken", sel=(1, 3), focused=True), None),
-             ("5. Invalid key rejected", dict(text="Ken", caret=3, focused=True), "no change"),
-             ("6. Disabled", dict(text="Ken", disabled=True), None)]
+             ("3. Typing", dict(text="Jane", caret=4, focused=True), "TextChanged"),
+             ("4. Selection", dict(text="Jane", sel=(1, 4), focused=True), None),
+             ("5. Invalid key rejected", dict(text="Jane", caret=4, focused=True), "no change"),
+             ("6. Disabled", dict(text="Jane", disabled=True), None)]
     out = []
     for lab, kw, note in steps:
         c = C(250, 56); x = c.labeled(12, 17, "Name:", 54); c.field(x, 17, 170, **kw); out.append((lab, c, note))
@@ -456,7 +459,7 @@ def menus():
 @sb("2.12")
 def file_chooser():
     c = C(470, 330); c.window(10, 10, 450, 310, "Open")
-    x = c.labeled(26, 46, "Folder:", 62); c.field(x, 44, 360, "/home/ken/projects")
+    x = c.labeled(26, 46, "Folder:", 62); c.field(x, 44, 360, "/home/user/projects")
     x = c.labeled(26, 76, "Filter:", 62); c.field(x, 74, 120, "*.rs")
     c.listbox(26, 108, 418, ["..", "src/", "main.rs", "lib.rs", "build.rs", "README.md"], selected={2})
     x = c.labeled(26, 240, "Name:", 62); c.field(x, 238, 360, "main.rs")
@@ -520,7 +523,7 @@ def switch():
 @sb("2.18")
 def text_area():
     c = C(360, 120); c.rect(14, 12, 320, 96, fill=WHITE); c.scrollbar(334, 12, 96, True, 0.0, 0.4)
-    c.text(20, 16, "Dear Ken,"); c.text(20, 36, "Thanks for the ")
+    c.text(20, 16, "Dear Customer,"); c.text(20, 36, "Thanks for the ")
     sx = 20 + c.tw("Thanks for the "); sel = "quick update"
     c.rect(int(sx), 39, int(c.tw(sel)) + 1, 17, fill=BLACK, outline=None); c.text(sx, 36, sel, WHITE)
     c.text(20, 56, "on the release."); c.line(20 + c.tw("on the release."), 59, 20 + c.tw("on the release."), 74)
@@ -706,12 +709,42 @@ def table_view():
     return [("Sorted by Size (descending)", c, "SortChanged when a header is clicked")]
 
 
-@sb("5.3")
-def scroll_view():
-    c = C(330, 140); c.rect(14, 12, 290, 100, fill=WHITE)
-    for n in range(4): c.text(22, 18 + n * 21, f"Line {12 + n} of the content")
-    c.scrollbar(304, 12, 100, True, 0.4, 0.3); c.scrollbar(14, 112, 290, False, 0.0, 0.5)
-    return [("Content clipped; wheel or scroll bars move it", c, "ValueChanged on scroll")]
+CONTENT_ITEMS = [("Name:", 20, 20), ("Email:", 20, 60), ("Phone:", 20, 100), ("Address:", 20, 140), ("City:", 20, 180), ("Notes:", 20, 220)]
+
+def _content(c, ox, oy, clip, scale=1.0):
+    """Draw the fixed-size content (360 x 260, its own 0,0) at ox, oy, clipped to clip=(x, y, w, h)."""
+    cx, cy, cw, ch = clip
+    layer = C(360, 260, bg=WHITE)
+    for label, x, y in CONTENT_ITEMS:
+        layer.text(x, y + 2, label); layer.field(x + 80, y, 220, "")
+    layer.text(6, 242, "0,0 is the content's own origin", MID, 11)
+    crop = layer.img.crop(((cx - ox) * S, (cy - oy) * S, (cx - ox + cw) * S, (cy - oy + ch) * S))
+    c.img.paste(crop, (cx * S, cy * S))
+    c.rect(cx, cy, cw, ch, fill=None)
+
+def _container(c, x, y, w, h, off_x, off_y):
+    """A container at x, y with a w x h frame, showing content from offset (off_x, off_y)."""
+    vw, vh = w - 16, h - 16
+    _content(c, x - off_x, y - off_y, (x, y, vw, vh))
+    c.scrollbar(x + vw, y, vh, True, off_y / max(1, 260 - vh), vh / 260)
+    c.scrollbar(x, y + vh, vw, False, off_x / max(1, 360 - vw), vw / 360)
+    c.rect(x + vw, y + vh, 16, 16, fill=GRAY)
+
+@sb("5.3", 1)
+def container_pan():
+    a = C(270, 170); _container(a, 15, 15, 240, 140, 0, 0)
+    b = C(270, 170); _container(b, 15, 15, 240, 140, 0, 110)
+    d = C(270, 170); _container(d, 15, 15, 240, 140, 120, 110)
+    return [("1. Viewport at the content's 0,0", a, None), ("2. Scrolled down", b, "ViewportChanged { offset: (0, 110) }"),
+            ("3. Scrolled right", d, "ViewportChanged { offset: (120, 110) }")]
+
+@sb("5.3", 2)
+def container_resize_move():
+    a = C(400, 300); _container(a, 15, 15, 240, 140, 0, 0)
+    b = C(400, 300); _container(b, 15, 15, 376, 276, 0, 0)
+    d = C(400, 300); _container(d, 145, 140, 240, 140, 0, 0)
+    return [("1. Container 240 x 140", a, None), ("2. Resized to 376 x 276: more content visible, same content size", b, "ViewportChanged"),
+            ("3. Moved: content positions unchanged", d, None)]
 
 
 @sb("9.8")
@@ -752,10 +785,10 @@ def composite_parts():
 
 
 TREE = {(): ["Applications", "Library", "System", "Users"],
-        ("Users",): ["ken", "guest", "shared"],
-        ("Users", "ken"): ["Desktop", "Documents", "Music", "Projects"],
-        ("Users", "ken", "Projects"): ["apiome", "pushrod", "tos3x-aes"],
-        ("Users", "ken", "Projects", "pushrod"): ["Cargo.toml", "README.md", "src", "examples"]}
+        ("Users",): ["user", "guest", "shared"],
+        ("Users", "user"): ["Desktop", "Documents", "Music", "Projects"],
+        ("Users", "user", "Projects"): ["notes-app", "pushrod", "sample-game"],
+        ("Users", "user", "Projects", "pushrod"): ["Cargo.toml", "README.md", "src", "examples"]}
 LEAVES = {"Cargo.toml", "README.md"}
 
 def _browser(c, x, y, path, ncols_visible=3, colw=140, rows=5, offset=0):
@@ -774,7 +807,7 @@ def _browser(c, x, y, path, ncols_visible=3, colw=140, rows=5, offset=0):
             if hot: c.rect(cx, ry, colw - 2, 20, fill=BLACK, outline=None)
             col = WHITE if hot else BLACK
             c.text(cx + 6, ry, it, col, 13)
-            branch = tuple(list(p) + [it]) in TREE or (it not in LEAVES and it not in ("Desktop", "Music", "guest", "shared", "Library", "System", "Applications", "apiome", "tos3x-aes", "src", "examples"))
+            branch = tuple(list(p) + [it]) in TREE or (it not in LEAVES and it not in ("Desktop", "Music", "guest", "shared", "Library", "System", "Applications", "notes-app", "sample-game", "src", "examples"))
             if branch: c.tri(cx + colw - 14, ry + 6, 7, "right", col)
         if n < ncols_visible - 1: c.line(cx + colw - 1, y, cx + colw - 1, y + rows * 20 + 4, MID)
     return total_w
@@ -784,15 +817,15 @@ def browser_steps():
     out = []
     for lab, path, note in [("1. Root column", [], None),
                             ("2. 'Users' selected: column 1 appears", ["Users"], "SelectionChanged (path /Users)"),
-                            ("3. 'ken' selected: column 2 appears", ["Users", "ken"], "SelectionChanged (path /Users/ken)")]:
+                            ("3. 'user' selected: column 2 appears", ["Users", "user"], "SelectionChanged (path /Users/user)")]:
         c = C(450, 130); _browser(c, 14, 14, path); out.append((lab, c, note))
     return out
 
 @sb("3.7", 2)
 def browser_scroll():
-    c = C(450, 150); _browser(c, 14, 14, ["Users", "ken", "Projects", "pushrod"], offset=2)
+    c = C(450, 150); _browser(c, 14, 14, ["Users", "user", "Projects", "pushrod"], offset=2)
     c.scrollbar(14, 122, 422, False, 1.0, 0.6)
-    c2 = C(450, 150); _browser(c2, 14, 14, ["Users", "ken", "Projects", "pushrod", "Cargo.toml"], offset=2)
+    c2 = C(450, 150); _browser(c2, 14, 14, ["Users", "user", "Projects", "pushrod", "Cargo.toml"], offset=2)
     c2.scrollbar(14, 122, 422, False, 1.0, 0.6)
     return [("Deep path: scrolled to keep the newest column visible", c, None),
             ("Leaf 'Cargo.toml' selected (double-click or Return activates)", c2, "Activated")]
@@ -838,6 +871,231 @@ def outline_mode():
     b = C(400, 130); _panel(b, 20, 20); b.dotted(150, 20, 150, 90); b.dotted(151, 21, 148, 88); b.pointer(220, 30)
     d = C(400, 130); _panel(d, 220, 20); d.pointer(290, 30)
     return [("1. Drag starts", a, None), ("2. Dragging: only the outline moves", b, "no content repaint"), ("3. Released: one repaint", d, "Moved")]
+
+
+CJK_FONT = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"   # any CJK-capable font works
+
+def _cjk(size=14):
+    key = ("cjk", size)
+    if key not in _fonts:
+        try:
+            _fonts[key] = ImageFont.truetype(CJK_FONT, size * S)
+        except OSError:
+            _fonts[key] = font(size)
+    return _fonts[key]
+
+def _ime_field(c, x, y, committed, composing, sel=None, candidates=None, hot=0):
+    c.rect(x, y, 230, 26, fill=WHITE); c.rect(x - 2, y - 2, 234, 30, outline=BLACK)
+    tx = x + 4
+    f = _cjk(14)
+    c.d.text((tx * S, (y + 2) * S), committed, fill=BLACK, font=f)
+    tx += c.d.textlength(committed, font=f) / S
+    if composing:
+        w = c.d.textlength(composing, font=f) / S
+        if sel:
+            a, b = sel
+            sx = tx + c.d.textlength(composing[:a], font=f) / S; sw = c.d.textlength(composing[a:b], font=f) / S
+            c.line(sx, y + 22, sx + sw, y + 22, BLACK, 2)
+        c.d.text((tx * S, (y + 2) * S), composing, fill=BLACK, font=f)
+        c.line(tx, y + 23, tx + w, y + 23, BLACK, 1)
+        caret = tx + w
+    else:
+        caret = tx
+    c.line(caret, y + 5, caret, y + 21)
+    if candidates:
+        cx0 = x + 4 + c.d.textlength(committed, font=f) / S
+        c.rect(int(cx0), y + 32, 120, 22 * len(candidates) + 4, fill=WHITE)
+        for n, cand in enumerate(candidates):
+            cy = y + 34 + n * 22
+            if n == hot: c.rect(int(cx0) + 1, cy, 118, 22, fill=BLACK, outline=None)
+            c.d.text(((cx0 + 6) * S, (cy + 1) * S), f"{n + 1}  {cand}", fill=WHITE if n == hot else BLACK, font=_cjk(13))
+
+@sb("1.19")
+def ime():
+    out = []
+    a = C(312, 120); a.text(12, 18, "Name:"); _ime_field(a, 62, 16, "", "にほんご"); out.append(("1. Composing (underlined, not yet in the text)", a, "CompositionUpdated"))
+    b = C(312, 150); b.text(12, 18, "Name:"); _ime_field(b, 62, 16, "", "日本語", sel=(0, 3), candidates=["日本語", "にほんご", "ニホンゴ"]); out.append(("2. Converting: candidates at the caret", b, None))
+    d = C(312, 120); d.text(12, 18, "Name:"); _ime_field(d, 62, 16, "日本語", ""); out.append(("3. Committed", d, "TextEntered, TextChanged"))
+    return out
+
+
+def _guide(c, x, y, w, h):
+    c.dotted(x, y, w, h, (60, 120, 200))
+
+@sb("5.6")
+def row_column():
+    out = []
+    for lab, W in [("Window 360 px wide", 360), ("Window 520 px wide (fields stretch, buttons stay right)", 520)]:
+        c = C(W, 190); c.window(0, 0, W, 190, "Connect")
+        fw = W - 40
+        c.text(20, 36, "Server"); c.field(20, 58, fw, "pushrod.example.com")
+        c.text(20, 88, "Port"); c.field(20, 110, fw, "8080")
+        _guide(c, 14, 32, W - 28, 104)
+        c.button(W - 196, 150, 84, 26, "Cancel"); c.button(W - 100, 150, 84, 26, "Connect", default=True)
+        _guide(c, 14, 144, W - 28, 38); c.text(24, 156, "<- spacer ->", (60, 120, 200), 12)
+        out.append((lab, c, None))
+    return out
+
+@sb("5.7")
+def form_layout():
+    rows = [("Name:", "Jane Doe"), ("Email address:", "jane.doe@example.com"), ("City:", "Anytown")]
+    a = C(460, 170); a.window(0, 0, 460, 170, "Profile")
+    lw = max(a.tw(r[0]) for r in rows)
+    for n, (l, v) in enumerate(rows):
+        y = 40 + n * 38
+        a.text(20 + lw - a.tw(l), y + 2, l); a.field(int(32 + lw), y, int(460 - 52 - lw), v)
+    a.line(int(26 + lw), 36, int(26 + lw), 150, (60, 120, 200))
+    b = C(250, 250); b.window(0, 0, 250, 250, "Profile")
+    for n, (l, v) in enumerate(rows):
+        y = 34 + n * 66
+        b.text(20, y, l); b.field(20, y + 24, 210, v)
+    return [("Wide: labels right-aligned to the widest label", a, None), ("Narrow: labels move above fields", b, "LayoutChanged")]
+
+@sb("5.8")
+def grid_layout():
+    out = []
+    keys = [["7", "8", "9", "/"], ["4", "5", "6", "*"], ["1", "2", "3", "-"], ["0", None, ".", "+"]]
+    for lab, W in [("Grid, 220 px", 220), ("Grid, 320 px (cells stretch)", 320)]:
+        c = C(W, 230); c.field(12, 12, W - 24, "         42", h=28)
+        cw = (W - 24 - 3 * 6) / 4
+        for r, row in enumerate(keys):
+            for col, k in enumerate(row):
+                if k is None: continue
+                x = 12 + col * (cw + 6); y = 52 + r * 42
+                w = cw * 2 + 6 if k == "0" else cw
+                c.button(int(x), y, int(w), 36, k)
+        out.append((lab, c, None))
+    return out
+
+@sb("5.10")
+def flow_layout():
+    tags = ["rust", "gui", "sdl2", "atari", "retro", "widgets", "layout", "gpu"]
+    out = []
+    for lab, W in [("Wide", 420), ("Narrow (wraps)", 220)]:
+        c = C(W, 120); x, y = 12, 14
+        for t in tags:
+            w = int(c.tw(t)) + 20
+            if x + w > W - 12: x = 12; y += 32
+            c.rect(x, y, w, 24, fill=WHITE); c.ctext(x, y, w, 24, t); x += w + 8
+        out.append((lab, c, None))
+    return out
+
+
+import math
+
+def _magnifier(c, x, y, color=DARK):
+    c.ellipse(x, y, 10, 10, outline=color, width=1); c.line(x + 9, y + 9, x + 13, y + 13, color, 2)
+
+def _clear_x(c, x, y, color=DARK):
+    c.ellipse(x, y, 14, 14, fill=GRAY, outline=None)
+    c.line(x + 4, y + 4, x + 10, y + 10, WHITE, 2); c.line(x + 10, y + 4, x + 4, y + 10, WHITE, 2)
+
+def _eye(c, x, y, open_=True):
+    c.ellipse(x, y + 2, 16, 10, outline=DARK)
+    c.ellipse(x + 5, y + 4, 6, 6, fill=DARK if open_ else None, outline=DARK)
+    if not open_: c.line(x, y + 12, x + 16, y, DARK, 1)
+
+@sb("2.6", 3)
+def field_accessories():
+    a = C(300, 56); a.field(14, 16, 260, "", placeholder="      Search"); _magnifier(a, 20, 21)
+    b = C(300, 56); b.field(14, 16, 260, "      widgets", caret=13, focused=True); _magnifier(b, 20, 21); _clear_x(b, 252, 20)
+    d = C(300, 56); d.field(14, 16, 260, "", focused=True, placeholder="       Search"); _magnifier(d, 20, 21); d.line(40, 20, 40, 34)
+    e = C(300, 56); x = e.labeled(10, 17, "Password:", 78); e.field(x, 16, 190, "•••••••"); _eye(e, x + 166, 21)
+    f = C(300, 56); x = f.labeled(10, 17, "Password:", 78); f.field(x, 16, 190, "sample-pass"); _eye(f, x + 166, 21, open_=False)
+    return [("1. Search field, empty", a, None), ("2. Typing: clear (×) appears", b, "TextChanged"),
+            ("3. × clicked: text cleared", d, "TextChanged"), ("4. Password with reveal", e, None),
+            ("5. Reveal clicked", f, "masking toggled")]
+
+
+@sb("3.9")
+def split_view():
+    def frame(div, outline=None):
+        c = C(470, 170); c.rect(14, 14, 442, 142, fill=WHITE)
+        c.listbox(15, 15, div - 15, ["Inbox", "Drafts", "Sent", "Archive"], selected={0}, scroll=False)
+        c.rect(div, 15, 6, 140, fill=GRAY, outline=None)
+        for yy in (78, 84, 90): c.rect(div + 2, yy, 2, 2, fill=DARK, outline=None)
+        c.text(div + 16, 22, "Subject: Weekly report", BLACK, 13); c.text(div + 16, 44, "From: jane.doe@example.com", DARK, 11)
+        if outline: c.rect(outline, 15, 2, 140, fill=None, outline=BLACK); c.dotted(outline - 1, 15, 4, 140)
+        return c
+    a = frame(140); b = frame(140, outline=220); b.pointer(222, 80); d = frame(220)
+    return [("1. Divider at 140 px", a, None), ("2. Dragging (outline mode shows a line)", b, None), ("3. Released at 220 px", d, "ValueChanged")]
+
+
+def _img_icon(c, x, y, s=20, color=(70, 120, 180)):
+    c.rect(x, y, s, s, fill=color, outline=None); c.poly([(x + 3, y + s - 3), (x + s / 2, y + 5), (x + s - 3, y + s - 3)], fill=WHITE)
+
+@sb("2.21")
+def image_button():
+    out = []
+    for lab, kind, kw in [("Image only", "only", {}), ("Image left", "left", {}), ("Image above", "above", {}),
+                          ("Pressed", "left", dict(pressed=True)), ("Toggled", "only", dict(pressed=True)), ("Disabled", "left", dict(disabled=True))]:
+        c = C(130, 80)
+        if kind == "only":
+            c.button(47, 22, 36, 36, "", pressed=kw.get("pressed", False)); _img_icon(c, 55, 30, 20, WHITE if kw.get("pressed") else (70, 120, 180))
+        elif kind == "left":
+            c.button(15, 25, 100, 30, "", **kw); _img_icon(c, 22, 30, 20, WHITE if kw.get("pressed") else (70, 120, 180))
+            c.text(48, 29, "Upload", WHITE if kw.get("pressed") else BLACK)
+            if kw.get("disabled"): c.dither(15, 25, 100, 30, PANEL)
+        else:
+            c.button(30, 10, 70, 60, ""); _img_icon(c, 55, 18, 20); c.ctext(30, 42, 70, 22, "Upload")
+        out.append((lab, c, "Clicked" if lab == "Pressed" else ("Toggled(true)" if lab == "Toggled" else None)))
+    return out
+
+
+LINK = (30, 80, 170)
+@sb("2.22")
+def link_label():
+    out = []
+    for lab, color, ptr, focus, note in [("Normal", LINK, False, False, None), ("Hovered", LINK, True, False, None),
+                                         ("Focused", LINK, False, True, "Return or Space activates"), ("Visited", (110, 60, 150), False, False, "Activated (opened)")]:
+        c = C(190, 50); c.text(14, 14, "Learn more about Pushrod", color, 13)
+        w = c.tw("Learn more about Pushrod", 13); c.line(14, 32, 14 + w, 32, color)
+        if ptr:
+            px, py = 70, 22; c.poly([(px + 4, py), (px + 7, py), (px + 7, py + 7), (px + 13, py + 7), (px + 13, py + 16), (px + 2, py + 16), (px, py + 10), (px + 4, py + 10)], fill=WHITE, outline=BLACK)
+        if focus: c.dotted(10, 12, int(w) + 9, 24)
+        out.append((lab, c, note))
+    return out
+
+
+def _dial(c, cx, cy, r, frac, disabled=False, focused=False, value=None, notches=11):
+    c.ellipse(cx - r, cy - r, 2 * r, 2 * r, fill=WHITE)
+    for n in range(notches):
+        a = math.radians(225 - 270 * n / (notches - 1))
+        c.line(cx + (r + 3) * math.cos(a), cy - (r + 3) * math.sin(a), cx + (r + 7) * math.cos(a), cy - (r + 7) * math.sin(a), DARK)
+    a = math.radians(225 - 270 * frac)
+    c.line(cx, cy, cx + (r - 5) * math.cos(a), cy - (r - 5) * math.sin(a), BLACK, 3)
+    if value is not None: c.ctext(cx - 40, cy + r + 10, 80, 18, str(value), DARK, 12)
+    if focused: c.dotted(cx - r - 10, cy - r - 10, 2 * r + 21, 2 * r + 21)
+    if disabled: c.dither(cx - r - 8, cy - r - 8, 2 * r + 17, 2 * r + 17, PANEL)
+
+@sb("3.12")
+def dial():
+    out = []
+    for lab, f, kw, ptr, note in [("Idle", 0.3, {}, None, None), ("Dragging up", 0.65, {}, (120, 30), "ValueChanged (continuous)"),
+                                  ("Focused (arrows step)", 0.65, dict(focused=True), None, None), ("Disabled", 0.3, dict(disabled=True), None, None)]:
+        c = C(150, 130); _dial(c, 75, 58, 34, f, value=f"Volume {int(f * 100)}", **kw)
+        if ptr: c.pointer(*ptr)
+        out.append((lab, c, note))
+    return out
+
+
+def _spinner(c, cx, cy, r, hot, static=False):
+    if static:
+        c.poly([(cx - 8, cy - 11), (cx + 8, cy - 11), (cx, cy)], fill=DARK); c.poly([(cx - 8, cy + 11), (cx + 8, cy + 11), (cx, cy)], fill=DARK)
+        c.line(cx - 10, cy - 11, cx + 10, cy - 11, BLACK, 2); c.line(cx - 10, cy + 11, cx + 10, cy + 11, BLACK, 2); return
+    for n in range(8):
+        a = math.radians(90 - n * 45)
+        col = BLACK if n == hot else (DARK if (n - hot) % 8 == 7 else GRAY)
+        c.line(cx + r * 0.45 * math.cos(a), cy - r * 0.45 * math.sin(a), cx + r * math.cos(a), cy - r * math.sin(a), col, 3)
+
+@sb("4.10")
+def spinner():
+    out = []
+    for n, hot in enumerate([0, 1, 2]):
+        c = C(190, 50); _spinner(c, 26, 25, 11, hot); c.text(46, 15, "Connecting…"); out.append((f"Running, frame {n + 1}", c, None))
+    c = C(190, 50); c.text(46, 15, "Connected"); out.append(("Stopped (hidden)", c, None))
+    c = C(190, 50); _spinner(c, 26, 25, 11, 0, static=True); c.text(46, 15, "Connecting…"); out.append(("Outline mode / vintage: static", c, None))
+    return out
 
 
 def main():

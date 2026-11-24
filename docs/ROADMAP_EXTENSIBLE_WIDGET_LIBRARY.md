@@ -18,8 +18,14 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Shared behavior lives in the core.** Flags, states, focus, clipping, and events are implemented once (Epic 1, Epic 5), so a new widget gets them for free.
 - **IDs are the contract.** Widgets are addressed by stable IDs, like the numbered objects in classic resource files. Forms, generated constants, and callbacks all key off IDs.
 - **Runtime first, designer second.** Epic 6 builds everything Chassis needs (registry, properties, form file format, loader/writer, design-mode hooks) into Pushrod itself.
-- **Same look.** New widgets use the current flat, black-and-white style. Theming is Epic 8 and is not scheduled.
+- **Keep it stupid simple.** Widgets are flat: fills, one-pixel borders, and text. No glass, no bevels, no shadows, no rounded corners. Fancy looks are up to the application (custom paint, 2.10 (#36); theming hooks, Epic 8, not scheduled). See [`DESIGN_PHILOSOPHY.md`](../DESIGN_PHILOSOPHY.md).
 - **Modern names.** Older systems are credited for ideas only. Pushrod's flags, events, and callbacks use plain, modern names, collected in the *Naming* section so they can be reviewed in one place.
+- **Retained, with stable identity.** Widgets persist and keep stable IDs, which is what accessibility trees, caching, incremental updates, and form files all need.
+- **Engine separate from design.** The engine (tree, events, invalidation, paint API) and the design layer (widgets, defaults, appearance, themes) are separate modules with written specs (7.6 (#114)).
+- **Use shared foundations.** Text layout (Parley) and accessibility (AccessKit) come from the ecosystem's well-tested crates rather than being reinvented.
+- **Layouts are optional and extensible.** Containers can stay absolutely positioned, as designed forms were on classic systems, or use simple layout managers (row, column, form, grid, stack, flow) and custom ones, so forms resize and adapt to text and fonts.
+- **Fictional sample data only.** Demos, examples, tests, mockups, documentation, and issue text never contain real names or personal information; use placeholders such as Jane Doe, jane.doe@example.com, Anytown, and /home/user (see CONTRIBUTING.md).
+- **Documented as it's built.** The Docusaurus site in `pushrod-docs/` has a five-minute quick start, guides for applications, events, and widgets, and one page per widget under **Widgets**. Every issue lists the pages it adds or updates, and the docs ship in the same PR as the code.
 - **Usability first.** A control is added because it makes ordinary applications easier to use, not because another toolkit had it. Ideas that didn't meet that bar are listed under *Parked*.
 - **Self-contained and GPU-first.** Pushrod draws everything itself through SDL2: no OS-native menus, menu bars, dialogs, or controls, so applications look and behave the same everywhere. Each widget paints into its own GPU texture only when invalidated; frames are composed by blitting cached textures; text comes from a glyph atlas texture. SDL2 does the heavy lifting for graphics and input.
 
@@ -35,21 +41,22 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **41 of 78 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **55 of 102 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
-| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 16 | 10 |
-| 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 20 | 10 |
-| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 7 | 3 |
-| 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
-| 5 (#15) | Composition, clipping, and layout | Clip children to parents, build widgets from child widgets, scroll views, and autoresizing. | 4 | 2 |
+| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 20 | 14 |
+| 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 22 | 10 |
+| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 9 | 3 |
+| 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 7 | 1 |
+| 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers. | 10 | 6 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
-| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 5 | 5 |
+| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 8 | 8 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
-| 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 9 | 3 |
+| 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 11 | 5 |
+| 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target. | 4 | 1 |
 
 ```mermaid
 flowchart LR
@@ -82,6 +89,31 @@ flowchart LR
   application code:  engine.on_click(form.id(main::OK), |state, ui| ...)
 ```
 
+## Widget roadmaps
+
+Each widget has its own roadmap in [`docs/widgets/`](widgets/README.md), the specification for what it is, what it does, how it looks, and how it responds. This file keeps the core, event, form, and release work, and the order everything is built in.
+
+[Boxed Label](widgets/boxed-label.md) · [Glyph Button](widgets/glyph-button.md) · [Button](widgets/button.md) · [Check Box](widgets/check-box.md) · [Radio Button](widgets/radio-button.md) · [Text Field](widgets/text-field.md) · [Image](widgets/image.md) · [Icon](widgets/icon.md) · [Alert](widgets/alert.md) · [Custom Paint](widgets/custom-paint.md) · [Menu Bar and Menus](widgets/menu-bar-and-menus.md) · [File Chooser](widgets/file-chooser.md) · [Tooltip](widgets/tooltip.md) · [Separator](widgets/separator.md) · [Toolbar](widgets/toolbar.md) · [Status Bar](widgets/status-bar.md) · [Switch](widgets/switch.md) · [Text Area](widgets/text-area.md) · [Context Menu](widgets/context-menu.md) · [Message Bar](widgets/message-bar.md) · [Image Button](widgets/image-button.md) · [Link Label](widgets/link-label.md) · [Scroll Bar](widgets/scroll-bar.md) · [Slider](widgets/slider.md) · [Group Box](widgets/group-box.md) · [Choice Button](widgets/choice-button.md) · [Column Browser](widgets/column-browser.md) · [Split View](widgets/split-view.md) · [Expander](widgets/expander.md) · [Date Picker](widgets/date-picker.md) · [Dial](widgets/dial.md) · [Progress Bar](widgets/progress-bar.md) · [Spin Box](widgets/spin-box.md) · [Tab View](widgets/tab-view.md) · [List View](widgets/list-view.md) · [Combo Box](widgets/combo-box.md) · [Table View](widgets/table-view.md) · [Spinner](widgets/spinner.md) · [Container](widgets/container.md)
+
+## Modern foundations
+
+Findings from Raph Levien's *Advice for the Next 100 Rust GUIs* (Linebender, 2026), applied to Pushrod:
+
+| Finding | Applied in |
+|---|---|
+| Text layout is largely solved by shared crates (Parley; Cosmic Text as an alternative) | 1.18 (#111), 1.7 (#3) |
+| Accessibility via AccessKit, done well rather than box-ticking, without per-frame cost | 1.14 (#80) (now MVP) |
+| Input methods (IME) are hard and often incomplete | 1.19 (#112), 2.6 (#32) |
+| Layers avoid re-rendering but cost memory; use hints like repaint boundaries | 1.20 (#113), 10.2 (#106) |
+| Retained mode needs stable identity and reliable caching | Stable `WidgetId`s throughout; layout and atlas caching |
+| Clear module boundaries with specs; separate the design layer from the engine | 7.6 (#114), 10.3 (#107) |
+| Virtualized lists need an incremental data-model interface | 4.5 (#52) |
+| Precompute the static parts of a design | 6.4 (#63) |
+| Performance gaps signal missed optimizations; measure | 7.7 (#115) |
+| Adapt web specs rather than copy them (curated style subset) | 8.1 (#74) |
+
+Not adopted for now: system-compositor video layers (outside SDL2's scope) and mobile platforms (the article recommends native UI there).
+
 ## Inspiration
 
 Where each idea comes from. Pushrod takes the common, proven core of these systems and keeps it small.
@@ -96,10 +128,12 @@ Where each idea comes from. Pushrod takes the common, proven core of these syste
 | Event routing | Single target (GEM, classic Mac) | Fixed mouse-button roles (Intergraph workstations) | Capture/bubble (GTK); accept/ignore + filters (Qt) |
 | Reusable input handling |  |  | GTK event controllers |
 | Keeping values in sync |  |  | GTK property bindings; Qt property notifications |
-| Layout on resize | Fixed positions | Motif form attachments; NeXTSTEP autoresizing | Qt/GTK layout managers (not adopted: too heavy) |
+| Layout on resize | Fixed-size forms (GEM, AmigaOS) | Motif form attachments; NeXTSTEP autoresizing | Qt/GTK layout managers (adopted as simple, extensible layouts) |
 | Value controls | Hand-built sliders (GEM) | Amiga sliders/scrollers/cycle gadgets; Motif scale/spin box | Qt/GTK sliders, spin buttons, switches |
 | Lists, tables, and hierarchies |  | Amiga list views; Motif lists; NeXTSTEP column browser | Qt/GTK item models and views; Mac Finder column view; Windows report lists |
 | Dialogs and notices | GEM/Mac alerts and modal dialogs | Motif message and file dialogs | GTK info bars; Qt/GTK dialogs |
+| Drawing while moving | Outline dragging (GEM, classic Mac) |  | 'Show contents while dragging' options (later desktops) |
+| Modern foundations |  |  | Shared text layout (Parley), AccessKit, repaint boundaries (Flutter), drawing groups (SwiftUI), engine/design-layer split (Xilem/Masonry) |
 
 Intergraph is thinly represented: public documentation for the Environ V forms toolkit is scarce, so it needs first-hand input before it informs more issues.
 
@@ -109,13 +143,17 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Behavior flags:** `FOCUSABLE`, `TOGGLE`, `DEFAULT_ACTION`, `CANCEL_ACTION`, `DISMISSES_DIALOG`, `ACTIVATE_ON_PRESS`, `EXCLUSIVE`, `HIDDEN`
 
-**Visual states:** `PRESSED`, `CHECKED`, `INDETERMINATE`, `DISABLED`, `FOCUSED`, `HOVERED`
+**Visual states:** `PRESSED`, `CHECKED`, `INDETERMINATE`, `DISABLED`, `FOCUSED`, `HOVERED`, `DRAG_OVER`
 
-**Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`
+**Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`, `ENGINE`
 
-**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Custom`, `Raw`
+**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `AccessoryClicked`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `ViewportChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
 
-**Callbacks:** `on_click`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_hover`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`
+**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_viewport_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`, `next_event (event-loop style)`
+
+**Drawing modes:** `Live`, `Outline`, `Auto`
+
+**Engine events:** `DrawingModeChanged`, `EventMaskChanged`, `FocusChanged`, `ModalOpened`, `ModalClosed`, `MenuOpened`, `MenuClosed`, `WidgetAdded`, `WidgetRemoved`, `WidgetReparented`, `FormLoaded`, `DragStarted`, `DragEnded`, `TooltipShown`, `TooltipHidden`, `TimerFired`, `WindowOpened`, `WindowClosed`, `ScaleFactorChanged`, `ActionChanged`, `IdleStarted`, `IdleEnded`
 
 ## Epic 1: Core: behavior flags, focus, timing, and performance (#11)
 
@@ -134,7 +172,7 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.3 (#7) | Broadcast events to all interested widgets | Window-level and application-wide events go to every widget whose mask includes them. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `cache.rs`, `engine.rs` |
 | 1.4 (#20) | Keyboard focus, Tab order, and Return/Escape | Focusable widgets take keyboard focus; Tab moves it; Return and Escape trigger the default and cancel buttons. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `cache.rs`, `engine.rs`, `widget.rs` |
 | 1.5 (#21) | Timers and idle callbacks | Repeating/one-shot timers, per-widget ticks for animation, and idle callbacks. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs`, `event.rs` |
-| 1.6 (#22) | Callback registry for every widget event | on_click, on_toggle, on_value_change, on_selection_change, on_text_change, on_editing_finished, on_activate, on_key_press, on_focus_change, on_hover. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs` |
+| 1.6 (#22) | Callback registry for every widget event | on_click, on_press, on_release, on_hover, on_toggle, on_value_change, on_selection_change, on_text_change, on_editing_finished, on_activate, on_key_press, on_focus_change. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs` |
 | 1.7 (#3) | GPU text: font cache with a glyph atlas texture | Load each font once, rasterize glyphs once into a GPU atlas, and draw text by blitting glyphs. | `core`, `enhancement`, `mvp`, `parallelizable`, `performance`, `size/M` | Y | Y | M | `font.rs`, `paint.rs`, `cache.rs`, `engine.rs` |
 | 1.8 (#23) | Edit the widget tree at run time: remove, reparent, reorder | Remove widgets and change parent or stacking order without breaking IDs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `cache.rs`, `engine.rs` |
 | 1.9 (#24) | Dirty-rectangle redraw | Only re-blit the screen regions that changed. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `cache.rs`, `engine.rs` |
@@ -142,15 +180,19 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.11 (#26) | Application lifecycle: startup and close-request callbacks | Run code before the first frame; confirm or veto closing the window. | `core`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `engine.rs` |
 | 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | Y | S | `paint.rs`, `cache.rs`, `button_widget.rs`, `text_widget.rs` |
 | 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `event.rs`, `engine.rs`, `cache.rs` |
-| 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `parallelizable`, `size/L`, `usability` | Y | N | L | `accessibility.rs (new)`, `widget.rs`, `engine.rs` |
+| 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/L`, `usability` | Y | Y | L | `accessibility.rs (new)`, `widget.rs`, `engine.rs` |
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `undo.rs (new)`, `engine.rs` |
-| 1.16 (#82) | Multiple windows | Open additional top-level windows, each with its own widget tree, sharing one application state. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `engine.rs`, `cache.rs` |
+| 1.16 (#82) | Multiple windows: separate OS windows, each with its own engine | Open additional operating-system windows (dialogs, palettes, inspectors), each driven by its own engine instance and widget tree. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `engine.rs`, `cache.rs` |
+| 1.17 (#104) | Per-state appearance: colors, border, and font for each visual state | Every widget carries appearance attributes for normal, pressed, hovered, focused, disabled, and drag-over, so the look changes automatically as the state changes. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `paint.rs`, `all widgets` |
+| 1.18 (#111) | Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) | Lay out text with a real layout engine and feed its glyph runs into the GPU glyph atlas. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text/layout.rs (new)`, `font.rs`, `paint.rs` |
+| 1.19 (#112) | Input method (IME) support: composition text and candidate window | Show in-progress composition text in fields and position the platform candidate window at the caret. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text_field.rs`, `engine.rs`, `event.rs` |
+| 1.20 (#113) | Layers and invalidation: cache hints, texture memory budget, incremental pipeline | Decide which widgets get their own GPU texture, cap texture memory, and invalidate layout, paint, and compositing separately. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `cache.rs`, `texture.rs`, `widget.rs` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
 **Problem Statement.** Every classic system stored what an object can do and how it currently looks as flags on the object itself, so selection, default buttons, and disabled appearance worked the same everywhere and could be saved in form files. Pushrod widgets only have `hidden`, so each widget would reinvent these behaviors and the form file (6.3 (#62)) would have nothing generic to store.
 
-**Solution / Scope.** Add two bitflag types to `WidgetCore`. `Behavior`: `FOCUSABLE`, `TOGGLE` (stays pressed after a click), `DEFAULT_ACTION` (activated by Return), `CANCEL_ACTION` (activated by Escape), `DISMISSES_DIALOG` (closes the enclosing modal dialog and reports itself, 6.7 (#66)), `ACTIVATE_ON_PRESS` (fires on press, not release), `EXCLUSIVE` (one-of-many among siblings, 2.5 (#31)), `HIDDEN`. `VisualState`: `PRESSED`, `CHECKED`, `INDETERMINATE` (mixed/tri-state), `DISABLED`, `FOCUSED`, `HOVERED`. Default trait methods `behavior()`, `set_behavior()`, `state()`, `set_state()`, `is_enabled()`, `set_enabled()`. `HIDDEN` backs the existing `set_hidden`. `paint::state_overlay` draws DISABLED (a cached 50% dither texture copied with alpha), FOCUSED (dotted outline), and INDETERMINATE generically. Disabled widgets receive no input.
+**Solution / Scope.** Add two bitflag types to `WidgetCore`. `Behavior`: `FOCUSABLE`, `TOGGLE` (stays pressed after a click), `DEFAULT_ACTION` (activated by Return), `CANCEL_ACTION` (activated by Escape), `DISMISSES_DIALOG` (closes the enclosing modal dialog and reports itself, 6.7 (#66)), `ACTIVATE_ON_PRESS` (fires on press, not release), `EXCLUSIVE` (one-of-many among siblings, 2.5 (#31)), `HIDDEN`. `VisualState`: `PRESSED` (shown while the mouse button is held on it; no flags = normal), `CHECKED`, `INDETERMINATE` (mixed/tri-state), `DISABLED`, `FOCUSED`, `HOVERED` (pointer inside), `DRAG_OVER` (a drag is over it, 9.8 (#100)). Default trait methods `behavior()`, `set_behavior()`, `state()`, `set_state()`, `is_enabled()`, `set_enabled()`. `HIDDEN` backs the existing `set_hidden`. `paint::state_overlay` draws DISABLED (a cached 50% dither texture copied with alpha), FOCUSED (dotted outline), and INDETERMINATE generically. Disabled widgets receive no input.
 
 ```text
 Behavior (what it does)          VisualState (how it looks now)
@@ -160,13 +202,13 @@ DEFAULT_ACTION   (Return)        INDETERMINATE
 CANCEL_ACTION    (Escape)        DISABLED
 DISMISSES_DIALOG                 FOCUSED
 ACTIVATE_ON_PRESS                HOVERED
-EXCLUSIVE        (radio groups)
+EXCLUSIVE        (radio groups)  DRAG_OVER
 HIDDEN
 ```
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **The same button in each visual state**
 
@@ -192,7 +234,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 render API
 
-**Documentation.** Rustdoc: `widget::Behavior`, `widget::VisualState`, `paint::state_overlay`. README/guides: 'Behavior and state' section with the table above. Examples: Disabled and default buttons in `examples/base.rs`. Screenshots: Gallery tile per state (7.3 (#71)).
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/widget-behavior-flags-and-visual-states.md` ("Widget behavior flags and visual states", Concepts, new). Guides: 'Behavior and state' section with the table above. Rustdoc: `widget::Behavior`, `widget::VisualState`, `paint::state_overlay`. Examples: Disabled and default buttons in `examples/base.rs`. Screenshots: Gallery tile per state (7.3 (#71)).
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
@@ -202,7 +244,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Classic event loops waited only for the kinds of events an application asked for, which kept them fast and idle when nothing relevant happened. Pushrod's run loop processes every SDL event, and every pointer event is routed even to widgets that never handle events. (Original issue #6.)
 
-**Solution / Scope.** One `EventMask` type with classes `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`. **Run-loop mask:** `Engine::set_event_mask` / `Ui::set_event_mask` (changeable at run time). Events outside the mask are dropped before routing and callbacks; SDL event types that only feed masked-out classes are disabled at the source with `EventPump::disable_event`, so SDL never queues them. Close requests are always delivered (1.11 (#26)). With no `TIMER` class and nothing animating, the loop blocks on `wait_event_timeout` instead of polling, so idle applications use no CPU. **Widget mask:** default trait method `event_mask()` returning `EventMask::NONE`; routing, propagation (9.2 (#94)), and broadcasts skip widgets whose mask excludes the event. An event is handled only if it passes both masks.
+**Solution / Scope.** One `EventMask` type with classes `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`. **Run-loop mask:** `Engine::set_event_mask` / `Ui::set_event_mask` (changeable at run time). Events outside the mask are dropped before routing and callbacks; SDL event types that only feed masked-out classes are disabled at the source with `EventPump::disable_event`, so SDL never queues them. Close requests are always delivered (1.11 (#26)). With no `TIMER` class and nothing animating, the loop blocks on `wait_event_timeout` instead of polling, so idle applications use no CPU. **Widget mask:** default trait method `event_mask()` returning `EventMask::NONE`; routing, propagation (9.2 (#94)), and broadcasts skip widgets whose mask excludes the event. An event is handled only if it passes both masks. Changing either mask emits `Engine(EventMaskChanged { scope, old, new })` (9.10 (#109)).
 
 ```text
 SDL2 ──(types disabled at source for masked classes)──> event pump
@@ -228,7 +270,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust, SDL2 event subsystem
 
-**Documentation.** Rustdoc: `event::EventMask`, `Engine::set_event_mask`, `Widget::event_mask`. README/guides: 'Event masks' section. Examples: Example disables pointer motion when no hover effects are needed. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/event-masks-for-the-run-loop-and-for-widgets.md` ("Event masks for the run loop and for widgets", Concepts, new). Guides: 'Event masks' section. Rustdoc: `event::EventMask`, `Engine::set_event_mask`, `Widget::event_mask`. Examples: Example disables pointer motion when no hover effects are needed. Screenshots: n/a.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
@@ -249,13 +291,13 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `WidgetCache::broadcast`. README/guides: Event flow diagram updated. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/broadcast-events-to-all-interested-widgets.md` ("Broadcast events to all interested widgets", Concepts, new). Guides: Event flow diagram updated. Rustdoc: `WidgetCache::broadcast`. Examples: n/a. Screenshots: n/a.
 
 ### 1.4 (#20): Keyboard focus, Tab order, and Return/Escape
 
 **Problem Statement.** There is no keyboard focus. Every desktop system lets users move between fields with Tab, use arrow keys within a group, press Return for the default button, and press Escape to cancel.
 
-**Solution / Scope.** Track `focused` in `WidgetCache`. Clicking a `FOCUSABLE` widget focuses it. Tab/Shift-Tab moves between focus groups in ID order (the order designed in the form); arrow keys move within a group (for example a radio group). Return activates the `DEFAULT_ACTION` widget of the current form; Escape (and Cmd-. on macOS) activates `CANCEL_ACTION`. Focus changes emit `FocusLost` then `FocusGained`. SDL text input starts and stops with focus on text widgets. `Ui::set_focus(id)`, `Ui::focused()`.
+**Solution / Scope.** Track `focused` in `WidgetCache`. Clicking a `FOCUSABLE` widget focuses it. Tab/Shift-Tab moves between focus groups in ID order (the order designed in the form); arrow keys move within a group (for example a radio group). Return activates the `DEFAULT_ACTION` widget of the current form; Escape (and Cmd-. on macOS) activates `CANCEL_ACTION`. Focus changes emit `FocusLost` then `FocusGained`. SDL text input starts and stops with focus on text widgets. `Ui::set_focus(id)`, `Ui::focused()`. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -263,12 +305,13 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Return/Escape activate default/cancel
 - `FocusGained`/`FocusLost` delivered and tested
 - `Ui::set_focus`/`Ui::focused`
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.1 (#19), 9.1 (#93), 9.2 (#94).
 
 **Technical Stack.** Rust, SDL2 text input
 
-**Documentation.** Rustdoc: Focus API. README/guides: Keyboard section. Examples: Form with two fields and OK/Cancel. Screenshots: Focused field in gallery.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/keyboard-and-focus.md` ("Keyboard and Focus", Guides, new). Guides: Keyboard section. Rustdoc: Focus API. Examples: Form with two fields and OK/Cancel. Screenshots: Focused field in gallery.
 
 **Sources.** [O'Reilly Motif Programming Manual: keyboard traversal](https://www.oreilly.com/library/view/volume-6a-motif/9780596000431/chapter-44.html)
 
@@ -276,7 +319,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** Applications and widgets need time-based events: caret blinking, auto-repeat on arrow buttons, indeterminate progress, clocks. Work that should run when nothing else is pending (deferred layout, incremental loading) needs an idle hook.
 
-**Solution / Scope.** `Engine::on_timer(interval, repeat, |state, ui| ..) -> TimerId`, `Ui::cancel_timer(id)`. Widgets with `TIMER` in their mask receive `Tick { elapsed }` once per frame while they request animation (`ctx.request_animation()`). `Engine::on_idle(|state, ui| ..)` runs once per loop iteration when the event queue is empty. Timers fire from the run loop based on `Instant`.
+**Solution / Scope.** `Engine::on_timer(interval, repeat, |state, ui| ..) -> TimerId`, `Ui::cancel_timer(id)`. Widgets with `TIMER` in their mask receive `Tick { elapsed }` once per frame while they request animation (`ctx.request_animation()`). `Engine::on_idle(|state, ui| ..)` runs once per loop iteration when the event queue is empty. Timers fire from the run loop based on `Instant`. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -284,18 +327,19 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Timers can be cancelled from callbacks
 - `Tick` only flows while a widget requests animation
 - Idle callbacks run only when no events are pending
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.2 (#6).
 
 **Technical Stack.** Rust std::time
 
-**Documentation.** Rustdoc: `on_timer`, `on_idle`, `TimerId`, `Tick`. README/guides: Timers section. Examples: Clock label updated every second. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/timers-and-idle-callbacks.md` ("Timers and idle callbacks", Concepts, new). Guides: Timers section. Rustdoc: `on_timer`, `on_idle`, `TimerId`, `Tick`. Examples: Clock label updated every second. Screenshots: n/a.
 
 ### 1.6 (#22): Callback registry for every widget event
 
 **Problem Statement.** `on_click` and the catch-all `on_event` only cover buttons. Value controls, text fields, lists, and focus all need their own clearly named callbacks.
 
-**Solution / Scope.** Add per-widget registration methods mapping one-to-one onto the event vocabulary (9.1 (#93)): `on_click`, `on_activate`, `on_toggle(|state, ui, checked|)`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change(|state, ui, gained|)`, `on_hover(|state, ui, inside|)`. All share one internal map keyed by `(WidgetId, EventKind)` and return a `CallbackId` (9.7 (#99)).
+**Solution / Scope.** Add per-widget registration methods mapping one-to-one onto the event vocabulary (9.1 (#93)): `on_click`, `on_press` (mouse button went down on the widget), `on_release` (went up, inside or outside), `on_activate`, `on_toggle(|state, ui, checked|)`, `on_value_change`, `on_viewport_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change(|state, ui, gained|)`, `on_hover(|state, ui, inside|)`. All share one internal map keyed by `(WidgetId, EventKind)` and return a `CallbackId` (9.7 (#99)).
 
 **Acceptance Criteria.**
 
@@ -307,7 +351,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: All `on_*` methods. README/guides: Table of callbacks (see Naming in the roadmap). Examples: Check box with `on_toggle` in the example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/handling-events.md` ("Handling events", Guides, update). Guides: Table of callbacks (see Naming in the roadmap). Rustdoc: All `on_*` methods. Examples: Check box with `on_toggle` in the example. Screenshots: n/a.
 
 **Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html); [Apple: Target-Action](https://developer.apple.com/library/archive/documentation/General/Devpedia-CocoaApp-MOSX/TargetAction.html)
 
@@ -317,7 +361,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** `FontCache::render_text` reloads the font from disk and rasterizes a new surface on the CPU for every repaint of every text widget. Original issue #3 also asked for the font cache to live with the `WidgetCache`.
 
-**Solution / Scope.** Load fonts once per `(path, size, style)` (the TTF context lives for the process). Rasterize each glyph once with SDL_ttf into a glyph atlas texture on the GPU; draw strings by copying glyph rectangles with `Canvas::copy`, colored with `set_color_mod`, using SDL_ttf metrics for kerning and wrapping. Changing text or its color never rasterizes again. Move ownership of the font cache into `WidgetCache`, as #3 requested.
+**Solution / Scope.** Load fonts once per `(path, size, style)` (the TTF context lives for the process). Rasterize each glyph once with SDL_ttf into a glyph atlas texture on the GPU; draw strings by copying glyph rectangles with `Canvas::copy`, colored with `set_color_mod`, using SDL_ttf metrics for kerning and wrapping. Changing text or its color never rasterizes again. Move ownership of the font cache into `WidgetCache`, as #3 requested. Glyph runs come from the text layout engine (1.18 (#111)); the atlas stays the drawing path.
 
 **Acceptance Criteria.**
 
@@ -326,17 +370,17 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Text color changes use color modulation
 - `FontCache` is owned by `WidgetCache`
 
-**Parallelism / Dependencies.** Parallelizable. Independent.
+**Parallelism / Dependencies.** Parallelizable. Requires 1.18 (#111).
 
 **Technical Stack.** Rust, sdl2::ttf, SDL2 render API
 
-**Documentation.** Rustdoc: `font::FontCache`, atlas notes. README/guides: n/a. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/gpu-text.md` ("GPU text", Concepts, new). Guides: n/a. Rustdoc: `font::FontCache`, atlas notes. Examples: n/a. Screenshots: n/a.
 
 ### 1.8 (#23): Edit the widget tree at run time: remove, reparent, reorder
 
 **Problem Statement.** Widgets can only be added. Opening and closing dialogs, list rows, and Chassis editing need removal, reparenting, and stacking-order changes.
 
-**Solution / Scope.** `WidgetCache::remove(id)` removes a subtree, leaves a tombstone so other IDs stay stable, destroys its textures, and emits `Removed`. `reparent(id, parent)` and `set_stacking_index(id, index)` among siblings. Focus, hover, and pointer capture pointing into a removed subtree are cleared.
+**Solution / Scope.** `WidgetCache::remove(id)` removes a subtree, leaves a tombstone so other IDs stay stable, destroys its textures, and emits `Removed`. `reparent(id, parent)` and `set_stacking_index(id, index)` among siblings. Focus, hover, and pointer capture pointing into a removed subtree are cleared. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -344,12 +388,13 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Removed textures are destroyed
 - Focus/hover/capture cleared safely
 - Tests for remove, reparent, reorder
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: New `WidgetCache` methods. README/guides: n/a. Examples: Button that adds and removes a widget. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/edit-the-widget-tree-at-run-time.md` ("Edit the widget tree at run time", Concepts, new). Guides: n/a. Rustdoc: New `WidgetCache` methods. Examples: Button that adds and removes a widget. Screenshots: n/a.
 
 ### 1.9 (#24): Dirty-rectangle redraw
 
@@ -367,24 +412,25 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust, SDL2 clip rect
 
-**Documentation.** Rustdoc: `draw_loop` docs. README/guides: n/a. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/dirty-rectangle-redraw.md` ("Dirty-rectangle redraw", Concepts, new). Guides: n/a. Rustdoc: `draw_loop` docs. Examples: n/a. Screenshots: n/a.
 
 ### 1.10 (#25): Window resize and high-DPI rendering
 
 **Problem Statement.** The root widget keeps its initial size when the window is resized, and high-DPI displays get a scaled, blurry image.
 
-**Solution / Scope.** On window resize, resize the root and apply autoresizing (5.4 (#59)). Create windows with high-DPI support and render textures at physical resolution with a logical coordinate scale so text stays sharp.
+**Solution / Scope.** On window resize, resize the root and apply autoresizing (5.4 (#59)). Create windows with high-DPI support and render textures at physical resolution with a logical coordinate scale so text stays sharp. Emits its engine event (9.10 (#109)). With layouts (5.5 (#116)), the window's minimum size comes from the root layout's minimum size hint, and dialogs open at their preferred size.
 
 **Acceptance Criteria.**
 
 - Resizing resizes the root and redraws
 - Text is sharp on a 2x display
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
-**Parallelism / Dependencies.** Parallelizable. Requires 5.4 (#59).
+**Parallelism / Dependencies.** Parallelizable. Requires 5.4 (#59), 5.5 (#116).
 
 **Technical Stack.** Rust, SDL2 window/high-DPI API
 
-**Documentation.** Rustdoc: Resize behavior. README/guides: High-DPI notes. Examples: Resizable example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/window-resize-and-high-dpi-rendering.md` ("Window resize and high-DPI rendering", Concepts, new). Guides: High-DPI notes. Rustdoc: Resize behavior. Examples: Resizable example. Screenshots: n/a.
 
 ### 1.11 (#26): Application lifecycle: startup and close-request callbacks
 
@@ -402,7 +448,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `on_start`, `on_close_request`. README/guides: Lifecycle section. Examples: Quit confirmation using an alert (2.9 (#35)). Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/application-lifecycle.md` ("Application lifecycle", Concepts, new). Guides: Lifecycle section. Rustdoc: `on_start`, `on_close_request`. Examples: Quit confirmation using an alert (2.9 (#35)). Screenshots: n/a.
 
 ### 1.12 (#76): Keyboard mnemonics: underlined shortcut letters
 
@@ -412,7 +458,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **Labels with mnemonics: `_` marks the letter, drawn underlined**
 
@@ -439,7 +485,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Mnemonic syntax. README/guides: Keyboard section. Examples: Mnemonics on example buttons. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/keyboard-mnemonics.md` ("Keyboard mnemonics", Concepts, new). Guides: Keyboard section. Rustdoc: Mnemonic syntax. Examples: Mnemonics on example buttons. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -462,7 +508,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **No visual; usage sketch**
 
@@ -498,7 +544,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust (`std::any`, `Rc`), SDL2 user events
 
-**Documentation.** Rustdoc: `CustomEvent`, `EventTarget`, `Ui::post`, `EventCtx::post`, `Engine::on_custom`, `Engine::sender`. README/guides: 'Custom events' section. Examples: Background thread updates a progress bar. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/custom-events.md` ("Custom Events", Events, new). Guides: 'Custom events' section. Rustdoc: `CustomEvent`, `EventTarget`, `Ui::post`, `EventCtx::post`, `Engine::on_custom`, `Engine::sender`. Examples: Background thread updates a progress bar. Screenshots: n/a.
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
@@ -506,18 +552,21 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Because Pushrod draws everything itself, screen readers can't see its controls. Native-widget toolkits get accessibility from the OS; self-drawn toolkits must publish an accessibility tree.
 
-**Solution / Scope.** Give each widget an accessibility role, label, value, and state (default trait method with sensible defaults per widget), and publish the tree with the AccessKit crate, which bridges to Windows, macOS, and Linux accessibility APIs while Pushrod keeps drawing everything through SDL2. Focus changes and value changes update the tree; accessibility actions (press, focus, set value) map onto normal Pushrod events.
+**Solution / Scope.** Give each widget an accessibility role, label, value, and state (default trait method with sensible defaults per widget), and publish the tree with the AccessKit crate, which bridges to Windows, macOS, and Linux accessibility APIs while Pushrod keeps drawing everything through SDL2. Focus changes and value changes update the tree; accessibility actions (press, focus, set value) map onto normal Pushrod events. Do it well, not as box-ticking: build the AccessKit tree from stable `WidgetId`s and send only incremental updates for widgets whose role, name, value, or state changed, never a full rebuild per frame; activate it lazily so applications pay nothing when no assistive technology is running. Composite parts (5.2 (#57)) appear as children, and text fields expose their text and selection.
 
 **Acceptance Criteria.**
 
 - A screen reader announces focused buttons, check boxes, and text fields with name and state
 - Accessibility actions trigger the same callbacks as user input
+- Updates are incremental (changed nodes only) and the tree is only built when assistive technology is active
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.4 (#20), 6.2 (#61).
 
 **Technical Stack.** Rust, AccessKit (new optional dependency)
 
-**Documentation.** Rustdoc: Accessibility trait methods. README/guides: Accessibility section. Examples: Example works with a screen reader. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/accessibility.md` ("Accessibility", Concepts, new). Guides: Accessibility section. Rustdoc: Accessibility trait methods. Examples: Example works with a screen reader. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [AccessKit: cross-platform accessibility infrastructure](https://github.com/AccessKit/accesskit)
 
 ### 1.15 (#81): Undo and redo command stack
 
@@ -535,25 +584,155 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `undo` module. README/guides: Undo section. Examples: Text field with undo. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/undo-and-redo-command-stack.md` ("Undo and redo command stack", Concepts, new). Guides: Undo section. Rustdoc: `undo` module. Examples: Text field with undo. Screenshots: n/a.
 
-### 1.16 (#82): Multiple windows
+### 1.16 (#82): Multiple windows: separate OS windows, each with its own engine
 
 **Problem Statement.** Pushrod drives one window. Tool palettes, inspectors (Chassis), and secondary documents need more.
 
-**Solution / Scope.** `Ui::open_window(title, size) -> WindowId` creates an SDL window with its own canvas and `WidgetCache`; events carry the window ID; widget IDs are unique per window; callbacks receive the window in `Ui`. Closing a window emits `CloseRequested` for that window.
+**Solution / Scope.** Each window is a real OS window (an SDL window) driven by its own `Engine` instance with its own widget tree, IDs, focus, and drawing; Pushrod draws everything inside it, while the frame (title bar, close, resize) belongs to the operating system. An `Application` owns the SDL context and a set of engines keyed by window ID, routes each SDL event to the engine for its window, and runs them in one loop (callbacks or `next_event`, 9.11 (#124)). Application state is shared: callbacks receive the state and a `Ui` for their own window, plus `ui.app()` to open, find, or close other windows (`open_window(title, size) -> WindowId`). Closing a window emits `CloseRequested` for that window (vetoable, 1.11 (#26)) and `WindowClosed` (9.10 (#109)); the application ends when the last window closes unless configured otherwise. Modal dialogs can be separate windows or in-window forms (6.7 (#66)).
 
 **Acceptance Criteria.**
 
-- Two windows render and receive input independently
-- Callbacks can reach widgets in any window
+- Two OS windows, each with its own engine and widget tree, render and receive input independently
+- Shared application state; callbacks can open, find, and close other windows
 - Closing one window doesn't end the application unless it's the last
+- Works in both callback and event-loop styles
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
 
 **Technical Stack.** Rust, SDL2 windows
 
-**Documentation.** Rustdoc: Window API. README/guides: Windows section. Examples: Example with a second window. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/multiple-windows.md` ("Multiple windows", Concepts, new). Guides: Windows section. Rustdoc: Window API. Examples: Example with a second window. Screenshots: n/a.
+
+### 1.17 (#104): Per-state appearance: colors, border, and font for each visual state
+
+**Problem Statement.** Today a widget's look is hard-coded per state (the button inverts when pressed). Applications can't say 'this button turns blue on hover' or 'this field gets a thicker border when focused', and every widget re-implements its own state colors.
+
+**Solution / Scope.** Add `StateStyle { background, foreground, border_color, border_width, font: Option<TextStyle> }` and an `Appearance` on `WidgetCore` holding one `StateStyle` per visual state: `normal`, `pressed`, `hovered`, `focused`, `disabled`, `checked`, `drag_over`. Unset fields fall back to `normal`, and `normal` falls back to the built-in defaults (today's look: pressed = inverted). `paint` helpers read the *effective* style for the current state (`self.style()`), so widgets get state-dependent appearance without code. API: `set_style(VisualState::HOVERED, StateStyle { background: Some(..), .. })`, `appearance_mut()`. State changes (pointer enter/exit, press/release, drag in/out, focus) invalidate only when the effective style actually changes. Appearance is a property (6.2 (#61)), so form files and Chassis store it, and parts of composites (5.2 (#57)) have their own.
+
+```text
+state change ──> effective style = appearance[state] ⟶ falls back to appearance.normal ⟶ built-in default
+                  │
+                  └─> repaint only if the effective style changed
+```
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**One button through its states with a custom appearance (hover = blue, pressed = dark blue)**
+
+![1.17 step set 1: One button through its states with a custom appearance (hover = blue, pressed = dark blue)](mockups/1.17-1.png)
+
+**A drop target in its drag-over state**
+
+![1.17 step set 2: A drop target in its drag-over state](mockups/1.17-2.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `PointerEntered / PointerExited { id }` | Pointer moves in or out (hover state) | `on_hover(id, ..)` |
+| `PointerPressed / PointerReleased { id }` | Mouse button down / up on the widget (pressed state) | `on_press(id, ..)`, `on_release(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- `StateStyle` and `Appearance` on every widget with fallback to normal and built-in defaults
+- Hover, press/release, focus, disabled, checked, and drag-over switch the effective style automatically
+- Default look unchanged (golden images identical)
+- Repaint only when the effective style changes
+- Stored in form files
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.1 (#19), 9.1 (#93).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/per-state-appearance.md` ("Per-state appearance", Concepts, new). Guides: 'Appearance and states' section. Rustdoc: `StateStyle`, `Appearance`, `Widget::style`. Examples: Example: hover color on a button. Screenshots: Gallery tile per state.
+
+**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+
+### 1.18 (#111): Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate)
+
+**Problem Statement.** SDL_ttf renders strings but doesn't handle complex scripts, right-to-left text, proper line breaking, font fallback for missing glyphs, or the caret and selection geometry that text fields need. Writing that ourselves would be a large, error-prone project; the ecosystem has converged on shared solutions.
+
+**Solution / Scope.** Use Parley for layout only: it computes glyph positions, line breaks, bidi, and font fallback, and provides caret and selection geometry; it does not draw. Pushrod keeps drawing: each glyph from Parley's glyph runs is rasterized once (with swash) into a CPU bitmap, uploaded into the SDL2 glyph-atlas texture (1.7 (#3)), and drawn by copying atlas rectangles with color modulation, so the GPU-first design is unchanged and steady-state text drawing does no CPU rasterization. **Compatibility gate (first step):** a spike in `examples/parley_spike.rs` renders labels and a text field through Parley → glyph bitmap → SDL2 atlas texture. It must show (a) no per-frame CPU rasterization after warm-up, (b) the same texture/blit path as other widgets, and (c) acceptable binary size and startup time. If the spike fails, Parley stays behind an off-by-default `parley` Cargo feature and the default `TextLayout` remains SDL_ttf-based until it passes. Text layouts are cached per widget and recomputed only when text, font, or width changes, and they supply size hints to layout managers (5.5 (#116)). The `TextLayout` trait allows Cosmic Text or a bitmap-font layout (vintage targets, 10.4 (#108); Parley can also build without std via its `libm` feature).
+
+**Acceptance Criteria.**
+
+- Spike passes the compatibility gate (or Parley is feature-gated off by default with the reason recorded in the issue)
+- Glyphs rasterized once into the SDL2 atlas; steady-state drawing is texture copies only
+- RTL, CJK, and emoji fallback render correctly; caret/selection geometry drives text fields
+- Layouts cached; recomputed only on text/font/width change; provide size hints
+- `TextLayout` trait with Parley as default once the gate passes
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 10.2 (#106).
+
+**Technical Stack.** Rust, Parley (new dependency), SDL2 render API
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text.md` ("Text", Concepts, new). Guides: 'Text' section. Rustdoc: `TextLayout`, layout caching. Examples: International text sample in the gallery. Screenshots: Gallery tile.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [Parley (Linebender): rich text layout library](https://github.com/linebender/parley)
+
+### 1.19 (#112): Input method (IME) support: composition text and candidate window
+
+**Problem Statement.** Chinese, Japanese, and Korean users type through an input method: keystrokes produce composition (pre-edit) text that is shown underlined until committed, and the platform shows a candidate list near the caret. Without this, text fields are unusable for a large share of users.
+
+**Solution / Scope.** Handle SDL's text-editing events: show composition text inline at the caret with an underline (and the IME's own cursor/selection within it), replace it on each update, and insert it on commit (`TextEntered`). Report the caret rectangle with SDL's text-input rectangle so the platform candidate window appears next to the caret. Emit `CompositionStarted/Updated/Ended` engine events (9.10 (#109)). Works for single-line fields and the text area.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Composing Japanese in a text field**
+
+![1.19 step set 1: Composing Japanese in a text field](mockups/1.19-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(CompositionStarted / CompositionUpdated / CompositionEnded)` | Input method composition begins, changes, or ends | `on_engine_event(..)` |
+| `TextChanged { id }` | Only when the composition is committed | `on_text_change(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Japanese and Chinese input methods compose and commit correctly in a text field
+- Candidate window appears at the caret and follows it
+- Composition never fires `TextChanged` until committed
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.18 (#111).
+
+**Technical Stack.** Rust, SDL2 text input/editing events
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/text-input-and-ime.md` ("Text Input and IME", Guides, new). Guides: 'Text input' section. Rustdoc: IME behavior in text widget docs. Examples: Gallery field tested with an IME. Screenshots: Gallery tile.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+
+### 1.20 (#113): Layers and invalidation: cache hints, texture memory budget, incremental pipeline
+
+**Problem Statement.** Pushrod gives every widget its own texture. Cached layers avoid re-rendering unchanged content, but they cost GPU memory, and too many small layers can be slower than drawing into a parent. A toolkit is at heart an incremental computation engine: work should be redone only at the level that changed.
+
+**Solution / Scope.** Add `CacheHint { Own, Parent, Auto }` per widget: `Own` keeps a texture (a repaint boundary), `Parent` paints into the nearest ancestor's texture, `Auto` uses heuristics (size, repaint frequency, child count). A texture memory budget with LRU eviction frees textures of hidden or rarely changing widgets. Split invalidation into three levels: layout (size/position or text layout changed), paint (appearance changed), and composite (only position or visibility changed, so no repaint, just a re-blit). Report texture memory in benchmarks (7.7 (#115)).
+
+**Acceptance Criteria.**
+
+- Cache hints honored; Auto measurably reduces texture count on the gallery
+- Memory budget enforced with eviction
+- Moving a widget re-composites without repainting
+- Golden images unchanged
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.2 (#106), 7.7 (#115).
+
+**Technical Stack.** Rust, SDL2
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/layers-and-invalidation.md` ("Layers and invalidation", Concepts, new). Guides: 'Performance' section. Rustdoc: `CacheHint`, invalidation levels. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 
 ## Epic 2: Core dialog widgets (#12)
 
@@ -569,7 +748,7 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 |---|---|---|---|---|---|---|---|
 | 2.1 (#27) | Boxed label widget | Text with background and border. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `boxed_label.rs (new)` |
 | 2.2 (#28) | Glyph button (small single-character button) | A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. | `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `glyph_button.rs (new)` |
-| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | Drive ButtonWidget behavior from behavior flags. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | Y | S | `button_widget.rs`, `paint.rs` |
+| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | Y | S | `button_widget.rs`, `paint.rs` |
 | 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `check_box.rs (new)` |
 | 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `radio_button.rs (new)`, `cache.rs` |
 | 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `enhancement`, `mvp`, `size/L`, `widget` | N | Y | L | `text_field.rs (new)`, `paint.rs` |
@@ -587,731 +766,140 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | 2.18 (#87) | Multi-line text area | Multi-line plain-text editing with scrolling, selection, clipboard, and undo. | `enhancement`, `size/L`, `widget` | N | N | L | `text_area.rs (new)` |
 | 2.19 (#88) | Context menus | Right-click (or long-press) pop-up menus for a widget. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `menu.rs`, `cache.rs` |
 | 2.20 (#89) | Message bar (non-modal inline notice) | A dismissible banner for warnings and information that doesn't block the window. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `message_bar.rs (new)` |
+| 2.21 (#125) | Image button | A button that shows an image, or an image with a text label, with the full button behavior. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `image_button.rs (new)` |
+| 2.22 (#126) | Link label | Clickable text that looks like a link and opens a URL or runs a callback. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `link_label.rs (new)` |
 
 ### 2.1 (#27): Boxed label widget
 
-**Problem Statement.** Boxed labels (text with a background and border) are common in dialogs and status areas, but need two stacked widgets today.
+Text with background and border. **Widget roadmap:** [`docs/widgets/boxed-label.md`](widgets/boxed-label.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `BoxedLabel` = `fill` + `text` + `border`, reusing `TextStyle`. Kept under 100 lines as the reference example of composing paint helpers.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Normal and disabled**
-
-![2.1 step set 1: Normal and disabled](mockups/2.1-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Renders background, centered text, border
-- Display only (empty event mask)
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+**Dependencies.** Requires PR #10.
 
 ### 2.2 (#28): Glyph button (small single-character button)
 
-**Problem Statement.** Scroll bars, spin boxes, and title gadgets need a small button showing one symbol, often repeating while held.
+A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. **Widget roadmap:** [`docs/widgets/glyph-button.md`](widgets/glyph-button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `GlyphButton { glyph: char }`: fill + centered glyph + border; inverted while pressed. With `ACTIVATE_ON_PRESS` it fires on press and auto-repeats while held (400 ms delay, then every 100 ms, via timers).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Pressed (fires immediately) 3. Held: repeats 4. Released 5. Disabled**
-
-![2.2 step set 1: 1. Idle 2. Pressed (fires immediately) 3. Held: repeats 4. Released 5. Disabled](mockups/2.2-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id }` | On press, then on each auto-repeat | `on_click(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Centered glyph
-- Pressed state inverts
-- Activate-on-press with auto-repeat
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.5 (#21).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.1 (#19), 1.5 (#21).
 
 ### 2.3 (#29): Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog
 
-**Problem Statement.** `ButtonWidget` is only a push button. Dialogs need a visibly distinct default button (Return), a cancel button (Escape), toggle buttons, buttons that fire on press, and buttons that close a dialog.
+A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. **Widget roadmap:** [`docs/widgets/button.md`](widgets/button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Behavior comes from flags (1.1 (#19)): `DEFAULT_ACTION` draws a 2 px ring and is triggered by Return; `CANCEL_ACTION` by Escape; `TOGGLE` stays pressed and emits `Toggled`; `ACTIVATE_ON_PRESS` emits `Clicked` on press; `DISMISSES_DIALOG` closes the modal dialog (6.7 (#66)) and reports its ID. Pressed inversion moves to shared state painting.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Push button: 1. idle 2. pressed 3. dragged out (releases) 4. released inside -> Clicked**
-
-![2.3 step set 1: Push button: 1. idle 2. pressed 3. dragged out (releases) 4. released inside -> Clicked](mockups/2.3-1.png)
-
-**Default button: 2 px ring, Return activates it**
-
-![2.3 step set 2: Default button: 2 px ring, Return activates it](mockups/2.3-2.png)
-
-**Toggle button: click stays pressed, click again releases**
-
-![2.3 step set 3: Toggle button: click stays pressed, click again releases](mockups/2.3-3.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id, button, count }` | Push/default/cancel: release inside; activate-on-press: press | `on_click(id, ..)` |
-| `Toggled { id, checked }` | Toggle button changes state | `on_toggle(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Each flag combination behaves as described and is tested
-- Default button is recognizable at a glance
-- No regression in PR #10 click tests
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Behavior table on `ButtonWidget`. README/guides: n/a. Examples: OK (default) / Cancel in example. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.4 (#30): Check box with indeterminate state
 
-**Problem Statement.** A first-class check box is expected everywhere, including a 'mixed' state when it summarizes several items.
+Box with a check mark and label; toggles checked; optional mixed state. **Widget roadmap:** [`docs/widgets/check-box.md`](widgets/check-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `CheckBox`: square + check mark when `CHECKED`, a dash when `INDETERMINATE`, followed by a label. Clicking the box or label toggles and emits `Toggled`; Space toggles when focused; clicking an indeterminate box makes it checked.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Unchecked 2. Pressed 3. Checked 4. Indeterminate 5. Focused 6. Disabled**
-
-![2.4 step set 1: 1. Unchecked 2. Pressed 3. Checked 4. Indeterminate 5. Focused 6. Disabled](mockups/2.4-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | Click, Space, or mnemonic | `on_toggle(id, ..)` |
-| `FocusGained / FocusLost { id }` | Keyboard focus moves | `on_focus_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Click, Space, and mnemonic toggle
-- Indeterminate renders and resolves on click
-- Label click toggles
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Example + gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.5 (#31): Radio buttons and radio groups
 
-**Problem Statement.** Choosing exactly one of a few options is everywhere; selecting one radio button must clear its siblings, which needs core support.
+One-of-many selection among sibling widgets. **Widget roadmap:** [`docs/widgets/radio-button.md`](widgets/radio-button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `RadioButton` (circle + label) with the `EXCLUSIVE` behavior. When one becomes checked, exclusive siblings under the same parent are cleared and `Toggled` is emitted for the newly checked one (and `Toggled(false)` for the one cleared). `RadioGroup::new(labels)` builds a labeled group in one call; `ui.checked_in_group(parent)`. Arrow keys move within the group (1.4 (#20)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared**
-
-![2.5 step set 1: 1. Medium checked 2. Pressing Large 3. Released: Large checked, Medium cleared](mockups/2.5-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | A radio becomes checked or is cleared | `on_toggle(id, ..)`; `ui.checked_in_group(parent)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Exactly one exclusive sibling is checked after any change
-- Works for any widget with `EXCLUSIVE`
-- Arrow keys move within the group
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Size picker in example. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.6 (#32): Text field: single-line entry with input masks, validation, and numeric mode
 
-**Problem Statement.** There is no text input. Fields need a caret, selection, clipboard, and a way to restrict and validate input.
+Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. **Widget roadmap:** [`docs/widgets/text-field.md`](widgets/text-field.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Add `TextField`: caret (blinking via timers), selection with Shift+arrows and mouse drag, Home/End, word movement, clipboard via SDL, max length, placeholder text, password mode. Restrict input with an input mask (`"99/99/9999"`, `9` digit, `A` letter, `X` any) or a `Validator` trait (`validate(&str) -> Valid | Intermediate | Invalid`); `IntegerField`/`NumberField` presets with range. Optional built-in label (`with_label("Name:")`). Uses SDL text input events. Emits `TextChanged` on each edit and `EditingFinished` on Return or focus loss.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. empty 2. focused 3. typing 4. selection 5. rejected character 6. disabled**
-
-![2.6 step set 1: 1. empty 2. focused 3. typing 4. selection 5. rejected character 6. disabled](mockups/2.6-1.png)
-
-**Input mask `99/99/9999`**
-
-![2.6 step set 2: Input mask `99/99/9999`](mockups/2.6-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `TextChanged { id }` | Every edit; read `text()` | `on_text_change(id, ..)` |
-| `EditingFinished { id }` | Return or focus loss (validate here) | `on_editing_finished(id, ..)` |
-| `KeyPressed { id, key, modifiers }` | Keys while focused | `on_key_press(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Typing, deleting, caret movement, selection, copy/paste
-- Masks and validators reject invalid input
-- Numeric mode with range
-- `EditingFinished` on Return and focus loss
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.5 (#21), 1.6 (#22).
-
-**Technical Stack.** Rust, SDL2 text input and clipboard
-
-**Documentation.** Rustdoc: Module docs incl. mask characters. README/guides: Widget list. Examples: Name and age fields in example. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
+**Dependencies.** Requires 1.4 (#20), 1.5 (#21), 1.6 (#22), 1.19 (#112).
 
 ### 2.7 (#33): Image widget
 
-**Problem Statement.** There is no way to show a bitmap.
+Display a PNG/BMP image centered, stretched, scaled to fit, or tiled. **Widget roadmap:** [`docs/widgets/image.md`](widgets/image.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ImageWidget` loads an image once with SDL2_image into a shared GPU texture cache keyed by path and copies it with a fit mode: `Center`, `Stretch`, `Fit` (keep aspect), `Tile`. Missing files draw a crossed box instead of panicking.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Fit modes and missing file**
-
-![2.7 step set 1: Fit modes and missing file](mockups/2.7-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id }` | Only if made clickable | `on_click(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Loads PNG and BMP
-- Fit modes render as documented
-- Missing files don't panic
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust, sdl2::image
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Logo in example. Screenshots: Gallery tile.
+**Dependencies.** Requires PR #10.
 
 ### 2.8 (#34): Icon widget (picture with caption)
 
-**Problem Statement.** Launchers, file views, and tool palettes use icons with captions.
+Picture with a caption, selectable and double-clickable, like desktop icons. **Widget roadmap:** [`docs/widgets/icon.md`](widgets/icon.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `IconWidget` = image + caption; click selects (caption inverted), double-click or Return activates.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Selected 3. Activated (double-click)**
-
-![2.8 step set 1: 1. Idle 2. Selected 3. Activated (double-click)](mockups/2.8-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id, count }` | Click selects | `on_click(id, ..)` |
-| `Activated { id }` | Double-click or Return | `on_activate(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Selection inverts the caption
-- Double-click and Return emit `Activated`
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 2.7 (#33).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.6 (#22), 2.7 (#33).
 
 ### 2.9 (#35): Alert dialog
 
-**Problem Statement.** Every system has a one-call alert (icon, message, a few buttons). Pushrod has no modal dialogs.
+One-call modal alert with icon, message, and up to three buttons. **Widget roadmap:** [`docs/widgets/alert.md`](widgets/alert.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` builds a centered modal form (6.7 (#66)) from existing widgets and calls the completion closure with the chosen button index. Return chooses the default, Escape the last button. Always drawn by Pushrod. **Parts (5.2 (#57)):** `AlertParts { icon, title, message, buttons }`; `add_button`, `remove_button`, `set_default_button`. Every part can be retrieved and restyled (font, color, text). Example: `let a = ui.alert(..); ui.get_mut::<TextWidget>(a.parts().message)?.set_font_color(Color::RED); a.add_button(ui, "Help");`
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Alert opens centered; the rest of the window is drawn but inert**
-
-![2.9 step set 1: 1. Alert opens centered; the rest of the window is drawn but inert](mockups/2.9-1.png)
-
-**2. Return = Delete (default), Escape = Cancel  3. Closes; completion gets the index**
-
-```rust
- ui.alert(AlertKind::Warning, "Delete \"report.txt\"?", "This cannot be undone.",
-          &["Delete", "Cancel"], 0, |state, ui, choice| if choice == 0 { /* delete */ });
-```
-
-**Customized through its parts: bold red message, an extra Help button**
-
-![2.9 step set 3: Customized through its parts: bold red message, an extra Help button](mockups/2.9-3.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (completion) | A button is chosen | Completion closure `FnOnce(&mut S, &mut Ui, usize)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Modal: nothing else receives input while open
-- Return/Escape behave as described
-- Completion closure gets the index
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 2.3 (#29), 6.7 (#66), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: `alert` module. README/guides: Dialogs section. Examples: Quit confirmation (1.11 (#26)). Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 2.3 (#29), 6.7 (#66), 5.2 (#57).
 
 ### 2.10 (#36): Custom paint widget (closure-drawn)
 
-**Problem Statement.** A full `Widget` impl is a lot of ceremony for a one-off drawing (a chart, a preview).
+One-off custom drawing without writing a widget struct. **Widget roadmap:** [`docs/widgets/custom-paint.md`](widgets/custom-paint.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `CustomPaint::new(origin, size, |canvas, size, state| ..)` with an optional event closure. The closure draws into the widget's GPU texture with the SDL2 canvas; it only runs when invalidated.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Drawn entirely by the application's closure**
-
-![2.10 step set 1: Drawn entirely by the application's closure](mockups/2.10-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (any) | Whatever the optional event closure emits or posts | `on_click`, `on_value_change`, `on_custom::<T>` as appropriate |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Closure paints into the texture
-- Optional event closure receives events
-- Example draws a chart
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Linked from 'Writing a widget'. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+**Dependencies.** Requires PR #10.
 
 ### 2.11 (#37): Menu bar and drop-down menus (drawn by Pushrod)
 
-**Problem Statement.** Desktop applications need menus that look and behave the same on every platform.
+Menu bar with drop-down menus, separators, check marks, submenus, shortcuts, and mnemonics. **Widget roadmap:** [`docs/widgets/menu-bar-and-menus.md`](widgets/menu-bar-and-menus.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `MenuBar` and `Menu` widgets built as composites (5.2 (#57)). Items come from actions (9.5 (#97)) or plain labels; support separators, check/radio items, disabled items, submenus, shortcut text, and mnemonics (1.12 (#76)). Menus open on click, track the pointer, draw in the overlay layer above all widgets, and close on outside click or Escape. Never uses the OS menu bar or native menus. **Parts (5.2 (#57)):** `MenuBar::menus()`, `Menu::items()`, `add_item`, `insert_item`, `remove_item`, `add_separator`; each item is a part with its own font and color. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. File opened (overlay) 3. Hovering Save 4. Release: Save triggered**
-
-![2.11 step set 1: 1. Idle 2. File opened (overlay) 3. Hovering Save 4. Release: Save triggered](mockups/2.11-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Triggered { action }` | Item chosen by mouse, shortcut, or mnemonic | `on_action(action, ..)` (9.5 (#97)) or `on_click(item_id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Menus open, track, select, and close correctly
-- Submenus and keyboard navigation
-- No OS-native menu APIs on any platform
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.12 (#76), 5.1 (#56), 5.2 (#57), 9.5 (#97).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: `menu` module. README/guides: Menus section. Examples: File/Edit menus in example. Screenshots: Gallery tile.
-
-**Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
+**Dependencies.** Requires 1.1 (#19), 1.12 (#76), 5.1 (#56), 5.2 (#57), 9.5 (#97).
 
 ### 2.12 (#38): File chooser dialog (drawn by Pushrod)
 
-**Problem Statement.** Applications need to open and save files; native dialogs would break the consistent look.
+Choose a file or directory with a consistent look on every platform. **Widget roadmap:** [`docs/widgets/file-chooser.md`](widgets/file-chooser.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Modal form built from the list view (4.5 (#52)), text fields, and buttons: directory, filter, file list, name, OK/Cancel; Open and Save modes. Completion closure receives `Option<PathBuf>`. OS-native dialogs are deliberately not used. **Parts (5.2 (#57)):** `FileChooserParts { folder, filter, list, name, buttons }`; `add_button` (for example 'New Folder'), `add_filter_choice`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Open dialog**
-
-![2.12 step set 1: Open dialog](mockups/2.12-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (completion) | Open or Cancel | Completion closure `FnOnce(&mut S, &mut Ui, Option<PathBuf>)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Navigate, filter, choose; keyboard operable
-- Returns None on cancel
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 6.7 (#66), 5.2 (#57).
-
-**Technical Stack.** Rust std::fs
-
-**Documentation.** Rustdoc: Module docs. README/guides: Dialogs section. Examples: Open button in example. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 2.6 (#32), 4.5 (#52), 6.7 (#66), 5.2 (#57).
 
 ### 2.13 (#77): Tooltips
 
-**Problem Statement.** Icon buttons and terse labels are hard to learn without explanation.
+Short help text shown after the pointer rests on a widget. **Widget roadmap:** [`docs/widgets/tooltip.md`](widgets/tooltip.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Optional `tooltip` text on `WidgetCore` (actions supply it automatically). After a delay (600 ms), draw a bordered text box in the overlay layer near the pointer; hide it on movement, click, or key press.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Pointer rests 2. After 600 ms 3. Pointer moves: hidden**
-
-![2.13 step set 1: 1. Pointer rests 2. After 600 ms 3. Pointer moves: hidden](mockups/2.13-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Purely visual | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Appears after the delay and hides correctly
-- Stays inside the window; never under the pointer
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 5.1 (#56).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: `set_tooltip`. README/guides: Usability section. Examples: Tooltips on example buttons. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21), 5.1 (#56).
 
 ### 2.14 (#83): Separator line
 
-**Problem Statement.** Dialogs group content with simple lines; today that needs a 1-pixel BoxWidget.
+Horizontal or vertical divider line. **Widget roadmap:** [`docs/widgets/separator.md`](widgets/separator.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Separator::horizontal(width)` / `vertical(height)`: a 1 px line (optionally etched as two lines). Display only.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Horizontal and vertical**
-
-![2.14 step set 1: Horizontal and vertical](mockups/2.14-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Horizontal and vertical render correctly
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires PR #10.
 
 ### 2.15 (#84): Toolbar
 
-**Problem Statement.** Frequent commands should be one click away.
+A row of icon/text buttons bound to actions. **Widget roadmap:** [`docs/widgets/toolbar.md`](widgets/toolbar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Toolbar` composite of tool buttons created from actions (9.5 (#97)): icon and/or text, toggle actions stay pressed, disabled actions gray out, tooltips from the action. Overflow items move into a '>>' menu. **Parts (5.2 (#57)):** `items()`, `add_action`, `insert_action`, `remove_item`; each tool button is a part. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Toolbar with a toggled Bold and a disabled Paste**
-
-![2.15 step set 1: Toolbar with a toggled Bold and a disabled Paste](mockups/2.15-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Triggered { action }` | A tool button is clicked | `on_action(action, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Buttons reflect action state
-- Overflow menu when too narrow
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 9.5 (#97), 5.2 (#57), 2.7 (#33).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Toolbar in example. Screenshots: Gallery tile.
-
-**Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
+**Dependencies.** Requires 9.5 (#97), 5.2 (#57), 2.21 (#125).
 
 ### 2.16 (#85): Status bar
 
-**Problem Statement.** Applications show transient messages ('Saved') and permanent status (line/column) at the bottom of the window.
+A strip at the bottom of the window for messages and status fields. **Widget roadmap:** [`docs/widgets/status-bar.md`](widgets/status-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `StatusBar` with a message area (`show_message(text, timeout)`) and permanent fields; actions' status text appears while their menu item is hovered. **Parts (5.2 (#57)):** `fields()`, `add_field`, `remove_field`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Status bar**
-
-![2.16 step set 1: Status bar](mockups/2.16-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Timed messages clear themselves
-- Hovered action status text appears
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Status bar in example. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21), 5.2 (#57).
 
 ### 2.17 (#86): Switch (on/off slide toggle)
 
-**Problem Statement.** Settings that apply immediately read more clearly as a switch than as a check box.
+A sliding on/off switch for settings that take effect immediately. **Widget roadmap:** [`docs/widgets/switch.md`](widgets/switch.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Switch`: track with a knob; click or drag toggles; Space when focused. Emits `Toggled`.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Off, on, disabled**
-
-![2.17 step set 1: Off, on, disabled](mockups/2.17-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | State changes | `on_toggle(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Click, drag, Space toggle
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.18 (#87): Multi-line text area
 
-**Problem Statement.** Notes, descriptions, and logs need multi-line text, which a single-line field can't provide.
+Multi-line plain-text editing with scrolling, selection, clipboard, and undo. **Widget roadmap:** [`docs/widgets/text-area.md`](widgets/text-area.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `TextArea` in a scroll view: line wrapping, caret and selection across lines, clipboard, undo (1.15 (#81)), read-only mode for logs, `append` for log output. Only visible lines are painted from the glyph atlas.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Editing with a selection**
-
-![2.18 step set 1: Editing with a selection](mockups/2.18-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `TextChanged { id }` | Every edit | `on_text_change(id, ..)` |
-| `EditingFinished { id }` | Focus loss | `on_editing_finished(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Editing, selection, clipboard, undo
-- Smooth with 10,000 lines
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 2.6 (#32), 5.3 (#58), 1.7 (#3).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Notes area in example. Screenshots: Gallery tile.
+**Dependencies.** Requires 2.6 (#32), 5.3 (#58), 1.7 (#3).
 
 ### 2.19 (#88): Context menus
 
-**Problem Statement.** Commands that apply to one object (a list row, a text selection) belong in a menu that appears where the user clicked.
+Right-click (or long-press) pop-up menus for a widget. **Widget roadmap:** [`docs/widgets/context-menu.md`](widgets/context-menu.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `widget.set_context_menu(menu)` or `on_context_menu(id, |state, ui, at| -> Option<Menu>)` to build it dynamically. Opens on secondary click, long-press, or the Menu key, at the pointer, in the overlay layer; reuses `Menu` (2.11 (#37)) and actions (9.5 (#97)).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Right-click on a list row**
-
-![2.19 step set 1: Right-click on a list row](mockups/2.19-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ContextMenuRequested { id, position }` | Secondary click / long-press / Menu key | `on_context_menu(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Opens on secondary click, long-press, and Menu key
-- Dynamic menus via callback
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.11 (#37), 9.4 (#96).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Context menu API. README/guides: Menus section. Examples: Context menu on a list. Screenshots: Gallery tile.
-
-**Sources.** [MAME wiki: Intergraph InterPro / CLIX / Environ V](https://wiki.mamedev.org/index.php/Driver:InterPro)
+**Dependencies.** Requires 2.11 (#37), 9.4 (#96).
 
 ### 2.20 (#89): Message bar (non-modal inline notice)
 
-**Problem Statement.** Many messages don't need a modal alert ('Connection lost, retrying'); blocking the user is worse usability.
+A dismissible banner for warnings and information that doesn't block the window. **Widget roadmap:** [`docs/widgets/message-bar.md`](widgets/message-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `MessageBar` at the top of a form: icon, text, optional action buttons, close box; slides in by animating its height. **Parts (5.2 (#57)):** `MessageBarParts { icon, message, buttons, close }`; `add_button`. Every part can be retrieved and restyled (font, color, text).
+**Dependencies.** Requires 1.5 (#21), 2.3 (#29), 5.2 (#57).
 
-#### Look and behavior (proposed)
+### 2.21 (#125): Image button
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+A button that shows an image, or an image with a text label, with the full button behavior. **Widget roadmap:** [`docs/widgets/image-button.md`](widgets/image-button.md) (look, behavior, events, acceptance criteria).
 
-**Message bar with an action**
+**Dependencies.** Requires 2.3 (#29), 2.7 (#33), 5.2 (#57).
 
-![2.20 step set 1: Message bar with an action](mockups/2.20-1.png)
+### 2.22 (#126): Link label
 
-#### Events and callbacks
+Clickable text that looks like a link and opens a URL or runs a callback. **Widget roadmap:** [`docs/widgets/link-label.md`](widgets/link-label.md) (look, behavior, events, acceptance criteria).
 
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Clicked { id }` | Action button or close box | `on_click(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Shows, hides, and dismisses
-- Action buttons fire callbacks
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 2.3 (#29), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Usability section. Examples: Example shows a connection warning. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.4 (#20), 1.6 (#22).
 
 ## Epic 3: Value and choice controls (#13)
 
@@ -1330,281 +918,64 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 | 3.3 (#41) | Group box (titled frame) | A frame with a title in its top border, grouping related controls. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `group_box.rs (new)` |
 | 3.6 (#44) | Choice button: pop-up list and click-to-cycle modes | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | `enhancement`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `choice_button.rs (new)` |
 | 3.7 (#45) | Column browser (multi-column hierarchical browser) | Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. | `enhancement`, `parallelizable`, `size/L`, `usability`, `widget` | Y | N | L | `column_browser.rs (new)` |
+| 3.9 (#47) | Split view (panes with draggable dividers) | Two or more panes side by side or stacked, separated by dividers the user drags to resize them. | `enhancement`, `layout`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `split_view.rs (new)` |
 | 3.10 (#90) | Expander (collapsible section) | A titled section that shows or hides its contents when clicked. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `expander.rs (new)` |
 | 3.11 (#91) | Date picker | A date field with a drop-down month calendar. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `date_picker.rs (new)` |
+| 3.12 (#127) | Dial (rotary knob) | A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `dial.rs (new)` |
 
 ### 3.1 (#39): Scroll bar
 
-**Problem Statement.** Scroll views, lists, and text areas need scroll bars; older systems made applications assemble them by hand.
+Vertical/horizontal scroll bar with arrows and a proportional thumb. **Widget roadmap:** [`docs/widgets/scroll-bar.md`](widgets/scroll-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ScrollBar` composite (5.2 (#57)): two glyph buttons (activate-on-press with auto-repeat), a track, and a draggable thumb sized by `visible / total`. Value 0.0 to 1.0 plus page size; clicking the track pages. Emits `ValueChanged`. **Parts (5.2 (#57)):** `ScrollBarParts { up, down, track, thumb }` (colors and glyphs customizable). Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Track clicked below thumb (page down) 3. Thumb dragged 4. Down arrow held**
-
-![3.1 step set 1: 1. Idle 2. Track clicked below thumb (page down) 3. Thumb dragged 4. Down arrow held](mockups/3.1-1.png)
-
-**Horizontal**
-
-![3.1 step set 2: Horizontal](mockups/3.1-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | Position changes; read `value()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Drag, arrows with repeat, track paging
-- Thumb size reflects proportion
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.5 (#21), 1.6 (#22), 2.2 (#28), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
+**Dependencies.** Requires 1.5 (#21), 1.6 (#22), 2.2 (#28), 5.2 (#57).
 
 ### 3.2 (#40): Slider
 
-**Problem Statement.** There is no way to pick a value from a range.
+Horizontal/vertical slider with range, optional ticks, and value label. **Widget roadmap:** [`docs/widgets/slider.md`](widgets/slider.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Slider { min, max, value, step, ticks, show_value }`: track + knob; drag or click; arrow keys when focused; optional value text beside it. Emits `ValueChanged` continuously and `EditingFinished` on release.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Dragging 3. Ticks with snap 4. Disabled**
-
-![3.2 step set 1: 1. Idle 2. Dragging 3. Ticks with snap 4. Disabled](mockups/3.2-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | While dragging and on key/click | `on_value_change(id, ..)` |
-| `EditingFinished { id }` | Drag released | `on_editing_finished(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Drag/click set value within range
-- Ticks and snapping
-- Keyboard adjusts
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Volume slider in example. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.6 (#22).
 
 ### 3.3 (#41): Group box (titled frame)
 
-**Problem Statement.** Dialogs group related controls inside a titled frame.
+A frame with a title in its top border, grouping related controls. **Widget roadmap:** [`docs/widgets/group-box.md`](widgets/group-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `GroupBox`: border with a gap at the top-left for the title. Children are added normally.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Group box**
-
-![3.3 step set 1: Group box](mockups/3.3-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Container only | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Title interrupts the border
-- Works as the parent of a radio group
-
-**Parallelism / Dependencies.** Parallelizable. Requires PR #10.
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Group the radio buttons in the example. Screenshots: Gallery tile.
-
-**Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires PR #10.
 
 ### 3.6 (#44): Choice button: pop-up list and click-to-cycle modes
 
-**Problem Statement.** Choosing one option from a list shouldn't always require radio buttons that take up space.
+Pick one of several options compactly, as a pop-up list or a click-to-cycle button. **Widget roadmap:** [`docs/widgets/choice-button.md`](widgets/choice-button.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ChoiceButton { items, selected, mode }`. `Popup` mode opens an overlay list positioned so the current item sits under the pointer. `Cycle` mode advances on each click (Shift-click goes back) without a list: the most compact choice for two to five options. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `items()`, `add_item`, `remove_item`; the pop-up list's rows are parts. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Popup mode: 1. closed 2. open, current item under pointer 3. Large chosen**
-
-![3.6 step set 1: Popup mode: 1. closed 2. open, current item under pointer 3. Large chosen](mockups/3.6-1.png)
-
-**Cycle mode: each click advances; Shift-click goes back**
-
-![3.6 step set 2: Cycle mode: each click advances; Shift-click goes back](mockups/3.6-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Selection changes; read `selected()` | `on_selection_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Popup opens over the current item; selects by mouse/keyboard
-- Cycle mode advances and reverses
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
+**Dependencies.** Requires 1.6 (#22), 5.1 (#56), 5.2 (#57).
 
 ### 3.7 (#45): Column browser (multi-column hierarchical browser)
 
-**Problem Statement.** Hierarchies (folders, settings categories, class trees, mail folders) are easiest to navigate when the whole path stays visible. NeXTSTEP's column browser shows column 0 as the root; selecting an item in column 0 fills column 1 with its children, selecting in column 1 fills column 2, and so on, with the path always on screen.
+Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. **Widget roadmap:** [`docs/widgets/column-browser.md`](widgets/column-browser.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ColumnBrowser` composite (5.2 (#57)) of list-view columns (4.5 (#52)) inside a horizontal scroll view (5.3 (#58)). Data comes from a `BrowserModel` trait: `children(&path) -> Vec<BrowserItem>`, `is_leaf(&path)`, optional icon and label per item. Selecting an item in column *n* replaces every column to the right with a new column *n+1* listing that item's children; selecting a leaf clears the columns to the right (an optional preview pane can show leaf details). Branch items show a ▶ marker. When columns overflow the width, the view scrolls horizontally to keep the newest column visible. Columns have a fixed default width and can be resized by dragging the divider between them. Keyboard: Up/Down move within a column, Right enters the selected branch (moving focus to the next column), Left returns to the parent column, typing jumps to a matching item, Return activates. Double-click or Return on a leaf emits `Activated`. **Parts (5.2 (#57)):** `columns()` returns each column's list-view ID; columns can be restyled like any list view; `path()` and `set_path()` read and set the selection. The file chooser (2.12 (#38)) can offer a column mode built on it.
+**Dependencies.** Requires 4.5 (#52), 5.2 (#57), 5.3 (#58).
 
-```text
-col[0] (root)       col[1] (children of
-                    col[0] selection)   col[2] (children of col[1] selection)
-+--------------+    +--------------+    +--------------+
-| Applications▶|    | ken         ▶|    | Documents   ▶|
-|#Users########|--> |#ken#########▶|--> |#Projects####▶|--> col[3] ...
-| System      ▶|    | shared      ▶|    | Music       ▶|
-+--------------+    +--------------+    +--------------+
-```
+### 3.9 (#47): Split view (panes with draggable dividers)
 
-#### Look and behavior (proposed)
+Two or more panes side by side or stacked, separated by dividers the user drags to resize them. **Widget roadmap:** [`docs/widgets/split-view.md`](widgets/split-view.md) (look, behavior, events, acceptance criteria).
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Selecting in each column fills the next one**
-
-![3.7 step set 1: Selecting in each column fills the next one](mockups/3.7-1.png)
-
-**Many columns: the view scrolls horizontally to keep the newest column visible**
-
-![3.7 step set 2: Many columns: the view scrolls horizontally to keep the newest column visible](mockups/3.7-2.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | The selected path changes; read `path()` | `on_selection_change(id, ..)` |
-| `Activated { id }` | Double-click or Return on a leaf | `on_activate(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Selecting in column n fills column n+1 and clears columns to its right
-- Leaf selection clears columns to the right; optional preview pane
-- Horizontal scrolling keeps the newest column visible; column widths are resizable
-- Keyboard navigation: Up/Down, Right into a branch, Left to parent, type-ahead, Return
-- `path()`/`set_path()`, `columns()` part access
-- Works with a filesystem model and an in-memory tree model
-
-**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52), 5.2 (#57), 5.3 (#58).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs + `BrowserModel`. README/guides: Widget list. Examples: Filesystem browser example. Screenshots: Gallery tile.
-
-**Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
+**Dependencies.** Requires 5.2 (#57), 5.5 (#116), 9.4 (#96).
 
 ### 3.10 (#90): Expander (collapsible section)
 
-**Problem Statement.** Advanced options clutter dialogs; hiding them behind a disclosure keeps simple cases simple.
+A titled section that shows or hides its contents when clicked. **Widget roadmap:** [`docs/widgets/expander.md`](widgets/expander.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `Expander { title, expanded }`: triangle + title; toggling hides or shows the child subtree and resizes the expander (autoresizing 5.4 (#59) moves following siblings if configured). Emits `Toggled`.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Collapsed and expanded**
-
-![3.10 step set 1: Collapsed and expanded](mockups/3.10-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `Toggled { id, checked }` | Expanded/collapsed | `on_toggle(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Click, Space, and mnemonic toggle
-- Children hidden and shown
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 5.4 (#59).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Advanced options in example. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.1 (#19), 5.4 (#59).
 
 ### 3.11 (#91): Date picker
 
-**Problem Statement.** Typing dates is error-prone; forms commonly need a date.
+A date field with a drop-down month calendar. **Widget roadmap:** [`docs/widgets/date-picker.md`](widgets/date-picker.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `DatePicker`: a masked text field (2.6 (#32)) plus a button that opens a month calendar in the overlay (arrows for month/year, keyboard navigation, today highlighted). Emits `ValueChanged`. **Parts (5.2 (#57)):** `DatePickerParts { field, button, calendar }`; day cells are parts of the calendar. Every part can be retrieved and restyled (font, color, text).
+**Dependencies.** Requires 2.6 (#32), 5.1 (#56), 5.2 (#57).
 
-#### Look and behavior (proposed)
+### 3.12 (#127): Dial (rotary knob)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. **Widget roadmap:** [`docs/widgets/dial.md`](widgets/dial.md) (look, behavior, events, acceptance criteria).
 
-**Calendar open**
-
-![3.11 step set 1: Calendar open](mockups/3.11-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | Date chosen or typed; read `date()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Calendar navigation by mouse and keyboard
-- Typed and picked dates agree
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.6 (#22), 9.4 (#96).
 
 ## Epic 4: Lists, tables, progress, spin boxes, and tabs (#14)
 
@@ -1618,236 +989,63 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 4.1 (#48) | Progress bar | Determinate bar and indeterminate busy mode. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `progress_bar.rs (new)` |
+| 4.1 (#48) | Progress bar | A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `progress_bar.rs (new)` |
 | 4.2 (#49) | Spin box | Numeric field with up/down arrows, range, and step. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `spin_box.rs (new)` |
 | 4.4 (#51) | Tab view | Tabs that switch between pages of controls. | `enhancement`, `layout`, `parallelizable`, `size/M`, `widget` | Y | N | M | `tab_view.rs (new)` |
 | 4.5 (#52) | List view | Scrolling list with single/multiple selection, backed by a data source. | `enhancement`, `size/L`, `widget` | N | N | L | `list_view.rs (new)` |
 | 4.6 (#53) | Combo box | Text field with a drop-down list of suggestions. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `combo_box.rs (new)` |
 | 4.9 (#92) | Table view | Multi-column list with headers, column resizing, and sorting. | `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `table_view.rs (new)` |
+| 4.10 (#128) | Busy spinner | A small animated indicator for work of unknown length, for use inline or on buttons. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `spinner.rs (new)` |
 
 ### 4.1 (#48): Progress bar
 
-**Problem Statement.** Long operations need visible progress.
+A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). **Widget roadmap:** [`docs/widgets/progress-bar.md`](widgets/progress-bar.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ProgressBar { min, max, value, indeterminate }`: border + filled part; busy mode animates a moving block with ticks (1.5 (#21)). Display only.
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**0%, 40%, busy**
-
-![4.1 step set 1: 0%, 40%, busy](mockups/4.1-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| (none) | Display only; set with `set_value()` (often from a custom event, 1.13 (#78)) | n/a |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Fill proportional to value
-- Busy mode animates without callbacks
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Progress fed by a custom event. Screenshots: Gallery tile.
+**Dependencies.** Requires 1.5 (#21).
 
 ### 4.2 (#49): Spin box
 
-**Problem Statement.** Numbers within a range are easier to adjust with arrows than by typing.
+Numeric field with up/down arrows, range, and step. **Widget roadmap:** [`docs/widgets/spin-box.md`](widgets/spin-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `SpinBox` = numeric text field (2.6 (#32)) + two glyph buttons with auto-repeat; Up/Down keys and the wheel adjust; typed values are clamped on `EditingFinished`. **Parts (5.2 (#57)):** `SpinBoxParts { field, up, down }`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Up held 3. Out-of-range typing clamps 4. Disabled**
-
-![4.2 step set 1: 1. Idle 2. Up held 3. Out-of-range typing clamps 4. Disabled](mockups/4.2-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | Value changes; read `value()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Arrows, keys, wheel adjust within range
-- Typed values clamp
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.2 (#28), 2.6 (#32), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
+**Dependencies.** Requires 2.2 (#28), 2.6 (#32), 5.2 (#57).
 
 ### 4.4 (#51): Tab view
 
-**Problem Statement.** Settings dialogs group many controls into pages.
+Tabs that switch between pages of controls. **Widget roadmap:** [`docs/widgets/tab-view.md`](widgets/tab-view.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `TabView`: tab strip + one container per page; switching hides inactive pages (IDs and state preserved). Ctrl+Tab switches pages. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `tabs()`, `pages()`, `add_page(title) -> (tab_id, page_id)`, `remove_page`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. General active 2. Advanced chosen**
-
-![4.4 step set 1: 1. General active 2. Advanced chosen](mockups/4.4-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Active page changes; read `selected_page()` | `on_selection_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Switching hides/shows pages
-- Hidden controls keep state and IDs
-- Ctrl+Tab
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Settings dialog example. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.1 (#19), 5.2 (#57).
 
 ### 4.5 (#52): List view
 
-**Problem Statement.** Lists are needed by file choosers, combo boxes, and most applications.
+Scrolling list with single/multiple selection, backed by a data source. **Widget roadmap:** [`docs/widgets/list-view.md`](widgets/list-view.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ListView` in a scroll view, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates. **Parts (5.2 (#57)):** `rows()` (visible row parts), per-row style via a `row_style` callback for model-driven rows. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Click selects 3. Shift-click extends 4. Double-click activates**
-
-![4.5 step set 1: 1. Idle 2. Click selects 3. Shift-click extends 4. Double-click activates](mockups/4.5-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Selection changes; read `selected_rows()` | `on_selection_change(id, ..)` |
-| `Activated { id }` | Double-click or Return | `on_activate(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Smooth with 10,000 rows
-- Selection modes and keyboard navigation
-- Model change notifications update the view
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 5.3 (#58), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs + `ListModel`. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 1.6 (#22), 5.3 (#58), 5.2 (#57).
 
 ### 4.6 (#53): Combo box
 
-**Problem Statement.** Choosing common values while allowing free entry needs a combo box.
+Text field with a drop-down list of suggestions. **Widget roadmap:** [`docs/widgets/combo-box.md`](widgets/combo-box.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** Composite of `TextField` + arrow + overlay `ListView`; typing filters; choosing fills the field. **Parts (5.2 (#57)):** `ComboBoxParts { field, button, list }`; `add_item`, `remove_item`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**1. Idle 2. Typing filters 3. Chosen**
-
-![4.6 step set 1: 1. Idle 2. Typing filters 3. Chosen](mockups/4.6-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `TextChanged { id }` | Typing | `on_text_change(id, ..)` |
-| `SelectionChanged { id }` | Item chosen from the list | `on_selection_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Typing filters; arrow opens; choosing fills
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
-
-**Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
+**Dependencies.** Requires 2.6 (#32), 4.5 (#52), 5.1 (#56), 5.2 (#57).
 
 ### 4.9 (#92): Table view
 
-**Problem Statement.** Records with several fields (files with size and date, orders, logs) need columns.
+Multi-column list with headers, column resizing, and sorting. **Widget roadmap:** [`docs/widgets/table-view.md`](widgets/table-view.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `TableView` extending the list view: column headers, resizable columns, click a header to sort (via the model), per-column alignment; a `TableModel` supplies cells. **Parts (5.2 (#57)):** `columns()`, `add_column`, `remove_column`; header cells are parts. Every part can be retrieved and restyled (font, color, text).
+**Dependencies.** Requires 4.5 (#52), 5.2 (#57).
 
-#### Look and behavior (proposed)
+### 4.10 (#128): Busy spinner
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+A small animated indicator for work of unknown length, for use inline or on buttons. **Widget roadmap:** [`docs/widgets/spinner.md`](widgets/spinner.md) (look, behavior, events, acceptance criteria).
 
-**Sorted by Size**
+**Dependencies.** Requires 1.5 (#21).
 
-![4.9 step set 1: Sorted by Size](mockups/4.9-1.png)
+## Epic 5: Composition, clipping, and layout managers (#15)
 
-#### Events and callbacks
+Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers.
 
-| Event emitted | When | Application callback |
-|---|---|---|
-| `SelectionChanged { id }` | Row selection | `on_selection_change(id, ..)` |
-| `Activated { id }` | Double-click or Return | `on_activate(id, ..)` |
-| `SortChanged { id, column, ascending }` | Header clicked | `on_event(..)` |
+**Problem.** Children draw outside their parents, interactive widgets can't be reused as parts, and nothing adapts when a window or parent is resized. Classic systems (GEM, AmigaOS) had no layout managers: forms were fixed-size, and putting a resizable form in a window was very difficult. Modern applications expect forms that resize, adapt to different fonts and translations, and size themselves to their content.
 
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Columns resize and sort
-- Only visible cells painted
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs + `TableModel`. README/guides: Widget list. Examples: File list in example. Screenshots: Gallery tile.
-
-## Epic 5: Composition, clipping, and layout (#15)
-
-Clip children to parents, build widgets from child widgets, scroll views, and autoresizing.
-
-**Problem.** Children draw outside their parents, interactive widgets can't be reused as parts of other widgets, and nothing adapts when a parent is resized.
-
-**Scope.** Clip children to their parents, add composite widgets (the reuse mechanism for complex controls), a scroll view, and simple autoresizing. Absolute positioning stays the default, as in a designed form.
+**Scope.** Clip children, add composites with retrievable parts, a scroll view, and autoresizing for absolutely positioned forms. Add a small `Layout` trait with simple built-in managers (row and column, form, then grid, stack, and flow) that applications can extend with their own. Absolute positioning stays available: a container without a layout behaves exactly as today.
 
 **Dependencies.** Clipping (5.1 (#56)) and composites (5.2 (#57)) are MVP and block the complex controls.
 
@@ -1855,12 +1053,18 @@ Clip children to parents, build widgets from child widgets, scroll views, and au
 |---|---|---|---|---|---|---|---|
 | 5.1 (#56) | Clip children to their parent's bounds | Children never draw or receive input outside their parent. | `core`, `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `cache.rs` |
 | 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `cache.rs`, `composite.rs (new)` |
-| 5.3 (#58) | Scroll view | A container whose content is larger than its frame. | `enhancement`, `layout`, `size/M`, `widget` | N | N | M | `scroll_view.rs (new)`, `cache.rs` |
+| 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | Y | M | `container.rs (new)`, `cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `widget.rs`, `cache.rs` |
+| 5.5 (#116) | Layout manager foundation: Layout trait, size hints, measure and arrange | A small Layout trait any container can use; widgets report minimum, preferred, and maximum sizes; containers measure then arrange their children. | `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | Y | M | `layout/mod.rs (new)`, `widget.rs`, `cache.rs` |
+| 5.6 (#117) | Row and column layouts | Arrange children in a horizontal row or vertical column with spacing, margins, alignment, and stretch. | `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `layout/linear.rs (new)` |
+| 5.7 (#118) | Form layout: aligned label and field rows | Two-column 'Label: field' rows with labels aligned and fields stretching to the available width. | `enhancement`, `layout`, `mvp`, `size/S`, `usability` | N | Y | S | `layout/form.rs (new)` |
+| 5.8 (#119) | Grid layout | Rows and columns of cells with spans, per-row/column stretch, and alignment. | `enhancement`, `layout`, `parallelizable`, `size/M` | Y | N | M | `layout/grid.rs (new)` |
+| 5.9 (#120) | Stack layout (one child visible at a time) | Children occupy the same area; one is shown at a time (pages, wizards, tab contents). | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/stack.rs (new)` |
+| 5.10 (#121) | Flow layout (wrapping rows) | Children placed left to right, wrapping to the next row when the width runs out. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/flow.rs (new)` |
 
 ### 5.1 (#56): Clip children to their parent's bounds
 
-**Problem Statement.** A child partly outside its parent draws over neighbors and receives input outside the parent; scroll views need clipping.
+**Problem Statement.** A child partly outside its parent draws over neighbors and receives input outside the parent; containers need clipping.
 
 **Solution / Scope.** Each widget's visible rectangle is its rectangle intersected with its ancestors'. Blits use cropped source/destination rectangles; hit testing uses the visible rectangle. Overlays (menus, tooltips, pop-ups) opt out.
 
@@ -1874,7 +1078,7 @@ Clip children to parents, build widgets from child widgets, scroll views, and au
 
 **Technical Stack.** Rust, SDL2 rects
 
-**Documentation.** Rustdoc: Draw/hit rules in `cache` docs. README/guides: Tree section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/clip-children-to-their-parent-s-bounds.md` ("Clip children to their parent's bounds", Concepts, new). Guides: Tree section. Rustdoc: Draw/hit rules in `cache` docs. Examples: n/a. Screenshots: n/a.
 
 ### 5.2 (#57): Composite widgets: build widgets from parts that applications can retrieve and modify
 
@@ -1894,7 +1098,7 @@ Alert (composite, id 40)
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **An alert customized through its parts: bold red message, an extra Help button**
 
@@ -1922,47 +1126,19 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `composite` module. README/guides: 'Writing a composite widget' guide. Examples: Composite example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/composite-widgets.md` ("Composite Widgets", Guides, new). Guides: 'Writing a composite widget' guide. Rustdoc: `composite` module. Examples: Composite example. Screenshots: n/a.
 
-### 5.3 (#58): Scroll view
+### 5.3 (#58): Container: a scrollable viewport onto fixed-size content
 
-**Problem Statement.** Lists, text areas, and long forms need a scrolling viewport.
+A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. **Widget roadmap:** [`docs/widgets/container.md`](widgets/container.md) (look, behavior, events, acceptance criteria).
 
-**Solution / Scope.** `ScrollView` with a content container offset by the scroll position, scroll bars as needed, wheel and keyboard scrolling, `scroll_to(rect)` to keep the focused widget visible. **Parts (5.2 (#57)):** `ScrollViewParts { content, vertical, horizontal }`. Every part can be retrieved and restyled (font, color, text).
-
-#### Look and behavior (proposed)
-
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
-
-**Content clipped; wheel or bars move it**
-
-![5.3 step set 1: Content clipped; wheel or bars move it](mockups/5.3-1.png)
-
-#### Events and callbacks
-
-| Event emitted | When | Application callback |
-|---|---|---|
-| `ValueChanged { id }` | Scroll position changes; read `scroll_offset()` | `on_value_change(id, ..)` |
-
-Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
-
-**Acceptance Criteria.**
-
-- Scrolls with bars, wheel, keys
-- Focused widget scrolled into view
-- Parts are retrievable and modifiable as described
-
-**Parallelism / Dependencies.** Not parallelizable. Requires 3.1 (#39), 5.1 (#56), 5.2 (#57).
-
-**Technical Stack.** Rust
-
-**Documentation.** Rustdoc: Module docs. README/guides: Layout section. Examples: Long form in a scroll view. Screenshots: Gallery tile.
+**Dependencies.** Requires 3.1 (#39), 5.1 (#56), 5.2 (#57).
 
 ### 5.4 (#59): Autoresizing (keep margins or stretch on resize)
 
 **Problem Statement.** Designed forms are absolutely positioned, which is simple, but nothing adapts when a window or pane is resized.
 
-**Solution / Scope.** An `Anchors` setting on `WidgetCore` (left, right, top, bottom, plus stretch width/height), applied when the parent's size changes. Absolute positioning remains the default; no constraint solver. Sibling-relative attachments can be revisited only if real forms need them.
+**Solution / Scope.** An `Anchors` setting on `WidgetCore` (left, right, top, bottom, plus stretch width/height), applied when the parent's size changes. Absolute positioning remains the default; no constraint solver. Sibling-relative attachments can be revisited only if real forms need them. Anchors apply to containers without a layout manager; containers with a layout (5.5 (#116)) are arranged by the layout instead.
 
 **Acceptance Criteria.**
 
@@ -1973,9 +1149,176 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Anchors`. README/guides: Layout section. Examples: Resizable example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/autoresizing.md` ("Autoresizing", Concepts, new). Guides: Layout section. Rustdoc: `Anchors`. Examples: Resizable example. Screenshots: n/a.
 
 **Sources.** [Motif reference: form attachments](https://man.archlinux.org/man/XmForm.3.en)
+
+### 5.5 (#116): Layout manager foundation: Layout trait, size hints, measure and arrange
+
+**Problem Statement.** Pushrod only supports absolute positions. Resizable windows, translated text of different lengths, user font sizes, and dialogs that size themselves to their content all need layout managers. Classic Atari and Amiga forms couldn't resize at all, which is a big part of why their dialogs felt rigid.
+
+**Solution / Scope.** Add `SizeHint { min, preferred, max }` (each widget reports it; text widgets measure through the text layout, 1.18 (#111)) and a per-widget `LayoutParams { stretch, alignment, margin }`. Add `trait Layout { fn measure(&self, children: &[ChildInfo], available: Size) -> SizeHint; fn arrange(&self, children: &[ChildInfo], bounds: Rect) -> Vec<Rect>; }`; any container widget can hold `Option<Box<dyn Layout>>` (`set_layout`). Layout runs as its own invalidation level: changing a child's size hint, text, font, or visibility, or resizing the container, marks layout dirty up to the nearest container whose own size doesn't change; measure and arrange run once per frame before painting, and arrange only moves widgets (re-blit) unless their size changed. Without a layout, a container keeps absolute positioning and autoresizing (5.4 (#59)). Applications extend the system by implementing `Layout` for their own managers. Emits `Engine(LayoutChanged { container })` (9.10 (#109)).
+
+```text
+            measure (bottom-up)                   arrange (top-down)
+window  <- SizeHint{min,pref,max} --   window  -- Rect --> 
+  column <- hints of children --        column -- Rects for each child -->
+    label   (text layout size)            label    (moved, re-blit only)
+    field   (min width 120)               field    (resized -> repaint)
+```
+
+**Acceptance Criteria.**
+
+- `SizeHint`, `LayoutParams`, and the `Layout` trait
+- Containers with a layout are measured and arranged once per frame when dirty
+- Layout invalidation stops at containers whose size doesn't change
+- Moving without resizing doesn't repaint
+- Absolute positioning unchanged when no layout is set
+- An application-defined layout works
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.18 (#111), 9.10 (#109).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/layouts-overview.md` ("Layouts Overview", Layouts, new). Guides: 'Layouts' section. Rustdoc: `layout` module, `Layout` trait, `SizeHint`. Examples: Custom layout example. Screenshots: n/a.
+
+**Sources.** [Motif reference: form attachments](https://man.archlinux.org/man/XmForm.3.en)
+
+### 5.6 (#117): Row and column layouts
+
+**Problem Statement.** Most dialogs are rows and columns: a column of fields, a row of buttons aligned to the right.
+
+**Solution / Scope.** `Row` and `Column` layouts with `spacing`, `margins`, cross-axis alignment, and per-child `stretch` (children with stretch share extra space proportionally; others keep their preferred size). A `Spacer` widget (`Spacer::stretch()`) pushes items apart, for example to right-align OK/Cancel. Children respect min/max sizes.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**A column of fields above a right-aligned button row, at two window widths**
+
+![5.6 step set 1: A column of fields above a right-aligned button row, at two window widths](mockups/5.6-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(LayoutChanged { container })` | Children re-arranged | `on_engine_event(..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Row and column with spacing, margins, alignment, stretch
+- Spacer for right/bottom alignment
+- Min/max respected while resizing
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/row-and-column.md` ("Row and Column", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Row`, `Column`, `Spacer`. Examples: Example dialog built with rows and columns. Screenshots: Gallery tile.
+
+### 5.7 (#118): Form layout: aligned label and field rows
+
+**Problem Statement.** Data-entry forms are label/field rows. Aligning labels by hand breaks when text is translated or fonts change.
+
+**Solution / Scope.** `FormLayout::add_row(label, field)`: labels right- (Mac style) or left-aligned in a column sized to the widest label; fields stretch; optional full-width rows (check boxes, group boxes); rows wrap the label above the field when the form gets too narrow. Clicking a label focuses its field (works with mnemonics, 1.12 (#76)).
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Form layout: wide window, then narrow window (labels move above fields)**
+
+![5.7 step set 1: Form layout: wide window, then narrow window (labels move above fields)](mockups/5.7-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(LayoutChanged { container })` | Rows re-arranged | `on_engine_event(..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Labels align to the widest label
+- Fields stretch with the window
+- Narrow mode puts labels above fields
+- Label click focuses its field
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/form-layout.md` ("Form Layout", Layouts, new). Guides: 'Layouts' section. Rustdoc: `FormLayout`. Examples: Settings form example. Screenshots: Gallery tile.
+
+### 5.8 (#119): Grid layout
+
+**Problem Statement.** Calculator keypads, property sheets, and dashboards need cells aligned in both directions.
+
+**Solution / Scope.** `Grid::place(child, row, col, row_span, col_span)` with per-row and per-column min sizes and stretch factors, spacing, and cell alignment.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Grid with a spanning cell, at two window widths**
+
+![5.8 step set 1: Grid with a spanning cell, at two window widths](mockups/5.8-1.png)
+
+**Acceptance Criteria.**
+
+- Spans, stretch, alignment, spacing
+- Correct min/preferred sizes from cell hints
+
+**Parallelism / Dependencies.** Parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/grid.md` ("Grid", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Grid`. Examples: Calculator example. Screenshots: Gallery tile.
+
+### 5.9 (#120): Stack layout (one child visible at a time)
+
+**Problem Statement.** Tab views, wizards, and settings pages switch between pages in the same space.
+
+**Solution / Scope.** `Stack` sized to its largest child (or the current one), showing one child; `set_current(index)` hides the others. Used by the tab view (4.4 (#51)).
+
+**Acceptance Criteria.**
+
+- Switching pages hides others and keeps their state
+- Size policy: largest or current
+
+**Parallelism / Dependencies.** Parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/stack.md` ("Stack", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Stack`. Examples: Wizard example. Screenshots: n/a.
+
+### 5.10 (#121): Flow layout (wrapping rows)
+
+**Problem Statement.** Tag lists, icon views, and toolbars that wrap need content to reflow as the width changes.
+
+**Solution / Scope.** `Flow` with horizontal and vertical spacing and row alignment; measure reports the height needed for a given width.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Flow layout reflowing tags at two widths**
+
+![5.10 step set 1: Flow layout reflowing tags at two widths](mockups/5.10-1.png)
+
+**Acceptance Criteria.**
+
+- Reflows on resize
+- Height-for-width measurement
+
+**Parallelism / Dependencies.** Parallelizable. Requires 5.5 (#116).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/flow.md` ("Flow", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Flow`. Examples: Tag list example. Screenshots: Gallery tile.
 
 ## Epic 6: Forms and form files (foundation for Chassis) (#16)
 
@@ -2015,7 +1358,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `registry` module. README/guides: Forms section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/widget-registry-and-factory.md` ("Widget registry and factory", Forms, new). Guides: Forms section. Rustdoc: `registry` module. Examples: n/a. Screenshots: n/a.
 
 ### 6.2 (#61): Property introspection: list, get, and set widget properties by name
 
@@ -2033,13 +1376,13 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `properties` module. README/guides: Forms section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/property-introspection.md` ("Property introspection", Forms, new). Guides: Forms section. Rustdoc: `properties` module. Examples: n/a. Screenshots: n/a.
 
 ### 6.3 (#62): Form file format (binary, versioned)
 
 **Problem Statement.** Designed forms must be stored compactly and loaded quickly, with programs referring to objects only by number, as every classic system did.
 
-**Solution / Scope.** Header (magic `PRSC`, version, offsets); form table (name, root); object table (type, parent, first child, next sibling, origin, size, behavior, state, anchors, property offset); tag-length-value property blocks so new properties don't break old readers; string pool; image pool; symbol table (names for IDs and actions). Little-endian, std only. Specified in `docs/FORM_FORMAT.md`.
+**Solution / Scope.** Header (magic `PRSC`, version, offsets); form table (name, root); object table (type, parent, first child, next sibling, origin, size, behavior, state, anchors, property offset); tag-length-value property blocks so new properties don't break old readers; string pool; image pool; symbol table (names for IDs and actions). Little-endian, std only. Specified in `docs/FORM_FORMAT.md`. Layouts are stored too: a container's layout kind and parameters, and each child's layout parameters (stretch, alignment, margins, grid cell).
 
 ```text
 +---------------------------+
@@ -2070,7 +1413,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust (std only)
 
-**Documentation.** Rustdoc: `form` module. README/guides: Forms section linking the spec. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/form-file-format.md` ("Form file format", Forms, new). Guides: Forms section linking the spec. Rustdoc: `form` module. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [FreeMiNT AES docs: object tree fundamentals](https://freemint.github.io/tos.hyp/en/aes_fundamentals.html); [Shift Interface resource editor (Atari)](https://atariuptodate.de/en/1277/interface)
 
@@ -2078,19 +1421,20 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** The point of form files is that code doesn't rebuild the UI: the application loads the form and attaches callbacks.
 
-**Solution / Scope.** `Engine::load_form(file, "main") -> FormHandle` creates widgets via the registry, applies properties, and maps form-local object numbers to `WidgetId`s (`form.id(main::OK)`).
+**Solution / Scope.** `Engine::load_form(file, "main") -> FormHandle` creates widgets via the registry, applies properties, and maps form-local object numbers to `WidgetId`s (`form.id(main::OK)`). Emits its engine event (9.10 (#109)). Forms are mostly static: at load, precompute what can't change (text layouts of fixed labels, static textures) so the dynamic work at run time is only what the application actually changes.
 
 **Acceptance Criteria.**
 
 - Loaded form renders identically to the code-built version (golden)
 - IDs resolve via generated constants
 - Errors name object and property
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 6.3 (#62).
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `load_form`, `FormHandle`. README/guides: Forms quick start. Examples: `examples/form.rs`. Screenshots: Form screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/loading-forms.md` ("Loading Forms", Forms, new). Guides: Forms quick start. Rustdoc: `load_form`, `FormHandle`. Examples: `examples/form.rs`. Screenshots: Form screenshot.
 
 ### 6.5 (#64): Form writer: save a widget subtree to a file
 
@@ -2107,7 +1451,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `FormWriter`. README/guides: Forms section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/form-writer.md` ("Form writer", Forms, new). Guides: Forms section. Rustdoc: `FormWriter`. Examples: n/a. Screenshots: n/a.
 
 ### 6.6 (#65): Generate ID constants from a form file
 
@@ -2124,7 +1468,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust, build.rs
 
-**Documentation.** Rustdoc: `form::codegen`. README/guides: Forms quick start. Examples: Example uses generated constants. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/generate-id-constants-from-a-form-file.md` ("Generate ID constants from a form file", Forms, new). Guides: Forms quick start. Rustdoc: `form::codegen`. Examples: Example uses generated constants. Screenshots: n/a.
 
 **Sources.** [Shift Interface resource editor (Atari)](https://atariuptodate.de/en/1277/interface)
 
@@ -2132,19 +1476,20 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** Alerts, file choosers, and settings dialogs need modal behavior: input goes only to the dialog until it is dismissed.
 
-**Solution / Scope.** `ui.open_modal(root, |state, ui, dismissed_by| ..)`. While open, input goes only to the modal subtree (the rest is drawn but inert), focus starts on the first focusable widget, Return/Escape map to default/cancel, and a `DISMISSES_DIALOG` control closes it. Modals nest.
+**Solution / Scope.** `ui.open_modal(root, |state, ui, dismissed_by| ..)`. While open, input goes only to the modal subtree (the rest is drawn but inert), focus starts on the first focusable widget, Return/Escape map to default/cancel, and a `DISMISSES_DIALOG` control closes it. Modals nest. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
 - Input blocked outside the top modal
 - Dismissing control reported
 - Nested modals
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.8 (#23), 2.3 (#29).
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Ui::open_modal`. README/guides: Dialogs section. Examples: Settings dialog example. Screenshots: Modal screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/modal-dialogs.md` ("Modal dialogs", Forms, new). Guides: Dialogs section. Rustdoc: `Ui::open_modal`. Examples: Settings dialog example. Screenshots: Modal screenshot.
 
 ### 6.8 (#67): Bind actions by name from form files
 
@@ -2161,7 +1506,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Action binding. README/guides: Forms section. Examples: Form example uses actions. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/bind-actions-by-name-from-form-files.md` ("Bind actions by name from form files", Forms, new). Guides: Forms section. Rustdoc: Action binding. Examples: Form example uses actions. Screenshots: n/a.
 
 **Sources.** [Apple: Target-Action](https://developer.apple.com/library/archive/documentation/General/Devpedia-CocoaApp-MOSX/TargetAction.html)
 
@@ -2169,7 +1514,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** Chassis will be a drag-and-drop form designer built on Pushrod. It must hit-test every object, draw selection handles, and edit widgets without them reacting.
 
-**Solution / Scope.** `DesignMode` on `WidgetCache`: an event filter (9.3 (#95)) intercepts all input; `design_hit` includes disabled widgets; an overlay draws handles and alignment guides; edits go through the undo stack (1.15 (#81)) and emit `DesignChanged`. Composite parts aren't separately selectable.
+**Solution / Scope.** `DesignMode` on `WidgetCache`: an event filter (9.3 (#95)) intercepts all input; `design_hit` includes disabled widgets; an overlay draws handles and alignment guides; edits go through the undo stack (1.15 (#81)) and emit `DesignChanged`. Composite parts aren't separately selectable. The designer edits layouts as well: choose a container's layout, drag children between cells or rows, and edit spacing, stretch, and alignment.
 
 **Acceptance Criteria.**
 
@@ -2181,7 +1526,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `design` module. README/guides: Chassis section. Examples: Minimal designer example. Screenshots: Design-mode screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/design-mode-hooks-for-chassis.md` ("Design-mode hooks for Chassis", Forms, new). Guides: Chassis section. Rustdoc: `design` module. Examples: Minimal designer example. Screenshots: Design-mode screenshot.
 
 **Sources.** [Shift Interface resource editor (Atari)](https://atariuptodate.de/en/1277/interface)
 
@@ -2202,24 +1547,28 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `examples/gallery.rs (new)` |
 | 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | Y | S | `Cargo.toml`, `CHANGELOG.md (new)` |
+| 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
+| 7.7 (#115) | Performance benchmarks and budgets | Measure frame time, input latency, memory per widget, and startup; fail CI on regressions. | `ci`, `mvp`, `parallelizable`, `performance`, `size/S` | Y | Y | S | `benches/ (new)`, `.github/workflows/ci.yml` |
+| 7.8 (#122) | Documentation site: build pushrod-docs in CI and publish it | Build the Docusaurus site on every PR (broken links fail) and publish it to GitHub Pages, with the API reference linked. | `ci`, `documentation`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `.github/workflows/docs.yml (new)`, `pushrod-docs/` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
 
 **Problem Statement.** There is no CI.
 
-**Solution / Scope.** Workflow installing SDL2/ttf/image dev packages; `cargo fmt --check`, `clippy -D warnings`, `test`, `doc`; Ubuntu and macOS; MSRV 1.86 and stable.
+**Solution / Scope.** Workflow installing SDL2/ttf/image dev packages; `cargo fmt --check`, `clippy -D warnings`, `test`, `doc`; Ubuntu and macOS; MSRV 1.86 and stable. Add a sample-data check that fails on e-mail addresses outside the reserved example domains (example.com/.org/.net) and on home-directory paths containing user names, in examples, tests, docs, and mockups.
 
 **Acceptance Criteria.**
 
 - Runs on PRs and main
 - Fails on warnings, formatting, or tests
 - README badge
+- Sample-data check flags real-looking e-mail addresses and user home paths
 
 **Parallelism / Dependencies.** Parallelizable. Independent; do first.
 
 **Technical Stack.** GitHub Actions
 
-**Documentation.** Rustdoc: n/a. README/guides: CI badge. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/ci.md` ("CI", Contributing, new). Guides: CI badge. Rustdoc: n/a. Examples: n/a. Screenshots: n/a.
 
 ### 7.2 (#70): Golden-image rendering tests
 
@@ -2237,13 +1586,13 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Rust, SDL2, Xvfb
 
-**Documentation.** Rustdoc: n/a. README/guides: Testing section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/golden-image-rendering-tests.md` ("Golden-image rendering tests", Contributing, new). Guides: Testing section. Rustdoc: n/a. Examples: n/a. Screenshots: n/a.
 
 ### 7.3 (#71): Widget gallery example
 
 **Problem Statement.** There is no single place to see every widget.
 
-**Solution / Scope.** `examples/gallery.rs` with labeled tiles; each widget issue adds its tile; README screenshot comes from it.
+**Solution / Scope.** `examples/gallery.rs` with labeled tiles; each widget issue adds its tile; README screenshot comes from it. All sample data in the gallery is fictional (CONTRIBUTING.md).
 
 **Acceptance Criteria.**
 
@@ -2254,13 +1603,13 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: n/a. README/guides: Screenshot + run command. Examples: This is the example. Screenshots: Gallery screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/intro.md` ("Introduction (gallery screenshot)", Introduction, update). Guides: Screenshot + run command. Rustdoc: n/a. Examples: This is the example. Screenshots: Gallery screenshot.
 
 ### 7.4 (#72): Guide: writing widgets and composites
 
 **Problem Statement.** Extending Pushrod is the point of the redesign; it needs end-to-end docs.
 
-**Solution / Scope.** Guide: paint-only widget, interactive widget with events and callbacks, behavior and state, input controllers (9.4 (#96)), composites, custom events, registry and properties, testing with `Engine::dispatch` and goldens.
+**Solution / Scope.** Guide: paint-only widget, interactive widget with events and callbacks, behavior and state, input controllers (9.4 (#96)), composites, custom events, registry and properties, testing with `Engine::dispatch` and goldens. Includes the sample-data rule: fictional placeholders only, no real names or PII.
 
 **Acceptance Criteria.**
 
@@ -2271,7 +1620,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Markdown, rustdoc
 
-**Documentation.** Rustdoc: Crate docs link. README/guides: Link. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/creating-widgets.md` ("Creating widgets", Guides, update). Guides: Link. Rustdoc: Crate docs link. Examples: n/a. Screenshots: n/a.
 
 ### 7.5 (#73): Changelog, Cargo metadata, and crates.io release
 
@@ -2289,7 +1638,67 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Cargo
 
-**Documentation.** Rustdoc: docs.rs build. README/guides: Install from crates.io. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/changelog-cargo-metadata-and-crates-io-release.md` ("Changelog, Cargo metadata, and crates.io release", Contributing, new). Guides: Install from crates.io. Rustdoc: docs.rs build. Examples: n/a. Screenshots: n/a.
+
+### 7.6 (#114): Module boundaries and written specs with conformance tests
+
+**Problem Statement.** Contributors (human or AI-assisted) work best against modules with clear boundaries and written contracts. Pushrod's contracts (what a widget must do, how events are routed, what a painter must provide, the form file format) live only in code and issue text.
+
+**Solution / Scope.** Write short specs in `docs/specs/`: `widget.md` (core, paint, events, parts, properties), `events.md` (vocabulary, phases, masks, engine events, ordering guarantees), `paint.md` (Painter trait and cache policy), `forms.md` (links to the form format). Keep the engine (tree, events, invalidation, paint API) separate from the design layer (widget defaults, appearance, theme) in both docs and module layout. Add conformance tests in `tests/conformance/` that check each guarantee (event order, propagation, mask filtering, engine-event emission) so alternative widgets and backends can prove compliance. Specs and conformance tests use fictional sample data only.
+
+**Acceptance Criteria.**
+
+- Specs for widget, events, paint, and forms
+- Engine and design layer separated in module layout
+- Conformance tests for each stated guarantee run in CI
+
+**Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93), 7.1 (#69).
+
+**Technical Stack.** Markdown, Rust tests
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/specs.md` ("Specifications", Contributing, new). Guides: Contributing section links the specs. Rustdoc: Links from crate docs. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+
+### 7.7 (#115): Performance benchmarks and budgets
+
+**Problem Statement.** Pushrod's premise is small and fast, but nothing measures it, so regressions go unnoticed.
+
+**Solution / Scope.** Benchmarks (headless where possible): event dispatch throughput, frame time for the gallery under interaction, text layout and atlas warm-up, form load time, texture memory per widget, and binary size. Record a baseline; CI flags regressions beyond a tolerance. Publish numbers in the README, including a low-end target.
+
+**Acceptance Criteria.**
+
+- Benchmarks run in CI with a stored baseline
+- Regressions beyond tolerance fail or warn
+- README shows current numbers
+
+**Parallelism / Dependencies.** Parallelizable. Requires 7.1 (#69).
+
+**Technical Stack.** Rust (criterion or built-in timing), GitHub Actions
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/performance-benchmarks-and-budgets.md` ("Performance benchmarks and budgets", Contributing, new). Guides: 'Performance' section with numbers. Rustdoc: n/a. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+
+### 7.8 (#122): Documentation site: build pushrod-docs in CI and publish it
+
+**Problem Statement.** The `pushrod-docs` Docusaurus site exists, but nothing builds it automatically, so broken links or stale pages could merge, and it isn't published anywhere.
+
+**Solution / Scope.** Add a workflow that runs `npm ci && npm run build` in `pushrod-docs` on every PR (Docusaurus fails on broken links) and deploys `main` to GitHub Pages at `/rust-pushrod/`. Publish rustdoc output alongside it (`/rust-pushrod/api/`) and link it from the navbar. Add a check that every widget module in `src/` has a page in `pushrod-docs/docs/widgets/`, and that code samples marked as checked compile (a doc-sample test crate).
+
+**Acceptance Criteria.**
+
+- PRs fail when the docs build fails
+- `main` deploys to GitHub Pages
+- API reference published and linked
+- Missing widget pages are reported
+- Checked code samples compile in CI
+
+**Parallelism / Dependencies.** Parallelizable. Requires 7.1 (#69).
+
+**Technical Stack.** GitHub Actions, Node (Docusaurus), rustdoc
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/writing-documentation.md` ("Writing documentation", Writing documentation, update). Guides: Writing documentation page: how CI checks docs. Rustdoc: API reference linked from the site. Examples: n/a. Screenshots: n/a.
 
 ## Epic 8: Theming and skins (distant future) (#18)
 
@@ -2310,7 +1719,7 @@ Placeholder: route colors and metrics through a theme, then allow skins. Not sch
 
 **Problem Statement.** Colors, borders, and fonts are hard-coded. Theming is planned for the distant future.
 
-**Solution / Scope.** When scheduled: `Theme` passed to `paint`, with `Theme::classic()` pixel-identical to today's goldens. Until then, new widgets take colors from `paint` helpers, not literals.
+**Solution / Scope.** When scheduled: `Theme` passed to `paint`, with `Theme::classic()` pixel-identical to today's goldens. Until then, new widgets take colors from `paint` helpers, not literals. If theming adopts style rules, use a small curated subset designed for incremental evaluation rather than full CSS.
 
 **Acceptance Criteria.**
 
@@ -2320,7 +1729,7 @@ Placeholder: route colors and metrics through a theme, then allow skins. Not sch
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: (Future). README/guides: (Future). Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/theme-for-colors-and-metrics.md` ("Theme for colors and metrics", Concepts, new). Guides: (Future). Rustdoc: (Future). Examples: n/a. Screenshots: n/a.
 
 ### 8.2 (#75): Skins: image-based widget rendering (future)
 
@@ -2336,7 +1745,7 @@ Placeholder: route colors and metrics through a theme, then allow skins. Not sch
 
 **Technical Stack.** Rust, SDL2_image
 
-**Documentation.** Rustdoc: (Future). README/guides: (Future). Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/skins.md` ("Skins", Concepts, new). Guides: (Future). Rustdoc: (Future). Examples: n/a. Screenshots: n/a.
 
 ## Epic 9: Event model and callbacks (#79)
 
@@ -2359,12 +1768,14 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 | 9.7 (#99) | Callback handles: disconnect, block, and unblock | Every registration returns a handle to remove or temporarily silence the callback. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `engine.rs` |
 | 9.8 (#100) | Drag and drop within the application | Drag data between widgets (list to list, file icon to drop zone) with drop targets and feedback. | `enhancement`, `events`, `parallelizable`, `size/L`, `usability` | Y | N | L | `dnd.rs (new)`, `cache.rs` |
 | 9.9 (#101) | Pointer cursor per widget | Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links). | `enhancement`, `events`, `parallelizable`, `size/S`, `usability` | Y | N | S | `widget.rs`, `cache.rs` |
+| 9.10 (#109) | Engine events: every internal action Pushrod performs emits an event | A system-wide EngineEvent for each internal action (mode changes, focus, modals, menus, tree changes, forms, drags, timers, window changes), broadcast to widgets and callbacks. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | Y | M | `event.rs`, `engine.rs`, `cache.rs` |
+| 9.11 (#124) | Event-loop style: keep parity with callbacks | Everything delivered to callbacks is also returned by next_event, and both styles can be combined. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs`, `event.rs` |
 
 ### 9.1 (#93): Event vocabulary: modern event names and structure
 
 **Problem Statement.** PR #10 inherited `BoundsChange`, `Clicked(u32, u8)`, and `SystemEvent`. Names should say what happened in plain modern terms, carry named fields, and cover pointer, keyboard, focus, semantic, lifecycle, window, time, and custom events consistently, so every other issue uses the same words.
 
-**Solution / Scope.** Replace `PushrodEvent` with `pushrod::Event` (struct variants, named fields). **Pointer:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked { id, button, count }`, `Scrolled { id, delta }`. **Keyboard:** `KeyPressed { id, key, modifiers, repeat }`, `KeyReleased`, `TextEntered { id, text }`. **Focus:** `FocusGained`, `FocusLost`. **Semantic (emitted by widgets):** `Activated`, `Toggled { checked }`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered { action }`, `ContextMenuRequested { position }`, `PropertyChanged { name }`. **Lifecycle:** `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`. **Window:** `WindowResized`, `WindowFocusChanged`, `CloseRequested`. **Time:** `Tick { elapsed }`. **Extension:** `Custom(CustomEvent)` (1.13 (#78)), `Raw(sdl2::event::Event)` for anything not yet mapped. `BoundsChange` becomes `PointerExited` + `PointerEntered`. Each event has `kind() -> EventKind` (used by masks and the callback registry) and `widget() -> Option<WidgetId>`.
+**Solution / Scope.** Replace `PushrodEvent` with `pushrod::Event` (struct variants, named fields). **Pointer:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked { id, button, count }`, `Scrolled { id, delta }`. **Keyboard:** `KeyPressed { id, key, modifiers, repeat }`, `KeyReleased`, `TextEntered { id, text }`. **Focus:** `FocusGained`, `FocusLost`. **Semantic (emitted by widgets):** `Activated`, `Toggled { checked }`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered { action }`, `ContextMenuRequested { position }`, `PropertyChanged { name }`, `ViewportChanged { offset }`. **Lifecycle:** `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`. **Window:** `WindowResized`, `WindowFocusChanged`, `CloseRequested`. **Time:** `Tick { elapsed }`. **Engine:** `Engine(EngineEvent)` for actions Pushrod performs internally (9.10 (#109)). **Extension:** `Custom(CustomEvent)` (1.13 (#78)), `Raw(sdl2::event::Event)` for anything not yet mapped. `BoundsChange` becomes `PointerExited` + `PointerEntered`. Each event has `kind() -> EventKind` (used by masks and the callback registry) and `widget() -> Option<WidgetId>`.
 
 ```text
 PR #10                     ->  this issue
@@ -2385,7 +1796,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `event` module: every variant documented. README/guides: 'Events' table (see Naming in the roadmap). Examples: Example updated. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/event-reference.md` ("Event Reference", Events, new). Guides: 'Events' table (see Naming in the roadmap). Rustdoc: `event` module: every variant documented. Examples: Example updated. Screenshots: n/a.
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html); [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html)
 
@@ -2415,7 +1826,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Propagation`, phases in `event` docs. README/guides: Event flow section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/event-propagation.md` ("Event propagation", Events, new). Guides: Event flow section. Rustdoc: `Propagation`, phases in `event` docs. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html); [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
@@ -2435,7 +1846,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Event filter API. README/guides: Event flow section. Examples: Example logs all key presses. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/event-filters.md` ("Event filters", Events, new). Guides: Event flow section. Rustdoc: Event filter API. Examples: Example logs all key presses. Screenshots: n/a.
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
@@ -2455,7 +1866,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `controllers` module. README/guides: 'Writing a widget' guide section. Examples: Custom widget using DragController. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/reusable-input-controllers.md` ("Reusable input controllers", Events, new). Guides: 'Writing a widget' guide section. Rustdoc: `controllers` module. Examples: Custom widget using DragController. Screenshots: n/a.
 
 **Sources.** [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html)
 
@@ -2463,7 +1874,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Problem Statement.** The same command (Save, Bold, Undo) appears in a menu, a toolbar, a button, and a keyboard shortcut. Without a shared object, applications must keep their enabled and checked states in sync by hand.
 
-**Solution / Scope.** `Action { id, label, icon, shortcut, tooltip, status_text, checkable, checked, enabled }` registered with `engine.add_action(..)`. Menus, toolbars, and buttons created from an action reflect its state automatically; changing `enabled` or `checked` updates every control. Triggering any of them emits `Triggered { action }` and runs `on_action(action, |state, ui| ..)`. Shortcuts are scoped to the application, window, or a widget subtree, with standard platform shortcuts (`StandardShortcut::Save` = Ctrl+S / Cmd+S). Action groups make checkable actions exclusive.
+**Solution / Scope.** `Action { id, label, icon, shortcut, tooltip, status_text, checkable, checked, enabled }` registered with `engine.add_action(..)`. Menus, toolbars, and buttons created from an action reflect its state automatically; changing `enabled` or `checked` updates every control. Triggering any of them emits `Triggered { action }` and runs `on_action(action, |state, ui| ..)`. Shortcuts are scoped to the application, window, or a widget subtree, with standard platform shortcuts (`StandardShortcut::Save` = Ctrl+S / Cmd+S). Action groups make checkable actions exclusive. Emits its engine event (9.10 (#109)).
 
 **Acceptance Criteria.**
 
@@ -2471,12 +1882,13 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 - Disabling an action disables every control
 - Shortcuts trigger actions; platform-standard keys map correctly
 - Exclusive action groups
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 9.1 (#93), 1.6 (#22).
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `action` module. README/guides: Actions section. Examples: Example with Save/Bold actions in a menu, toolbar, and shortcut. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/actions-and-keyboard-shortcuts.md` ("Actions and keyboard shortcuts", Events, new). Guides: Actions section. Rustdoc: `action` module. Examples: Example with Save/Bold actions in a menu, toolbar, and shortcut. Screenshots: n/a.
 
 **Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html); [Apple: Target-Action](https://developer.apple.com/library/archive/documentation/General/Devpedia-CocoaApp-MOSX/TargetAction.html)
 
@@ -2496,7 +1908,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `binding` module. README/guides: Bindings section. Examples: Slider bound to a label. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/property-bindings.md` ("Property bindings", Events, new). Guides: Bindings section. Rustdoc: `binding` module. Examples: Slider bound to a label. Screenshots: n/a.
 
 **Sources.** [GObject: property bindings (GBinding)](https://docs.gtk.org/gobject/class.Binding.html)
 
@@ -2515,7 +1927,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `CallbackId` API. README/guides: Callbacks section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/callback-handles.md` ("Callback handles", Events, new). Guides: Callbacks section. Rustdoc: `CallbackId` API. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [GObject: property bindings (GBinding)](https://docs.gtk.org/gobject/class.Binding.html)
 
@@ -2523,11 +1935,11 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Problem Statement.** Moving items by dragging is a basic desktop interaction.
 
-**Solution / Scope.** `DragSource` and `DropTarget` controllers (9.4 (#96)): the source provides a typed payload and a drag image (a GPU texture following the pointer); targets declare accepted types, highlight on hover, and receive `Dropped { id, payload }`. Escape cancels. Files dropped onto the window from the OS arrive as `Dropped` with paths (via SDL's drop events).
+**Solution / Scope.** `DragSource` and `DropTarget` controllers (9.4 (#96)): the source provides a typed payload and a drag image (a GPU texture following the pointer); targets declare accepted types, highlight on hover, and receive `Dropped { id, payload }`. Escape cancels. Files dropped onto the window from the OS arrive as `Dropped` with paths (via SDL's drop events). Emits its engine event (9.10 (#109)).
 
 #### Look and behavior (proposed)
 
-Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
 
 **1. Drag starts 2. Over an accepting target (highlighted) 3. Dropped**
 
@@ -2546,12 +1958,13 @@ Like every widget, it can also receive application-defined custom events in `han
 - Drag between two lists
 - Drop highlighting and cancel
 - OS file drops delivered
+- Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.4 (#96), 5.1 (#56).
 
 **Technical Stack.** Rust, SDL2 drop events
 
-**Documentation.** Rustdoc: `dnd` module. README/guides: Drag and drop section. Examples: Reorder a list by dragging. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/drag-and-drop-within-the-application.md` ("Drag and drop within the application", Events, new). Guides: Drag and drop section. Rustdoc: `dnd` module. Examples: Reorder a list by dragging. Screenshots: Gallery tile.
 
 ### 9.9 (#101): Pointer cursor per widget
 
@@ -2568,7 +1981,185 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 cursors
 
-**Documentation.** Rustdoc: `set_cursor`. README/guides: Usability section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/pointer-cursor-per-widget.md` ("Pointer cursor per widget", Events, new). Guides: Usability section. Rustdoc: `set_cursor`. Examples: n/a. Screenshots: n/a.
+
+### 9.10 (#109): Engine events: every internal action Pushrod performs emits an event
+
+**Problem Statement.** Applications can only react to what they can observe. Today Pushrod changes things internally (moves focus, opens a modal dialog, switches drawing mode, adds or removes widgets) without telling anyone, so applications can't keep a status line, log, preference, or custom widget in sync.
+
+**Solution / Scope.** Add `Event::Engine(EngineEvent)`: one variant per internal action, each with the details an application needs. Initial set: `DrawingModeChanged { old, new, reason }` (10.1 (#105)), `EventMaskChanged { scope, old, new }` (1.2 (#6)), `FocusChanged { old, new }` (1.4 (#20)), `ModalOpened { root }` / `ModalClosed { root, dismissed_by }` (6.7 (#66)), `MenuOpened` / `MenuClosed` (2.11 (#37)), `WidgetAdded` / `WidgetRemoved` / `WidgetReparented` (1.8 (#23)), `FormLoaded { form, root }` (6.4 (#63)), `DragStarted` / `DragEnded { dropped }` (9.8 (#100)), `TooltipShown` / `TooltipHidden` (2.13 (#77)), `TimerFired { timer }` (1.5 (#21)), `WindowOpened` / `WindowClosed` (1.16 (#82)), `ScaleFactorChanged` (1.10 (#25)), `ActionChanged { action }` (9.5 (#97)), `IdleStarted` / `IdleEnded`. Engine events are broadcast after the action has completed: to widgets whose mask includes the `ENGINE` class (with an optional filter by kind), then to `engine.on_engine_event(|state, ui, &EngineEvent| ..)` and `on_event`. They never trigger further internal actions by themselves, so they can't loop. **Standing rule for the project:** any issue that adds an internal action must add its `EngineEvent` variant and emit it; the guide (7.4 (#72)) and review checklist say so.
+
+```text
+internal action (e.g. ui.set_drawing_mode(Outline))
+        │ completes
+        v
+Engine(DrawingModeChanged { old: Live, new: Outline, reason: Application })
+        │ broadcast (after the action, never re-entrant)
+        ├──> widgets with ENGINE in their mask (optionally filtered by kind)
+        ├──> on_engine_event(|state, ui, ev| ..)
+        └──> on_event(..)
+```
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(EngineEvent)` | After any internal action completes | `on_engine_event(..)`, widgets with the ENGINE mask, `on_event(..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- `EngineEvent` enum with the initial variants above (those whose features exist are emitted now; the rest are added by their issues)
+- Broadcast after completion to masked widgets and `on_engine_event`
+- Kind filter for widgets and callbacks
+- No re-entrant loops (engine events never trigger internal actions on their own)
+- Guide and PR checklist state the rule
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 9.1 (#93), 1.2 (#6).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/engine-events.md` ("Engine events", Events, new). Guides: 'Engine events' section with the full list. Rustdoc: `EngineEvent` (every variant documented with when it fires). Examples: Example status line that shows focus and drawing-mode changes. Screenshots: n/a.
+
+**Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
+
+### 9.11 (#124): Event-loop style: keep parity with callbacks
+
+**Problem Statement.** Pushrod now supports two styles: callbacks (`engine.run`) and an application-driven loop (`engine.event_loop` + `next_event`). As the event system grows (engine events, custom events, timers, masks, actions), the loop style could fall behind.
+
+**Solution / Scope.** Rule: every event that reaches callbacks is also returned by `next_event`, in the same order: semantic events, `Engine(..)` events (9.10 (#109)), `Custom(..)` events (1.13 (#78)), timer events (1.5 (#21)), and action triggers (9.5 (#97)). The run-loop mask (1.2 (#6)) applies to both. Add `next_event_with(&mut events, &mut state)`, which also runs registered callbacks for each event before returning it, so an application can mix styles (for example callbacks for most widgets, a loop for the main window logic). Add conformance tests (7.6 (#114)) that run the same scripted input through both styles and compare the event sequences.
+
+**Acceptance Criteria.**
+
+- Every event kind is delivered by both styles in the same order
+- `next_event_with` runs callbacks then returns the event
+- Conformance test compares both styles on the same input
+
+**Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/handling-events.md` ("Handling events", Guides, update). Guides: Two ways to handle events (events guide). Rustdoc: `Engine::event_loop`, `next_event`, `next_event_with`. Examples: Quick start shows both styles. Screenshots: n/a.
+
+**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+
+## Epic 10: Rendering backends, drawing modes, and vintage hardware (#103)
+
+Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target.
+
+**Problem.** Pushrod should run well on slow GPUs and, ideally, on vintage hardware such as the Atari ST. Two things stand in the way: dragging and resizing redraw content continuously (expensive on slow hardware), and widgets paint directly onto an SDL2 canvas, which ties every widget to SDL2.
+
+**Scope.** Add a feedback mode (live or outline) for anything that moves or resizes; route all painting through a small backend-neutral `Painter` trait whose default backend is SDL2 with GPU texture caching; split out a `no_std` + `alloc` core; then explore an Atari ST/TOS backend. SDL2 remains the default and does the heavy lifting on modern systems.
+
+**Dependencies.** The backend-neutral paint API (10.2 (#106)) is MVP and should land before the widget count grows. Drawing modes (10.1 (#105)) follow the input controllers (9.4 (#96)). The no_std core (10.3 (#107)) and the Atari ST backend (10.4 (#108)) are future work.
+
+| Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
+|---|---|---|---|---|---|---|---|
+| 10.1 (#105) | Drawing modes: live or outline feedback while moving and resizing | Live mode redraws content as things move; outline mode shows only a dotted rectangle until the move ends. Switchable at run time, with a system-wide event. | `core`, `enhancement`, `parallelizable`, `performance`, `portability`, `size/M` | Y | N | M | `engine.rs`, `cache.rs`, `controllers.rs` |
+| 10.2 (#106) | Backend-neutral paint API (SDL2 backend by default) | Widgets paint through a small Painter trait instead of an SDL2 canvas, so other backends become possible without touching widgets. | `core`, `enhancement`, `mvp`, `portability`, `size/M` | N | Y | M | `paint.rs`, `widget.rs`, `cache.rs`, `texture.rs`, `backend/sdl2.rs (new)` |
+| 10.3 (#107) | no_std + alloc core crate | Split the widget tree, events, and widgets into a core crate that builds without the standard library. | `core`, `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-core (new crate)`, `Cargo workspace` |
+| 10.4 (#108) | Experimental: Atari ST / TOS backend | Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing. | `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-tos (new crate)` |
+
+### 10.1 (#105): Drawing modes: live or outline feedback while moving and resizing
+
+**Problem Statement.** Moving or resizing something (a dragged item, a split divider, a column width, a window or panel, objects in Chassis) normally repaints content continuously. On slow GPUs, software renderers, and vintage machines that's too slow and looks jerky.
+
+**Solution / Scope.** `Engine::set_drawing_mode(DrawingMode::Live | DrawingMode::Outline | DrawingMode::Auto)`, overridable per widget. **Live:** content follows the pointer and repaints as it moves. **Outline:** only a dotted (inverted where the backend supports it) rectangle is drawn in the overlay layer while dragging; the real move or resize, and its repaint, happen once on release. Value controls follow the same rule: in outline mode the slider and scroll-bar thumbs still move, but `ValueChanged` and dependent repaints (for example scrolled content) happen on release. **Auto** measures frame time and switches to outline when frames take longer than a threshold. Drag controllers (9.4 (#96)) implement it, so every widget that drags gets it for free. **Run-time switching:** `ui.set_drawing_mode(mode)` (and `Engine::set_drawing_mode` at startup) can be called at any time, for example from a preferences check box; an interaction already in progress finishes in the mode it started in. Every change, whether by the application or by Auto, broadcasts `Engine(DrawingModeChanged { old, new, reason: Application | Auto })` (9.10 (#109)) to all widgets with the `ENGINE` mask class and to `on_engine_event` callbacks, so applications and widgets can respond (for example turn off animations or show an indicator).
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Live mode: the dragged panel repaints at every position**
+
+![10.1 step set 1: Live mode: the dragged panel repaints at every position](mockups/10.1-1.png)
+
+**Outline mode: only an outline moves; the panel repaints once on release**
+
+![10.1 step set 2: Outline mode: only an outline moves; the panel repaints once on release](mockups/10.1-2.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Moved / Resized { id }` | Live: continuously; Outline: once on release | `on_event(..)` |
+| `Engine(DrawingModeChanged { old, new, reason })` | Mode switched by the application or by Auto | `on_engine_event(..)`; widgets with the ENGINE mask |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Live, Outline, and Auto modes for drag, resize, divider, and column-width interactions
+- Outline mode performs no content repaint until release
+- Value controls defer change events and dependent repaints in outline mode
+- Auto switches based on measured frame time
+- `ui.set_drawing_mode` switches at run time; in-progress interactions finish in their starting mode
+- Each change broadcasts `DrawingModeChanged { old, new, reason }`
+
+**Parallelism / Dependencies.** Parallelizable. Requires 9.4 (#96), 9.10 (#109).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/drawing-modes.md` ("Drawing modes", Platforms, new). Guides: 'Slow hardware' section. Rustdoc: `DrawingMode`. Examples: Example toggles the mode at run time. Screenshots: n/a.
+
+### 10.2 (#106): Backend-neutral paint API (SDL2 backend by default)
+
+**Problem Statement.** `Widget::paint` takes `&mut sdl2::render::Canvas<Window>`, so every widget depends on SDL2. Changing that signature after dozens of widgets exist would be expensive, and it is the main obstacle to software rendering and vintage targets.
+
+**Solution / Scope.** Introduce `trait Painter { fn fill(&mut self, color); fn fill_rect(..); fn rect(..); fn line(..); fn text(..) -> Size; fn image(..); fn dither(..); fn clip(..) }` (kept small: only what `paint` helpers need) and change `Widget::paint(&self, p: &mut dyn Painter)`. The default `Sdl2Painter` keeps today's design exactly: each widget paints into its own GPU texture when invalidated and frames are blits of cached textures. A backend also declares a `CachePolicy` (`TextureCache` on GPUs; `DirectDraw` on memory-poor systems, painting invalidated widgets straight to the screen with clipping). The SDL2 backend remains the default; nothing changes for applications.
+
+**Acceptance Criteria.**
+
+- All widgets paint through `Painter`; no widget imports `sdl2::render`
+- SDL2 backend renders pixel-identical goldens
+- A headless test backend records paint calls for unit tests
+- Cache policy is backend-selected
+
+**Parallelism / Dependencies.** Not parallelizable. Requires PR #10. Do before the widget count grows.
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/backend-neutral-paint-api.md` ("Backend-neutral paint API", Platforms, new). Guides: 'Backends' section. Rustdoc: `Painter` trait, `Sdl2Painter`, `CachePolicy`. Examples: Test backend used in widget tests. Screenshots: n/a.
+
+### 10.3 (#107): no_std + alloc core crate
+
+**Problem Statement.** Vintage targets have no Rust standard library; Rust's m68k bare-metal target builds only `core` and `alloc`.
+
+**Solution / Scope.** Move the widget tree, events, widgets, paint helpers, and form loader into `pushrod-core` (`#![no_std]` + `alloc`), with time, files, and threads behind small traits provided by the platform crate. `pushrod` (SDL2, std) re-exports it, so applications don't change. The split follows the module boundaries and specs in 7.6 (#114): engine (tree, events, invalidation, paint API) separate from the design layer (widgets and their defaults).
+
+**Acceptance Criteria.**
+
+- `pushrod-core` builds for a `no_std` target with `alloc`
+- `pushrod` API unchanged
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.2 (#106).
+
+**Technical Stack.** Rust (core, alloc)
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/no-std-alloc-core-crate.md` ("no_std + alloc core crate", Platforms, new). Guides: 'Backends' section. Rustdoc: Crate layout. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html)
+
+### 10.4 (#108): Experimental: Atari ST / TOS backend
+
+**Problem Statement.** It would be ideal for a Pushrod application to run on the Atari ST. Rust can already produce TOS programs for the 68000, but SDL2 isn't available there and an 8 MHz 68000 with 512 KB to 4 MB of RAM can't afford a texture per widget.
+
+**Solution / Scope.** A `pushrod-tos` platform crate on top of `pushrod-core` (10.3 (#107)), built for Rust's `m68k-unknown-none-elf` target with `build-std` (core, alloc) and linked into a `.PRG`. Backend options to evaluate: (a) draw directly into screen memory (monochrome 640x400 first, then low/medium resolution bitplanes) with a fixed bitmap font; (b) use the VDI; (c) use SDL 1.2 (#6)'s Atari port. Input from the IKBD/GEMDOS. Defaults for the platform: `DrawingMode::Outline`, `CachePolicy::DirectDraw`, bitmap font instead of the glyph atlas. Start with a hello-world form (label + button + callback) running in Hatari, then on hardware.
+
+**Acceptance Criteria.**
+
+- A Pushrod form with a button and callback runs in the Hatari emulator
+- Size and speed measured and documented
+- Runs on real ST hardware
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.1 (#105), 10.2 (#106), 10.3 (#107).
+
+**Technical Stack.** Rust nightly (`build-std`), m68k, TOS, Hatari
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/experimental.md` ("Experimental", Platforms, new). Guides: 'Vintage hardware' section. Rustdoc: `pushrod-tos` README. Examples: Hello-world form PRG. Screenshots: n/a.
+
+**Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html); [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST); [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
 
 ## Work Order
 
@@ -2577,20 +2168,28 @@ Work in this order. Items in the same step can be done in parallel unless their 
 **1. Foundation (do first, mostly parallel)**
 
 - 7.1 (#69) CI: build, test, clippy, fmt, doc with SDL2 — MVP
+- 7.8 (#122) Documentation site: build pushrod-docs in CI and publish it — MVP
 - 9.1 (#93) Event vocabulary: modern event names and structure — MVP
+- 10.2 (#106) Backend-neutral paint API (SDL2 backend by default) — MVP
 - 1.1 (#19) Widget behavior flags and visual states — MVP
 - 1.2 (#6) Event masks for the run loop and for widgets — MVP
+- 9.10 (#109) Engine events: every internal action Pushrod performs emits an event — MVP
+- 9.11 (#124) Event-loop style: keep parity with callbacks — MVP
 - 1.3 (#7) Broadcast events to all interested widgets — MVP
 - 1.6 (#22) Callback registry for every widget event — MVP
 - 1.13 (#78) Custom application events with payloads — MVP
+- 1.18 (#111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) — MVP
 - 1.7 (#3) GPU text: font cache with a glyph atlas texture — MVP
 - 7.3 (#71) Widget gallery example — MVP
+- 7.6 (#114) Module boundaries and written specs with conformance tests — MVP
 
 **2. Input model**
 
 - 9.2 (#94) Event propagation: capture, target, and bubble phases with handled/ignored — MVP
 - 9.4 (#96) Reusable input controllers: click, drag, scroll, hover, long-press, key — MVP
 - 1.4 (#20) Keyboard focus, Tab order, and Return/Escape — MVP
+- 1.19 (#112) Input method (IME) support: composition text and candidate window — MVP
+- 1.17 (#104) Per-state appearance: colors, border, and font for each visual state — MVP
 - 1.12 (#76) Keyboard mnemonics: underlined shortcut letters — MVP
 - 1.5 (#21) Timers and idle callbacks — MVP
 
@@ -2613,13 +2212,19 @@ Work in this order. Items in the same step can be done in parallel unless their 
 
 - 5.1 (#56) Clip children to their parent's bounds — MVP
 - 5.2 (#57) Composite widgets: build widgets from parts that applications can retrieve and modify — MVP
+- 5.5 (#116) Layout manager foundation: Layout trait, size hints, measure and arrange — MVP
+- 5.6 (#117) Row and column layouts — MVP
+- 5.7 (#118) Form layout: aligned label and field rows — MVP
 - 3.1 (#39) Scroll bar — MVP
+- 5.3 (#58) Container: a scrollable viewport onto fixed-size content — MVP
 - 7.2 (#70) Golden-image rendering tests — MVP
+- 7.7 (#115) Performance benchmarks and budgets — MVP
 
 **5. Forms runtime**
 
 - 6.1 (#60) Widget registry and factory — MVP
 - 6.2 (#61) Property introspection: list, get, and set widget properties by name — MVP
+- 1.14 (#80) Accessibility: expose widgets to screen readers — MVP
 - 6.3 (#62) Form file format (binary, versioned) — MVP
 - 6.4 (#63) Form loader: build a form from a file with stable IDs — MVP
 - 6.5 (#64) Form writer: save a widget subtree to a file — MVP
@@ -2643,12 +2248,15 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 9.9 (#101) Pointer cursor per widget
 - 1.11 (#26) Application lifecycle: startup and close-request callbacks
 - 1.15 (#81) Undo and redo command stack
+- 10.1 (#105) Drawing modes: live or outline feedback while moving and resizing
 
 **8. After MVP: widgets**
 
 - 5.4 (#59) Autoresizing (keep margins or stretch on resize)
+- 5.8 (#119) Grid layout
+- 5.9 (#120) Stack layout (one child visible at a time)
+- 5.10 (#121) Flow layout (wrapping rows)
 - 1.10 (#25) Window resize and high-DPI rendering
-- 5.3 (#58) Scroll view
 - 4.5 (#52) List view
 - 3.7 (#45) Column browser (multi-column hierarchical browser)
 - 4.2 (#49) Spin box
@@ -2660,6 +2268,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 3.11 (#91) Date picker
 - 2.11 (#37) Menu bar and drop-down menus (drawn by Pushrod)
 - 2.13 (#77) Tooltips
+- 2.21 (#125) Image button
 - 2.15 (#84) Toolbar
 - 2.16 (#85) Status bar
 - 2.17 (#86) Switch (on/off slide toggle)
@@ -2668,14 +2277,20 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 2.20 (#89) Message bar (non-modal inline notice)
 - 2.8 (#34) Icon widget (picture with caption)
 - 2.12 (#38) File chooser dialog (drawn by Pushrod)
+- 2.22 (#126) Link label
+- 3.12 (#127) Dial (rotary knob)
+- 4.10 (#128) Busy spinner
+- 3.9 (#47) Split view (panes with draggable dividers)
 
 **9. After MVP: platform and Chassis**
 
 - 1.9 (#24) Dirty-rectangle redraw
-- 1.14 (#80) Accessibility: expose widgets to screen readers
-- 1.16 (#82) Multiple windows
+- 1.16 (#82) Multiple windows: separate OS windows, each with its own engine
 - 6.8 (#67) Bind actions by name from form files
 - 6.9 (#68) Design-mode hooks for Chassis
+- 10.3 (#107) no_std + alloc core crate
+- 10.4 (#108) Experimental: Atari ST / TOS backend
+- 1.20 (#113) Layers and invalidation: cache hints, texture memory budget, incremental pipeline
 
 **10. Distant future**
 
@@ -2691,10 +2306,10 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 | 3.4 (#42) | Matrix of cells (grid of buttons with selection modes) | Radio groups (2.5 (#31)) and the choice button (3.6 (#44)) cover the common cases; palettes can be built from buttons. |
 | 3.5 (#43) | Labeled field rows | Text fields with built-in labels (2.6 (#32)) cover this. |
 | 3.8 (#46) | Color well and picker | Rarely needed in ordinary dialogs; revisit if the Chassis inspector needs it. |
-| 3.9 (#47) | Split view (draggable pane dividers) | Application-layout feature rather than a dialog control; revisit after forms ship. |
 | 4.3 (#50) | Segmented control | Radio groups and the choice button's cycle mode cover the same choices. |
 | 4.7 (#54) | Level indicator | The progress bar covers capacity displays. |
 | 4.8 (#55) | Outline view (expandable tree list) | Specialized; revisit once the list view is in use. |
+| 3.13 (#129) | Font chooser | Specialized; most applications don't let users pick fonts. Revisit alongside the color picker. |
 
 ## Existing issues
 
@@ -2724,4 +2339,11 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 - [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
 - [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html)
 - [GObject: property bindings (GBinding)](https://docs.gtk.org/gobject/class.Binding.html)
+- [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html)
+- [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST)
+- [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
+- [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+- [Parley: rich text layout (Linebender)](https://github.com/linebender/parley)
+- [AccessKit: cross-platform accessibility infrastructure](https://github.com/AccessKit/accesskit)
+- [Parley (Linebender): rich text layout library](https://github.com/linebender/parley)
 - Apple AppKit documentation for NSStepper, NSSegmentedControl, NSTabView, NSProgressIndicator, NSLevelIndicator, NSComboBox, NSOutlineView (Mac OS X successors of the NeXTSTEP Application Kit)

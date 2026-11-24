@@ -73,6 +73,19 @@ Interactive `Widget`s also implement `handle_event`, and call `ctx.emit(...)` to
 
 Pushrod requires Rust 1.86 or newer.
 
+## Design philosophy
+
+Pushrod follows one rule: **Keep It Stupid Simple.** Widgets are flat: fills, one-pixel borders,
+and text. No glass, no beveled edges, no rounded corners, no shadows. Making things look fancy is up to the
+application. The reasons are performance, a clean and consistent look, usability, and predictable
+behavior. See [DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md).
+
+## Roadmap
+
+The [roadmap](docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) covers the core, events, forms, and
+release plan. Each widget has its own roadmap in [docs/widgets](docs/widgets/README.md) that
+specifies what it is, what it does, how it looks, and how it responds.
+
 ## Installing on Ubuntu Linux
 
 ```shell
@@ -111,3 +124,7 @@ examples in the examples directory.
 This is the current state of the example app.
 
 ![App image](examples/example-app.png)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Demos, examples, tests, mockups, and documentation use fictional sample data only: no real names or personal information.
