@@ -1,0 +1,35 @@
+/*
+ * Pushrod documentation theme: neutral grays, matching Pushrod's flat,
+ * black-and-white widget style.
+ */
+
+:root {
+  --ifm-color-primary: #3d4a5c;
+  --ifm-color-primary-dark: #374353;
+  --ifm-color-primary-darker: #343f4e;
+  --ifm-color-primary-darkest: #2b3440;
+  --ifm-color-primary-light: #435165;
+  --ifm-color-primary-lighter: #46556a;
+  --ifm-color-primary-lightest: #4f6078;
+  --ifm-code-font-size: 92%;
+  --ifm-font-family-base: system-ui, -apple-system, 'Segoe UI', 'Open Sans', sans-serif;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #a9b6c8;
+  --ifm-color-primary-dark: #94a4ba;
+  --ifm-color-primary-darker: #8a9bb3;
+  --ifm-color-primary-darkest: #6b80a0;
+  --ifm-color-primary-light: #bec8d6;
+  --ifm-color-primary-lighter: #c8d1dd;
+  --ifm-color-primary-lightest: #e6eaf0;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.1);
+}
+
+/* Screenshots and mockups: framed, never stretched. */
+.markdown img {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  max-width: 100%;
+}

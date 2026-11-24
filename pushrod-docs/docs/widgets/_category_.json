@@ -1,0 +1,10 @@
+{
+  "label": "Widgets",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "slug": "/widgets",
+    "title": "Widgets",
+    "description": "Every built-in Pushrod widget, one page each. Widgets on the roadmap get their page when they are implemented."
+  }
+}
