@@ -15,74 +15,37 @@
 
 //! # BoxWidget
 //!
-//! This is a simple system `Widget` that utilizes the `BaseWidget`, and draws on its canvas to
-//! create a border of a specific width and color.
+//! This is a simple system `Widget` that fills its background like the `BaseWidget`, and draws a
+//! border of a specific width and color on top of it.
 
-use crate::base_widget::BaseWidget;
-use crate::event::PushrodEvent;
-use crate::geometry::{origin_point, make_rect, Point, Size};
-use crate::texture::TextureStore;
-use crate::widget::Widget;
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
-use sdl2::render::{Canvas, Texture};
-use sdl2::video::Window;
-use std::any::Any;
 use crate::font::FontCache;
-use crate::impl_widget_base;
+use crate::geometry::{Point, Size};
+use crate::paint;
+use crate::widget::{Widget, WidgetCore};
+use sdl2::pixels::Color;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
 
 pub struct BoxWidget {
-    id: i32,
-    origin: Point,
-    size: Size,
-    invalidated: bool,
-    texture: TextureStore,
-    base_widget: BaseWidget,
+    core: WidgetCore,
     border_color: Color,
     border_width: u8,
 }
 
 impl Widget for BoxWidget {
-    fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
-
-    fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture> {
-        if self.invalidated && self.border_width > 0 {
-            self.texture.create_or_resize_texture(c, self.size);
-
-            let base_widget_texture = self.base_widget.draw(c, fc).unwrap();
-            let border_color = self.border_color;
-            let border_width = self.border_width;
-            let widget_size = self.size;
-            let widget_width = self.size.w;
-            let widget_height = self.size.h;
-
-            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                texture
-                    .copy(
-                        base_widget_texture,
-                        None,
-                        make_rect(origin_point(), widget_size),
-                    )
-                    .unwrap();
-
-                texture.set_draw_color(border_color);
-
-                for i in 0..border_width as i32 {
-                    let computed_width = (widget_width as u32 - (i as u32 * 2u32)) as u32;
-                    let computed_height = (widget_height as u32 - (i as u32 * 2u32)) as u32;
-
-                    texture
-                        .draw_rect(Rect::new(i, i, computed_width, computed_height))
-                        .unwrap();
-                }
-            })
-            .unwrap();
-        }
-
-        self.texture.get_optional_ref()
+    fn core(&self) -> &WidgetCore {
+        &self.core
     }
 
-    impl_widget_base!();
+    fn core_mut(&mut self) -> &mut WidgetCore {
+        &mut self.core
+    }
+
+    /// Fills the background, then draws the border.
+    fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
+        paint::fill(c, self.get_color());
+        paint::border(c, self.get_size(), self.border_color, self.border_width);
+    }
 }
 
 impl BoxWidget {
@@ -90,12 +53,7 @@ impl BoxWidget {
     /// Any borders with a width of 0 will not be drawn.
     pub fn new(origin: Point, size: Size, border_color: Color, border_width: u8) -> Self {
         Self {
-            id: 0,
-            origin: origin.clone(),
-            size: size.clone(),
-            invalidated: true,
-            texture: TextureStore::default(),
-            base_widget: BaseWidget::new(origin_point(), size),
+            core: WidgetCore::new(origin, size),
             border_color,
             border_width,
         }

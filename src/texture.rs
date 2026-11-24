@@ -36,7 +36,7 @@ impl TextureStore {
     /// Retrieves a `&mut Texture` reference to the stored `Texture` object.
     ///
     /// Example use:
-    /// ```rust,no_run
+    /// ```rust,ignore
     ///   c.with_texture_canvas(texture_store.get_mut_ref(), |texture| {
     ///     texture.set_draw_color(base_color);
     ///     texture.clear();
@@ -66,6 +66,13 @@ impl TextureStore {
         if self.store.is_none() || self.size.w != size.w || self.size.h != size.h {
             self.size.w = size.w;
             self.size.h = size.h;
+
+            // With the `unsafe_textures` feature, textures are not freed when dropped, so the
+            // previous texture must be destroyed explicitly while the renderer is still alive.
+            if let Some(old_texture) = self.store.take() {
+                unsafe { old_texture.destroy() };
+            }
+
             self.store = Some(c.create_texture_target(None, size.w, size.h).unwrap());
 
             eprintln!(
@@ -77,6 +84,17 @@ impl TextureStore {
 
             self.set_invalidated(true);
         }
+    }
+
+    /// Temporarily removes the `Texture` from the store, so that it can be used as a drawing
+    /// target while the owning `Widget` is borrowed for painting.  Must be followed by `restore`.
+    pub(crate) fn take(&mut self) -> Option<Texture> {
+        self.store.take()
+    }
+
+    /// Restores a `Texture` that was removed with `take`.
+    pub(crate) fn restore(&mut self, texture: Texture) {
+        self.store = Some(texture);
     }
 
     /// Returns `true` if the object needs to be redrawn to the screen, `false` otherwise.

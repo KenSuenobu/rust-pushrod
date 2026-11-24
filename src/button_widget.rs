@@ -15,138 +15,135 @@
 
 //! # ButtonWidget
 //!
-//! This is a simple system `Widget` that utilizes the `BaseWidget`, and draws on its canvas
-//! using a `TextWidget` to display a text message within its bounds.  Displays a border
-//! and a filled button with a 3D-like effect.  Generates a `Clicked(u32, u8)` event when
-//! a mouse button is clicked and released within its bounds.
+//! This is a simple system `Widget` that fills its background, displays a text message within its
+//! bounds, and draws a border around its frame.  It generates a `Clicked(id, clicks)` event when
+//! the left mouse button is pressed and released within its bounds.
+//!
+//! The button follows the same behavior as a GEM button on the Atari ST: pressing the mouse
+//! button selects (inverts) it; dragging out of the bounds deselects it, and dragging back in
+//! selects it again.  `Clicked` is only generated if the mouse button is released while the
+//! button is still selected.
 
+use crate::event::{EventCtx, PushrodEvent};
+use crate::font::FontCache;
+use crate::geometry::{Point, Size};
+use crate::paint::{self, TextJustify, TextStyle};
+use crate::widget::{Widget, WidgetCore};
+use sdl2::event::Event;
+use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
-use sdl2::render::{Canvas, Texture};
+use sdl2::rect::Rect;
+use sdl2::render::Canvas;
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
-use std::any::Any;
-use sdl2::event::Event::{MouseButtonDown, MouseButtonUp};
-use sdl2::rect::Rect;
-use crate::base_widget::BaseWidget;
-use crate::event::PushrodEvent;
-use crate::font::FontCache;
-use crate::geometry::{make_rect, origin_point, Point, point, Size};
-use crate::text_widget::{TextJustify, TextWidget};
-use crate::texture::TextureStore;
-use crate::widget::Widget;
-use crate::impl_widget_base;
 
 pub struct ButtonWidget {
-    id: i32,
-    origin: Point,
-    size: Size,
-    invalidated: bool,
-    texture: TextureStore,
-    base_widget: BaseWidget,
-    text_widget: TextWidget,
+    core: WidgetCore,
+    style: TextStyle,
+    msg: String,
     border_width: u8,
-    selected_state: bool,
+    pressed: bool,
+    selected: bool,
 }
 
 impl Widget for ButtonWidget {
-    fn handle_event(&self, event: PushrodEvent) -> Option<&[PushrodEvent]> {
+    fn core(&self) -> &WidgetCore {
+        &self.core
+    }
+
+    fn core_mut(&mut self) -> &mut WidgetCore {
+        &mut self.core
+    }
+
+    /// Fills the background, draws the text inset horizontally by the border width, then draws
+    /// the frame.
+    /// When selected, the colors are inverted (black background, white text).
+    fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache) {
+        let size = self.get_size();
+        let (background, foreground) = if self.selected {
+            (Color::BLACK, Color::WHITE)
+        } else {
+            (self.get_color(), self.style.font_color)
+        };
+        let inset = self.border_width as u32 + 1;
+
+        paint::fill(c, background);
+
+        if size.w > inset * 2 {
+            paint::text(
+                c,
+                fc,
+                Rect::new(inset as i32, 0, size.w - inset * 2, size.h),
+                &self.style,
+                foreground,
+                &self.msg,
+            );
+        }
+
+        paint::border(c, size, Color::BLACK, 1);
+    }
+
+    fn handle_event(&mut self, event: &PushrodEvent, ctx: &mut EventCtx) {
         match event {
-            PushrodEvent::SystemEvent(widget_id, x) => {
-                match &x {
-                    MouseButtonDown {
-                        mouse_btn, clicks, ..
-                    } => {
-                        eprintln!("[ButtonWidget] Button down: {:?} clicks={:?}", mouse_btn, clicks);
-                    }
+            PushrodEvent::SystemEvent(
+                _,
+                Event::MouseButtonDown {
+                    mouse_btn: MouseButton::Left,
+                    ..
+                },
+            ) => {
+                self.pressed = true;
+                self.set_selected(true);
+            }
 
-                    MouseButtonUp {
-                        mouse_btn, clicks, ..
-                    } => {
-                        eprintln!("[ButtonWidget] Button up: {:?} clicks={:?}", mouse_btn, clicks);
-                    }
-
-                    _default => {
-                        eprintln!("[ButtonWidget] Wrapped SystemEvent: ID={:?} Widget={:?} {:?}", self.id, widget_id, &x);
-                    }
+            PushrodEvent::SystemEvent(
+                _,
+                Event::MouseButtonUp {
+                    mouse_btn: MouseButton::Left,
+                    clicks,
+                    ..
+                },
+            ) => {
+                if self.pressed && self.selected {
+                    ctx.emit(PushrodEvent::Clicked(self.get_id(), *clicks));
                 }
 
+                self.pressed = false;
+                self.set_selected(false);
             }
 
-            _default => {}
-        }
-
-        None
-    }
-
-    fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture> {
-        if self.invalidated && self.border_width > 0 {
-            self.texture.create_or_resize_texture(c, self.size);
-
-            if self.selected_state {
-                self.base_widget.set_color(Color::BLACK);
-                self.text_widget.set_color(Color::WHITE);
+            // While pressed, the button follows the mouse pointer in and out of its bounds.
+            PushrodEvent::BoundsChange(_, entered) if self.pressed => {
+                self.set_selected(*entered == self.get_id());
             }
 
-            let base_widget_texture = self.base_widget.draw(c, fc).unwrap();
-            let text_widget_texture = self.text_widget.draw(c, fc).unwrap();
-            // let border_color = self.border_color;
-            let border_width = self.border_width as u32;
-            let widget_size = self.size;
-            // let widget_width = self.size.w;
-            // let widget_height = self.size.h;
-
-            #[allow(unused_must_use)]
-            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                // Draw the background
-                &texture
-                    .copy(
-                        base_widget_texture,
-                        None,
-                        make_rect(origin_point(), widget_size),
-                    )
-                    .unwrap();
-
-                // Overlay the text
-                &texture
-                    .copy(
-                        text_widget_texture,
-                        None,
-                        make_rect(point((border_width + 1) as i32, (border_width + 1) as i32),
-                                  Size::new(self.size.w - ((border_width + 1) * 2), self.size.h - ((border_width + 1) * 2))),
-                    )
-                    .unwrap();
-
-                // Draw the border
-                texture.set_draw_color(Color::BLACK);
-                texture.draw_rect(Rect::new(0, 0, widget_size.w, widget_size.h))
-                    .unwrap();
-            })
-                .unwrap();
+            _ => {}
         }
-
-        self.texture.get_optional_ref()
     }
-
-    impl_widget_base!();
 }
 
 impl ButtonWidget {
-    /// Creates a new `BoxWidget` based on its point of origin, size, border color, and border width.
-    /// Any borders with a width of 0 will not be drawn.
-    pub fn new(origin: Point, size: Size, font_name: String, font_style: FontStyle, font_size: u16,
-               font_color: Color, justification: TextJustify, msg: String, border_width: u8) -> Self {
+    /// Creates a new `ButtonWidget` based on its point of origin, size, font, text, and border
+    /// width.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        origin: Point,
+        size: Size,
+        font_name: String,
+        font_style: FontStyle,
+        font_size: u16,
+        font_color: Color,
+        justification: TextJustify,
+        msg: String,
+        border_width: u8,
+    ) -> Self {
         Self {
-            id: 0,
-            origin: origin.clone(),
-            size: size.clone(),
-            invalidated: true,
-            texture: TextureStore::default(),
-            base_widget: BaseWidget::new(origin_point(), size),
-            text_widget: TextWidget::new(origin_point(),
-                                         Size::new(size.w - (border_width as u32 * 2), size.h - (border_width as u32 * 2)),
-                                         font_name, font_style, font_size, font_color, justification, msg),
+            core: WidgetCore::new(origin, size),
+            style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
+            msg,
             border_width,
-            selected_state: false,
+            pressed: false,
+            selected: false,
         }
     }
 
@@ -163,6 +160,24 @@ impl ButtonWidget {
 
     /// Changes the text displayed inside the button.
     pub fn set_text(&mut self, msg: String) {
-        self.text_widget.set_text(msg.clone());
+        self.msg = msg;
+        self.set_invalidated(true);
+    }
+
+    /// Returns the text displayed inside the button.
+    pub fn get_text(&self) -> String {
+        self.msg.clone()
+    }
+
+    /// Returns `true` if the button is currently drawn in its selected (pressed) state.
+    pub fn is_selected(&self) -> bool {
+        self.selected
+    }
+
+    fn set_selected(&mut self, state: bool) {
+        if self.selected != state {
+            self.selected = state;
+            self.set_invalidated(true);
+        }
     }
 }

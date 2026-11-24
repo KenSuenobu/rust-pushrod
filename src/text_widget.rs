@@ -15,92 +15,54 @@
 
 //! # TextWidget
 //!
-//! This is a simple system `Widget` that utilizes the `BaseWidget`, and draws on its canvas to
-//! create a text message with a given font name, style, color, and message.
+//! This is a simple system `Widget` that fills its background like the `BaseWidget`, and draws a
+//! text message with a given font name, style, color, and message on top of it.
 
+use crate::font::FontCache;
+use crate::geometry::{Point, Size};
+use crate::paint::{self, TextStyle};
+use crate::widget::{Widget, WidgetCore};
 use sdl2::pixels::Color;
-use sdl2::render::{Canvas, Texture};
+use sdl2::rect::Rect;
+use sdl2::render::Canvas;
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
-use std::any::Any;
-use sdl2::rect::Rect;
-use crate::base_widget::BaseWidget;
-use crate::event::PushrodEvent;
-use crate::font::FontCache;
-use crate::geometry::{origin_point, Point, rect, Size};
-use crate::texture::TextureStore;
-use crate::impl_widget_base;
-use crate::widget::Widget;
 
-pub enum TextJustify {
-    Left,
-    Center,
-    Right,
-}
+pub use crate::paint::TextJustify;
 
 pub struct TextWidget {
-    id: i32,
-    origin: Point,
-    size: Size,
-    invalidated: bool,
-    texture: TextureStore,
-    base_widget: BaseWidget,
-    font_name: String,
-    font_style: FontStyle,
-    font_size: u16,
-    font_color: Color,
-    justification: TextJustify,
+    core: WidgetCore,
+    style: TextStyle,
     msg: String,
 }
 
 impl Widget for TextWidget {
-    fn handle_event(&self, _event: PushrodEvent) -> Option<&[PushrodEvent]> { None }
-
-    fn draw(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> Option<&Texture> {
-        if self.invalidated {
-            self.texture.create_or_resize_texture(c, self.size);
-
-            let base_widget_texture = self.base_widget.draw(c, fc).unwrap();
-            let widget_width = self.size.w;
-            let ( font_texture, font_width, font_height ) = &fc.render_text(
-                c, self.font_name.clone(), self.font_size, self.font_style, self.font_color,
-                self.msg.clone(), widget_width
-            );
-            let texture_y = 0;
-            let texture_x = match self.justification {
-                TextJustify::Left => 0,
-                TextJustify::Right => self.size.w as i32 - *font_width as i32,
-                TextJustify::Center => (self.size.w as i32 - *font_width as i32) / 2,
-            };
-
-            #[allow(unused_must_use)]
-            c.with_texture_canvas(self.texture.get_mut_ref(), |texture| {
-                &texture
-                    .copy(
-                        &base_widget_texture,
-                        None,
-                        rect(0, 0, self.size.w, self.size.h)
-                    )
-                    .unwrap();
-
-                &texture
-                    .copy(
-                        &font_texture,
-                        None,
-                        Rect::new(texture_x as i32, texture_y, *font_width, *font_height),
-                    )
-                    .unwrap();
-            })
-                .unwrap();
-        }
-
-        self.texture.get_optional_ref()
+    fn core(&self) -> &WidgetCore {
+        &self.core
     }
 
-    impl_widget_base!();
+    fn core_mut(&mut self) -> &mut WidgetCore {
+        &mut self.core
+    }
+
+    /// Fills the background, then draws the text.
+    fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache) {
+        let size = self.get_size();
+
+        paint::fill(c, self.get_color());
+        paint::text(
+            c,
+            fc,
+            Rect::new(0, 0, size.w, size.h),
+            &self.style,
+            self.style.font_color,
+            &self.msg,
+        );
+    }
 }
 
 impl TextWidget {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         origin: Point,
         size: Size,
@@ -112,32 +74,30 @@ impl TextWidget {
         msg: String,
     ) -> Self {
         Self {
-            id: 0,
-            origin,
-            size,
-            invalidated: true,
-            texture: TextureStore::default(),
-            base_widget: BaseWidget::new(origin_point(), size),
-            font_name,
-            font_style,
-            font_size,
-            font_color,
-            justification,
+            core: WidgetCore::new(origin, size),
+            style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
             msg,
         }
     }
 
+    /// Sets the color of the text.
     pub fn set_font_color(&mut self, color: Color) {
-        self.font_color = color;
+        self.style.font_color = color;
+        self.set_invalidated(true);
     }
 
+    /// Sets the text to display.
     pub fn set_text(&mut self, msg: String) {
         self.msg = msg;
         self.set_invalidated(true);
     }
 
-    pub fn get_font_color(&self) -> Color { self.font_color }
+    /// Returns the color of the text.
+    pub fn get_font_color(&self) -> Color {
+        self.style.font_color
+    }
 
+    /// Returns the text being displayed.
     pub fn get_text(&self) -> String {
         self.msg.clone()
     }

@@ -56,7 +56,9 @@ pub struct Size {
 
 impl Size {
     /// Constructor to create a new `Size` object.
-    pub fn new(w: u32, h: u32) -> Self { Self { w, h } }
+    pub fn new(w: u32, h: u32) -> Self {
+        Self { w, h }
+    }
 
     /// Computes the amount of memory (in bytes) that a sized object takes in GPU RAM.
     /// This calculation is the `w`idth x `h`eight multiplied by 4 (4 bytes representing RGBA).

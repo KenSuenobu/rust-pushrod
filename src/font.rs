@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::Path;
 use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture, TextureQuery};
 use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::video::Window;
+use std::path::Path;
 
 pub struct FontCache {
     ttf_context: Sdl2TtfContext,
@@ -30,25 +30,27 @@ impl FontCache {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn render_text(
         &mut self,
         c: &mut Canvas<Window>,
-        font_name: String,
+        font_name: &str,
         font_size: u16,
         font_style: FontStyle,
         font_color: Color,
-        text: String,
+        text: &str,
         width: u32,
     ) -> (Texture, u32, u32) {
         let texture_creator = c.texture_creator();
-        let mut font = self.ttf_context
-            .load_font(Path::new(&font_name), font_size)
+        let mut font = self
+            .ttf_context
+            .load_font(Path::new(font_name), font_size)
             .unwrap();
 
         font.set_style(font_style);
 
         let surface = font
-            .render(&text)
+            .render(text)
             .blended_wrapped(font_color, width)
             .map_err(|e| e.to_string())
             .unwrap();
