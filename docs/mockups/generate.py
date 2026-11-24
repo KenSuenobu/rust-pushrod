@@ -727,6 +727,77 @@ def drag_drop():
     return [("1. Drag starts", a, None), ("2. Over an accepting target", b, "target highlighted"), ("3. Dropped", d, "Dropped { payload }")]
 
 
+
+def _alert_custom(c):
+    c.rect(0, 0, 480, 170, fill=GRAY, outline=None); c.dither(0, 0, 480, 170, MID)
+    c.window(30, 14, 420, 140)
+    c.poly([(60, 64), (84, 64), (72, 42)], fill=(250, 200, 0), outline=BLACK); c.text(69, 46, "!", BLACK, 13)
+    c.text(100, 34, "Delete \"report.txt\"?", (190, 0, 0), 16); c.text(100, 60, "This cannot be undone.", DARK, 13)
+    c.button(52, 108, 80, 26, "Help")
+    c.button(246, 108, 90, 26, "Delete", default=True); c.button(350, 108, 90, 26, "Cancel")
+
+@sb("2.9", 3)
+def alert_custom():
+    c = C(480, 170); _alert_custom(c)
+    return [("message part: red, larger font;  alert.add_button(\"Help\")", c, "Clicked on the Help part -> on_click(help_id)")]
+
+@sb("5.2")
+def composite_parts():
+    c = C(480, 170); _alert_custom(c)
+    for (x, y, w, h, name) in [(96, 32, 200, 24, "message"), (50, 106, 84, 30, "button:2"), (56, 38, 32, 30, "icon")]:
+        c.dotted(x - 2, y - 2, w + 4, h + 4, (200, 0, 0))
+    c.text(300, 36, "<- part \"message\"", (200, 0, 0), 12)
+    c.text(140, 112, "<- part \"button:2\"", (200, 0, 0), 12)
+    return [("Parts are real widgets: fetched by name, restyled, added", c, "parts(), part(\"message\"), add_button(..)")]
+
+
+TREE = {(): ["Applications", "Library", "System", "Users"],
+        ("Users",): ["ken", "guest", "shared"],
+        ("Users", "ken"): ["Desktop", "Documents", "Music", "Projects"],
+        ("Users", "ken", "Projects"): ["apiome", "pushrod", "tos3x-aes"],
+        ("Users", "ken", "Projects", "pushrod"): ["Cargo.toml", "README.md", "src", "examples"]}
+LEAVES = {"Cargo.toml", "README.md"}
+
+def _browser(c, x, y, path, ncols_visible=3, colw=140, rows=5, offset=0):
+    cols = [()] + [tuple(path[:n + 1]) for n in range(len(path))]
+    cols = [p for p in cols if p in TREE]
+    shown = cols[offset:offset + ncols_visible]
+    total_w = colw * ncols_visible
+    c.rect(x, y, total_w + 2, rows * 20 + 4, fill=WHITE)
+    for n, p in enumerate(shown):
+        cx = x + 1 + n * colw
+        items = TREE[p]
+        sel = path[len(p)] if len(p) < len(path) else None
+        for r, it in enumerate(items[:rows]):
+            ry = y + 2 + r * 20
+            hot = it == sel
+            if hot: c.rect(cx, ry, colw - 2, 20, fill=BLACK, outline=None)
+            col = WHITE if hot else BLACK
+            c.text(cx + 6, ry, it, col, 13)
+            branch = tuple(list(p) + [it]) in TREE or (it not in LEAVES and it not in ("Desktop", "Music", "guest", "shared", "Library", "System", "Applications", "apiome", "tos3x-aes", "src", "examples"))
+            if branch: c.tri(cx + colw - 14, ry + 6, 7, "right", col)
+        if n < ncols_visible - 1: c.line(cx + colw - 1, y, cx + colw - 1, y + rows * 20 + 4, MID)
+    return total_w
+
+@sb("3.7", 1)
+def browser_steps():
+    out = []
+    for lab, path, note in [("1. Root column", [], None),
+                            ("2. 'Users' selected: column 1 appears", ["Users"], "SelectionChanged (path /Users)"),
+                            ("3. 'ken' selected: column 2 appears", ["Users", "ken"], "SelectionChanged (path /Users/ken)")]:
+        c = C(450, 130); _browser(c, 14, 14, path); out.append((lab, c, note))
+    return out
+
+@sb("3.7", 2)
+def browser_scroll():
+    c = C(450, 150); _browser(c, 14, 14, ["Users", "ken", "Projects", "pushrod"], offset=2)
+    c.scrollbar(14, 122, 422, False, 1.0, 0.6)
+    c2 = C(450, 150); _browser(c2, 14, 14, ["Users", "ken", "Projects", "pushrod", "Cargo.toml"], offset=2)
+    c2.scrollbar(14, 122, 422, False, 1.0, 0.6)
+    return [("Deep path: scrolled to keep the newest column visible", c, None),
+            ("Leaf 'Cargo.toml' selected (double-click or Return activates)", c2, "Activated")]
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
