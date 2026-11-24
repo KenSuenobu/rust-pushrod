@@ -35,7 +35,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **41 of 77 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **41 of 78 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
@@ -43,7 +43,7 @@ MVP scope: **41 of 77 active issues** (marked **Y** in the MVP column). Everythi
 |---|---|---|---|---|
 | 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 16 | 10 |
 | 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 20 | 10 |
-| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 6 | 3 |
+| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 7 | 3 |
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
 | 5 (#15) | Composition, clipping, and layout | Clip children to parents, build widgets from child widgets, scroll views, and autoresizing. | 4 | 2 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
@@ -98,7 +98,7 @@ Where each idea comes from. Pushrod takes the common, proven core of these syste
 | Keeping values in sync |  |  | GTK property bindings; Qt property notifications |
 | Layout on resize | Fixed positions | Motif form attachments; NeXTSTEP autoresizing | Qt/GTK layout managers (not adopted: too heavy) |
 | Value controls | Hand-built sliders (GEM) | Amiga sliders/scrollers/cycle gadgets; Motif scale/spin box | Qt/GTK sliders, spin buttons, switches |
-| Lists and tables |  | Amiga list views; Motif lists; Mac List Manager | Qt/GTK item models and views; Windows report lists |
+| Lists, tables, and hierarchies |  | Amiga list views; Motif lists; NeXTSTEP column browser | Qt/GTK item models and views; Mac Finder column view; Windows report lists |
 | Dialogs and notices | GEM/Mac alerts and modal dialogs | Motif message and file dialogs | GTK info bars; Qt/GTK dialogs |
 
 Intergraph is thinly represented: public documentation for the Environ V forms toolkit is scarce, so it needs first-hand input before it informs more issues.
@@ -890,7 +890,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Every system has a one-call alert (icon, message, a few buttons). Pushrod has no modal dialogs.
 
-**Solution / Scope.** `ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` builds a centered modal form (6.7 (#66)) from existing widgets and calls the completion closure with the chosen button index. Return chooses the default, Escape the last button. Always drawn by Pushrod.
+**Solution / Scope.** `ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` builds a centered modal form (6.7 (#66)) from existing widgets and calls the completion closure with the chosen button index. Return chooses the default, Escape the last button. Always drawn by Pushrod. **Parts (5.2 (#57)):** `AlertParts { icon, title, message, buttons }`; `add_button`, `remove_button`, `set_default_button`. Every part can be retrieved and restyled (font, color, text). Example: `let a = ui.alert(..); ui.get_mut::<TextWidget>(a.parts().message)?.set_font_color(Color::RED); a.add_button(ui, "Help");`
 
 #### Look and behavior (proposed)
 
@@ -907,6 +907,10 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
           &["Delete", "Cancel"], 0, |state, ui, choice| if choice == 0 { /* delete */ });
 ```
 
+**Customized through its parts: bold red message, an extra Help button**
+
+![2.9 step set 3: Customized through its parts: bold red message, an extra Help button](mockups/2.9-3.png)
+
 #### Events and callbacks
 
 | Event emitted | When | Application callback |
@@ -920,8 +924,9 @@ Like every widget, it can also receive application-defined custom events in `han
 - Modal: nothing else receives input while open
 - Return/Escape behave as described
 - Completion closure gets the index
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Not parallelizable. Requires 2.3 (#29), 6.7 (#66).
+**Parallelism / Dependencies.** Not parallelizable. Requires 2.3 (#29), 6.7 (#66), 5.2 (#57).
 
 **Technical Stack.** Rust
 
@@ -969,7 +974,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Desktop applications need menus that look and behave the same on every platform.
 
-**Solution / Scope.** `MenuBar` and `Menu` widgets built as composites (5.2 (#57)). Items come from actions (9.5 (#97)) or plain labels; support separators, check/radio items, disabled items, submenus, shortcut text, and mnemonics (1.12 (#76)). Menus open on click, track the pointer, draw in the overlay layer above all widgets, and close on outside click or Escape. Never uses the OS menu bar or native menus.
+**Solution / Scope.** `MenuBar` and `Menu` widgets built as composites (5.2 (#57)). Items come from actions (9.5 (#97)) or plain labels; support separators, check/radio items, disabled items, submenus, shortcut text, and mnemonics (1.12 (#76)). Menus open on click, track the pointer, draw in the overlay layer above all widgets, and close on outside click or Escape. Never uses the OS menu bar or native menus. **Parts (5.2 (#57)):** `MenuBar::menus()`, `Menu::items()`, `add_item`, `insert_item`, `remove_item`, `add_separator`; each item is a part with its own font and color. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -992,6 +997,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - Menus open, track, select, and close correctly
 - Submenus and keyboard navigation
 - No OS-native menu APIs on any platform
+- Parts are retrievable and modifiable as described
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.12 (#76), 5.1 (#56), 5.2 (#57), 9.5 (#97).
 
@@ -1005,7 +1011,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Applications need to open and save files; native dialogs would break the consistent look.
 
-**Solution / Scope.** Modal form built from the list view (4.5 (#52)), text fields, and buttons: directory, filter, file list, name, OK/Cancel; Open and Save modes. Completion closure receives `Option<PathBuf>`. OS-native dialogs are deliberately not used.
+**Solution / Scope.** Modal form built from the list view (4.5 (#52)), text fields, and buttons: directory, filter, file list, name, OK/Cancel; Open and Save modes. Completion closure receives `Option<PathBuf>`. OS-native dialogs are deliberately not used. **Parts (5.2 (#57)):** `FileChooserParts { folder, filter, list, name, buttons }`; `add_button` (for example 'New Folder'), `add_filter_choice`. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1027,8 +1033,9 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Navigate, filter, choose; keyboard operable
 - Returns None on cancel
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 6.7 (#66).
+**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 6.7 (#66), 5.2 (#57).
 
 **Technical Stack.** Rust std::fs
 
@@ -1105,7 +1112,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Frequent commands should be one click away.
 
-**Solution / Scope.** `Toolbar` composite of tool buttons created from actions (9.5 (#97)): icon and/or text, toggle actions stay pressed, disabled actions gray out, tooltips from the action. Overflow items move into a '>>' menu.
+**Solution / Scope.** `Toolbar` composite of tool buttons created from actions (9.5 (#97)): icon and/or text, toggle actions stay pressed, disabled actions gray out, tooltips from the action. Overflow items move into a '>>' menu. **Parts (5.2 (#57)):** `items()`, `add_action`, `insert_action`, `remove_item`; each tool button is a part. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1127,6 +1134,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Buttons reflect action state
 - Overflow menu when too narrow
+- Parts are retrievable and modifiable as described
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.5 (#97), 5.2 (#57), 2.7 (#33).
 
@@ -1140,7 +1148,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Applications show transient messages ('Saved') and permanent status (line/column) at the bottom of the window.
 
-**Solution / Scope.** `StatusBar` with a message area (`show_message(text, timeout)`) and permanent fields; actions' status text appears while their menu item is hovered.
+**Solution / Scope.** `StatusBar` with a message area (`show_message(text, timeout)`) and permanent fields; actions' status text appears while their menu item is hovered. **Parts (5.2 (#57)):** `fields()`, `add_field`, `remove_field`. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1162,8 +1170,9 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Timed messages clear themselves
 - Hovered action status text appears
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21).
+**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 5.2 (#57).
 
 **Technical Stack.** Rust
 
@@ -1274,7 +1283,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Many messages don't need a modal alert ('Connection lost, retrying'); blocking the user is worse usability.
 
-**Solution / Scope.** `MessageBar` at the top of a form: icon, text, optional action buttons, close box; slides in by animating its height.
+**Solution / Scope.** `MessageBar` at the top of a form: icon, text, optional action buttons, close box; slides in by animating its height. **Parts (5.2 (#57)):** `MessageBarParts { icon, message, buttons, close }`; `add_button`. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1296,8 +1305,9 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Shows, hides, and dismisses
 - Action buttons fire callbacks
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 2.3 (#29).
+**Parallelism / Dependencies.** Parallelizable. Requires 1.5 (#21), 2.3 (#29), 5.2 (#57).
 
 **Technical Stack.** Rust
 
@@ -1319,6 +1329,7 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 | 3.2 (#40) | Slider | Horizontal/vertical slider with range, optional ticks, and value label. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `slider.rs (new)` |
 | 3.3 (#41) | Group box (titled frame) | A frame with a title in its top border, grouping related controls. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | S | `group_box.rs (new)` |
 | 3.6 (#44) | Choice button: pop-up list and click-to-cycle modes | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | `enhancement`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `choice_button.rs (new)` |
+| 3.7 (#45) | Column browser (multi-column hierarchical browser) | Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. | `enhancement`, `parallelizable`, `size/L`, `usability`, `widget` | Y | N | L | `column_browser.rs (new)` |
 | 3.10 (#90) | Expander (collapsible section) | A titled section that shows or hides its contents when clicked. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `expander.rs (new)` |
 | 3.11 (#91) | Date picker | A date field with a drop-down month calendar. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `date_picker.rs (new)` |
 
@@ -1326,7 +1337,7 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 
 **Problem Statement.** Scroll views, lists, and text areas need scroll bars; older systems made applications assemble them by hand.
 
-**Solution / Scope.** `ScrollBar` composite (5.2 (#57)): two glyph buttons (activate-on-press with auto-repeat), a track, and a draggable thumb sized by `visible / total`. Value 0.0 to 1.0 plus page size; clicking the track pages. Emits `ValueChanged`.
+**Solution / Scope.** `ScrollBar` composite (5.2 (#57)): two glyph buttons (activate-on-press with auto-repeat), a track, and a draggable thumb sized by `visible / total`. Value 0.0 to 1.0 plus page size; clicking the track pages. Emits `ValueChanged`. **Parts (5.2 (#57)):** `ScrollBarParts { up, down, track, thumb }` (colors and glyphs customizable). Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1352,6 +1363,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Drag, arrows with repeat, track paging
 - Thumb size reflects proportion
+- Parts are retrievable and modifiable as described
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.5 (#21), 1.6 (#22), 2.2 (#28), 5.2 (#57).
 
@@ -1437,7 +1449,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Choosing one option from a list shouldn't always require radio buttons that take up space.
 
-**Solution / Scope.** `ChoiceButton { items, selected, mode }`. `Popup` mode opens an overlay list positioned so the current item sits under the pointer. `Cycle` mode advances on each click (Shift-click goes back) without a list: the most compact choice for two to five options. Emits `SelectionChanged`.
+**Solution / Scope.** `ChoiceButton { items, selected, mode }`. `Popup` mode opens an overlay list positioned so the current item sits under the pointer. `Cycle` mode advances on each click (Shift-click goes back) without a list: the most compact choice for two to five options. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `items()`, `add_item`, `remove_item`; the pop-up list's rows are parts. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1463,14 +1475,69 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Popup opens over the current item; selects by mouse/keyboard
 - Cycle mode advances and reverses
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 5.1 (#56).
+**Parallelism / Dependencies.** Parallelizable. Requires 1.6 (#22), 5.1 (#56), 5.2 (#57).
 
 **Technical Stack.** Rust
 
 **Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
+
+### 3.7 (#45): Column browser (multi-column hierarchical browser)
+
+**Problem Statement.** Hierarchies (folders, settings categories, class trees, mail folders) are easiest to navigate when the whole path stays visible. NeXTSTEP's column browser shows column 0 as the root; selecting an item in column 0 fills column 1 with its children, selecting in column 1 fills column 2, and so on, with the path always on screen.
+
+**Solution / Scope.** `ColumnBrowser` composite (5.2 (#57)) of list-view columns (4.5 (#52)) inside a horizontal scroll view (5.3 (#58)). Data comes from a `BrowserModel` trait: `children(&path) -> Vec<BrowserItem>`, `is_leaf(&path)`, optional icon and label per item. Selecting an item in column *n* replaces every column to the right with a new column *n+1* listing that item's children; selecting a leaf clears the columns to the right (an optional preview pane can show leaf details). Branch items show a ▶ marker. When columns overflow the width, the view scrolls horizontally to keep the newest column visible. Columns have a fixed default width and can be resized by dragging the divider between them. Keyboard: Up/Down move within a column, Right enters the selected branch (moving focus to the next column), Left returns to the parent column, typing jumps to a matching item, Return activates. Double-click or Return on a leaf emits `Activated`. **Parts (5.2 (#57)):** `columns()` returns each column's list-view ID; columns can be restyled like any list view; `path()` and `set_path()` read and set the selection. The file chooser (2.12 (#38)) can offer a column mode built on it.
+
+```text
+col[0] (root)       col[1] (children of
+                    col[0] selection)   col[2] (children of col[1] selection)
++--------------+    +--------------+    +--------------+
+| Applications▶|    | ken         ▶|    | Documents   ▶|
+|#Users########|--> |#ken#########▶|--> |#Projects####▶|--> col[3] ...
+| System      ▶|    | shared      ▶|    | Music       ▶|
++--------------+    +--------------+    +--------------+
+```
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Selecting in each column fills the next one**
+
+![3.7 step set 1: Selecting in each column fills the next one](mockups/3.7-1.png)
+
+**Many columns: the view scrolls horizontally to keep the newest column visible**
+
+![3.7 step set 2: Many columns: the view scrolls horizontally to keep the newest column visible](mockups/3.7-2.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `SelectionChanged { id }` | The selected path changes; read `path()` | `on_selection_change(id, ..)` |
+| `Activated { id }` | Double-click or Return on a leaf | `on_activate(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Selecting in column n fills column n+1 and clears columns to its right
+- Leaf selection clears columns to the right; optional preview pane
+- Horizontal scrolling keeps the newest column visible; column widths are resizable
+- Keyboard navigation: Up/Down, Right into a branch, Left to parent, type-ahead, Return
+- `path()`/`set_path()`, `columns()` part access
+- Works with a filesystem model and an in-memory tree model
+
+**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52), 5.2 (#57), 5.3 (#58).
+
+**Technical Stack.** Rust
+
+**Documentation.** Rustdoc: Module docs + `BrowserModel`. README/guides: Widget list. Examples: Filesystem browser example. Screenshots: Gallery tile.
+
+**Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
 
 ### 3.10 (#90): Expander (collapsible section)
 
@@ -1509,7 +1576,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Typing dates is error-prone; forms commonly need a date.
 
-**Solution / Scope.** `DatePicker`: a masked text field (2.6 (#32)) plus a button that opens a month calendar in the overlay (arrows for month/year, keyboard navigation, today highlighted). Emits `ValueChanged`.
+**Solution / Scope.** `DatePicker`: a masked text field (2.6 (#32)) plus a button that opens a month calendar in the overlay (arrows for month/year, keyboard navigation, today highlighted). Emits `ValueChanged`. **Parts (5.2 (#57)):** `DatePickerParts { field, button, calendar }`; day cells are parts of the calendar. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1531,8 +1598,9 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Calendar navigation by mouse and keyboard
 - Typed and picked dates agree
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 5.1 (#56).
+**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 5.1 (#56), 5.2 (#57).
 
 **Technical Stack.** Rust
 
@@ -1594,7 +1662,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Numbers within a range are easier to adjust with arrows than by typing.
 
-**Solution / Scope.** `SpinBox` = numeric text field (2.6 (#32)) + two glyph buttons with auto-repeat; Up/Down keys and the wheel adjust; typed values are clamped on `EditingFinished`.
+**Solution / Scope.** `SpinBox` = numeric text field (2.6 (#32)) + two glyph buttons with auto-repeat; Up/Down keys and the wheel adjust; typed values are clamped on `EditingFinished`. **Parts (5.2 (#57)):** `SpinBoxParts { field, up, down }`. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1616,6 +1684,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Arrows, keys, wheel adjust within range
 - Typed values clamp
+- Parts are retrievable and modifiable as described
 
 **Parallelism / Dependencies.** Parallelizable. Requires 2.2 (#28), 2.6 (#32), 5.2 (#57).
 
@@ -1629,7 +1698,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Settings dialogs group many controls into pages.
 
-**Solution / Scope.** `TabView`: tab strip + one container per page; switching hides inactive pages (IDs and state preserved). Ctrl+Tab switches pages. Emits `SelectionChanged`.
+**Solution / Scope.** `TabView`: tab strip + one container per page; switching hides inactive pages (IDs and state preserved). Ctrl+Tab switches pages. Emits `SelectionChanged`. **Parts (5.2 (#57)):** `tabs()`, `pages()`, `add_page(title) -> (tab_id, page_id)`, `remove_page`. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1652,6 +1721,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - Switching hides/shows pages
 - Hidden controls keep state and IDs
 - Ctrl+Tab
+- Parts are retrievable and modifiable as described
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 5.2 (#57).
 
@@ -1665,7 +1735,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Lists are needed by file choosers, combo boxes, and most applications.
 
-**Solution / Scope.** `ListView` in a scroll view, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates.
+**Solution / Scope.** `ListView` in a scroll view, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates. **Parts (5.2 (#57)):** `rows()` (visible row parts), per-row style via a `row_style` callback for model-driven rows. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1689,8 +1759,9 @@ Like every widget, it can also receive application-defined custom events in `han
 - Smooth with 10,000 rows
 - Selection modes and keyboard navigation
 - Model change notifications update the view
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 5.3 (#58).
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 5.3 (#58), 5.2 (#57).
 
 **Technical Stack.** Rust
 
@@ -1702,7 +1773,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Choosing common values while allowing free entry needs a combo box.
 
-**Solution / Scope.** Composite of `TextField` + arrow + overlay `ListView`; typing filters; choosing fills the field.
+**Solution / Scope.** Composite of `TextField` + arrow + overlay `ListView`; typing filters; choosing fills the field. **Parts (5.2 (#57)):** `ComboBoxParts { field, button, list }`; `add_item`, `remove_item`. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1724,8 +1795,9 @@ Like every widget, it can also receive application-defined custom events in `han
 **Acceptance Criteria.**
 
 - Typing filters; arrow opens; choosing fills
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 5.1 (#56).
+**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.5 (#52), 5.1 (#56), 5.2 (#57).
 
 **Technical Stack.** Rust
 
@@ -1737,7 +1809,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Records with several fields (files with size and date, orders, logs) need columns.
 
-**Solution / Scope.** `TableView` extending the list view: column headers, resizable columns, click a header to sort (via the model), per-column alignment; a `TableModel` supplies cells.
+**Solution / Scope.** `TableView` extending the list view: column headers, resizable columns, click a header to sort (via the model), per-column alignment; a `TableModel` supplies cells. **Parts (5.2 (#57)):** `columns()`, `add_column`, `remove_column`; header cells are parts. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1761,8 +1833,9 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Columns resize and sort
 - Only visible cells painted
+- Parts are retrievable and modifiable as described
 
-**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52).
+**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52), 5.2 (#57).
 
 **Technical Stack.** Rust
 
@@ -1781,7 +1854,7 @@ Clip children to parents, build widgets from child widgets, scroll views, and au
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 5.1 (#56) | Clip children to their parent's bounds | Children never draw or receive input outside their parent. | `core`, `enhancement`, `layout`, `mvp`, `size/S` | N | Y | S | `cache.rs` |
-| 5.2 (#57) | Composite widgets: build a widget out of child widgets | A Composite trait that creates and manages child widgets as one control. | `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | Y | M | `widget.rs`, `cache.rs`, `composite.rs (new)` |
+| 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `cache.rs`, `composite.rs (new)` |
 | 5.3 (#58) | Scroll view | A container whose content is larger than its frame. | `enhancement`, `layout`, `size/M`, `widget` | N | N | M | `scroll_view.rs (new)`, `cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `widget.rs`, `cache.rs` |
 
@@ -1803,26 +1876,47 @@ Clip children to parents, build widgets from child widgets, scroll views, and au
 
 **Documentation.** Rustdoc: Draw/hit rules in `cache` docs. README/guides: Tree section. Examples: n/a. Screenshots: n/a.
 
-### 5.2 (#57): Composite widgets: build a widget out of child widgets
+### 5.2 (#57): Composite widgets: build widgets from parts that applications can retrieve and modify
 
-**Problem Statement.** Complex controls (scroll bar, spin box, combo box, menu) are naturally made from simpler widgets. `paint` made drawing reusable, but interactive widgets can't be reused as parts of another widget.
+**Problem Statement.** Complex controls (alert, scroll bar, spin box, combo box, menu, file chooser) are naturally made from simpler widgets. `paint` made drawing reusable, but interactive widgets can't yet be reused as parts of another widget. And because every widget that displays elements must be customizable, an application must be able to reach those elements: change the font or color of an alert's message, add a Help button to an alert, restyle one menu item, or recolor a scroll bar's thumb.
 
-**Solution / Scope.** `Composite` trait: `build(&mut self, parts: &mut PartsBuilder)` runs when added and creates child widgets; part events reach `handle_part_event` before propagation continues, so the composite translates them into its own events (for example an arrow's `Clicked` into `ValueChanged`). Parts are internal: not saved separately in form files and selected as one object in Chassis.
+**Solution / Scope.** `Composite` trait: `build(&mut self, parts: &mut PartsBuilder)` runs when the widget is added and creates its parts as ordinary child widgets with their own IDs. **Parts are public, not hidden.** Every composite provides (1) `parts() -> Vec<(PartName, WidgetId)>` listing every part by a stable name (`"message"`, `"button:0"`, `"thumb"`), (2) `part(name) -> Option<WidgetId>`, and (3) typed accessors for its own structure (for example `AlertParts { icon, title, message, buttons: Vec<WidgetId> }`). Applications change parts through the normal API: `ui.get_mut::<TextWidget>(parts.message)?.set_font(..)`, `set_font_color`, `set_color`, `set_text`, any property (6.2 (#61)). Composites whose structure is a list (alert buttons, menu items, toolbar items, tabs, list columns) also provide `add_*`, `insert_*`, and `remove_*` methods that create or remove parts and re-lay them out (for example `alert.add_button("Help") -> WidgetId`). Part events reach the composite's `handle_part_event` first, so it can translate them (an arrow's `Clicked` into the scroll bar's `ValueChanged`); applications can also attach callbacks directly to a part's ID. Form files (6.5 (#64)) store a composite as its type plus part overrides (changed properties) and added or removed parts, so customizations survive save and load. Chassis selects a composite as one object and lets the user drill into its parts.
 
 ```text
-ScrollBar (composite, id 12)
- ├── GlyphButton ▲ (part, id 13)  Clicked ──┐
- ├── Track        (part, id 14)             ├─> ScrollBar::handle_part_event
- ├── Thumb        (part, id 15)             │      -> ValueChanged { id: 12 }
- └── GlyphButton ▼ (part, id 16)  Clicked ──┘
+Alert (composite, id 40)
+ ├── icon     (ImageWidget, id 41)   "icon"
+ ├── title    (TextWidget,  id 42)   "title"
+ ├── message  (TextWidget,  id 43)   "message"   <- app: set_font(bold), set_font_color(..)
+ ├── button 0 (ButtonWidget,id 44)   "button:0"  Delete
+ ├── button 1 (ButtonWidget,id 45)   "button:1"  Cancel
+ └── button 2 (ButtonWidget,id 46)   "button:2"  Help   <- app: alert.add_button("Help")
 ```
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/docs/roadmap/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**An alert customized through its parts: bold red message, an extra Help button**
+
+![5.2 step set 1: An alert customized through its parts: bold red message, an extra Help button](mockups/5.2-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| (part events) | A part emits an event; the composite may translate it | `on_click(part_id, ..)` on a part, or the composite's own callbacks |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
 
 **Acceptance Criteria.**
 
-- Composite creates parts and receives their events
-- Callbacks see only the composite's events
-- Parts skipped by form save
-- Scroll bar built on it
+- Composites create parts as ordinary widgets with IDs
+- `parts()`, `part(name)`, and typed part accessors exist on every built-in composite
+- Changing a part's font, color, or text through `ui.get_mut` repaints it
+- List-structured composites support add/insert/remove of parts with automatic re-layout
+- Composite translates part events; callbacks on part IDs also work
+- Form round trip preserves part overrides and added/removed parts
+- Scroll bar and alert built on it
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 9.2 (#94).
 
@@ -1834,7 +1928,7 @@ ScrollBar (composite, id 12)
 
 **Problem Statement.** Lists, text areas, and long forms need a scrolling viewport.
 
-**Solution / Scope.** `ScrollView` with a content container offset by the scroll position, scroll bars as needed, wheel and keyboard scrolling, `scroll_to(rect)` to keep the focused widget visible.
+**Solution / Scope.** `ScrollView` with a content container offset by the scroll position, scroll bars as needed, wheel and keyboard scrolling, `scroll_to(rect)` to keep the focused widget visible. **Parts (5.2 (#57)):** `ScrollViewParts { content, vertical, horizontal }`. Every part can be retrieved and restyled (font, color, text).
 
 #### Look and behavior (proposed)
 
@@ -1856,6 +1950,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 - Scrolls with bars, wheel, keys
 - Focused widget scrolled into view
+- Parts are retrievable and modifiable as described
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 3.1 (#39), 5.1 (#56), 5.2 (#57).
 
@@ -2517,7 +2612,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 **4. Composition**
 
 - 5.1 (#56) Clip children to their parent's bounds — MVP
-- 5.2 (#57) Composite widgets: build a widget out of child widgets — MVP
+- 5.2 (#57) Composite widgets: build widgets from parts that applications can retrieve and modify — MVP
 - 3.1 (#39) Scroll bar — MVP
 - 7.2 (#70) Golden-image rendering tests — MVP
 
@@ -2555,6 +2650,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.10 (#25) Window resize and high-DPI rendering
 - 5.3 (#58) Scroll view
 - 4.5 (#52) List view
+- 3.7 (#45) Column browser (multi-column hierarchical browser)
 - 4.2 (#49) Spin box
 - 4.4 (#51) Tab view
 - 4.6 (#53) Combo box
@@ -2594,7 +2690,6 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 |---|---|---|
 | 3.4 (#42) | Matrix of cells (grid of buttons with selection modes) | Radio groups (2.5 (#31)) and the choice button (3.6 (#44)) cover the common cases; palettes can be built from buttons. |
 | 3.5 (#43) | Labeled field rows | Text fields with built-in labels (2.6 (#32)) cover this. |
-| 3.7 (#45) | Column browser | Specialized; the list view (4.5 (#52)) and file chooser (2.12 (#38)) cover everyday navigation. |
 | 3.8 (#46) | Color well and picker | Rarely needed in ordinary dialogs; revisit if the Chassis inspector needs it. |
 | 3.9 (#47) | Split view (draggable pane dividers) | Application-layout feature rather than a dialog control; revisit after forms ship. |
 | 4.3 (#50) | Segmented control | Radio groups and the choice button's cycle mode cover the same choices. |
