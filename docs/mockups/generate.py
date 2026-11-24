@@ -1738,6 +1738,100 @@ def layout_grid():
     return [("6. Grid (after the MVP): drop into a cell; drag a selected widget's edge across cells to span them", c, "NotesArea spans columns 0 to 2")]
 
 
+# ---- Chassis example projects (docs/ROADMAP_CHASSIS.md, Epic 8) -------------------------
+def _ex_window(w, h, title):
+    c = C(w + 28, h + 28, bg=(226, 226, 226))
+    c.window(14, 14, w, h, title)
+    return c, 14, 14 + 24
+
+@sb("chassis-example-hello")
+def example_hello():
+    c, x, y = _ex_window(320, 150, "Hello, Chassis")
+    c.ctext(x, y + 16, 320, 30, "Hello from Chassis!", BLACK, 16)
+    c.ctext(x, y + 46, 320, 22, "Clicked 3 times", DARK, 13)
+    c.button(x + 110, y + 82, 100, 28, "Click Me", default=True)
+    return [("Hello, Chassis: one label, one button, one handler", c, "on_click_me_clicked")]
+
+@sb("chassis-example-temperature")
+def example_temperature():
+    c, x, y = _ex_window(380, 190, "Temperature")
+    c.text(x + 30, y + 22, "Celsius:", BLACK, 13); c.field(x + 120, y + 19, 220, "21.5")
+    c.text(x + 30, y + 58, "Fahrenheit:", BLACK, 13); c.field(x + 120, y + 55, 220, "70.7")
+    c.slider(x + 120, y + 96, 220, (21.5 + 40) / 140)
+    c.text(x + 120, y + 124, "-40", MID, 11); c.text(x + 318, y + 124, "100", MID, 11)
+    return [("Temperature converter: type in either field or drag the slider", c, "TextChanged / ValueChanged keep all three in step")]
+
+@sb("chassis-example-tip-calculator")
+def example_tip():
+    c, x, y = _ex_window(400, 300, "Tip Calculator")
+    c.text(x + 24, y + 20, "Bill:", BLACK, 13); c.field(x + 100, y + 17, 120, "48.60")
+    c.group(x + 20, y + 54, 170, 130, "Tip")
+    for n, t in enumerate(["10%", "15%", "20%", "Custom"]): c.radio(x + 34, y + 78 + n * 24, t, on=(n == 2))
+    c.group(x + 206, y + 54, 174, 130, "Split")
+    c.text(x + 220, y + 80, "People: 3", BLACK, 13); c.slider(x + 220, y + 106, 140, 0.25)
+    c.line(x + 20, y + 198, x + 380, y + 198, GRAY)
+    for n, (lab, val) in enumerate([("Tip:", "9.72"), ("Total:", "58.32"), ("Each:", "19.44")]):
+        c.text(x + 24 + n * 124, y + 214, lab, DARK, 13); c.text(x + 72 + n * 124, y + 214, val, BLACK, 13)
+    return [("Tip calculator: radio group, sliders, group boxes, results", c, None)]
+
+@sb("chassis-example-settings-dialog")
+def example_settings():
+    c, x, y = _ex_window(420, 300, "Settings")
+    c.group(x + 16, y + 14, 388, 88, "General")
+    c.checkbox(x + 30, y + 38, "Open the last file at startup", state="on", mn=0)
+    c.checkbox(x + 30, y + 64, "Check for sample updates", state="mixed")
+    c.group(x + 16, y + 114, 388, 110, "Appearance")
+    for n, t in enumerate(["Small", "Medium", "Large"]): c.radio(x + 30, y + 138 + n * 24, t, on=(n == 1))
+    c.text(x + 200, y + 140, "Line spacing", BLACK, 13); c.slider(x + 200, y + 166, 180, 0.4)
+    c.button(x + 112, y + 240, 90, 28, "Apply"); c.button(x + 210, y + 240, 90, 28, "Cancel"); c.button(x + 308, y + 240, 90, 28, "OK", default=True)
+    return [("Settings dialog: modal, OK / Cancel / Apply, grouped options", c, "OK and Apply copy values to the application state")]
+
+@sb("chassis-example-image-viewer")
+def example_image_viewer():
+    c, x, y = _ex_window(440, 300, "Image Viewer")
+    c.button(x + 12, y + 10, 90, 26, "Previous"); c.button(x + 108, y + 10, 70, 26, "Next")
+    c.text(x + 194, y + 14, "Hills at sunrise  (1 of 3)", BLACK, 13)
+    c.rect(x + 12, y + 46, 416, 210, fill=WHITE)
+    _picture(c, x + 13, y + 47, 398, 208)
+    c.scrollbar(x + 412, y + 46, 210, True, 0.1, 0.6)
+    return [("Image viewer: pictures from the resource file by ID, in a scrollable container", c, None)]
+
+@sb("chassis-example-stopwatch")
+def example_stopwatch():
+    c, x, y = _ex_window(340, 260, "Stopwatch")
+    c.ctext(x, y + 12, 340, 50, "02:41.37", BLACK, 36)
+    c.progress(x + 30, y + 72, 280, frac=41.37 / 60)
+    c.button(x + 30, y + 102, 88, 28, "Stop", default=True); c.button(x + 126, y + 102, 88, 28, "Lap"); c.button(x + 222, y + 102, 88, 28, "Reset", disabled=True)
+    for n, lap in enumerate(["Lap 3   00:52.10", "Lap 2   00:49.88", "Lap 1   00:59.39"]):
+        c.text(x + 30, y + 146 + n * 22, lap, DARK, 13)
+    return [("Stopwatch: timer ticks, progress for the current minute, buttons enabled by state", c, None)]
+
+@sb("chassis-example-quiz")
+def example_quiz():
+    c, x, y = _ex_window(420, 260, "Quiz")
+    c.text(x + 20, y + 16, "Question 4 of 10", DARK, 12); c.progress(x + 160, y + 18, 240, frac=0.4)
+    c.text(x + 20, y + 46, "Which planet has the most moons?", BLACK, 15)
+    for n, t in enumerate(["Mars", "Saturn", "Venus", "Mercury"]): c.radio(x + 30, y + 82 + n * 26, t, on=(n == 1))
+    c.button(x + 310, y + 200, 90, 28, "Next", default=True)
+    return [("Quiz: questions loaded from a file resource by ID; radio answers; score alert at the end", c, None)]
+
+def _die(c, x, y, n, s=44):
+    c.rect(x, y, s, s, fill=WHITE)
+    pos = {1: [(2, 2)], 2: [(1, 1), (3, 3)], 3: [(1, 1), (2, 2), (3, 3)], 4: [(1, 1), (3, 1), (1, 3), (3, 3)],
+           5: [(1, 1), (3, 1), (2, 2), (1, 3), (3, 3)], 6: [(1, 1), (3, 1), (1, 2), (3, 2), (1, 3), (3, 3)]}[n]
+    for px, py in pos:
+        c.ellipse(x + px * s / 4 - 4, y + py * s / 4 - 4, 8, 8, fill=BLACK, outline=None)
+
+@sb("chassis-example-dice")
+def example_dice():
+    c, x, y = _ex_window(380, 220, "Dice")
+    c.text(x + 20, y + 18, "Dice: 3", BLACK, 13); c.slider(x + 90, y + 20, 160, 2 / 3)
+    c.button(x + 270, y + 12, 90, 28, "Roll", default=True)
+    for n, face in enumerate([5, 2, 6]): _die(c, x + 40 + n * 64, y + 70, face)
+    c.text(x + 40, y + 140, "Total: 13", BLACK, 16)
+    return [("Dice roller: die faces are icon resources; the row grows with the dice count", c, None)]
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
