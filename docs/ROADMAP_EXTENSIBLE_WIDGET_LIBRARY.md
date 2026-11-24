@@ -29,6 +29,7 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Core and widgets are separate crates.** `pushrod` is the core (engine, tree, events, paint helpers); `pushrod-widgets` holds the standard widgets and uses only public core API. Other widget libraries can extend or replace it (1.22), so a fancier look never requires changing the core.
 - **Backends are crates.** The core and the widgets never name SDL. `pushrod-sdl2` implements the backend today; `pushrod-sdl3` (10.5) and an Atari ST backend (10.4) plug in the same way, so applications switch by changing one dependency.
 - **Documentation ships with the code.** Every user-visible change includes its Docusaurus pages, rustdoc, screenshots, and changelog entry in the same pull request; outdated documentation is a bug (CONTRIBUTING.md).
+- **Chassis components are labeled.** Work that exists for the Chassis designer (the code editor, Epic 11) carries the `chassis` label and a "Chassis:" title, and lives in `chassis-*` crates that any Pushrod application can still use.
 - **Usability first.** A control is added because it makes ordinary applications easier to use, not because another toolkit had it. Ideas that didn't meet that bar are listed under *Parked*.
 - **Self-contained and GPU-first.** Pushrod draws everything itself through SDL2: no OS-native menus, menu bars, dialogs, or controls, so applications look and behave the same everywhere. Each widget paints into its own GPU texture only when invalidated; frames are composed by blitting cached textures; text comes from a glyph atlas texture. SDL2 does the heavy lifting for graphics and input.
 
@@ -44,7 +45,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, a reference application built only with Pushrod, a guide for writing widgets, and documentation for everything.
 7. Draw everything through a backend crate (SDL2 today, SDL3 later) into GPU textures, with no OS-native UI, no per-frame CPU pixel work, sharp rendering on high-DPI displays, and no SDL types in the core or widget APIs.
 
-MVP scope: **63 of 111 active issues**, delivered in two release stages. The MVP column shows each issue's stage, and GitHub milestones match.
+MVP scope: **63 of 120 active issues**, delivered in two release stages. The MVP column shows each issue's stage, and GitHub milestones match.
 
 - **v0.1: dialog applications** (53 issues): Build and ship real dialog-style applications: core, backends, events, focus, the core widgets, composition, layouts, high-DPI, modal dialogs, CI, docs, and the first crates.io release.
 - **v0.2: forms (MVP complete)** (10 issues): Forms and form files (the runtime foundation for Chassis), plus input methods, mnemonics, accessibility, and written specs. Completes the MVP.
@@ -65,6 +66,7 @@ Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, 
 | 8 (#18) | Theming and skins (distant future) | Placeholder: an optional theme layer for pushrod-widgets. Not scheduled; different looks can already be built as separate widget libraries (1.22). | 2 | 0 |
 | 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 11 | 5 |
 | 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Backend crates (SDL2 now, SDL3 later) with no SDL in the core, a backend-neutral paint API, high-DPI, live vs. outline drawing for slow and vintage machines, a no_std core, and an experimental Atari ST backend. | 6 | 2 |
+| 11 (#141) | Chassis: code editor (chassis-code-editor) | A lightweight code editor component ("Monaco lite", Tier 1 features only) for Chassis's code-behind view, built as its own crate on Pushrod. | 9 | 0 |
 
 ```mermaid
 flowchart LR
@@ -78,6 +80,8 @@ flowchart LR
   E2 --> E6["6 Forms and form files"]
   E1 --> E6
   E6 --> CH([Chassis designer])
+  E11["11 Chassis code editor"] --> CH
+  E5 --> E11
   E7 --> REL([crates.io v1])
   E6 --> REL
   E8["8 Theming (future)"] -.-> E2
@@ -155,7 +159,7 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Event mask classes:** `POINTER_BUTTONS`, `POINTER_MOTION`, `HOVER`, `SCROLL`, `KEYBOARD`, `TEXT`, `FOCUS`, `WINDOW`, `LIFECYCLE`, `TIMER`, `CUSTOM`, `ENGINE`
 
-**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `AccessoryClicked`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `ViewportChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
+**Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `GuardedEditBlocked`, `FindChanged`, `CaretMoved`, `AccessoryClicked`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `ViewportChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
 
 **Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_viewport_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`, `next_event (event-loop style)`
 
@@ -163,7 +167,7 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Engine events:** `DrawingModeChanged`, `EventMaskChanged`, `FocusChanged`, `ModalOpened`, `ModalClosed`, `MenuOpened`, `MenuClosed`, `WidgetAdded`, `WidgetRemoved`, `WidgetReparented`, `FormLoaded`, `DragStarted`, `DragEnded`, `TooltipShown`, `TooltipHidden`, `TimerFired`, `WindowOpened`, `WindowClosed`, `ScaleFactorChanged`, `ActionChanged`, `IdleStarted`, `IdleEnded`
 
-**Crates:** `pushrod`, `pushrod-widgets`, `pushrod-sdl2`, `pushrod-sdl3`
+**Crates:** `pushrod`, `pushrod-widgets`, `pushrod-sdl2`, `pushrod-sdl3`, `chassis-code-editor`
 
 ## Epic 1: Core: behavior flags, focus, timing, and performance (#11)
 
@@ -2346,6 +2350,82 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/backends.md` ("Backends", Platforms, update). Guides: update the guide or concept page covering: Backends. Rustdoc: `pushrod_sdl3::run`. Examples: examples run with either backend. Screenshots: n/a.
 
+## Epic 11: Chassis: code editor (chassis-code-editor) (#141)
+
+A lightweight code editor component ("Monaco lite", Tier 1 features only) for Chassis's code-behind view, built as its own crate on Pushrod.
+
+**Problem.** Chassis, the visual form designer, works like the classic rapid-application-development IDEs: draw a form, double-click a control, and land in its event-handler stub to write code. That needs an embedded code editor, and none of the existing Rust code-editor components can be used in Pushrod: each is tied to its own toolkit's drawing and input.
+
+**Scope.** A `chassis-code-editor` crate: a Pushrod widget library (1.22 (#131)) providing a `CodeEditor` widget with Tier 1 features only. **In scope:** a rope text buffer, cursors and selections, clipboard, undo and redo with typing grouped, line numbers, syntax highlighting (tree-sitter), scrolling that lays out and draws only visible lines, find, auto-indent, bracket matching, and an API that lets Chassis insert and navigate to generated code and protect it from edits. **Out of scope (Tier 2 and 3):** multiple cursors, folding, minimap, regex replace, language servers (completion, hover, diagnostics), diff view. It follows the design philosophy (flat, simple) and is usable by any Pushrod application, not only Chassis.
+
+**Dependencies.** After the MVP. Starts once widget libraries (1.22 (#131)) exist; the view needs the glyph atlas (1.7 (#3)), Parley (1.18 (#111)), layers (1.20 (#113)), and the Container (5.3 (#58)). The designer API (11.8 (#149)) pairs with Chassis design mode (6.9 (#68)).
+
+| Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
+|---|---|---|---|---|---|---|---|
+| 11.1 (#142) | Chassis: Code editor crate and editing core | Create `chassis-code-editor` with its text buffer, cursor and selection model, and edit commands, independent of drawing. | `architecture`, `chassis`, `code-editor`, `enhancement`, `parallelizable`, `size/M` | Y | N | M | `chassis-code-editor/ (new crate)`, `chassis-code-editor/src/buffer.rs (new)`, `chassis-code-editor/src/selection.rs (new)`, `chassis-code-editor/src/command.rs (new)` |
+| 11.2 (#143) | Chassis: Code editor view: gutter, visible-line rendering, caret | The `CodeEditor` widget: draws line numbers, the visible lines, the current line, and the caret, and scrolls through files of any length. | `chassis`, `code-editor`, `enhancement`, `parallelizable`, `rendering`, `size/L`, `widget` | Y | N | L | `chassis-code-editor/src/view.rs (new)`, `chassis-code-editor/src/gutter.rs (new)` |
+| 11.3 (#144) | Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods | Editing with the keyboard and mouse the way users expect from a code editor. | `chassis`, `code-editor`, `enhancement`, `input`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `chassis-code-editor/src/input.rs (new)` |
+| 11.4 (#145) | Chassis: Code editor undo and redo | Undo and redo every edit, with consecutive typing grouped into one step. | `chassis`, `code-editor`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `chassis-code-editor/src/history.rs (new)` |
+| 11.5 (#146) | Chassis: Code editor syntax highlighting with tree-sitter | Highlight code incrementally as it is edited, with a small, flat color scheme. | `chassis`, `code-editor`, `enhancement`, `parallelizable`, `size/M`, `text` | Y | N | M | `chassis-code-editor/src/highlight.rs (new)` |
+| 11.6 (#147) | Chassis: Code editor find | A find bar inside the editor: type to search, step through matches. | `chassis`, `code-editor`, `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `chassis-code-editor/src/find.rs (new)` |
+| 11.7 (#148) | Chassis: Code editor auto-indent and bracket matching | New lines keep and adjust indentation, and the bracket matching the one at the caret is boxed. | `chassis`, `code-editor`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `chassis-code-editor/src/indent.rs (new)` |
+| 11.8 (#149) | Chassis: Code editor API for the Chassis designer | Let Chassis insert, find, and protect generated code: double-click a control and land in its event handler. | `api`, `chassis`, `code-editor`, `enhancement`, `parallelizable`, `size/M` | Y | N | M | `chassis-code-editor/src/api.rs (new)` |
+| 11.9 (#150) | Chassis: Code editor documentation, example, and tests | Document the code editor on the site, ship an example editor, and cover it with golden-image tests. | `chassis`, `code-editor`, `documentation`, `parallelizable`, `quality`, `size/S` | Y | N | S | `chassis-code-editor/examples/editor.rs (new)`, `chassis-code-editor/tests/ (new)`, `pushrod-docs/docs/chassis/ (new)` |
+
+### 11.1 (#142): Chassis: Code editor crate and editing core
+
+Create `chassis-code-editor` with its text buffer, cursor and selection model, and edit commands, independent of drawing. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 1.21 (#130), 1.22 (#131).
+
+### 11.2 (#143): Chassis: Code editor view: gutter, visible-line rendering, caret
+
+The `CodeEditor` widget: draws line numbers, the visible lines, the current line, and the caret, and scrolls through files of any length. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.1 (#142), 1.7 (#3), 1.18 (#111), 1.20 (#113), 5.3 (#58), 1.10 (#25), 1.24 (#137).
+
+### 11.3 (#144): Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods
+
+Editing with the keyboard and mouse the way users expect from a code editor. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.2 (#143), 1.4 (#20), 1.19 (#112), 9.4 (#96), 9.5 (#97).
+
+### 11.4 (#145): Chassis: Code editor undo and redo
+
+Undo and redo every edit, with consecutive typing grouped into one step. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.1 (#142), 1.15 (#81).
+
+### 11.5 (#146): Chassis: Code editor syntax highlighting with tree-sitter
+
+Highlight code incrementally as it is edited, with a small, flat color scheme. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.2 (#143).
+
+### 11.6 (#147): Chassis: Code editor find
+
+A find bar inside the editor: type to search, step through matches. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.3 (#144), 2.6 (#32), 2.2 (#28).
+
+### 11.7 (#148): Chassis: Code editor auto-indent and bracket matching
+
+New lines keep and adjust indentation, and the bracket matching the one at the caret is boxed. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.3 (#144), 11.5 (#146).
+
+### 11.8 (#149): Chassis: Code editor API for the Chassis designer
+
+Let Chassis insert, find, and protect generated code: double-click a control and land in its event handler. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.4 (#145), 11.5 (#146). Pairs with 6.9 (#68) (Chassis design-mode hooks).
+
+### 11.9 (#150): Chassis: Code editor documentation, example, and tests
+
+Document the code editor on the site, ship an example editor, and cover it with golden-image tests. **Specification:** [`docs/chassis/code-editor.md`](chassis/code-editor.md).
+
+**Dependencies.** Requires 11.6 (#147), 11.7 (#148), 11.8 (#149), 7.2 (#70).
+
 ## Work Order
 
 Work in this order. Items in the same step can be done in parallel unless their dependencies say otherwise.
@@ -2486,7 +2566,19 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.22 (#131) Widget libraries: extend or replace pushrod-widgets
 - 10.5 (#135) SDL3 backend (pushrod-sdl3)
 
-**10. Distant future**
+**10. After MVP: Chassis code editor**
+
+- 11.1 (#142) Chassis: Code editor crate and editing core
+- 11.2 (#143) Chassis: Code editor view: gutter, visible-line rendering, caret
+- 11.3 (#144) Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods
+- 11.4 (#145) Chassis: Code editor undo and redo
+- 11.5 (#146) Chassis: Code editor syntax highlighting with tree-sitter
+- 11.6 (#147) Chassis: Code editor find
+- 11.7 (#148) Chassis: Code editor auto-indent and bracket matching
+- 11.8 (#149) Chassis: Code editor API for the Chassis designer
+- 11.9 (#150) Chassis: Code editor documentation, example, and tests
+
+**11. Distant future**
 
 - 8.1 (#74) Theme for colors and metrics (future)
 - 8.2 (#75) Skins: image-based widget rendering (future)

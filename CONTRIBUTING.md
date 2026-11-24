@@ -9,6 +9,8 @@ each issue there describes the problem, scope, acceptance criteria, mockups, and
 documentation it needs. Each widget has its own roadmap in [`docs/widgets/`](docs/widgets/README.md),
 which is the specification for that widget. To change how a widget looks or behaves, edit its
 roadmap file (and its mockup in `docs/mockups/generate.py`) in a pull request, then update the issue.
+Components built for the Chassis designer (label `chassis`) are specified the same way in
+[`docs/chassis/`](docs/chassis/code-editor.md).
 
 ## Where code goes
 
