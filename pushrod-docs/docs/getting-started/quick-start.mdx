@@ -44,11 +44,11 @@ pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 
 [dependencies.sdl2]
-version = "^0.36.0"
+version = "0.38"
 features = ["ttf", "image", "unsafe_textures"]
 ```
 
-`pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets. Pushrod requires Rust 1.86 or newer. The `unsafe_textures` feature is required: it lets Pushrod keep one GPU texture per widget.
+`pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets. Pushrod requires Rust 1.100 or newer (edition 2024). The `unsafe_textures` feature is required: it lets Pushrod keep one GPU texture per widget.
 
 ## 4. Add a font
 

@@ -39,8 +39,11 @@ use sdl2::video::Window;
 /// Horizontal justification of text within its bounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TextJustify {
+    /// Aligned to the left edge.
     Left,
+    /// Centered horizontally.
     Center,
+    /// Aligned to the right edge.
     Right,
 }
 

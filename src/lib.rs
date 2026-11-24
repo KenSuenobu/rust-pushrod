@@ -33,11 +33,13 @@
 //! Pushrod uses the following dependency:
 //! ```ignore
 //! [dependencies.sdl2]
-//! version = "^0.36.0"
+//! version = "0.38"
 //! features = ["ttf", "image", "unsafe_textures"]
 //! ```
 //!
 //! Note, the `unsafe_textures` feature is required for OpenGL functionality.
+
+#![warn(missing_docs)]
 
 pub mod cache;
 pub mod engine;

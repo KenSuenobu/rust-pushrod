@@ -30,6 +30,7 @@ use sdl2::video::Window;
 
 pub use pushrod::paint::TextJustify;
 
+/// A single string of text on a filled background.
 pub struct TextWidget {
     core: WidgetCore,
     style: TextStyle,
@@ -62,6 +63,8 @@ impl Widget for TextWidget {
 }
 
 impl TextWidget {
+    /// Creates a text widget at `origin` with the given `size`, font, style, color,
+    /// justification, and text.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         origin: Point,

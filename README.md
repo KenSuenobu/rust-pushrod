@@ -107,7 +107,7 @@ impl Widget for PanelWidget {
 
 Interactive `Widget`s also implement `handle_event`, and call `ctx.emit(...)` to generate events.
 
-Pushrod requires Rust 1.86 or newer.
+Pushrod requires Rust 1.100 or newer (edition 2024).
 
 ## Design philosophy
 

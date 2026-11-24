@@ -37,6 +37,7 @@ use sdl2::render::Canvas;
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
 
+/// A push button with a text label.  Emits `Clicked` when pressed and released inside its bounds.
 pub struct ButtonWidget {
     core: WidgetCore,
     style: TextStyle,

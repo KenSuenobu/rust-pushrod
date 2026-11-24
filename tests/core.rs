@@ -3,7 +3,7 @@
 use pushrod::engine::Engine;
 use pushrod::geometry::size;
 use pushrod::root_widget::RootWidget;
-use pushrod::widget::{Widget, ROOT_WIDGET_ID};
+use pushrod::widget::{ROOT_WIDGET_ID, Widget};
 use sdl2::pixels::Color;
 
 #[test]

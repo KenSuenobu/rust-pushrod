@@ -26,6 +26,7 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+/// A filled rectangle with a border of any width and color.
 pub struct BoxWidget {
     core: WidgetCore,
     border_color: Color,

@@ -56,6 +56,8 @@
 //! engine.run(sdl, window, AppState::default());
 //! ```
 
+#![warn(missing_docs)]
+
 pub mod base_widget;
 pub mod box_widget;
 pub mod button_widget;

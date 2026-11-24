@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    name: Rust ${{ matrix.toolchain }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The minimum supported version (rust-version in Cargo.toml) and the latest stable.
+        toolchain: ["1.100.0", stable]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SDL2
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --workspace
+      - name: Rustdoc
+        run: cargo doc --workspace --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  docs:
+    name: Documentation site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pushrod-docs/package-lock.json
+      - name: Build (broken links fail the build)
+        working-directory: pushrod-docs
+        run: npm ci && npm run build
+
+  sample-data:
+    name: Sample data (no real e-mail addresses)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Only reserved example domains in files
+        run: |
+          hits=$(git ls-files \
+            | grep -v -E '^(Cargo\.toml|pushrod-widgets/Cargo\.toml|Cargo\.lock|LICENSE)$|package-lock\.json|\.(png|ttf)$' \
+            | xargs grep -n -I -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' \
+            | grep -v -E '@example\.(com|org|net)' || true)
+          if [ -n "$hits" ]; then
+            echo "Use jane.doe@example.com-style placeholders (see CONTRIBUTING.md):"
+            echo "$hits"
+            exit 1
+          fi

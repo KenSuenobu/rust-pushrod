@@ -13,23 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! # Fonts
+//!
+//! The `FontCache` loads TrueType fonts through SDL2_ttf and renders text into GPU textures for
+//! the `paint::text` helper.  One `FontCache` is owned by the engine and passed to every
+//! `Widget::paint` call.
+
 use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture, TextureQuery};
 use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::video::Window;
 use std::path::Path;
 
+/// Loads fonts and renders text into textures.  Owned by the engine; widgets receive it in `paint`.
 pub struct FontCache {
     ttf_context: Sdl2TtfContext,
 }
 
 impl FontCache {
+    /// Initializes SDL2_ttf and creates an empty cache.
     pub fn new() -> Self {
         Self {
             ttf_context: sdl2::ttf::init().map_err(|e| e.to_string()).unwrap(),
         }
     }
 
+    /// Renders `text` with the given font file, size, style, and color, wrapped to `width`
+    /// pixels, into a new texture.  Returns the texture and its width and height.
     #[allow(clippy::too_many_arguments)]
     pub fn render_text(
         &mut self,
