@@ -20,6 +20,9 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Runtime first, designer second.** Epic 6 builds everything Chassis needs (registry, properties, form file format, loader/writer, design-mode hooks) into Pushrod itself.
 - **Same look.** New widgets use the current flat, black-and-white style. Theming is Epic 8 and is not scheduled.
 - **Modern names.** Older systems are credited for ideas only. Pushrod's flags, events, and callbacks use plain, modern names, collected in the *Naming* section so they can be reviewed in one place.
+- **Retained, with stable identity.** Widgets persist and keep stable IDs, which is what accessibility trees, caching, incremental updates, and form files all need.
+- **Engine separate from design.** The engine (tree, events, invalidation, paint API) and the design layer (widgets, defaults, appearance, themes) are separate modules with written specs (7.6 (#114)).
+- **Use shared foundations.** Text layout (Parley) and accessibility (AccessKit) come from the ecosystem's well-tested crates rather than being reinvented.
 - **Usability first.** A control is added because it makes ordinary applications easier to use, not because another toolkit had it. Ideas that didn't meet that bar are listed under *Parked*.
 - **Self-contained and GPU-first.** Pushrod draws everything itself through SDL2: no OS-native menus, menu bars, dialogs, or controls, so applications look and behave the same everywhere. Each widget paints into its own GPU texture only when invalidated; frames are composed by blitting cached textures; text comes from a glyph atlas texture. SDL2 does the heavy lifting for graphics and input.
 
@@ -35,19 +38,19 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **44 of 84 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **49 of 89 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
-| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 17 | 11 |
+| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 20 | 14 |
 | 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 20 | 10 |
 | 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 7 | 3 |
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
 | 5 (#15) | Composition, clipping, and layout | Clip children to parents, build widgets from child widgets, scroll views, and autoresizing. | 4 | 2 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
-| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 5 | 5 |
+| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 7 | 7 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
 | 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 10 | 4 |
 | 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target. | 4 | 1 |
@@ -83,6 +86,25 @@ flowchart LR
   application code:  engine.on_click(form.id(main::OK), |state, ui| ...)
 ```
 
+## Modern foundations
+
+Findings from Raph Levien's *Advice for the Next 100 Rust GUIs* (Linebender, 2026), applied to Pushrod:
+
+| Finding | Applied in |
+|---|---|
+| Text layout is largely solved by shared crates (Parley; Cosmic Text as an alternative) | 1.18 (#111), 1.7 (#3) |
+| Accessibility via AccessKit, done well rather than box-ticking, without per-frame cost | 1.14 (#80) (now MVP) |
+| Input methods (IME) are hard and often incomplete | 1.19 (#112), 2.6 (#32) |
+| Layers avoid re-rendering but cost memory; use hints like repaint boundaries | 1.20 (#113), 10.2 (#106) |
+| Retained mode needs stable identity and reliable caching | Stable `WidgetId`s throughout; layout and atlas caching |
+| Clear module boundaries with specs; separate the design layer from the engine | 7.6 (#114), 10.3 (#107) |
+| Virtualized lists need an incremental data-model interface | 4.5 (#52) |
+| Precompute the static parts of a design | 6.4 (#63) |
+| Performance gaps signal missed optimizations; measure | 7.7 (#115) |
+| Adapt web specs rather than copy them (curated style subset) | 8.1 (#74) |
+
+Not adopted for now: system-compositor video layers (outside SDL2's scope) and mobile platforms (the article recommends native UI there).
+
 ## Inspiration
 
 Where each idea comes from. Pushrod takes the common, proven core of these systems and keeps it small.
@@ -102,6 +124,7 @@ Where each idea comes from. Pushrod takes the common, proven core of these syste
 | Lists, tables, and hierarchies |  | Amiga list views; Motif lists; NeXTSTEP column browser | Qt/GTK item models and views; Mac Finder column view; Windows report lists |
 | Dialogs and notices | GEM/Mac alerts and modal dialogs | Motif message and file dialogs | GTK info bars; Qt/GTK dialogs |
 | Drawing while moving | Outline dragging (GEM, classic Mac) |  | 'Show contents while dragging' options (later desktops) |
+| Modern foundations |  |  | Shared text layout (Parley), AccessKit, repaint boundaries (Flutter), drawing groups (SwiftUI), engine/design-layer split (Xilem/Masonry) |
 
 Intergraph is thinly represented: public documentation for the Environ V forms toolkit is scarce, so it needs first-hand input before it informs more issues.
 
@@ -148,10 +171,13 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.11 (#26) | Application lifecycle: startup and close-request callbacks | Run code before the first frame; confirm or veto closing the window. | `core`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `engine.rs` |
 | 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | Y | S | `paint.rs`, `cache.rs`, `button_widget.rs`, `text_widget.rs` |
 | 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `event.rs`, `engine.rs`, `cache.rs` |
-| 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `parallelizable`, `size/L`, `usability` | Y | N | L | `accessibility.rs (new)`, `widget.rs`, `engine.rs` |
+| 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/L`, `usability` | Y | Y | L | `accessibility.rs (new)`, `widget.rs`, `engine.rs` |
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `undo.rs (new)`, `engine.rs` |
 | 1.16 (#82) | Multiple windows | Open additional top-level windows, each with its own widget tree, sharing one application state. | `core`, `enhancement`, `parallelizable`, `size/L` | Y | N | L | `engine.rs`, `cache.rs` |
 | 1.17 (#104) | Per-state appearance: colors, border, and font for each visual state | Every widget carries appearance attributes for normal, pressed, hovered, focused, disabled, and drag-over, so the look changes automatically as the state changes. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `widget.rs`, `paint.rs`, `all widgets` |
+| 1.18 (#111) | Text layout engine: shaping, bidi, line breaking, and font fallback (Parley) | Lay out text with a real layout engine and feed its glyph runs into the GPU glyph atlas. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text/layout.rs (new)`, `font.rs`, `paint.rs` |
+| 1.19 (#112) | Input method (IME) support: composition text and candidate window | Show in-progress composition text in fields and position the platform candidate window at the caret. | `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | Y | M | `text_field.rs`, `engine.rs`, `event.rs` |
+| 1.20 (#113) | Layers and invalidation: cache hints, texture memory budget, incremental pipeline | Decide which widgets get their own GPU texture, cap texture memory, and invalidate layout, paint, and compositing separately. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `cache.rs`, `texture.rs`, `widget.rs` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
@@ -326,7 +352,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Problem Statement.** `FontCache::render_text` reloads the font from disk and rasterizes a new surface on the CPU for every repaint of every text widget. Original issue #3 also asked for the font cache to live with the `WidgetCache`.
 
-**Solution / Scope.** Load fonts once per `(path, size, style)` (the TTF context lives for the process). Rasterize each glyph once with SDL_ttf into a glyph atlas texture on the GPU; draw strings by copying glyph rectangles with `Canvas::copy`, colored with `set_color_mod`, using SDL_ttf metrics for kerning and wrapping. Changing text or its color never rasterizes again. Move ownership of the font cache into `WidgetCache`, as #3 requested.
+**Solution / Scope.** Load fonts once per `(path, size, style)` (the TTF context lives for the process). Rasterize each glyph once with SDL_ttf into a glyph atlas texture on the GPU; draw strings by copying glyph rectangles with `Canvas::copy`, colored with `set_color_mod`, using SDL_ttf metrics for kerning and wrapping. Changing text or its color never rasterizes again. Move ownership of the font cache into `WidgetCache`, as #3 requested. Glyph runs come from the text layout engine (1.18 (#111)); the atlas stays the drawing path.
 
 **Acceptance Criteria.**
 
@@ -335,7 +361,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Text color changes use color modulation
 - `FontCache` is owned by `WidgetCache`
 
-**Parallelism / Dependencies.** Parallelizable. Independent.
+**Parallelism / Dependencies.** Parallelizable. Requires 1.18 (#111).
 
 **Technical Stack.** Rust, sdl2::ttf, SDL2 render API
 
@@ -517,18 +543,21 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Because Pushrod draws everything itself, screen readers can't see its controls. Native-widget toolkits get accessibility from the OS; self-drawn toolkits must publish an accessibility tree.
 
-**Solution / Scope.** Give each widget an accessibility role, label, value, and state (default trait method with sensible defaults per widget), and publish the tree with the AccessKit crate, which bridges to Windows, macOS, and Linux accessibility APIs while Pushrod keeps drawing everything through SDL2. Focus changes and value changes update the tree; accessibility actions (press, focus, set value) map onto normal Pushrod events.
+**Solution / Scope.** Give each widget an accessibility role, label, value, and state (default trait method with sensible defaults per widget), and publish the tree with the AccessKit crate, which bridges to Windows, macOS, and Linux accessibility APIs while Pushrod keeps drawing everything through SDL2. Focus changes and value changes update the tree; accessibility actions (press, focus, set value) map onto normal Pushrod events. Do it well, not as box-ticking: build the AccessKit tree from stable `WidgetId`s and send only incremental updates for widgets whose role, name, value, or state changed, never a full rebuild per frame; activate it lazily so applications pay nothing when no assistive technology is running. Composite parts (5.2 (#57)) appear as children, and text fields expose their text and selection.
 
 **Acceptance Criteria.**
 
 - A screen reader announces focused buttons, check boxes, and text fields with name and state
 - Accessibility actions trigger the same callbacks as user input
+- Updates are incremental (changed nodes only) and the tree is only built when assistive technology is active
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.1 (#19), 1.4 (#20), 6.2 (#61).
 
 **Technical Stack.** Rust, AccessKit (new optional dependency)
 
 **Documentation.** Rustdoc: Accessibility trait methods. README/guides: Accessibility section. Examples: Example works with a screen reader. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [AccessKit: cross-platform accessibility infrastructure](https://github.com/AccessKit/accesskit)
 
 ### 1.15 (#81): Undo and redo command stack
 
@@ -615,6 +644,85 @@ Like every widget, it can also receive application-defined custom events in `han
 **Documentation.** Rustdoc: `StateStyle`, `Appearance`, `Widget::style`. README/guides: 'Appearance and states' section. Examples: Example: hover color on a button. Screenshots: Gallery tile per state.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+
+### 1.18 (#111): Text layout engine: shaping, bidi, line breaking, and font fallback (Parley)
+
+**Problem Statement.** SDL_ttf renders strings but doesn't handle complex scripts, right-to-left text, proper line breaking, font fallback for missing glyphs, or the caret and selection geometry that text fields need. Writing that ourselves would be a large, error-prone project; the ecosystem has converged on shared solutions.
+
+**Solution / Scope.** Use Parley for text layout (shaping, bidirectional text, line breaking, font fallback, alignment) and its cursor/selection geometry for text fields. Glyphs from the layout are rasterized once into the GPU glyph atlas (1.7 (#3)) and drawn by copying atlas rectangles, so the GPU-first design is unchanged. Text layouts are cached per widget and recomputed only when text, font, or width changes. Keep the layout behind a small `TextLayout` trait so Cosmic Text can be swapped in (avoiding a monoculture) and a bitmap-font layout can serve vintage targets (10.4 (#108)).
+
+**Acceptance Criteria.**
+
+- Arabic/Hebrew (RTL), CJK, and emoji fallback render correctly in labels and fields
+- Caret and selection geometry from the layout engine drive text fields
+- Layouts cached and recomputed only on text/font/width change
+- `TextLayout` trait with the Parley implementation as default
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 10.2 (#106).
+
+**Technical Stack.** Rust, Parley (new dependency), SDL2 render API
+
+**Documentation.** Rustdoc: `TextLayout`, layout caching. README/guides: 'Text' section. Examples: International text sample in the gallery. Screenshots: Gallery tile.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [Parley: rich text layout (Linebender)](https://github.com/linebender/parley)
+
+### 1.19 (#112): Input method (IME) support: composition text and candidate window
+
+**Problem Statement.** Chinese, Japanese, and Korean users type through an input method: keystrokes produce composition (pre-edit) text that is shown underlined until committed, and the platform shows a candidate list near the caret. Without this, text fields are unusable for a large share of users.
+
+**Solution / Scope.** Handle SDL's text-editing events: show composition text inline at the caret with an underline (and the IME's own cursor/selection within it), replace it on each update, and insert it on commit (`TextEntered`). Report the caret rectangle with SDL's text-input rectangle so the platform candidate window appears next to the caret. Emit `CompositionStarted/Updated/Ended` engine events (9.10 (#109)). Works for single-line fields and the text area.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Composing Japanese in a text field**
+
+![1.19 step set 1: Composing Japanese in a text field](mockups/1.19-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Engine(CompositionStarted / CompositionUpdated / CompositionEnded)` | Input method composition begins, changes, or ends | `on_engine_event(..)` |
+| `TextChanged { id }` | Only when the composition is committed | `on_text_change(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Japanese and Chinese input methods compose and commit correctly in a text field
+- Candidate window appears at the caret and follows it
+- Composition never fires `TextChanged` until committed
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.18 (#111).
+
+**Technical Stack.** Rust, SDL2 text input/editing events
+
+**Documentation.** Rustdoc: IME behavior in text widget docs. README/guides: 'Text input' section. Examples: Gallery field tested with an IME. Screenshots: Gallery tile.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+
+### 1.20 (#113): Layers and invalidation: cache hints, texture memory budget, incremental pipeline
+
+**Problem Statement.** Pushrod gives every widget its own texture. Cached layers avoid re-rendering unchanged content, but they cost GPU memory, and too many small layers can be slower than drawing into a parent. A toolkit is at heart an incremental computation engine: work should be redone only at the level that changed.
+
+**Solution / Scope.** Add `CacheHint { Own, Parent, Auto }` per widget: `Own` keeps a texture (a repaint boundary), `Parent` paints into the nearest ancestor's texture, `Auto` uses heuristics (size, repaint frequency, child count). A texture memory budget with LRU eviction frees textures of hidden or rarely changing widgets. Split invalidation into three levels: layout (size/position or text layout changed), paint (appearance changed), and composite (only position or visibility changed, so no repaint, just a re-blit). Report texture memory in benchmarks (7.7 (#115)).
+
+**Acceptance Criteria.**
+
+- Cache hints honored; Auto measurably reduces texture count on the gallery
+- Memory budget enforced with eviction
+- Moving a widget re-composites without repainting
+- Golden images unchanged
+
+**Parallelism / Dependencies.** Parallelizable. Requires 10.2 (#106), 7.7 (#115).
+
+**Technical Stack.** Rust, SDL2
+
+**Documentation.** Rustdoc: `CacheHint`, invalidation levels. README/guides: 'Performance' section. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 
 ## Epic 2: Core dialog widgets (#12)
 
@@ -840,7 +948,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** There is no text input. Fields need a caret, selection, clipboard, and a way to restrict and validate input.
 
-**Solution / Scope.** Add `TextField`: caret (blinking via timers), selection with Shift+arrows and mouse drag, Home/End, word movement, clipboard via SDL, max length, placeholder text, password mode. Restrict input with an input mask (`"99/99/9999"`, `9` digit, `A` letter, `X` any) or a `Validator` trait (`validate(&str) -> Valid | Intermediate | Invalid`); `IntegerField`/`NumberField` presets with range. Optional built-in label (`with_label("Name:")`). Uses SDL text input events. Emits `TextChanged` on each edit and `EditingFinished` on Return or focus loss.
+**Solution / Scope.** Add `TextField`: caret (blinking via timers), selection with Shift+arrows and mouse drag, Home/End, word movement, clipboard via SDL, max length, placeholder text, password mode. Restrict input with an input mask (`"99/99/9999"`, `9` digit, `A` letter, `X` any) or a `Validator` trait (`validate(&str) -> Valid | Intermediate | Invalid`); `IntegerField`/`NumberField` presets with range. Optional built-in label (`with_label("Name:")`). Uses SDL text input events. Emits `TextChanged` on each edit and `EditingFinished` on Return or focus loss. Input method composition is handled per 1.19 (#112).
 
 #### Look and behavior (proposed)
 
@@ -871,7 +979,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - Numeric mode with range
 - `EditingFinished` on Return and focus loss
 
-**Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.5 (#21), 1.6 (#22).
+**Parallelism / Dependencies.** Not parallelizable. Requires 1.4 (#20), 1.5 (#21), 1.6 (#22), 1.19 (#112).
 
 **Technical Stack.** Rust, SDL2 text input and clipboard
 
@@ -1798,7 +1906,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Lists are needed by file choosers, combo boxes, and most applications.
 
-**Solution / Scope.** `ListView` in a scroll view, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates. **Parts (5.2 (#57)):** `rows()` (visible row parts), per-row style via a `row_style` callback for model-driven rows. Every part can be retrieved and restyled (font, color, text).
+**Solution / Scope.** `ListView` in a scroll view, rows from a `ListModel` trait (`len`, `item(i)`, change notifications so the view updates when the model changes); only visible rows painted. Single, multiple, and range selection; keyboard navigation and type-ahead; double-click or Return activates. **Parts (5.2 (#57)):** `rows()` (visible row parts), per-row style via a `row_style` callback for model-driven rows. Every part can be retrieved and restyled (font, color, text). The `ListModel` reports changes as ranges (`inserted(range)`, `removed(range)`, `changed(range)`, `reset`) so the view updates incrementally, and row widgets are recycled as the list scrolls (virtualization).
 
 #### Look and behavior (proposed)
 
@@ -1823,6 +1931,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - Selection modes and keyboard navigation
 - Model change notifications update the view
 - Parts are retrievable and modifiable as described
+- Range-based model notifications; row widgets recycled while scrolling
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 5.3 (#58), 5.2 (#57).
 
@@ -2141,7 +2250,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Problem Statement.** The point of form files is that code doesn't rebuild the UI: the application loads the form and attaches callbacks.
 
-**Solution / Scope.** `Engine::load_form(file, "main") -> FormHandle` creates widgets via the registry, applies properties, and maps form-local object numbers to `WidgetId`s (`form.id(main::OK)`). Emits its engine event (9.10 (#109)).
+**Solution / Scope.** `Engine::load_form(file, "main") -> FormHandle` creates widgets via the registry, applies properties, and maps form-local object numbers to `WidgetId`s (`form.id(main::OK)`). Emits its engine event (9.10 (#109)). Forms are mostly static: at load, precompute what can't change (text layouts of fixed labels, static textures) so the dynamic work at run time is only what the application actually changes.
 
 **Acceptance Criteria.**
 
@@ -2267,6 +2376,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `examples/gallery.rs (new)` |
 | 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | Y | S | `Cargo.toml`, `CHANGELOG.md (new)` |
+| 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
+| 7.7 (#115) | Performance benchmarks and budgets | Measure frame time, input latency, memory per widget, and startup; fail CI on regressions. | `ci`, `mvp`, `parallelizable`, `performance`, `size/S` | Y | Y | S | `benches/ (new)`, `.github/workflows/ci.yml` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
 
@@ -2356,6 +2467,46 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Documentation.** Rustdoc: docs.rs build. README/guides: Install from crates.io. Examples: n/a. Screenshots: n/a.
 
+### 7.6 (#114): Module boundaries and written specs with conformance tests
+
+**Problem Statement.** Contributors (human or AI-assisted) work best against modules with clear boundaries and written contracts. Pushrod's contracts (what a widget must do, how events are routed, what a painter must provide, the form file format) live only in code and issue text.
+
+**Solution / Scope.** Write short specs in `docs/specs/`: `widget.md` (core, paint, events, parts, properties), `events.md` (vocabulary, phases, masks, engine events, ordering guarantees), `paint.md` (Painter trait and cache policy), `forms.md` (links to the form format). Keep the engine (tree, events, invalidation, paint API) separate from the design layer (widget defaults, appearance, theme) in both docs and module layout. Add conformance tests in `tests/conformance/` that check each guarantee (event order, propagation, mask filtering, engine-event emission) so alternative widgets and backends can prove compliance.
+
+**Acceptance Criteria.**
+
+- Specs for widget, events, paint, and forms
+- Engine and design layer separated in module layout
+- Conformance tests for each stated guarantee run in CI
+
+**Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93), 7.1 (#69).
+
+**Technical Stack.** Markdown, Rust tests
+
+**Documentation.** Rustdoc: Links from crate docs. README/guides: Contributing section links the specs. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+
+### 7.7 (#115): Performance benchmarks and budgets
+
+**Problem Statement.** Pushrod's premise is small and fast, but nothing measures it, so regressions go unnoticed.
+
+**Solution / Scope.** Benchmarks (headless where possible): event dispatch throughput, frame time for the gallery under interaction, text layout and atlas warm-up, form load time, texture memory per widget, and binary size. Record a baseline; CI flags regressions beyond a tolerance. Publish numbers in the README, including a low-end target.
+
+**Acceptance Criteria.**
+
+- Benchmarks run in CI with a stored baseline
+- Regressions beyond tolerance fail or warn
+- README shows current numbers
+
+**Parallelism / Dependencies.** Parallelizable. Requires 7.1 (#69).
+
+**Technical Stack.** Rust (criterion or built-in timing), GitHub Actions
+
+**Documentation.** Rustdoc: n/a. README/guides: 'Performance' section with numbers. Examples: n/a. Screenshots: n/a.
+
+**Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+
 ## Epic 8: Theming and skins (distant future) (#18)
 
 Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled.
@@ -2375,7 +2526,7 @@ Placeholder: route colors and metrics through a theme, then allow skins. Not sch
 
 **Problem Statement.** Colors, borders, and fonts are hard-coded. Theming is planned for the distant future.
 
-**Solution / Scope.** When scheduled: `Theme` passed to `paint`, with `Theme::classic()` pixel-identical to today's goldens. Until then, new widgets take colors from `paint` helpers, not literals.
+**Solution / Scope.** When scheduled: `Theme` passed to `paint`, with `Theme::classic()` pixel-identical to today's goldens. Until then, new widgets take colors from `paint` helpers, not literals. If theming adopts style rules, use a small curated subset designed for incremental evaluation rather than full CSS.
 
 **Acceptance Criteria.**
 
@@ -2761,7 +2912,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** Vintage targets have no Rust standard library; Rust's m68k bare-metal target builds only `core` and `alloc`.
 
-**Solution / Scope.** Move the widget tree, events, widgets, paint helpers, and form loader into `pushrod-core` (`#![no_std]` + `alloc`), with time, files, and threads behind small traits provided by the platform crate. `pushrod` (SDL2, std) re-exports it, so applications don't change.
+**Solution / Scope.** Move the widget tree, events, widgets, paint helpers, and form loader into `pushrod-core` (`#![no_std]` + `alloc`), with time, files, and threads behind small traits provided by the platform crate. `pushrod` (SDL2, std) re-exports it, so applications don't change. The split follows the module boundaries and specs in 7.6 (#114): engine (tree, events, invalidation, paint API) separate from the design layer (widgets and their defaults).
 
 **Acceptance Criteria.**
 
@@ -2804,21 +2955,24 @@ Work in this order. Items in the same step can be done in parallel unless their 
 
 - 7.1 (#69) CI: build, test, clippy, fmt, doc with SDL2 — MVP
 - 9.1 (#93) Event vocabulary: modern event names and structure — MVP
+- 10.2 (#106) Backend-neutral paint API (SDL2 backend by default) — MVP
 - 1.1 (#19) Widget behavior flags and visual states — MVP
 - 1.2 (#6) Event masks for the run loop and for widgets — MVP
 - 9.10 (#109) Engine events: every internal action Pushrod performs emits an event — MVP
 - 1.3 (#7) Broadcast events to all interested widgets — MVP
 - 1.6 (#22) Callback registry for every widget event — MVP
 - 1.13 (#78) Custom application events with payloads — MVP
+- 1.18 (#111) Text layout engine: shaping, bidi, line breaking, and font fallback (Parley) — MVP
 - 1.7 (#3) GPU text: font cache with a glyph atlas texture — MVP
 - 7.3 (#71) Widget gallery example — MVP
-- 10.2 (#106) Backend-neutral paint API (SDL2 backend by default) — MVP
+- 7.6 (#114) Module boundaries and written specs with conformance tests — MVP
 
 **2. Input model**
 
 - 9.2 (#94) Event propagation: capture, target, and bubble phases with handled/ignored — MVP
 - 9.4 (#96) Reusable input controllers: click, drag, scroll, hover, long-press, key — MVP
 - 1.4 (#20) Keyboard focus, Tab order, and Return/Escape — MVP
+- 1.19 (#112) Input method (IME) support: composition text and candidate window — MVP
 - 1.17 (#104) Per-state appearance: colors, border, and font for each visual state — MVP
 - 1.12 (#76) Keyboard mnemonics: underlined shortcut letters — MVP
 - 1.5 (#21) Timers and idle callbacks — MVP
@@ -2844,11 +2998,13 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 5.2 (#57) Composite widgets: build widgets from parts that applications can retrieve and modify — MVP
 - 3.1 (#39) Scroll bar — MVP
 - 7.2 (#70) Golden-image rendering tests — MVP
+- 7.7 (#115) Performance benchmarks and budgets — MVP
 
 **5. Forms runtime**
 
 - 6.1 (#60) Widget registry and factory — MVP
 - 6.2 (#61) Property introspection: list, get, and set widget properties by name — MVP
+- 1.14 (#80) Accessibility: expose widgets to screen readers — MVP
 - 6.3 (#62) Form file format (binary, versioned) — MVP
 - 6.4 (#63) Form loader: build a form from a file with stable IDs — MVP
 - 6.5 (#64) Form writer: save a widget subtree to a file — MVP
@@ -2902,12 +3058,12 @@ Work in this order. Items in the same step can be done in parallel unless their 
 **9. After MVP: platform and Chassis**
 
 - 1.9 (#24) Dirty-rectangle redraw
-- 1.14 (#80) Accessibility: expose widgets to screen readers
 - 1.16 (#82) Multiple windows
 - 6.8 (#67) Bind actions by name from form files
 - 6.9 (#68) Design-mode hooks for Chassis
 - 10.3 (#107) no_std + alloc core crate
 - 10.4 (#108) Experimental: Atari ST / TOS backend
+- 1.20 (#113) Layers and invalidation: cache hints, texture memory budget, incremental pipeline
 
 **10. Distant future**
 
@@ -2959,4 +3115,7 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 - [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html)
 - [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST)
 - [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
+- [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+- [Parley: rich text layout (Linebender)](https://github.com/linebender/parley)
+- [AccessKit: cross-platform accessibility infrastructure](https://github.com/AccessKit/accesskit)
 - Apple AppKit documentation for NSStepper, NSSegmentedControl, NSTabView, NSProgressIndicator, NSLevelIndicator, NSComboBox, NSOutlineView (Mac OS X successors of the NeXTSTEP Application Kit)
