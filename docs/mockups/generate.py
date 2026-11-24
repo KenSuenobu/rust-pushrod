@@ -12,6 +12,10 @@ Needs:  Pillow  (pip install pillow)
 
 To change a mockup, edit the frame functions below and re-run; keep frames
 simple so they stay faithful to what Pushrod can draw.
+
+Sample data must be fictional: no real names, e-mail addresses, places,
+paths, or other personal information. Use placeholders such as "Jane Doe",
+"jane.doe@example.com", "Anytown", and "/home/user" (see CONTRIBUTING.md).
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -364,10 +368,10 @@ def radios():
 def text_field():
     steps = [("1. Empty", dict(text="", placeholder="Your name"), None),
              ("2. Focused", dict(text="", caret=0, focused=True), None),
-             ("3. Typing", dict(text="Ken", caret=3, focused=True), "TextChanged"),
-             ("4. Selection", dict(text="Ken", sel=(1, 3), focused=True), None),
-             ("5. Invalid key rejected", dict(text="Ken", caret=3, focused=True), "no change"),
-             ("6. Disabled", dict(text="Ken", disabled=True), None)]
+             ("3. Typing", dict(text="Jane", caret=4, focused=True), "TextChanged"),
+             ("4. Selection", dict(text="Jane", sel=(1, 4), focused=True), None),
+             ("5. Invalid key rejected", dict(text="Jane", caret=4, focused=True), "no change"),
+             ("6. Disabled", dict(text="Jane", disabled=True), None)]
     out = []
     for lab, kw, note in steps:
         c = C(250, 56); x = c.labeled(12, 17, "Name:", 54); c.field(x, 17, 170, **kw); out.append((lab, c, note))
@@ -456,7 +460,7 @@ def menus():
 @sb("2.12")
 def file_chooser():
     c = C(470, 330); c.window(10, 10, 450, 310, "Open")
-    x = c.labeled(26, 46, "Folder:", 62); c.field(x, 44, 360, "/home/ken/projects")
+    x = c.labeled(26, 46, "Folder:", 62); c.field(x, 44, 360, "/home/user/projects")
     x = c.labeled(26, 76, "Filter:", 62); c.field(x, 74, 120, "*.rs")
     c.listbox(26, 108, 418, ["..", "src/", "main.rs", "lib.rs", "build.rs", "README.md"], selected={2})
     x = c.labeled(26, 240, "Name:", 62); c.field(x, 238, 360, "main.rs")
@@ -520,7 +524,7 @@ def switch():
 @sb("2.18")
 def text_area():
     c = C(360, 120); c.rect(14, 12, 320, 96, fill=WHITE); c.scrollbar(334, 12, 96, True, 0.0, 0.4)
-    c.text(20, 16, "Dear Ken,"); c.text(20, 36, "Thanks for the ")
+    c.text(20, 16, "Dear Customer,"); c.text(20, 36, "Thanks for the ")
     sx = 20 + c.tw("Thanks for the "); sel = "quick update"
     c.rect(int(sx), 39, int(c.tw(sel)) + 1, 17, fill=BLACK, outline=None); c.text(sx, 36, sel, WHITE)
     c.text(20, 56, "on the release."); c.line(20 + c.tw("on the release."), 59, 20 + c.tw("on the release."), 74)
@@ -752,10 +756,10 @@ def composite_parts():
 
 
 TREE = {(): ["Applications", "Library", "System", "Users"],
-        ("Users",): ["ken", "guest", "shared"],
-        ("Users", "ken"): ["Desktop", "Documents", "Music", "Projects"],
-        ("Users", "ken", "Projects"): ["apiome", "pushrod", "tos3x-aes"],
-        ("Users", "ken", "Projects", "pushrod"): ["Cargo.toml", "README.md", "src", "examples"]}
+        ("Users",): ["user", "guest", "shared"],
+        ("Users", "user"): ["Desktop", "Documents", "Music", "Projects"],
+        ("Users", "user", "Projects"): ["notes-app", "pushrod", "sample-game"],
+        ("Users", "user", "Projects", "pushrod"): ["Cargo.toml", "README.md", "src", "examples"]}
 LEAVES = {"Cargo.toml", "README.md"}
 
 def _browser(c, x, y, path, ncols_visible=3, colw=140, rows=5, offset=0):
@@ -774,7 +778,7 @@ def _browser(c, x, y, path, ncols_visible=3, colw=140, rows=5, offset=0):
             if hot: c.rect(cx, ry, colw - 2, 20, fill=BLACK, outline=None)
             col = WHITE if hot else BLACK
             c.text(cx + 6, ry, it, col, 13)
-            branch = tuple(list(p) + [it]) in TREE or (it not in LEAVES and it not in ("Desktop", "Music", "guest", "shared", "Library", "System", "Applications", "apiome", "tos3x-aes", "src", "examples"))
+            branch = tuple(list(p) + [it]) in TREE or (it not in LEAVES and it not in ("Desktop", "Music", "guest", "shared", "Library", "System", "Applications", "notes-app", "sample-game", "src", "examples"))
             if branch: c.tri(cx + colw - 14, ry + 6, 7, "right", col)
         if n < ncols_visible - 1: c.line(cx + colw - 1, y, cx + colw - 1, y + rows * 20 + 4, MID)
     return total_w
@@ -784,15 +788,15 @@ def browser_steps():
     out = []
     for lab, path, note in [("1. Root column", [], None),
                             ("2. 'Users' selected: column 1 appears", ["Users"], "SelectionChanged (path /Users)"),
-                            ("3. 'ken' selected: column 2 appears", ["Users", "ken"], "SelectionChanged (path /Users/ken)")]:
+                            ("3. 'user' selected: column 2 appears", ["Users", "user"], "SelectionChanged (path /Users/user)")]:
         c = C(450, 130); _browser(c, 14, 14, path); out.append((lab, c, note))
     return out
 
 @sb("3.7", 2)
 def browser_scroll():
-    c = C(450, 150); _browser(c, 14, 14, ["Users", "ken", "Projects", "pushrod"], offset=2)
+    c = C(450, 150); _browser(c, 14, 14, ["Users", "user", "Projects", "pushrod"], offset=2)
     c.scrollbar(14, 122, 422, False, 1.0, 0.6)
-    c2 = C(450, 150); _browser(c2, 14, 14, ["Users", "ken", "Projects", "pushrod", "Cargo.toml"], offset=2)
+    c2 = C(450, 150); _browser(c2, 14, 14, ["Users", "user", "Projects", "pushrod", "Cargo.toml"], offset=2)
     c2.scrollbar(14, 122, 422, False, 1.0, 0.6)
     return [("Deep path: scrolled to keep the newest column visible", c, None),
             ("Leaf 'Cargo.toml' selected (double-click or Return activates)", c2, "Activated")]
@@ -905,7 +909,7 @@ def row_column():
 
 @sb("5.7")
 def form_layout():
-    rows = [("Name:", "Ken"), ("Email address:", "ken@example.com"), ("City:", "Denver")]
+    rows = [("Name:", "Jane Doe"), ("Email address:", "jane.doe@example.com"), ("City:", "Anytown")]
     a = C(460, 170); a.window(0, 0, 460, 170, "Profile")
     lw = max(a.tw(r[0]) for r in rows)
     for n, (l, v) in enumerate(rows):
