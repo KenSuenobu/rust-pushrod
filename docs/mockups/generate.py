@@ -886,6 +886,68 @@ def ime():
     return out
 
 
+def _guide(c, x, y, w, h):
+    c.dotted(x, y, w, h, (60, 120, 200))
+
+@sb("5.6")
+def row_column():
+    out = []
+    for lab, W in [("Window 360 px wide", 360), ("Window 520 px wide (fields stretch, buttons stay right)", 520)]:
+        c = C(W, 190); c.window(0, 0, W, 190, "Connect")
+        fw = W - 40
+        c.text(20, 36, "Server"); c.field(20, 58, fw, "pushrod.example.com")
+        c.text(20, 88, "Port"); c.field(20, 110, fw, "8080")
+        _guide(c, 14, 32, W - 28, 104)
+        c.button(W - 196, 150, 84, 26, "Cancel"); c.button(W - 100, 150, 84, 26, "Connect", default=True)
+        _guide(c, 14, 144, W - 28, 38); c.text(24, 156, "<- spacer ->", (60, 120, 200), 12)
+        out.append((lab, c, None))
+    return out
+
+@sb("5.7")
+def form_layout():
+    rows = [("Name:", "Ken"), ("Email address:", "ken@example.com"), ("City:", "Denver")]
+    a = C(460, 170); a.window(0, 0, 460, 170, "Profile")
+    lw = max(a.tw(r[0]) for r in rows)
+    for n, (l, v) in enumerate(rows):
+        y = 40 + n * 38
+        a.text(20 + lw - a.tw(l), y + 2, l); a.field(int(32 + lw), y, int(460 - 52 - lw), v)
+    a.line(int(26 + lw), 36, int(26 + lw), 150, (60, 120, 200))
+    b = C(250, 250); b.window(0, 0, 250, 250, "Profile")
+    for n, (l, v) in enumerate(rows):
+        y = 34 + n * 66
+        b.text(20, y, l); b.field(20, y + 24, 210, v)
+    return [("Wide: labels right-aligned to the widest label", a, None), ("Narrow: labels move above fields", b, "LayoutChanged")]
+
+@sb("5.8")
+def grid_layout():
+    out = []
+    keys = [["7", "8", "9", "/"], ["4", "5", "6", "*"], ["1", "2", "3", "-"], ["0", None, ".", "+"]]
+    for lab, W in [("Grid, 220 px", 220), ("Grid, 320 px (cells stretch)", 320)]:
+        c = C(W, 230); c.field(12, 12, W - 24, "         42", h=28)
+        cw = (W - 24 - 3 * 6) / 4
+        for r, row in enumerate(keys):
+            for col, k in enumerate(row):
+                if k is None: continue
+                x = 12 + col * (cw + 6); y = 52 + r * 42
+                w = cw * 2 + 6 if k == "0" else cw
+                c.button(int(x), y, int(w), 36, k)
+        out.append((lab, c, None))
+    return out
+
+@sb("5.10")
+def flow_layout():
+    tags = ["rust", "gui", "sdl2", "atari", "retro", "widgets", "layout", "gpu"]
+    out = []
+    for lab, W in [("Wide", 420), ("Narrow (wraps)", 220)]:
+        c = C(W, 120); x, y = 12, 14
+        for t in tags:
+            w = int(c.tw(t)) + 20
+            if x + w > W - 12: x = 12; y += 32
+            c.rect(x, y, w, 24, fill=WHITE); c.ctext(x, y, w, 24, t); x += w + 8
+        out.append((lab, c, None))
+    return out
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
