@@ -20,6 +20,14 @@
 //! It is an event-based GUI library that utilizes an event loop to handle the event, dispatch, and
 //! draw loop.
 //!
+//! # Core and widgets
+//!
+//! This crate is the core: the engine, the `Widget` trait and widget tree, events, the `paint`
+//! helpers, and texture and font caches.  It contains no widgets except the window's
+//! [`RootWidget`](root_widget::RootWidget).  The standard widgets (buttons, text, boxes, and
+//! the rest) live in the `pushrod-widgets` crate.  A different widget library can extend or
+//! replace `pushrod-widgets`, using the same public API.
+//!
 //! # Dependencies
 //!
 //! Pushrod uses the following dependency:
@@ -31,15 +39,16 @@
 //!
 //! Note, the `unsafe_textures` feature is required for OpenGL functionality.
 
-pub mod base_widget;
-pub mod box_widget;
-pub mod button_widget;
+// Every public item is documented, including `# Panics` and `# Errors` sections where they
+// apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").
+#![warn(missing_docs, clippy::missing_panics_doc, clippy::missing_errors_doc)]
+
 pub mod cache;
 pub mod engine;
 pub mod event;
 pub mod font;
 pub mod geometry;
 pub mod paint;
-pub mod text_widget;
+pub mod root_widget;
 pub mod texture;
 pub mod widget;

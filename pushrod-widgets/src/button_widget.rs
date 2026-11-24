@@ -24,11 +24,11 @@
 //! selects it again.  `Clicked` is only generated if the mouse button is released while the
 //! button is still selected.
 
-use crate::event::{EventCtx, PushrodEvent};
-use crate::font::FontCache;
-use crate::geometry::{Point, Size};
-use crate::paint::{self, TextJustify, TextStyle};
-use crate::widget::{Widget, WidgetCore};
+use pushrod::event::{EventCtx, PushrodEvent};
+use pushrod::font::FontCache;
+use pushrod::geometry::{Point, Size};
+use pushrod::paint::{self, TextJustify, TextStyle};
+use pushrod::widget::{Widget, WidgetCore};
 use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
@@ -37,6 +37,11 @@ use sdl2::render::Canvas;
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
 
+/// A push button with a text label.
+///
+/// Pressing the left mouse button selects (inverts) the button; dragging out of its bounds
+/// deselects it and dragging back in selects it again.  Releasing the mouse button while the
+/// button is selected emits `Clicked(id, clicks)`.
 pub struct ButtonWidget {
     core: WidgetCore,
     style: TextStyle,
@@ -47,17 +52,32 @@ pub struct ButtonWidget {
 }
 
 impl Widget for ButtonWidget {
+    /// Returns the button's shared state.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core(&self) -> &WidgetCore {
         &self.core
     }
 
+    /// Returns the button's shared state for modification.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
     }
 
-    /// Fills the background, draws the text inset horizontally by the border width, then draws
-    /// the frame.
+    /// Draws the button: a fill, the label inset by the border width, and a one-pixel frame.
+    ///
     /// When selected, the colors are inverted (black background, white text).
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The canvas, targeting the button's texture.
+    /// * `fc` - The font cache used to render the label.
     fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache) {
         let size = self.get_size();
         let (background, foreground) = if self.selected {
@@ -83,6 +103,17 @@ impl Widget for ButtonWidget {
         paint::border(c, size, Color::BLACK, 1);
     }
 
+    /// Tracks the left mouse button and emits `Clicked`.
+    ///
+    /// - Left button pressed: the button is pressed and selected.
+    /// - Pointer leaves or re-enters while pressed (`BoundsChange`): deselects or reselects it.
+    /// - Left button released: if still selected, emits `Clicked(id, clicks)`; then the button is
+    ///   released and deselected.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event sent to the button.
+    /// * `ctx` - The context used to emit `Clicked`.
     fn handle_event(&mut self, event: &PushrodEvent, ctx: &mut EventCtx) {
         match event {
             PushrodEvent::SystemEvent(
@@ -123,8 +154,24 @@ impl Widget for ButtonWidget {
 }
 
 impl ButtonWidget {
-    /// Creates a new `ButtonWidget` based on its point of origin, size, font, text, and border
-    /// width.
+    /// Creates a button.  Its background is transparent until set with `set_color`.
+    ///
+    /// # Arguments
+    ///
+    /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
+    /// * `size` - The width and height in pixels.
+    /// * `font_name` - Path to the TrueType font file.
+    /// * `font_style` - The font style (normal, bold, italic, ...).
+    /// * `font_size` - The font size in points.
+    /// * `font_color` - The label color.
+    /// * `justification` - The horizontal alignment of the label.
+    /// * `msg` - The label.
+    /// * `border_width` - Horizontal inset of the label from the edges, in pixels (the frame itself is
+    ///   always one pixel).
+    ///
+    /// # Returns
+    ///
+    /// The new `ButtonWidget`.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         origin: Point,
@@ -147,29 +194,49 @@ impl ButtonWidget {
         }
     }
 
-    /// Sets the border width in pixels.
+    /// Sets the label's horizontal inset, and invalidates the button.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The inset in pixels.
     pub fn set_border_width(&mut self, width: u8) {
         self.border_width = width;
         self.set_invalidated(true);
     }
 
-    /// Retrieves the border width in pixels.
+    /// Returns the label's horizontal inset.
+    ///
+    /// # Returns
+    ///
+    /// The inset in pixels.
     pub fn get_border_width(&self) -> u8 {
         self.border_width
     }
 
-    /// Changes the text displayed inside the button.
+    /// Sets the label, and invalidates the button.
+    ///
+    /// # Arguments
+    ///
+    /// * `msg` - The new label.
     pub fn set_text(&mut self, msg: String) {
         self.msg = msg;
         self.set_invalidated(true);
     }
 
-    /// Returns the text displayed inside the button.
+    /// Returns the label.
+    ///
+    /// # Returns
+    ///
+    /// A copy of the label.
     pub fn get_text(&self) -> String {
         self.msg.clone()
     }
 
-    /// Returns `true` if the button is currently drawn in its selected (pressed) state.
+    /// Returns whether the button is drawn selected (pressed, with the pointer inside).
+    ///
+    /// # Returns
+    ///
+    /// `true` while the button is selected.
     pub fn is_selected(&self) -> bool {
         self.selected
     }

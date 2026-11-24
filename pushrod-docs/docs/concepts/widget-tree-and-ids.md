@@ -8,7 +8,7 @@ title: Widget tree and IDs
 Every widget in a window lives in one tree, stored as a flat list and addressed by `WidgetId` (a `u32`):
 
 ```text
-ID 0  root (BaseWidget, the window)
+ID 0  root (RootWidget, the window)
  ├── ID 1  panel                 origins are relative to the parent
  │    ├── ID 2  label
  │    └── ID 3  button           later siblings draw on top

@@ -1,0 +1,24 @@
+[package]
+name = "pushrod-widgets"
+version = "0.0.1"
+authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
+description = "Standard widgets for the Pushrod UI library: simple, flat, and predictable"
+readme = "README.md"
+documentation = "https://docs.rs/pushrod-widgets"
+keywords = ["sdl", "sdl2", "pushrod", "ui", "gui"]
+categories = ["gui", "graphics"]
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "pushrod_widgets"
+path = "src/lib.rs"
+
+[dependencies]
+pushrod = { path = "..", version = "0.0.1" }
+
+[dependencies.sdl2]
+version = "^0.36.0"
+features = ["ttf", "image", "unsafe_textures"]

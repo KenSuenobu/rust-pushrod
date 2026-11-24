@@ -67,16 +67,34 @@ Each widget's exact look and behavior is specified in its own roadmap file under
 - No widget added just because another toolkit has it. If ordinary applications don't need it,
   it is parked.
 
+## Core and widgets
+
+Pushrod is split in two so the look can change without touching the core:
+
+- **`pushrod`, the core:** the engine, the widget tree and IDs, events and callbacks, the
+  `paint` helpers, and texture and font caches. It has no opinion about how widgets look and
+  contains no widgets except the window's root.
+- **`pushrod-widgets`, the standard widgets:** the KISS widget set described here. It uses only
+  the core's public API.
+
+KISS is the rule for both. The core stays small and neutral; `pushrod-widgets` stays flat and
+simple. Anything more graphically ambitious belongs in a separate crate.
+
 ## If you want it fancier
 
-That's up to the application, and Pushrod stays out of the way:
+That's up to the application, or to another widget library, and Pushrod stays out of the way:
+
+- **Build a widget library.** A separate crate can extend `pushrod-widgets` with new widgets
+  (a tree view, a graph view, a 3D container) or replace it with a different look (drop
+  shadows, gradients, rounded corners). It uses the same public core API as `pushrod-widgets`,
+  and an application picks the library it wants in `Cargo.toml`.
 
 - **Draw it yourself.** A widget's `paint` function is yours: write your own widget, or use the
   Custom Paint widget for one-off drawing.
 - **Change colors, border, and font per state.** Per-state appearance lets an application restyle
   a widget within the flat style.
 - **Theming hooks may come later.** Themes and skins are a distant-future epic and are not
-  scheduled. Until then, the core stays simple.
+  scheduled. Until then, `pushrod-widgets` stays simple.
 
 ## The same rule beyond looks
 
@@ -101,5 +119,6 @@ Before proposing a widget, a feature, or a visual change, ask:
 4. Would ordinary applications use it, or is it there because another toolkit has it?
 5. Does it add a dependency? If so, why is that worth it?
 
-If the answers point toward "fancier", the feature probably belongs in the application, not in
-Pushrod.
+If the answers point toward "fancier", the feature probably belongs in the application or in a
+separate widget library, not in `pushrod-widgets`. If a widget library needs something the core
+doesn't expose, that's a core issue worth opening.

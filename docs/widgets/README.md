@@ -1,6 +1,6 @@
 # Widget roadmaps
 
-One roadmap per widget: what it is, what it does, how it looks, and how it responds. Each file is the specification for its widget; change a widget by editing its file in a pull request. The [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) covers the core, events, forms, and release work, and the order everything is built in. Every widget follows the [design philosophy](../../DESIGN_PHILOSOPHY.md): simple, flat, and predictable.
+One roadmap per widget: what it is, what it does, how it looks, and how it responds. Each file is the specification for its widget; change a widget by editing its file in a pull request. These are the standard widgets in the `pushrod-widgets` crate. Specialized or more graphically ambitious widgets (tree views, graph views, 3D containers, shadows and gradients) belong in separate widget libraries that extend or replace it ([1.22](https://github.com/KenSuenobu/rust-pushrod/issues/131)). The [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) covers the core, events, forms, and release work, and the order everything is built in. Every widget follows the [design philosophy](../../DESIGN_PHILOSOPHY.md): simple, flat, and predictable.
 
 ## Core dialog widgets
 
@@ -72,5 +72,5 @@ Considered and not planned. Reopen the issue if real applications need one.
 | Color well and picker | Rarely needed in ordinary dialogs; revisit if the Chassis inspector needs it. | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) |
 | Segmented control | Radio groups and the choice button's cycle mode cover the same choices. | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) |
 | Level indicator | The progress bar covers capacity displays. | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) |
-| Outline view (expandable tree list) | Specialized; revisit once the list view is in use. | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) |
+| Outline view (expandable tree list) | Specialized and not a core widget. A tree view fits naturally in a separate widget library that extends pushrod-widgets ([1.22](https://github.com/KenSuenobu/rust-pushrod/issues/131)); community contributions welcome. | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) |
 | Font chooser | Specialized; most applications don't let users pick fonts. Revisit alongside the color picker. | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) |

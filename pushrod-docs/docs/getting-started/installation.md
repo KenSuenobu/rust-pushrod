@@ -41,9 +41,19 @@ Follow the [rust-sdl2 Windows instructions](https://github.com/Rust-SDL2/rust-sd
 
 ## Adding Pushrod to a project
 
+Pushrod is two crates:
+
+| Crate | What it contains |
+|---|---|
+| `pushrod` | The core: the engine, the widget tree and IDs, events, the `paint` helpers, and texture and font caches. It contains no widgets except the window's root. |
+| `pushrod-widgets` | The standard widgets: buttons, text, boxes, panels, and the rest of the widget set. Simple and flat, per the [design philosophy](../design-philosophy.md). |
+
+Most applications use both. A different widget library can extend or replace `pushrod-widgets`; see [Widget libraries](../concepts/widget-libraries.md).
+
 ```toml
 [dependencies]
 pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 
 [dependencies.sdl2]
 version = "^0.36.0"
@@ -55,5 +65,5 @@ features = ["ttf", "image", "unsafe_textures"]
 ```bash
 git clone https://github.com/KenSuenobu/rust-pushrod
 cd rust-pushrod
-cargo run --example base
+cargo run -p pushrod-widgets --example base
 ```

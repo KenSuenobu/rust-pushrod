@@ -6,7 +6,7 @@ description: A single string of text on a filled background.
 
 # Text
 
-`TextWidget` (module `pushrod::text_widget`): a single string of text on a filled background.
+`TextWidget` (module `pushrod_widgets::text_widget`): a single string of text on a filled background.
 
 ![A Text widget showing Hello, Pushrod](/img/screenshots/text.png)
 
@@ -14,7 +14,7 @@ description: A single string of text on a filled background.
 
 ```rust
 use pushrod::geometry::{point, size};
-use pushrod::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
 

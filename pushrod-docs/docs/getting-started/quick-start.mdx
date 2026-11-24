@@ -41,13 +41,14 @@ In `Cargo.toml`:
 ```toml
 [dependencies]
 pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 
 [dependencies.sdl2]
 version = "^0.36.0"
 features = ["ttf", "image", "unsafe_textures"]
 ```
 
-Pushrod requires Rust 1.86 or newer. The `unsafe_textures` feature is required: it lets Pushrod keep one GPU texture per widget.
+`pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets. Pushrod requires Rust 1.86 or newer. The `unsafe_textures` feature is required: it lets Pushrod keep one GPU texture per widget.
 
 ## 4. Add a font
 
@@ -68,10 +69,10 @@ Replace `src/main.rs` with either version. Both build the same window and behave
 Pushrod runs the event loop; you register a callback for the button.
 
 ```rust title="src/main.rs"
-use pushrod::button_widget::ButtonWidget;
+use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::geometry::{point, size};
-use pushrod::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
 
@@ -138,11 +139,11 @@ fn main() {
 You run the loop: `next_event` waits for input, keeps the screen up to date, and returns each event the widgets generate; `match` on the ones you care about. It returns `None` when the window closes.
 
 ```rust title="src/main.rs"
-use pushrod::button_widget::ButtonWidget;
+use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::event::PushrodEvent;
 use pushrod::geometry::{point, size};
-use pushrod::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
 

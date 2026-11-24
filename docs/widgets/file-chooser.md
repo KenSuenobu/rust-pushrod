@@ -62,7 +62,8 @@ Requires [2.6 Text Field](text-field.md), [4.5 List View](list-view.md), [6.7](h
 
 ## Implementation notes
 
-- **Modules:** `file_chooser.rs (new)`
+- **Crate:** `pushrod-widgets`, using only the public API of the `pushrod` core. Shared behavior (states, focus, events) comes from the core; anything the widget needs that the core doesn't expose is added to the core first.
+- **Modules:** `pushrod-widgets/src/file_chooser.rs (new)`
 - **Stack:** Rust std::fs
 - **Drawing:** paints into its own GPU texture only when invalidated; frames are composed by blitting. No OS-native controls; no per-frame CPU pixel work.
 

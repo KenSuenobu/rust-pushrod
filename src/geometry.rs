@@ -22,7 +22,9 @@
 
 use sdl2::rect::Rect;
 
-/// A geometric struct representing `x` and `y` positional coordinates.
+/// A position in pixels: `x` from left to right, `y` from top to bottom.
+///
+/// `Widget` origins are `Point`s relative to the parent `Widget`'s upper left-hand corner.
 #[derive(Default, Copy, Clone)]
 pub struct Point {
     /// Horizontal point from left to right in pixels.
@@ -33,18 +35,36 @@ pub struct Point {
 }
 
 impl Point {
-    /// Constructor to create a new `Point` object.
+    /// Creates a `Point`.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - The horizontal position in pixels, from the left.
+    /// * `y` - The vertical position in pixels, from the top.
+    ///
+    /// # Returns
+    ///
+    /// The new `Point`.
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
 }
 
-/// Creates a new `Point` given `x` and `y` coordinates.
+/// Creates a `Point`; shorthand for [`Point::new`].
+///
+/// # Arguments
+///
+/// * `x` - The horizontal position in pixels, from the left.
+/// * `y` - The vertical position in pixels, from the top.
+///
+/// # Returns
+///
+/// The new `Point`.
 pub fn point(x: i32, y: i32) -> Point {
     Point::new(x, y)
 }
 
-/// A geometric struct representing the size of an object in `w`idth and `h`eight.
+/// A width and height in pixels.
 #[derive(Default, Copy, Clone)]
 pub struct Size {
     /// Width in pixels.
@@ -55,34 +75,79 @@ pub struct Size {
 }
 
 impl Size {
-    /// Constructor to create a new `Size` object.
+    /// Creates a `Size`.
+    ///
+    /// # Arguments
+    ///
+    /// * `w` - The width in pixels.
+    /// * `h` - The height in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The new `Size`.
     pub fn new(w: u32, h: u32) -> Self {
         Self { w, h }
     }
 
-    /// Computes the amount of memory (in bytes) that a sized object takes in GPU RAM.
-    /// This calculation is the `w`idth x `h`eight multiplied by 4 (4 bytes representing RGBA).
+    /// Returns the GPU memory a texture of this size uses.
+    ///
+    /// # Returns
+    ///
+    /// The size in bytes: width times height times 4 (one byte each for red, green, blue, and alpha).
     pub fn get_memory_size(&self) -> u32 {
         self.w * self.h * 4
     }
 }
 
-/// Creates a new size object with its `w`idth and `h`eight constraints.
+/// Creates a `Size`; shorthand for [`Size::new`].
+///
+/// # Arguments
+///
+/// * `w` - The width in pixels.
+/// * `h` - The height in pixels.
+///
+/// # Returns
+///
+/// The new `Size`.
 pub fn size(w: u32, h: u32) -> Size {
     Size::new(w, h)
 }
 
-/// Creates a new `Rect` object given `Point` and `Size` constraints.
+/// Creates an `SDL2` rectangle from an origin and a size.
+///
+/// # Arguments
+///
+/// * `origin` - The upper left-hand corner.
+/// * `bounds` - The width and height.
+///
+/// # Returns
+///
+/// The rectangle.
 pub fn make_rect(origin: Point, bounds: Size) -> Rect {
     Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }
 
-/// Creates a new `Rect` object given `x`, `y`, `w`, and `h` values.
+/// Creates an `SDL2` rectangle from its position and size.
+///
+/// # Arguments
+///
+/// * `x` - The left edge in pixels.
+/// * `y` - The top edge in pixels.
+/// * `w` - The width in pixels.
+/// * `h` - The height in pixels.
+///
+/// # Returns
+///
+/// The rectangle.
 pub fn rect(x: i32, y: i32, w: u32, h: u32) -> Rect {
     make_rect(point(x, y), size(w, h))
 }
 
-/// Returns point of origin (`0x0`)
+/// Returns the point `(0, 0)`.
+///
+/// # Returns
+///
+/// A `Point` at the origin.
 pub fn origin_point() -> Point {
     Point { x: 0, y: 0 }
 }

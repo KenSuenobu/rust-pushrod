@@ -69,13 +69,13 @@ Callbacks receive `&mut AppState` and a `Ui` handle. See [Handling events](./han
 ![The application below, after clicking Save](/img/screenshots/events.png)
 
 ```rust title="src/main.rs"
-use pushrod::base_widget::BaseWidget;
-use pushrod::box_widget::BoxWidget;
-use pushrod::button_widget::ButtonWidget;
+use pushrod_widgets::base_widget::BaseWidget;
+use pushrod_widgets::box_widget::BoxWidget;
+use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::event::PushrodEvent;
 use pushrod::geometry::{point, size};
-use pushrod::text_widget::TextJustify;
+use pushrod_widgets::text_widget::TextJustify;
 use pushrod::widget::Widget;
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;

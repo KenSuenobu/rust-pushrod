@@ -5,7 +5,7 @@ title: Creating widgets
 
 # Creating widgets
 
-A widget is a struct that stores a `WidgetCore` and implements the `Widget` trait. Only three functions are required:
+A widget is a struct that stores a `WidgetCore` and implements the `Widget` trait. Only three functions are required. Everything a widget needs is in the `pushrod` core, so your widgets don't depend on `pushrod-widgets`: the standard widgets are built exactly the same way, with the same public API.
 
 | Function | Purpose |
 |---|---|

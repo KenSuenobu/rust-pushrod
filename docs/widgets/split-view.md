@@ -63,7 +63,8 @@ Requires [5.2](https://github.com/KenSuenobu/rust-pushrod/issues/57), [5.5](http
 
 ## Implementation notes
 
-- **Modules:** `split_view.rs (new)`
+- **Crate:** `pushrod-widgets`, using only the public API of the `pushrod` core. Shared behavior (states, focus, events) comes from the core; anything the widget needs that the core doesn't expose is added to the core first.
+- **Modules:** `pushrod-widgets/src/split_view.rs (new)`
 - **Stack:** Rust
 - **Drawing:** paints into its own GPU texture only when invalidated; frames are composed by blitting. No OS-native controls; no per-frame CPU pixel work.
 

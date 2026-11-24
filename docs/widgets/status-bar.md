@@ -62,6 +62,7 @@ Requires [1.5](https://github.com/KenSuenobu/rust-pushrod/issues/21), [5.2](http
 
 ## Implementation notes
 
-- **Modules:** `status_bar.rs (new)`
+- **Crate:** `pushrod-widgets`, using only the public API of the `pushrod` core. Shared behavior (states, focus, events) comes from the core; anything the widget needs that the core doesn't expose is added to the core first.
+- **Modules:** `pushrod-widgets/src/status_bar.rs (new)`
 - **Stack:** Rust
 - **Drawing:** paints into its own GPU texture only when invalidated; frames are composed by blitting. No OS-native controls; no per-frame CPU pixel work.
