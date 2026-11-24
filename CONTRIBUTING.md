@@ -8,8 +8,11 @@ documentation it needs.
 ## Before opening a pull request
 
 - `cargo fmt`, `cargo clippy --all-targets`, and `cargo test` pass.
-- Documentation changes ship in the same pull request as the code (rustdoc, README or
-  guides, examples, mockups or screenshots, changelog).
+- Documentation changes ship in the same pull request as the code: the Docusaurus site in
+  `pushrod-docs/` (each widget has its own page under **Widgets**), rustdoc, examples,
+  screenshots, and the changelog. Check the site with `cd pushrod-docs && npm install &&
+  npm run build` (broken links fail the build). Each issue's *Documentation (Docusaurus)*
+  section names the pages to add or update.
 - New widgets follow the existing drawing style (`paint::fill`, `paint::border`,
   `paint::text`) and draw everything through Pushrod; no OS-native controls.
 - Any internal action you add emits an engine event (see roadmap issue 9.10).

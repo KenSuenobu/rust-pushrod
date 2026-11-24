@@ -25,6 +25,7 @@ This roadmap builds on the core modernization in #10 (`dyn Widget` tree, `Widget
 - **Use shared foundations.** Text layout (Parley) and accessibility (AccessKit) come from the ecosystem's well-tested crates rather than being reinvented.
 - **Layouts are optional and extensible.** Containers can stay absolutely positioned, as designed forms were on classic systems, or use simple layout managers (row, column, form, grid, stack, flow) and custom ones, so forms resize and adapt to text and fonts.
 - **Fictional sample data only.** Demos, examples, tests, mockups, documentation, and issue text never contain real names or personal information; use placeholders such as Jane Doe, jane.doe@example.com, Anytown, and /home/user (see CONTRIBUTING.md).
+- **Documented as it's built.** The Docusaurus site in `pushrod-docs/` has a five-minute quick start, guides for applications, events, and widgets, and one page per widget under **Widgets**. Every issue lists the pages it adds or updates, and the docs ship in the same PR as the code.
 - **Usability first.** A control is added because it makes ordinary applications easier to use, not because another toolkit had it. Ideas that didn't meet that bar are listed under *Parked*.
 - **Self-contained and GPU-first.** Pushrod draws everything itself through SDL2: no OS-native menus, menu bars, dialogs, or controls, so applications look and behave the same everywhere. Each widget paints into its own GPU texture only when invalidated; frames are composed by blitting cached textures; text comes from a glyph atlas texture. SDL2 does the heavy lifting for graphics and input.
 
@@ -40,7 +41,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **52 of 95 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **53 of 96 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
@@ -52,7 +53,7 @@ MVP scope: **52 of 95 active issues** (marked **Y** in the MVP column). Everythi
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 6 | 1 |
 | 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, scroll views, autoresizing, and simple, extensible layout managers (row, column, form, grid, stack, flow). | 10 | 5 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
-| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 7 | 7 |
+| 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 8 | 8 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
 | 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 10 | 4 |
 | 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target. | 4 | 1 |
@@ -227,7 +228,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 render API
 
-**Documentation.** Rustdoc: `widget::Behavior`, `widget::VisualState`, `paint::state_overlay`. README/guides: 'Behavior and state' section with the table above. Examples: Disabled and default buttons in `examples/base.rs`. Screenshots: Gallery tile per state (7.3 (#71)).
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/widget-behavior-flags-and-visual-states.md` ("Widget behavior flags and visual states", Concepts, new). Guides: 'Behavior and state' section with the table above. Rustdoc: `widget::Behavior`, `widget::VisualState`, `paint::state_overlay`. Examples: Disabled and default buttons in `examples/base.rs`. Screenshots: Gallery tile per state (7.3 (#71)).
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
@@ -263,7 +264,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust, SDL2 event subsystem
 
-**Documentation.** Rustdoc: `event::EventMask`, `Engine::set_event_mask`, `Widget::event_mask`. README/guides: 'Event masks' section. Examples: Example disables pointer motion when no hover effects are needed. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/event-masks-for-the-run-loop-and-for-widgets.md` ("Event masks for the run loop and for widgets", Concepts, new). Guides: 'Event masks' section. Rustdoc: `event::EventMask`, `Engine::set_event_mask`, `Widget::event_mask`. Examples: Example disables pointer motion when no hover effects are needed. Screenshots: n/a.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
@@ -284,7 +285,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `WidgetCache::broadcast`. README/guides: Event flow diagram updated. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/broadcast-events-to-all-interested-widgets.md` ("Broadcast events to all interested widgets", Concepts, new). Guides: Event flow diagram updated. Rustdoc: `WidgetCache::broadcast`. Examples: n/a. Screenshots: n/a.
 
 ### 1.4 (#20): Keyboard focus, Tab order, and Return/Escape
 
@@ -304,7 +305,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust, SDL2 text input
 
-**Documentation.** Rustdoc: Focus API. README/guides: Keyboard section. Examples: Form with two fields and OK/Cancel. Screenshots: Focused field in gallery.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/keyboard-and-focus.md` ("Keyboard and Focus", Guides, new). Guides: Keyboard section. Rustdoc: Focus API. Examples: Form with two fields and OK/Cancel. Screenshots: Focused field in gallery.
 
 **Sources.** [O'Reilly Motif Programming Manual: keyboard traversal](https://www.oreilly.com/library/view/volume-6a-motif/9780596000431/chapter-44.html)
 
@@ -326,7 +327,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust std::time
 
-**Documentation.** Rustdoc: `on_timer`, `on_idle`, `TimerId`, `Tick`. README/guides: Timers section. Examples: Clock label updated every second. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/timers-and-idle-callbacks.md` ("Timers and idle callbacks", Concepts, new). Guides: Timers section. Rustdoc: `on_timer`, `on_idle`, `TimerId`, `Tick`. Examples: Clock label updated every second. Screenshots: n/a.
 
 ### 1.6 (#22): Callback registry for every widget event
 
@@ -344,7 +345,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: All `on_*` methods. README/guides: Table of callbacks (see Naming in the roadmap). Examples: Check box with `on_toggle` in the example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/handling-events.md` ("Handling events", Guides, update). Guides: Table of callbacks (see Naming in the roadmap). Rustdoc: All `on_*` methods. Examples: Check box with `on_toggle` in the example. Screenshots: n/a.
 
 **Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html); [Apple: Target-Action](https://developer.apple.com/library/archive/documentation/General/Devpedia-CocoaApp-MOSX/TargetAction.html)
 
@@ -367,7 +368,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust, sdl2::ttf, SDL2 render API
 
-**Documentation.** Rustdoc: `font::FontCache`, atlas notes. README/guides: n/a. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/gpu-text.md` ("GPU text", Concepts, new). Guides: n/a. Rustdoc: `font::FontCache`, atlas notes. Examples: n/a. Screenshots: n/a.
 
 ### 1.8 (#23): Edit the widget tree at run time: remove, reparent, reorder
 
@@ -387,7 +388,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: New `WidgetCache` methods. README/guides: n/a. Examples: Button that adds and removes a widget. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/edit-the-widget-tree-at-run-time.md` ("Edit the widget tree at run time", Concepts, new). Guides: n/a. Rustdoc: New `WidgetCache` methods. Examples: Button that adds and removes a widget. Screenshots: n/a.
 
 ### 1.9 (#24): Dirty-rectangle redraw
 
@@ -405,7 +406,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust, SDL2 clip rect
 
-**Documentation.** Rustdoc: `draw_loop` docs. README/guides: n/a. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/dirty-rectangle-redraw.md` ("Dirty-rectangle redraw", Concepts, new). Guides: n/a. Rustdoc: `draw_loop` docs. Examples: n/a. Screenshots: n/a.
 
 ### 1.10 (#25): Window resize and high-DPI rendering
 
@@ -423,7 +424,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust, SDL2 window/high-DPI API
 
-**Documentation.** Rustdoc: Resize behavior. README/guides: High-DPI notes. Examples: Resizable example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/window-resize-and-high-dpi-rendering.md` ("Window resize and high-DPI rendering", Concepts, new). Guides: High-DPI notes. Rustdoc: Resize behavior. Examples: Resizable example. Screenshots: n/a.
 
 ### 1.11 (#26): Application lifecycle: startup and close-request callbacks
 
@@ -441,7 +442,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `on_start`, `on_close_request`. README/guides: Lifecycle section. Examples: Quit confirmation using an alert (2.9 (#35)). Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/application-lifecycle.md` ("Application lifecycle", Concepts, new). Guides: Lifecycle section. Rustdoc: `on_start`, `on_close_request`. Examples: Quit confirmation using an alert (2.9 (#35)). Screenshots: n/a.
 
 ### 1.12 (#76): Keyboard mnemonics: underlined shortcut letters
 
@@ -478,7 +479,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Mnemonic syntax. README/guides: Keyboard section. Examples: Mnemonics on example buttons. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/keyboard-mnemonics.md` ("Keyboard mnemonics", Concepts, new). Guides: Keyboard section. Rustdoc: Mnemonic syntax. Examples: Mnemonics on example buttons. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -537,7 +538,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust (`std::any`, `Rc`), SDL2 user events
 
-**Documentation.** Rustdoc: `CustomEvent`, `EventTarget`, `Ui::post`, `EventCtx::post`, `Engine::on_custom`, `Engine::sender`. README/guides: 'Custom events' section. Examples: Background thread updates a progress bar. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/custom-events.md` ("Custom Events", Events, new). Guides: 'Custom events' section. Rustdoc: `CustomEvent`, `EventTarget`, `Ui::post`, `EventCtx::post`, `Engine::on_custom`, `Engine::sender`. Examples: Background thread updates a progress bar. Screenshots: n/a.
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
@@ -557,7 +558,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, AccessKit (new optional dependency)
 
-**Documentation.** Rustdoc: Accessibility trait methods. README/guides: Accessibility section. Examples: Example works with a screen reader. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/accessibility.md` ("Accessibility", Concepts, new). Guides: Accessibility section. Rustdoc: Accessibility trait methods. Examples: Example works with a screen reader. Screenshots: n/a.
 
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [AccessKit: cross-platform accessibility infrastructure](https://github.com/AccessKit/accesskit)
 
@@ -577,7 +578,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `undo` module. README/guides: Undo section. Examples: Text field with undo. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/undo-and-redo-command-stack.md` ("Undo and redo command stack", Concepts, new). Guides: Undo section. Rustdoc: `undo` module. Examples: Text field with undo. Screenshots: n/a.
 
 ### 1.16 (#82): Multiple windows
 
@@ -596,7 +597,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 windows
 
-**Documentation.** Rustdoc: Window API. README/guides: Windows section. Examples: Example with a second window. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/multiple-windows.md` ("Multiple windows", Concepts, new). Guides: Windows section. Rustdoc: Window API. Examples: Example with a second window. Screenshots: n/a.
 
 ### 1.17 (#104): Per-state appearance: colors, border, and font for each visual state
 
@@ -643,7 +644,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `StateStyle`, `Appearance`, `Widget::style`. README/guides: 'Appearance and states' section. Examples: Example: hover color on a button. Screenshots: Gallery tile per state.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/per-state-appearance.md` ("Per-state appearance", Concepts, new). Guides: 'Appearance and states' section. Rustdoc: `StateStyle`, `Appearance`, `Widget::style`. Examples: Example: hover color on a button. Screenshots: Gallery tile per state.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
@@ -665,7 +666,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, Parley (new dependency), SDL2 render API
 
-**Documentation.** Rustdoc: `TextLayout`, layout caching. README/guides: 'Text' section. Examples: International text sample in the gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text.md` ("Text", Concepts, new). Guides: 'Text' section. Rustdoc: `TextLayout`, layout caching. Examples: International text sample in the gallery. Screenshots: Gallery tile.
 
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/); [Parley (Linebender): rich text layout library](https://github.com/linebender/parley)
 
@@ -702,7 +703,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 text input/editing events
 
-**Documentation.** Rustdoc: IME behavior in text widget docs. README/guides: 'Text input' section. Examples: Gallery field tested with an IME. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/text-input-and-ime.md` ("Text Input and IME", Guides, new). Guides: 'Text input' section. Rustdoc: IME behavior in text widget docs. Examples: Gallery field tested with an IME. Screenshots: Gallery tile.
 
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 
@@ -723,7 +724,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2
 
-**Documentation.** Rustdoc: `CacheHint`, invalidation levels. README/guides: 'Performance' section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/layers-and-invalidation.md` ("Layers and invalidation", Concepts, new). Guides: 'Performance' section. Rustdoc: `CacheHint`, invalidation levels. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 
@@ -791,7 +792,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/boxed-label.md` ("Boxed Label", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
@@ -827,7 +828,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/glyph-button.md` ("Glyph Button", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -872,7 +873,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Behavior table on `ButtonWidget`. README/guides: n/a. Examples: OK (default) / Cancel in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/button.md` ("Button", Widgets, update). Guides: n/a. Rustdoc: Behavior table on `ButtonWidget`. Examples: OK (default) / Cancel in example. Screenshots: Gallery tile.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -909,7 +910,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Example + gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/check-box.md` ("Check Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Example + gallery. Screenshots: Gallery tile.
 
 ### 2.5 (#31): Radio buttons and radio groups
 
@@ -943,7 +944,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Size picker in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/radio-button.md` ("Radio Button", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Size picker in example. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
 
@@ -986,7 +987,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 text input and clipboard
 
-**Documentation.** Rustdoc: Module docs incl. mask characters. README/guides: Widget list. Examples: Name and age fields in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/text-field.md` ("Text Field", Widgets, new). Guides: Widget list. Rustdoc: Module docs incl. mask characters. Examples: Name and age fields in example. Screenshots: Gallery tile.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
 
@@ -1022,7 +1023,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, sdl2::image
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Logo in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/image.md` ("Image", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Logo in example. Screenshots: Gallery tile.
 
 ### 2.8 (#34): Icon widget (picture with caption)
 
@@ -1056,7 +1057,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/icon.md` ("Icon", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 ### 2.9 (#35): Alert dialog
 
@@ -1102,7 +1103,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `alert` module. README/guides: Dialogs section. Examples: Quit confirmation (1.11 (#26)). Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/alert.md` ("Alert", Widgets, new). Guides: Dialogs section. Rustdoc: `alert` module. Examples: Quit confirmation (1.11 (#26)). Screenshots: Gallery tile.
 
 **Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -1138,7 +1139,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Linked from 'Writing a widget'. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/custom-paint.md` ("Custom Paint", Widgets, new). Guides: Linked from 'Writing a widget'. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
 
@@ -1176,7 +1177,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `menu` module. README/guides: Menus section. Examples: File/Edit menus in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/menu-bar-and-menus.md` ("Menu Bar and Menus", Widgets, new). Guides: Menus section. Rustdoc: `menu` module. Examples: File/Edit menus in example. Screenshots: Gallery tile.
 
 **Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
 
@@ -1212,7 +1213,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust std::fs
 
-**Documentation.** Rustdoc: Module docs. README/guides: Dialogs section. Examples: Open button in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/file-chooser.md` ("File Chooser", Widgets, new). Guides: Dialogs section. Rustdoc: Module docs. Examples: Open button in example. Screenshots: Gallery tile.
 
 **Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -1248,7 +1249,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `set_tooltip`. README/guides: Usability section. Examples: Tooltips on example buttons. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/tooltip.md` ("Tooltip", Widgets, new). Guides: Usability section. Rustdoc: `set_tooltip`. Examples: Tooltips on example buttons. Screenshots: Gallery tile.
 
 ### 2.14 (#83): Separator line
 
@@ -1280,7 +1281,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/separator.md` ("Separator", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 ### 2.15 (#84): Toolbar
 
@@ -1314,7 +1315,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Toolbar in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/toolbar.md` ("Toolbar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Toolbar in example. Screenshots: Gallery tile.
 
 **Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html)
 
@@ -1350,7 +1351,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Status bar in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/status-bar.md` ("Status Bar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Status bar in example. Screenshots: Gallery tile.
 
 ### 2.17 (#86): Switch (on/off slide toggle)
 
@@ -1382,7 +1383,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/switch.md` ("Switch", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 ### 2.18 (#87): Multi-line text area
 
@@ -1416,7 +1417,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Notes area in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/text-area.md` ("Text Area", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Notes area in example. Screenshots: Gallery tile.
 
 ### 2.19 (#88): Context menus
 
@@ -1449,7 +1450,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Context menu API. README/guides: Menus section. Examples: Context menu on a list. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/context-menu.md` ("Context Menu", Widgets, new). Guides: Menus section. Rustdoc: Context menu API. Examples: Context menu on a list. Screenshots: Gallery tile.
 
 **Sources.** [MAME wiki: Intergraph InterPro / CLIX / Environ V](https://wiki.mamedev.org/index.php/Driver:InterPro)
 
@@ -1485,7 +1486,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Usability section. Examples: Example shows a connection warning. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/message-bar.md` ("Message Bar", Widgets, new). Guides: Usability section. Rustdoc: Module docs. Examples: Example shows a connection warning. Screenshots: Gallery tile.
 
 ## Epic 3: Value and choice controls (#13)
 
@@ -1543,7 +1544,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/scroll-bar.md` ("Scroll Bar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
 
@@ -1580,7 +1581,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Volume slider in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/slider.md` ("Slider", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Volume slider in example. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -1615,7 +1616,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Group the radio buttons in the example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/group-box.md` ("Group Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Group the radio buttons in the example. Screenshots: Gallery tile.
 
 **Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -1655,7 +1656,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/choice-button.md` ("Choice Button", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
 
@@ -1709,7 +1710,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs + `BrowserModel`. README/guides: Widget list. Examples: Filesystem browser example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/column-browser.md` ("Column Browser", Widgets, new). Guides: Widget list. Rustdoc: Module docs + `BrowserModel`. Examples: Filesystem browser example. Screenshots: Gallery tile.
 
 **Sources.** [OpenStep specification: controls and target/action](https://www.ict.griffith.edu.au/teaching/2501ICT/archive/resources/OpenStepSpec/ApplicationKit/Classes/NSControl.html)
 
@@ -1744,7 +1745,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Advanced options in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/expander.md` ("Expander", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Advanced options in example. Screenshots: Gallery tile.
 
 ### 3.11 (#91): Date picker
 
@@ -1778,7 +1779,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/date-picker.md` ("Date Picker", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 ## Epic 4: Lists, tables, progress, spin boxes, and tabs (#14)
 
@@ -1830,7 +1831,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Progress fed by a custom event. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/progress-bar.md` ("Progress Bar", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Progress fed by a custom event. Screenshots: Gallery tile.
 
 ### 4.2 (#49): Spin box
 
@@ -1864,7 +1865,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/spin-box.md` ("Spin Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341); [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html)
 
@@ -1901,7 +1902,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Settings dialog example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/tab-view.md` ("Tab View", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Settings dialog example. Screenshots: Gallery tile.
 
 **Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -1940,7 +1941,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs + `ListModel`. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/list-view.md` ("List View", Widgets, new). Guides: Widget list. Rustdoc: Module docs + `ListModel`. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [AmigaOS GadTools autodoc (gadget kinds, underlined keyboard equivalents)](https://amigadev.grimore.org/Includes_and_Autodocs_2._guide/node05a3.html); [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -1976,7 +1977,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Widget list. Examples: Gallery. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/combo-box.md` ("Combo Box", Widgets, new). Guides: Widget list. Rustdoc: Module docs. Examples: Gallery. Screenshots: Gallery tile.
 
 **Sources.** [ICS: Motif widget descriptions](https://motif.ics.com/book/export/html/341)
 
@@ -2014,7 +2015,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs + `TableModel`. README/guides: Widget list. Examples: File list in example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/table-view.md` ("Table View", Widgets, new). Guides: Widget list. Rustdoc: Module docs + `TableModel`. Examples: File list in example. Screenshots: Gallery tile.
 
 ## Epic 5: Composition, clipping, and layout managers (#15)
 
@@ -2055,7 +2056,7 @@ Clip children to parents, composite widgets with retrievable parts, scroll views
 
 **Technical Stack.** Rust, SDL2 rects
 
-**Documentation.** Rustdoc: Draw/hit rules in `cache` docs. README/guides: Tree section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/clip-children-to-their-parent-s-bounds.md` ("Clip children to their parent's bounds", Concepts, new). Guides: Tree section. Rustdoc: Draw/hit rules in `cache` docs. Examples: n/a. Screenshots: n/a.
 
 ### 5.2 (#57): Composite widgets: build widgets from parts that applications can retrieve and modify
 
@@ -2103,7 +2104,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `composite` module. README/guides: 'Writing a composite widget' guide. Examples: Composite example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/composite-widgets.md` ("Composite Widgets", Guides, new). Guides: 'Writing a composite widget' guide. Rustdoc: `composite` module. Examples: Composite example. Screenshots: n/a.
 
 ### 5.3 (#58): Scroll view
 
@@ -2137,7 +2138,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Module docs. README/guides: Layout section. Examples: Long form in a scroll view. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/scroll-view.md` ("Scroll View", Widgets, new). Guides: Layout section. Rustdoc: Module docs. Examples: Long form in a scroll view. Screenshots: Gallery tile.
 
 ### 5.4 (#59): Autoresizing (keep margins or stretch on resize)
 
@@ -2154,7 +2155,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Anchors`. README/guides: Layout section. Examples: Resizable example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/autoresizing.md` ("Autoresizing", Concepts, new). Guides: Layout section. Rustdoc: `Anchors`. Examples: Resizable example. Screenshots: n/a.
 
 **Sources.** [Motif reference: form attachments](https://man.archlinux.org/man/XmForm.3.en)
 
@@ -2185,7 +2186,7 @@ window  <- SizeHint{min,pref,max} --   window  -- Rect -->
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `layout` module, `Layout` trait, `SizeHint`. README/guides: 'Layouts' section. Examples: Custom layout example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/layouts-overview.md` ("Layouts Overview", Layouts, new). Guides: 'Layouts' section. Rustdoc: `layout` module, `Layout` trait, `SizeHint`. Examples: Custom layout example. Screenshots: n/a.
 
 **Sources.** [Motif reference: form attachments](https://man.archlinux.org/man/XmForm.3.en)
 
@@ -2221,7 +2222,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Row`, `Column`, `Spacer`. README/guides: 'Layouts' section. Examples: Example dialog built with rows and columns. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/row-and-column.md` ("Row and Column", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Row`, `Column`, `Spacer`. Examples: Example dialog built with rows and columns. Screenshots: Gallery tile.
 
 ### 5.7 (#118): Form layout: aligned label and field rows
 
@@ -2256,7 +2257,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `FormLayout`. README/guides: 'Layouts' section. Examples: Settings form example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/form-layout.md` ("Form Layout", Layouts, new). Guides: 'Layouts' section. Rustdoc: `FormLayout`. Examples: Settings form example. Screenshots: Gallery tile.
 
 ### 5.8 (#119): Grid layout
 
@@ -2281,7 +2282,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Grid`. README/guides: 'Layouts' section. Examples: Calculator example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/grid.md` ("Grid", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Grid`. Examples: Calculator example. Screenshots: Gallery tile.
 
 ### 5.9 (#120): Stack layout (one child visible at a time)
 
@@ -2298,7 +2299,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Stack`. README/guides: 'Layouts' section. Examples: Wizard example. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/stack.md` ("Stack", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Stack`. Examples: Wizard example. Screenshots: n/a.
 
 ### 5.10 (#121): Flow layout (wrapping rows)
 
@@ -2323,7 +2324,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Flow`. README/guides: 'Layouts' section. Examples: Tag list example. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/flow.md` ("Flow", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Flow`. Examples: Tag list example. Screenshots: Gallery tile.
 
 ## Epic 6: Forms and form files (foundation for Chassis) (#16)
 
@@ -2363,7 +2364,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `registry` module. README/guides: Forms section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/widget-registry-and-factory.md` ("Widget registry and factory", Forms, new). Guides: Forms section. Rustdoc: `registry` module. Examples: n/a. Screenshots: n/a.
 
 ### 6.2 (#61): Property introspection: list, get, and set widget properties by name
 
@@ -2381,7 +2382,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `properties` module. README/guides: Forms section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/property-introspection.md` ("Property introspection", Forms, new). Guides: Forms section. Rustdoc: `properties` module. Examples: n/a. Screenshots: n/a.
 
 ### 6.3 (#62): Form file format (binary, versioned)
 
@@ -2418,7 +2419,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust (std only)
 
-**Documentation.** Rustdoc: `form` module. README/guides: Forms section linking the spec. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/form-file-format.md` ("Form file format", Forms, new). Guides: Forms section linking the spec. Rustdoc: `form` module. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html); [FreeMiNT AES docs: object tree fundamentals](https://freemint.github.io/tos.hyp/en/aes_fundamentals.html); [Shift Interface resource editor (Atari)](https://atariuptodate.de/en/1277/interface)
 
@@ -2439,7 +2440,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `load_form`, `FormHandle`. README/guides: Forms quick start. Examples: `examples/form.rs`. Screenshots: Form screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/loading-forms.md` ("Loading Forms", Forms, new). Guides: Forms quick start. Rustdoc: `load_form`, `FormHandle`. Examples: `examples/form.rs`. Screenshots: Form screenshot.
 
 ### 6.5 (#64): Form writer: save a widget subtree to a file
 
@@ -2456,7 +2457,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `FormWriter`. README/guides: Forms section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/form-writer.md` ("Form writer", Forms, new). Guides: Forms section. Rustdoc: `FormWriter`. Examples: n/a. Screenshots: n/a.
 
 ### 6.6 (#65): Generate ID constants from a form file
 
@@ -2473,7 +2474,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust, build.rs
 
-**Documentation.** Rustdoc: `form::codegen`. README/guides: Forms quick start. Examples: Example uses generated constants. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/generate-id-constants-from-a-form-file.md` ("Generate ID constants from a form file", Forms, new). Guides: Forms quick start. Rustdoc: `form::codegen`. Examples: Example uses generated constants. Screenshots: n/a.
 
 **Sources.** [Shift Interface resource editor (Atari)](https://atariuptodate.de/en/1277/interface)
 
@@ -2494,7 +2495,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Ui::open_modal`. README/guides: Dialogs section. Examples: Settings dialog example. Screenshots: Modal screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/modal-dialogs.md` ("Modal dialogs", Forms, new). Guides: Dialogs section. Rustdoc: `Ui::open_modal`. Examples: Settings dialog example. Screenshots: Modal screenshot.
 
 ### 6.8 (#67): Bind actions by name from form files
 
@@ -2511,7 +2512,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Action binding. README/guides: Forms section. Examples: Form example uses actions. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/bind-actions-by-name-from-form-files.md` ("Bind actions by name from form files", Forms, new). Guides: Forms section. Rustdoc: Action binding. Examples: Form example uses actions. Screenshots: n/a.
 
 **Sources.** [Apple: Target-Action](https://developer.apple.com/library/archive/documentation/General/Devpedia-CocoaApp-MOSX/TargetAction.html)
 
@@ -2531,7 +2532,7 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `design` module. README/guides: Chassis section. Examples: Minimal designer example. Screenshots: Design-mode screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/forms/design-mode-hooks-for-chassis.md` ("Design-mode hooks for Chassis", Forms, new). Guides: Chassis section. Rustdoc: `design` module. Examples: Minimal designer example. Screenshots: Design-mode screenshot.
 
 **Sources.** [Shift Interface resource editor (Atari)](https://atariuptodate.de/en/1277/interface)
 
@@ -2554,6 +2555,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | Y | S | `Cargo.toml`, `CHANGELOG.md (new)` |
 | 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | Y | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
 | 7.7 (#115) | Performance benchmarks and budgets | Measure frame time, input latency, memory per widget, and startup; fail CI on regressions. | `ci`, `mvp`, `parallelizable`, `performance`, `size/S` | Y | Y | S | `benches/ (new)`, `.github/workflows/ci.yml` |
+| 7.8 (#122) | Documentation site: build pushrod-docs in CI and publish it | Build the Docusaurus site on every PR (broken links fail) and publish it to GitHub Pages, with the API reference linked. | `ci`, `documentation`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `.github/workflows/docs.yml (new)`, `pushrod-docs/` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
 
@@ -2572,7 +2574,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** GitHub Actions
 
-**Documentation.** Rustdoc: n/a. README/guides: CI badge. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/ci.md` ("CI", Contributing, new). Guides: CI badge. Rustdoc: n/a. Examples: n/a. Screenshots: n/a.
 
 ### 7.2 (#70): Golden-image rendering tests
 
@@ -2590,7 +2592,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Rust, SDL2, Xvfb
 
-**Documentation.** Rustdoc: n/a. README/guides: Testing section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/golden-image-rendering-tests.md` ("Golden-image rendering tests", Contributing, new). Guides: Testing section. Rustdoc: n/a. Examples: n/a. Screenshots: n/a.
 
 ### 7.3 (#71): Widget gallery example
 
@@ -2607,7 +2609,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: n/a. README/guides: Screenshot + run command. Examples: This is the example. Screenshots: Gallery screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/intro.md` ("Introduction (gallery screenshot)", Introduction, update). Guides: Screenshot + run command. Rustdoc: n/a. Examples: This is the example. Screenshots: Gallery screenshot.
 
 ### 7.4 (#72): Guide: writing widgets and composites
 
@@ -2624,7 +2626,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Markdown, rustdoc
 
-**Documentation.** Rustdoc: Crate docs link. README/guides: Link. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/creating-widgets.md` ("Creating widgets", Guides, update). Guides: Link. Rustdoc: Crate docs link. Examples: n/a. Screenshots: n/a.
 
 ### 7.5 (#73): Changelog, Cargo metadata, and crates.io release
 
@@ -2642,7 +2644,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Cargo
 
-**Documentation.** Rustdoc: docs.rs build. README/guides: Install from crates.io. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/changelog-cargo-metadata-and-crates-io-release.md` ("Changelog, Cargo metadata, and crates.io release", Contributing, new). Guides: Install from crates.io. Rustdoc: docs.rs build. Examples: n/a. Screenshots: n/a.
 
 ### 7.6 (#114): Module boundaries and written specs with conformance tests
 
@@ -2660,7 +2662,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Markdown, Rust tests
 
-**Documentation.** Rustdoc: Links from crate docs. README/guides: Contributing section links the specs. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/specs.md` ("Specifications", Contributing, new). Guides: Contributing section links the specs. Rustdoc: Links from crate docs. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 
@@ -2680,9 +2682,29 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Technical Stack.** Rust (criterion or built-in timing), GitHub Actions
 
-**Documentation.** Rustdoc: n/a. README/guides: 'Performance' section with numbers. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/performance-benchmarks-and-budgets.md` ("Performance benchmarks and budgets", Contributing, new). Guides: 'Performance' section with numbers. Rustdoc: n/a. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
+
+### 7.8 (#122): Documentation site: build pushrod-docs in CI and publish it
+
+**Problem Statement.** The `pushrod-docs` Docusaurus site exists, but nothing builds it automatically, so broken links or stale pages could merge, and it isn't published anywhere.
+
+**Solution / Scope.** Add a workflow that runs `npm ci && npm run build` in `pushrod-docs` on every PR (Docusaurus fails on broken links) and deploys `main` to GitHub Pages at `/rust-pushrod/`. Publish rustdoc output alongside it (`/rust-pushrod/api/`) and link it from the navbar. Add a check that every widget module in `src/` has a page in `pushrod-docs/docs/widgets/`, and that code samples marked as checked compile (a doc-sample test crate).
+
+**Acceptance Criteria.**
+
+- PRs fail when the docs build fails
+- `main` deploys to GitHub Pages
+- API reference published and linked
+- Missing widget pages are reported
+- Checked code samples compile in CI
+
+**Parallelism / Dependencies.** Parallelizable. Requires 7.1 (#69).
+
+**Technical Stack.** GitHub Actions, Node (Docusaurus), rustdoc
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/writing-documentation.md` ("Writing documentation", Writing documentation, update). Guides: Writing documentation page: how CI checks docs. Rustdoc: API reference linked from the site. Examples: n/a. Screenshots: n/a.
 
 ## Epic 8: Theming and skins (distant future) (#18)
 
@@ -2713,7 +2735,7 @@ Placeholder: route colors and metrics through a theme, then allow skins. Not sch
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: (Future). README/guides: (Future). Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/theme-for-colors-and-metrics.md` ("Theme for colors and metrics", Concepts, new). Guides: (Future). Rustdoc: (Future). Examples: n/a. Screenshots: n/a.
 
 ### 8.2 (#75): Skins: image-based widget rendering (future)
 
@@ -2729,7 +2751,7 @@ Placeholder: route colors and metrics through a theme, then allow skins. Not sch
 
 **Technical Stack.** Rust, SDL2_image
 
-**Documentation.** Rustdoc: (Future). README/guides: (Future). Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/skins.md` ("Skins", Concepts, new). Guides: (Future). Rustdoc: (Future). Examples: n/a. Screenshots: n/a.
 
 ## Epic 9: Event model and callbacks (#79)
 
@@ -2779,7 +2801,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `event` module: every variant documented. README/guides: 'Events' table (see Naming in the roadmap). Examples: Example updated. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/event-reference.md` ("Event Reference", Events, new). Guides: 'Events' table (see Naming in the roadmap). Rustdoc: `event` module: every variant documented. Examples: Example updated. Screenshots: n/a.
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html); [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html)
 
@@ -2809,7 +2831,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Propagation`, phases in `event` docs. README/guides: Event flow section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/event-propagation.md` ("Event propagation", Events, new). Guides: Event flow section. Rustdoc: `Propagation`, phases in `event` docs. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html); [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
@@ -2829,7 +2851,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: Event filter API. README/guides: Event flow section. Examples: Example logs all key presses. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/event-filters.md` ("Event filters", Events, new). Guides: Event flow section. Rustdoc: Event filter API. Examples: Example logs all key presses. Screenshots: n/a.
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
@@ -2849,7 +2871,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `controllers` module. README/guides: 'Writing a widget' guide section. Examples: Custom widget using DragController. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/reusable-input-controllers.md` ("Reusable input controllers", Events, new). Guides: 'Writing a widget' guide section. Rustdoc: `controllers` module. Examples: Custom widget using DragController. Screenshots: n/a.
 
 **Sources.** [GTK 4: input handling (event controllers, capture/target/bubble phases)](https://docs.gtk.org/gtk4/input-handling.html)
 
@@ -2871,7 +2893,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `action` module. README/guides: Actions section. Examples: Example with Save/Bold actions in a menu, toolbar, and shortcut. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/actions-and-keyboard-shortcuts.md` ("Actions and keyboard shortcuts", Events, new). Guides: Actions section. Rustdoc: `action` module. Examples: Example with Save/Bold actions in a menu, toolbar, and shortcut. Screenshots: n/a.
 
 **Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html); [Apple: Target-Action](https://developer.apple.com/library/archive/documentation/General/Devpedia-CocoaApp-MOSX/TargetAction.html)
 
@@ -2891,7 +2913,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `binding` module. README/guides: Bindings section. Examples: Slider bound to a label. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/property-bindings.md` ("Property bindings", Events, new). Guides: Bindings section. Rustdoc: `binding` module. Examples: Slider bound to a label. Screenshots: n/a.
 
 **Sources.** [GObject: property bindings (GBinding)](https://docs.gtk.org/gobject/class.Binding.html)
 
@@ -2910,7 +2932,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `CallbackId` API. README/guides: Callbacks section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/callback-handles.md` ("Callback handles", Events, new). Guides: Callbacks section. Rustdoc: `CallbackId` API. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [GObject: property bindings (GBinding)](https://docs.gtk.org/gobject/class.Binding.html)
 
@@ -2947,7 +2969,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 drop events
 
-**Documentation.** Rustdoc: `dnd` module. README/guides: Drag and drop section. Examples: Reorder a list by dragging. Screenshots: Gallery tile.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/drag-and-drop-within-the-application.md` ("Drag and drop within the application", Events, new). Guides: Drag and drop section. Rustdoc: `dnd` module. Examples: Reorder a list by dragging. Screenshots: Gallery tile.
 
 ### 9.9 (#101): Pointer cursor per widget
 
@@ -2964,7 +2986,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, SDL2 cursors
 
-**Documentation.** Rustdoc: `set_cursor`. README/guides: Usability section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/pointer-cursor-per-widget.md` ("Pointer cursor per widget", Events, new). Guides: Usability section. Rustdoc: `set_cursor`. Examples: n/a. Screenshots: n/a.
 
 ### 9.10 (#109): Engine events: every internal action Pushrod performs emits an event
 
@@ -3003,7 +3025,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `EngineEvent` (every variant documented with when it fires). README/guides: 'Engine events' section with the full list. Examples: Example status line that shows focus and drawing-mode changes. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/events/engine-events.md` ("Engine events", Events, new). Guides: 'Engine events' section with the full list. Rustdoc: `EngineEvent` (every variant documented with when it fires). Examples: Example status line that shows focus and drawing-mode changes. Screenshots: n/a.
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
@@ -3064,7 +3086,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `DrawingMode`. README/guides: 'Slow hardware' section. Examples: Example toggles the mode at run time. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/drawing-modes.md` ("Drawing modes", Platforms, new). Guides: 'Slow hardware' section. Rustdoc: `DrawingMode`. Examples: Example toggles the mode at run time. Screenshots: n/a.
 
 ### 10.2 (#106): Backend-neutral paint API (SDL2 backend by default)
 
@@ -3083,7 +3105,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Rustdoc: `Painter` trait, `Sdl2Painter`, `CachePolicy`. README/guides: 'Backends' section. Examples: Test backend used in widget tests. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/backend-neutral-paint-api.md` ("Backend-neutral paint API", Platforms, new). Guides: 'Backends' section. Rustdoc: `Painter` trait, `Sdl2Painter`, `CachePolicy`. Examples: Test backend used in widget tests. Screenshots: n/a.
 
 ### 10.3 (#107): no_std + alloc core crate
 
@@ -3100,7 +3122,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust (core, alloc)
 
-**Documentation.** Rustdoc: Crate layout. README/guides: 'Backends' section. Examples: n/a. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/no-std-alloc-core-crate.md` ("no_std + alloc core crate", Platforms, new). Guides: 'Backends' section. Rustdoc: Crate layout. Examples: n/a. Screenshots: n/a.
 
 **Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html)
 
@@ -3120,7 +3142,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust nightly (`build-std`), m68k, TOS, Hatari
 
-**Documentation.** Rustdoc: `pushrod-tos` README. README/guides: 'Vintage hardware' section. Examples: Hello-world form PRG. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/experimental.md` ("Experimental", Platforms, new). Guides: 'Vintage hardware' section. Rustdoc: `pushrod-tos` README. Examples: Hello-world form PRG. Screenshots: n/a.
 
 **Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html); [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST); [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
 
@@ -3131,6 +3153,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 **1. Foundation (do first, mostly parallel)**
 
 - 7.1 (#69) CI: build, test, clippy, fmt, doc with SDL2 — MVP
+- 7.8 (#122) Documentation site: build pushrod-docs in CI and publish it — MVP
 - 9.1 (#93) Event vocabulary: modern event names and structure — MVP
 - 10.2 (#106) Backend-neutral paint API (SDL2 backend by default) — MVP
 - 1.1 (#19) Widget behavior flags and visual states — MVP
