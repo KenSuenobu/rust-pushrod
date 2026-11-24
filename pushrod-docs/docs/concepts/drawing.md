@@ -17,5 +17,5 @@ This is why widgets never draw directly to the screen and why changing a widget 
 ## Rules for widget authors
 
 - Draw only inside `paint`, from `(0, 0)` to `get_size()`.
-- Use the `paint` helpers (`fill`, `border`, `text`) so widgets share one look: flat, with no gradients, bevels, or rounded corners ([design philosophy](../design-philosophy.md)).
+- Use the `paint` helpers (`fill`, `border`, `text`) so widgets share one look: flat, with no gradients, bevels, shadows, or rounded corners ([design philosophy](../design-philosophy.md)).
 - Pushrod never uses operating-system menus, dialogs, or controls: everything on screen is a Pushrod widget, so applications look the same everywhere.
