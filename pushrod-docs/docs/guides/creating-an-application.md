@@ -5,7 +5,7 @@ title: Creating an application
 
 # Creating an application
 
-A Pushrod application has three parts: an **engine** that owns the window's widgets and runs the event loop, an **application state** type of your choosing, and **callbacks** that connect widget events to your code.
+A Pushrod application has three parts: an **engine** that owns the window's widgets, an **application state**, and the code that reacts to widget events, either **callbacks** (Pushrod runs the loop) or **your own event loop** (you call `next_event`). This guide uses callbacks; see [Two ways to handle events](./handling-events.md#two-ways-to-handle-events) for the event-loop style.
 
 ## The engine and application state
 

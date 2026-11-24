@@ -5,7 +5,47 @@ title: Handling events
 
 # Handling events
 
+## Two ways to handle events
+
+Pushrod supports two styles. Both route input through the same widgets and produce the same events.
+
+| | Callbacks | Your own event loop |
+|---|---|---|
+| Who runs the loop | Pushrod (`engine.run`) | You (`while let Some(event) = engine.next_event(&mut events)`) |
+| Where your code goes | `on_click`, `on_event` closures | A `match` on each returned `PushrodEvent` |
+| Application state | Passed to callbacks as `&mut S` | Ordinary local variables |
+| Changing widgets | `ui.get_mut::<T>(id)` | `engine.widgets().get_as_mut::<T>(id)` |
+| Good for | Many independent widgets, Visual Basic-style event procedures | Central dispatch, state machines, porting code written for GEM-style event loops |
+
+Use one style per window: callbacks registered with `on_click`/`on_event` are not called while you drive the loop with `next_event`.
+
+### Event-loop style
+
+```rust
+let mut events = engine.event_loop(&sdl, window);
+
+while let Some(event) = engine.next_event(&mut events) {
+    match event {
+        PushrodEvent::Clicked(id, _) if id == button => {
+            clicks += 1;
+
+            if let Some(text) = engine.widgets().get_as_mut::<TextWidget>(label) {
+                text.set_text(format!("Clicked {} time(s).", clicks));
+            }
+        }
+
+        _ => {}
+    }
+}
+```
+
+`next_event` repaints any widgets you changed and presents the frame, waits for input (up to one frame at a time, without using the CPU while idle), routes the input through the widgets, and returns the events they generated, one at a time. It returns `None` after the window is closed or `engine.shutdown()` is called. See the [quick start](../getting-started/quick-start.mdx) for a complete program.
+
+The rest of this page describes the callback style and the event flow common to both.
+
 ## How events flow
+
+In both styles:
 
 ```text
 SDL2 event ──> WidgetCache ──> Widget::handle_event(&mut self, &event, ctx)
@@ -24,7 +64,7 @@ SDL2 event ──> WidgetCache ──> Widget::handle_event(&mut self, &event, c
    - **Mouse motion** sends `BoundsChange(left, entered)` to the widget the pointer left and the one it entered, then the motion itself to the captured widget (or the one under the pointer).
    - **Mouse button up** goes to the captured widget, then releases the capture.
 2. The widget updates itself and may queue events with `ctx.emit(...)`. A button, for example, emits `Clicked` when released while still pressed.
-3. After routing, Pushrod delivers each queued event to your callbacks, in order. Because no widget is borrowed at that point, callbacks can freely change your state and any widget.
+3. After routing, Pushrod delivers each queued event, in order: to your callbacks (callback style), or as the return value of `next_event` (event-loop style). Because no widget is borrowed at that point, your code can freely change your state and any widget.
 
 ## Events
 

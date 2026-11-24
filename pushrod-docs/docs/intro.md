@@ -13,13 +13,13 @@ Pushrod is a small, simple GUI library for Rust. It uses SDL2 for graphics and i
 ## What it's like to use
 
 - **Widgets live in a tree and are addressed by ID.** Adding a widget returns a `WidgetId`; callbacks and code refer to widgets by that ID, the way classic resource-file systems did. This is also what lets forms be designed visually and loaded from a file later.
-- **Events are queued, then delivered to your callbacks.** Widgets react to the mouse and keyboard and queue events such as `Clicked`. After the queue is processed, Pushrod calls the callbacks you registered (`on_click`, `on_event`) with mutable access to your application state and to every widget.
+- **Events are queued, then delivered to your code, in the style you prefer.** Widgets react to the mouse and keyboard and queue events such as `Clicked`. Pushrod then either calls the callbacks you registered (`on_click`, `on_event`) with mutable access to your application state and every widget, or hands the events to your own loop (`while let Some(event) = engine.next_event(&mut events)`).
 - **Writing a widget is three functions.** A widget stores a `WidgetCore` and implements `core`, `core_mut`, and `paint`; interactive widgets also implement `handle_event`.
 - **Everything is drawn by Pushrod.** No native menus, dialogs, or controls, so applications look and behave the same on every platform.
 
 ## Where to go next
 
-- [Quick start](./getting-started/quick-start.md): a working application in about five minutes.
+- [Quick start](./getting-started/quick-start.mdx): a working application in about five minutes.
 - [Creating an application](./guides/creating-an-application.md): the engine, application state, and the widget tree.
 - [Handling events](./guides/handling-events.md): how events flow and how callbacks work.
 - [Creating widgets](./guides/creating-widgets.md): write and test your own widget.

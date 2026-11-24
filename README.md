@@ -49,7 +49,20 @@ engine.on_click(button, move |state, ui| {
 let state = engine.run(sdl_context, window, AppState::default());
 ```
 
-See [`examples/base.rs`](examples/base.rs) for a complete application.
+Prefer to run the loop yourself? Ask the engine for each event instead of registering callbacks:
+
+```rust
+let mut events = engine.event_loop(&sdl_context, window);
+
+while let Some(event) = engine.next_event(&mut events) {
+    if let PushrodEvent::Clicked(id, _) = event {
+        if id == button { /* ... */ }
+    }
+}
+```
+
+See [`examples/base.rs`](examples/base.rs) for a complete application, and the
+[quick start](pushrod-docs/docs/getting-started/quick-start.mdx) for both styles side by side.
 
 ## Writing a widget
 
