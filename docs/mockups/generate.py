@@ -798,6 +798,48 @@ def browser_scroll():
             ("Leaf 'Cargo.toml' selected (double-click or Return activates)", c2, "Activated")]
 
 
+BLUE, DBLUE = (70, 130, 200), (30, 70, 140)
+
+@sb("1.17", 1)
+def state_styles():
+    out = []
+    for lab, bg, fg, ptr, note in [("Normal", WHITE, BLACK, None, None), ("Hovered (style: blue)", BLUE, WHITE, (116, 36), "PointerEntered -> on_hover(true)"),
+                                   ("Pressed (style: dark blue)", DBLUE, WHITE, (116, 36), "PointerPressed -> on_press"),
+                                   ("Released inside", BLUE, WHITE, (116, 36), "Clicked -> on_click"),
+                                   ("Pointer left", WHITE, BLACK, (150, 50), "PointerExited -> on_hover(false)")]:
+        c = C(170, 70); c.rect(30, 20, 100, 28, fill=bg); c.ctext(30, 20, 100, 28, "Save", fg)
+        if ptr: c.pointer(*ptr)
+        out.append((lab, c, note))
+    return out
+
+@sb("1.17", 2)
+def drag_over_style():
+    a = C(300, 110); a.rect(150, 20, 130, 70, fill=WHITE); a.text(158, 24, "Drop here", DARK)
+    a.rect(20, 40, 80, 22, fill=WHITE); a.text(26, 40, "Bananas"); a.pointer(70, 50)
+    b = C(300, 110); b.rect(150, 20, 130, 70, fill=(230, 240, 255), outline=BLUE, width=2); b.text(158, 24, "Drop here", DBLUE)
+    b.rect(180, 50, 80, 22, fill=WHITE, outline=MID); b.text(186, 50, "Bananas", DARK); b.pointer(220, 60)
+    return [("Normal", a, None), ("Drag over (style: light blue, blue border)", b, "DRAG_OVER state while a drag hovers")]
+
+
+def _panel(c, x, y, title="Panel"):
+    c.rect(x, y, 150, 90, fill=WHITE); c.rect(x, y, 150, 22, fill=GRAY); c.text(x + 8, y + 1, title)
+    c.checkbox(x + 10, y + 32, "Option A", "on"); c.checkbox(x + 10, y + 58, "Option B")
+
+@sb("10.1", 1)
+def live_mode():
+    out = []
+    for n, (x, note) in enumerate([(20, None), (120, "repaint"), (220, "repaint")], 1):
+        c = C(400, 130); _panel(c, x, 20); c.pointer(x + 70, 30); out.append((f"{n}. " + ("Drag starts" if n == 1 else "Dragging"), c, note))
+    return out
+
+@sb("10.1", 2)
+def outline_mode():
+    a = C(400, 130); _panel(a, 20, 20); a.pointer(90, 30)
+    b = C(400, 130); _panel(b, 20, 20); b.dotted(150, 20, 150, 90); b.dotted(151, 21, 148, 88); b.pointer(220, 30)
+    d = C(400, 130); _panel(d, 220, 20); d.pointer(290, 30)
+    return [("1. Drag starts", a, None), ("2. Dragging: only the outline moves", b, "no content repaint"), ("3. Released: one repaint", d, "Moved")]
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
