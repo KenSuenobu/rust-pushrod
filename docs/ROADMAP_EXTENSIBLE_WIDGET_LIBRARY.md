@@ -41,7 +41,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, and a guide for writing widgets.
 7. Draw everything through SDL2 GPU textures, with no OS-native UI and no per-frame CPU pixel work.
 
-MVP scope: **53 of 96 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
+MVP scope: **54 of 97 active issues** (marked **Y** in the MVP column). Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, accessibility, multiple windows, Chassis design mode, theming) follows the MVP.
 
 ## Epics
 
@@ -55,7 +55,7 @@ MVP scope: **53 of 96 active issues** (marked **Y** in the MVP column). Everythi
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 9 | 7 |
 | 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 8 | 8 |
 | 8 (#18) | Theming and skins (distant future) | Placeholder: route colors and metrics through a theme, then allow skins. Not scheduled. | 2 | 0 |
-| 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 10 | 4 |
+| 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 11 | 5 |
 | 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target. | 4 | 1 |
 
 ```mermaid
@@ -143,7 +143,7 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Events:** `PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`, `Clicked`, `Scrolled`, `KeyPressed`, `KeyReleased`, `TextEntered`, `FocusGained`, `FocusLost`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `Triggered`, `ContextMenuRequested`, `PropertyChanged`, `Dropped`, `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `WindowResized`, `WindowFocusChanged`, `CloseRequested`, `Tick`, `Engine`, `Custom`, `Raw`
 
-**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`
+**Callbacks:** `on_click`, `on_press`, `on_release`, `on_hover`, `on_activate`, `on_toggle`, `on_value_change`, `on_selection_change`, `on_text_change`, `on_editing_finished`, `on_key_press`, `on_focus_change`, `on_context_menu`, `on_drop`, `on_action`, `on_custom::<T>`, `on_event`, `on_timer`, `on_idle`, `on_start`, `on_close_request`, `on_engine_event`, `next_event (event-loop style)`
 
 **Drawing modes:** `Live`, `Outline`, `Auto`
 
@@ -2775,6 +2775,7 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 | 9.8 (#100) | Drag and drop within the application | Drag data between widgets (list to list, file icon to drop zone) with drop targets and feedback. | `enhancement`, `events`, `parallelizable`, `size/L`, `usability` | Y | N | L | `dnd.rs (new)`, `cache.rs` |
 | 9.9 (#101) | Pointer cursor per widget | Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links). | `enhancement`, `events`, `parallelizable`, `size/S`, `usability` | Y | N | S | `widget.rs`, `cache.rs` |
 | 9.10 (#109) | Engine events: every internal action Pushrod performs emits an event | A system-wide EngineEvent for each internal action (mode changes, focus, modals, menus, tree changes, forms, drags, timers, window changes), broadcast to widgets and callbacks. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | Y | M | `event.rs`, `engine.rs`, `cache.rs` |
+| 9.11 (#124) | Event-loop style: keep parity with callbacks | Everything delivered to callbacks is also returned by next_event, and both styles can be combined. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/S` | Y | Y | S | `engine.rs`, `event.rs` |
 
 ### 9.1 (#93): Event vocabulary: modern event names and structure
 
@@ -3029,6 +3030,26 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Sources.** [Qt: The Event System (accept/ignore, event filters, posting custom events)](https://doc.qt.io/qt-6/eventsandfilters.html)
 
+### 9.11 (#124): Event-loop style: keep parity with callbacks
+
+**Problem Statement.** Pushrod now supports two styles: callbacks (`engine.run`) and an application-driven loop (`engine.event_loop` + `next_event`). As the event system grows (engine events, custom events, timers, masks, actions), the loop style could fall behind.
+
+**Solution / Scope.** Rule: every event that reaches callbacks is also returned by `next_event`, in the same order: semantic events, `Engine(..)` events (9.10 (#109)), `Custom(..)` events (1.13 (#78)), timer events (1.5 (#21)), and action triggers (9.5 (#97)). The run-loop mask (1.2 (#6)) applies to both. Add `next_event_with(&mut events, &mut state)`, which also runs registered callbacks for each event before returning it, so an application can mix styles (for example callbacks for most widgets, a loop for the main window logic). Add conformance tests (7.6 (#114)) that run the same scripted input through both styles and compare the event sequences.
+
+**Acceptance Criteria.**
+
+- Every event kind is delivered by both styles in the same order
+- `next_event_with` runs callbacks then returns the event
+- Conformance test compares both styles on the same input
+
+**Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/handling-events.md` ("Handling events", Guides, update). Guides: Two ways to handle events (events guide). Rustdoc: `Engine::event_loop`, `next_event`, `next_event_with`. Examples: Quick start shows both styles. Screenshots: n/a.
+
+**Sources.** [GEM AES object structure (flags, states, object tree)](https://www.seasip.info/Gem/aestruct.html)
+
 ## Epic 10: Rendering backends, drawing modes, and vintage hardware (#103)
 
 Live vs. outline drawing for slow GPUs and vintage machines, a backend-neutral paint API (SDL2 by default), a no_std core, and an experimental Atari ST target.
@@ -3159,6 +3180,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.1 (#19) Widget behavior flags and visual states — MVP
 - 1.2 (#6) Event masks for the run loop and for widgets — MVP
 - 9.10 (#109) Engine events: every internal action Pushrod performs emits an event — MVP
+- 9.11 (#124) Event-loop style: keep parity with callbacks — MVP
 - 1.3 (#7) Broadcast events to all interested widgets — MVP
 - 1.6 (#22) Callback registry for every widget event — MVP
 - 1.13 (#78) Custom application events with payloads — MVP
