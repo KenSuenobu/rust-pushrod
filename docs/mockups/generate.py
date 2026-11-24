@@ -982,6 +982,123 @@ def flow_layout():
     return out
 
 
+import math
+
+def _magnifier(c, x, y, color=DARK):
+    c.ellipse(x, y, 10, 10, outline=color, width=1); c.line(x + 9, y + 9, x + 13, y + 13, color, 2)
+
+def _clear_x(c, x, y, color=DARK):
+    c.ellipse(x, y, 14, 14, fill=GRAY, outline=None)
+    c.line(x + 4, y + 4, x + 10, y + 10, WHITE, 2); c.line(x + 10, y + 4, x + 4, y + 10, WHITE, 2)
+
+def _eye(c, x, y, open_=True):
+    c.ellipse(x, y + 2, 16, 10, outline=DARK)
+    c.ellipse(x + 5, y + 4, 6, 6, fill=DARK if open_ else None, outline=DARK)
+    if not open_: c.line(x, y + 12, x + 16, y, DARK, 1)
+
+@sb("2.6", 3)
+def field_accessories():
+    a = C(300, 56); a.field(14, 16, 260, "", placeholder="      Search"); _magnifier(a, 20, 21)
+    b = C(300, 56); b.field(14, 16, 260, "      widgets", caret=13, focused=True); _magnifier(b, 20, 21); _clear_x(b, 252, 20)
+    d = C(300, 56); d.field(14, 16, 260, "", focused=True, placeholder="       Search"); _magnifier(d, 20, 21); d.line(40, 20, 40, 34)
+    e = C(300, 56); x = e.labeled(10, 17, "Password:", 78); e.field(x, 16, 190, "•••••••"); _eye(e, x + 166, 21)
+    f = C(300, 56); x = f.labeled(10, 17, "Password:", 78); f.field(x, 16, 190, "sample-pass"); _eye(f, x + 166, 21, open_=False)
+    return [("1. Search field, empty", a, None), ("2. Typing: clear (×) appears", b, "TextChanged"),
+            ("3. × clicked: text cleared", d, "TextChanged"), ("4. Password with reveal", e, None),
+            ("5. Reveal clicked", f, "masking toggled")]
+
+
+@sb("3.9")
+def split_view():
+    def frame(div, outline=None):
+        c = C(470, 170); c.rect(14, 14, 442, 142, fill=WHITE)
+        c.listbox(15, 15, div - 15, ["Inbox", "Drafts", "Sent", "Archive"], selected={0}, scroll=False)
+        c.rect(div, 15, 6, 140, fill=GRAY, outline=None)
+        for yy in (78, 84, 90): c.rect(div + 2, yy, 2, 2, fill=DARK, outline=None)
+        c.text(div + 16, 22, "Subject: Weekly report", BLACK, 13); c.text(div + 16, 44, "From: jane.doe@example.com", DARK, 11)
+        if outline: c.rect(outline, 15, 2, 140, fill=None, outline=BLACK); c.dotted(outline - 1, 15, 4, 140)
+        return c
+    a = frame(140); b = frame(140, outline=220); b.pointer(222, 80); d = frame(220)
+    return [("1. Divider at 140 px", a, None), ("2. Dragging (outline mode shows a line)", b, None), ("3. Released at 220 px", d, "ValueChanged")]
+
+
+def _img_icon(c, x, y, s=20, color=(70, 120, 180)):
+    c.rect(x, y, s, s, fill=color, outline=None); c.poly([(x + 3, y + s - 3), (x + s / 2, y + 5), (x + s - 3, y + s - 3)], fill=WHITE)
+
+@sb("2.21")
+def image_button():
+    out = []
+    for lab, kind, kw in [("Image only", "only", {}), ("Image left", "left", {}), ("Image above", "above", {}),
+                          ("Pressed", "left", dict(pressed=True)), ("Toggled", "only", dict(pressed=True)), ("Disabled", "left", dict(disabled=True))]:
+        c = C(130, 80)
+        if kind == "only":
+            c.button(47, 22, 36, 36, "", pressed=kw.get("pressed", False)); _img_icon(c, 55, 30, 20, WHITE if kw.get("pressed") else (70, 120, 180))
+        elif kind == "left":
+            c.button(15, 25, 100, 30, "", **kw); _img_icon(c, 22, 30, 20, WHITE if kw.get("pressed") else (70, 120, 180))
+            c.text(48, 29, "Upload", WHITE if kw.get("pressed") else BLACK)
+            if kw.get("disabled"): c.dither(15, 25, 100, 30, PANEL)
+        else:
+            c.button(30, 10, 70, 60, ""); _img_icon(c, 55, 18, 20); c.ctext(30, 42, 70, 22, "Upload")
+        out.append((lab, c, "Clicked" if lab == "Pressed" else ("Toggled(true)" if lab == "Toggled" else None)))
+    return out
+
+
+LINK = (30, 80, 170)
+@sb("2.22")
+def link_label():
+    out = []
+    for lab, color, ptr, focus, note in [("Normal", LINK, False, False, None), ("Hovered", LINK, True, False, None),
+                                         ("Focused", LINK, False, True, "Return or Space activates"), ("Visited", (110, 60, 150), False, False, "Activated (opened)")]:
+        c = C(190, 50); c.text(14, 14, "Learn more about Pushrod", color, 13)
+        w = c.tw("Learn more about Pushrod", 13); c.line(14, 32, 14 + w, 32, color)
+        if ptr:
+            px, py = 70, 22; c.poly([(px + 4, py), (px + 7, py), (px + 7, py + 7), (px + 13, py + 7), (px + 13, py + 16), (px + 2, py + 16), (px, py + 10), (px + 4, py + 10)], fill=WHITE, outline=BLACK)
+        if focus: c.dotted(10, 12, int(w) + 9, 24)
+        out.append((lab, c, note))
+    return out
+
+
+def _dial(c, cx, cy, r, frac, disabled=False, focused=False, value=None, notches=11):
+    c.ellipse(cx - r, cy - r, 2 * r, 2 * r, fill=WHITE)
+    for n in range(notches):
+        a = math.radians(225 - 270 * n / (notches - 1))
+        c.line(cx + (r + 3) * math.cos(a), cy - (r + 3) * math.sin(a), cx + (r + 7) * math.cos(a), cy - (r + 7) * math.sin(a), DARK)
+    a = math.radians(225 - 270 * frac)
+    c.line(cx, cy, cx + (r - 5) * math.cos(a), cy - (r - 5) * math.sin(a), BLACK, 3)
+    if value is not None: c.ctext(cx - 40, cy + r + 10, 80, 18, str(value), DARK, 12)
+    if focused: c.dotted(cx - r - 10, cy - r - 10, 2 * r + 21, 2 * r + 21)
+    if disabled: c.dither(cx - r - 8, cy - r - 8, 2 * r + 17, 2 * r + 17, PANEL)
+
+@sb("3.12")
+def dial():
+    out = []
+    for lab, f, kw, ptr, note in [("Idle", 0.3, {}, None, None), ("Dragging up", 0.65, {}, (120, 30), "ValueChanged (continuous)"),
+                                  ("Focused (arrows step)", 0.65, dict(focused=True), None, None), ("Disabled", 0.3, dict(disabled=True), None, None)]:
+        c = C(150, 130); _dial(c, 75, 58, 34, f, value=f"Volume {int(f * 100)}", **kw)
+        if ptr: c.pointer(*ptr)
+        out.append((lab, c, note))
+    return out
+
+
+def _spinner(c, cx, cy, r, hot, static=False):
+    if static:
+        c.poly([(cx - 8, cy - 11), (cx + 8, cy - 11), (cx, cy)], fill=DARK); c.poly([(cx - 8, cy + 11), (cx + 8, cy + 11), (cx, cy)], fill=DARK)
+        c.line(cx - 10, cy - 11, cx + 10, cy - 11, BLACK, 2); c.line(cx - 10, cy + 11, cx + 10, cy + 11, BLACK, 2); return
+    for n in range(8):
+        a = math.radians(90 - n * 45)
+        col = BLACK if n == hot else (DARK if (n - hot) % 8 == 7 else GRAY)
+        c.line(cx + r * 0.45 * math.cos(a), cy - r * 0.45 * math.sin(a), cx + r * math.cos(a), cy - r * math.sin(a), col, 3)
+
+@sb("4.10")
+def spinner():
+    out = []
+    for n, hot in enumerate([0, 1, 2]):
+        c = C(190, 50); _spinner(c, 26, 25, 11, hot); c.text(46, 15, "Connecting…"); out.append((f"Running, frame {n + 1}", c, None))
+    c = C(190, 50); c.text(46, 15, "Connected"); out.append(("Stopped (hidden)", c, None))
+    c = C(190, 50); _spinner(c, 26, 25, 11, 0, static=True); c.text(46, 15, "Connecting…"); out.append(("Outline mode / vintage: static", c, None))
+    return out
+
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
