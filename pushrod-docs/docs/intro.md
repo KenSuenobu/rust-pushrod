@@ -15,6 +15,7 @@ Pushrod is a small, simple GUI library for Rust. It uses SDL2 for graphics and i
 - **Widgets live in a tree and are addressed by ID.** Adding a widget returns a `WidgetId`; callbacks and code refer to widgets by that ID, the way classic resource-file systems did. This is also what lets forms be designed visually and loaded from a file later.
 - **Events are queued, then delivered to your code, in the style you prefer.** Widgets react to the mouse and keyboard and queue events such as `Clicked`. Pushrod then either calls the callbacks you registered (`on_click`, `on_event`) with mutable access to your application state and every widget, or hands the events to your own loop (`while let Some(event) = engine.next_event(&mut events)`).
 - **Writing a widget is three functions.** A widget stores a `WidgetCore` and implements `core`, `core_mut`, and `paint`; interactive widgets also implement `handle_event`.
+- **Simple by design.** Widgets are flat: fills, one-pixel borders, and text. No glass, no bevels, no rounded corners. See the [design philosophy](./design-philosophy.md).
 - **Everything is drawn by Pushrod.** No native menus, dialogs, or controls, so applications look and behave the same on every platform.
 
 ## Where to go next
@@ -25,4 +26,4 @@ Pushrod is a small, simple GUI library for Rust. It uses SDL2 for graphics and i
 - [Creating widgets](./guides/creating-widgets.md): write and test your own widget.
 - [Widgets](/widgets): every built-in widget, one page each.
 
-Pushrod is being modernized; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) for what's planned.
+Pushrod is being modernized; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) for what's planned, and the [widget roadmaps](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/widgets/README.md) for how each planned widget will look and respond.
