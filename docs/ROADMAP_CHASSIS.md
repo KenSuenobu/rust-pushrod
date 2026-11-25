@@ -1841,6 +1841,8 @@ Work in this order; items in the same phase can run in parallel unless their dep
 
 ## Action Plan
 
+The step-by-step version of this plan, with every Pushrod and Chassis issue in one exact order, is [`docs/roadmaps/ORDER_OF_EXECUTION.md`](roadmaps/ORDER_OF_EXECUTION.md).
+
 Chassis is written in five phases, each a GitHub milestone with a working, demonstrable result. Phase 1 needs no window, so it starts as soon as Pushrod's resource manager exists; the UI phases wait for the Pushrod widgets they use.
 
 ```mermaid
