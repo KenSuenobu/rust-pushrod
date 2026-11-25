@@ -1,7 +1,9 @@
 name: Documentation site
 
-# Builds the Docusaurus site and the rustdoc API reference together, and publishes them to
-# GitHub Pages from main.  Pull requests build only (the build fails on broken links).
+# Builds the Docusaurus site and the rustdoc API reference together, and publishes them as the
+# `pushrod-docs` Docker image from main.  Pull requests build only (the build fails on broken
+# links).  Needs the repository secrets DOCKER_REPOSITORY (the registry namespace the image is
+# pushed under), DOCKER_USERNAME, and DOCKER_PASSWORD.
 on:
   push:
     branches: [main]
@@ -39,21 +41,30 @@ jobs:
           RUSTDOCFLAGS: -D warnings
       - name: Publish the API reference at /api/
         run: cp -r target/doc pushrod-docs/build/api
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: site
           path: pushrod-docs/build
 
-  deploy:
-    name: Deploy to GitHub Pages
+  publish:
+    name: Publish the pushrod-docs Docker image
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: pushrod-docs/build
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: pushrod-docs
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REPOSITORY }}/pushrod-docs:latest
+            ${{ secrets.DOCKER_REPOSITORY }}/pushrod-docs:${{ github.sha }}
