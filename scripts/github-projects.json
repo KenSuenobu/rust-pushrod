@@ -1434,12 +1434,20 @@
      "order": 1
     },
     {
+     "number": 87,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/87",
+     "title": "pushrod: [2.18] Multi-line text area",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 2
+    },
+    {
      "number": 82,
      "url": "https://github.com/KenSuenobu/rust-pushrod/issues/82",
      "title": "pushrod: [1.16] Multiple windows: separate OS windows, each with its own engine",
      "phase": "Pushrod prerequisites",
      "kind": "Pushrod",
-     "order": 2
+     "order": 3
     },
     {
      "number": 67,
@@ -1447,7 +1455,7 @@
      "title": "pushrod: [6.8] Bind actions by name from form files",
      "phase": "Pushrod prerequisites",
      "kind": "Pushrod",
-     "order": 3
+     "order": 4
     },
     {
      "number": 107,
@@ -1455,7 +1463,7 @@
      "title": "pushrod: [10.3] no_std + alloc core crate",
      "phase": "Pushrod prerequisites",
      "kind": "Pushrod",
-     "order": 4
+     "order": 5
     },
     {
      "number": 108,
@@ -1463,7 +1471,7 @@
      "title": "pushrod: [10.4] Experimental: Atari ST / TOS backend",
      "phase": "Pushrod prerequisites",
      "kind": "Pushrod",
-     "order": 5
+     "order": 6
     },
     {
      "number": 135,
@@ -1471,7 +1479,7 @@
      "title": "pushrod: [10.5] SDL3 backend (pushrod-sdl3)",
      "phase": "Pushrod prerequisites",
      "kind": "Pushrod",
-     "order": 6
+     "order": 7
     },
     {
      "number": 200,
@@ -1479,7 +1487,7 @@
      "title": "chassis: [1.5] Workspace settings",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 7
+     "order": 8
     },
     {
      "number": 201,
@@ -1487,7 +1495,7 @@
      "title": "chassis: [2.7] Menu editor",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 8
+     "order": 9
     },
     {
      "number": 202,
@@ -1495,7 +1503,7 @@
      "title": "chassis: [3.9] Form preview",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 9
+     "order": 10
     },
     {
      "number": 203,
@@ -1503,7 +1511,7 @@
      "title": "chassis: [4.5] Multiple selection editing",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 10
+     "order": 11
     },
     {
      "number": 204,
@@ -1511,7 +1519,7 @@
      "title": "chassis: [6.3] Error list",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 11
+     "order": 12
     },
     {
      "number": 205,
@@ -1519,7 +1527,7 @@
      "title": "chassis: [6.4] Project templates",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 12
+     "order": 13
     },
     {
      "number": 206,
@@ -1527,7 +1535,7 @@
      "title": "chassis: [7.4] Packaging and releases",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 13
+     "order": 14
     },
     {
      "number": 216,
@@ -1535,7 +1543,7 @@
      "title": "chassis: [1.6] Find in project",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 14
+     "order": 15
     },
     {
      "number": 217,
@@ -1543,7 +1551,7 @@
      "title": "chassis: [1.7] Multiple windows per project",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 15
+     "order": 16
     },
     {
      "number": 218,
@@ -1551,7 +1559,7 @@
      "title": "chassis: [2.9] Localization",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 16
+     "order": 17
     },
     {
      "number": 219,
@@ -1559,7 +1567,7 @@
      "title": "chassis: [2.10] Source control status",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 17
+     "order": 18
     },
     {
      "number": 220,
@@ -1567,7 +1575,7 @@
      "title": "chassis: [3.10] Visual form inheritance",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 18
+     "order": 19
     },
     {
      "number": 221,
@@ -1575,7 +1583,7 @@
      "title": "chassis: [3.11] Accessibility and usability checks",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 19
+     "order": 20
     },
     {
      "number": 222,
@@ -1583,7 +1591,7 @@
      "title": "chassis: [4.6] Data bindings in the inspector",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 20
+     "order": 21
     },
     {
      "number": 223,
@@ -1591,7 +1599,7 @@
      "title": "chassis: [5.8] Code intelligence with rust-analyzer",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 21
+     "order": 22
     },
     {
      "number": 224,
@@ -1599,7 +1607,87 @@
      "title": "chassis: [6.6] Build targets, including the Atari ST",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 22
+     "order": 23
+    },
+    {
+     "number": 312,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/312",
+     "title": "chassis: [9.1] Command catalog: every designer command by name, with typed arguments",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 24
+    },
+    {
+     "number": 313,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/313",
+     "title": "chassis: [9.2] MCP server inside Chassis",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 25
+    },
+    {
+     "number": 314,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/314",
+     "title": "chassis: [9.3] Assistant tools: read the project",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 26
+    },
+    {
+     "number": 315,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/315",
+     "title": "chassis: [9.4] Assistant tools: edit forms and resources",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 27
+    },
+    {
+     "number": 316,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/316",
+     "title": "chassis: [9.5] Assistant tools: events, handler code, and builds",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 28
+    },
+    {
+     "number": 317,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/317",
+     "title": "chassis: [9.6] Assistant tool: a picture of the form",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 29
+    },
+    {
+     "number": 318,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/318",
+     "title": "chassis: [9.7] Assistant activity, review mode, and safety",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 30
+    },
+    {
+     "number": 319,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/319",
+     "title": "chassis: [9.8] Connect dialog and assistant guide",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 31
+    },
+    {
+     "number": 322,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/322",
+     "title": "chassis: [9.10] Assistant settings: every check is configurable",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 32
+    },
+    {
+     "number": 320,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/320",
+     "title": "chassis: [9.9] Assistant drawer: chat inside Chassis",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 33
     }
    ]
   },
@@ -1688,20 +1776,12 @@
      "order": 9
     },
     {
-     "number": 87,
-     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/87",
-     "title": "pushrod: [2.18] Multi-line text area",
-     "phase": "Pushrod prerequisites",
-     "kind": "Pushrod",
-     "order": 10
-    },
-    {
      "number": 126,
      "url": "https://github.com/KenSuenobu/rust-pushrod/issues/126",
      "title": "pushrod: [2.22] Link label",
      "phase": "Pushrod prerequisites",
      "kind": "Pushrod",
-     "order": 11
+     "order": 10
     },
     {
      "number": 253,
@@ -1709,7 +1789,7 @@
      "title": "extra-widgets: [1.2] Extra widgets in the Pushrod Showcase",
      "phase": "Extra widgets 1 - crate and Chassis widgets",
      "kind": "Extra widgets",
-     "order": 12
+     "order": 11
     },
     {
      "number": 258,
@@ -1717,7 +1797,7 @@
      "title": "extra-widgets: [2.1] Menu button and split button",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 13
+     "order": 12
     },
     {
      "number": 50,
@@ -1725,7 +1805,7 @@
      "title": "extra-widgets: [2.2] Segmented control",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 14
+     "order": 13
     },
     {
      "number": 259,
@@ -1733,7 +1813,7 @@
      "title": "extra-widgets: [2.3] Stepper (up and down arrows)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 15
+     "order": 14
     },
     {
      "number": 127,
@@ -1741,7 +1821,7 @@
      "title": "extra-widgets: [2.4] Dial (rotary knob)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 16
+     "order": 15
     },
     {
      "number": 54,
@@ -1749,7 +1829,7 @@
      "title": "extra-widgets: [2.5] Level indicator (meter)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 17
+     "order": 16
     },
     {
      "number": 306,
@@ -1757,7 +1837,7 @@
      "title": "extra-widgets: [2.10] Range slider (two thumbs)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 18
+     "order": 17
     },
     {
      "number": 260,
@@ -1765,7 +1845,7 @@
      "title": "extra-widgets: [3.1] Calendar (month view)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 19
+     "order": 18
     },
     {
      "number": 91,
@@ -1773,7 +1853,7 @@
      "title": "extra-widgets: [3.2] Date picker",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 20
+     "order": 19
     },
     {
      "number": 261,
@@ -1781,7 +1861,7 @@
      "title": "extra-widgets: [3.3] Time field and date-time field",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 21
+     "order": 20
     },
     {
      "number": 46,
@@ -1789,7 +1869,7 @@
      "title": "extra-widgets: [3.4] Color well and color picker",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 22
+     "order": 21
     },
     {
      "number": 129,
@@ -1797,7 +1877,7 @@
      "title": "extra-widgets: [3.5] Font chooser",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 23
+     "order": 22
     },
     {
      "number": 262,
@@ -1805,7 +1885,7 @@
      "title": "extra-widgets: [3.6] Path field (file or folder with Browse)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 24
+     "order": 23
     },
     {
      "number": 307,
@@ -1813,7 +1893,7 @@
      "title": "extra-widgets: [3.10] Token field (tags in a field)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 25
+     "order": 24
     },
     {
      "number": 55,
@@ -1821,7 +1901,7 @@
      "title": "extra-widgets: [4.1] Tree view (outline)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 26
+     "order": 25
     },
     {
      "number": 263,
@@ -1829,7 +1909,7 @@
      "title": "extra-widgets: [4.6] Check list",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 27
+     "order": 26
     },
     {
      "number": 264,
@@ -1837,7 +1917,7 @@
      "title": "extra-widgets: [4.7] Editable list (add, remove, reorder)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 28
+     "order": 27
     },
     {
      "number": 308,
@@ -1845,7 +1925,7 @@
      "title": "extra-widgets: [4.15] Rich text view (formatted, read-only)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 29
+     "order": 28
     },
     {
      "number": 265,
@@ -1853,7 +1933,7 @@
      "title": "extra-widgets: [5.2] Accordion (one section open at a time)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 30
+     "order": 29
     },
     {
      "number": 266,
@@ -1861,7 +1941,7 @@
      "title": "extra-widgets: [5.3] Sidebar (navigation list)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 31
+     "order": 30
     },
     {
      "number": 267,
@@ -1869,7 +1949,7 @@
      "title": "extra-widgets: [6.1] Input dialog (ask for one value)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 32
+     "order": 31
     },
     {
      "number": 268,
@@ -1877,7 +1957,7 @@
      "title": "extra-widgets: [6.2] Progress dialog",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 33
+     "order": 32
     },
     {
      "number": 269,
@@ -1885,7 +1965,7 @@
      "title": "extra-widgets: [6.3] Task dialog (alert with details and options)",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 34
+     "order": 33
     },
     {
      "number": 309,
@@ -1893,7 +1973,7 @@
      "title": "extra-widgets: [6.10] Recent files menu",
      "phase": "Extra widgets 2 - everyday controls and pickers",
      "kind": "Extra widgets",
-     "order": 35
+     "order": 34
     },
     {
      "number": 270,
@@ -1901,7 +1981,7 @@
      "title": "extra-widgets: [2.7] Ruler",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 36
+     "order": 35
     },
     {
      "number": 271,
@@ -1909,7 +1989,7 @@
      "title": "extra-widgets: [2.8] Shortcut field (key combination recorder)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 37
+     "order": 36
     },
     {
      "number": 272,
@@ -1917,7 +1997,7 @@
      "title": "extra-widgets: [3.7] Image well",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 38
+     "order": 37
     },
     {
      "number": 273,
@@ -1925,7 +2005,7 @@
      "title": "extra-widgets: [3.8] New password (enter, confirm, strength)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 39
+     "order": 38
     },
     {
      "number": 274,
@@ -1933,7 +2013,7 @@
      "title": "extra-widgets: [3.9] Character picker",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 40
+     "order": 39
     },
     {
      "number": 45,
@@ -1941,7 +2021,7 @@
      "title": "extra-widgets: [4.2] Column browser",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 41
+     "order": 40
     },
     {
      "number": 275,
@@ -1949,7 +2029,7 @@
      "title": "extra-widgets: [4.3] Icon grid view",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 42
+     "order": 41
     },
     {
      "number": 276,
@@ -1957,7 +2037,7 @@
      "title": "extra-widgets: [4.4] Data grid (editable table)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 43
+     "order": 42
     },
     {
      "number": 277,
@@ -1965,7 +2045,7 @@
      "title": "extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 44
+     "order": 43
     },
     {
      "number": 278,
@@ -1973,7 +2053,7 @@
      "title": "extra-widgets: [4.8] Dual list (list builder)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 45
+     "order": 44
     },
     {
      "number": 279,
@@ -1981,7 +2061,7 @@
      "title": "extra-widgets: [4.11] Rule editor (query builder)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 46
+     "order": 45
     },
     {
      "number": 280,
@@ -1989,7 +2069,7 @@
      "title": "extra-widgets: [4.12] Image viewer (zoom and pan)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 47
+     "order": 46
     },
     {
      "number": 281,
@@ -1997,7 +2077,7 @@
      "title": "extra-widgets: [5.4] Document tabs (closable and reorderable)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 48
+     "order": 47
     },
     {
      "number": 282,
@@ -2005,7 +2085,7 @@
      "title": "extra-widgets: [6.4] Wizard (step-by-step assistant)",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 49
+     "order": 48
     },
     {
      "number": 283,
@@ -2013,7 +2093,7 @@
      "title": "extra-widgets: [6.5] Settings dialog",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 50
+     "order": 49
     },
     {
      "number": 284,
@@ -2021,7 +2101,7 @@
      "title": "extra-widgets: [6.6] About dialog",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 51
+     "order": 50
     },
     {
      "number": 285,
@@ -2029,7 +2109,7 @@
      "title": "extra-widgets: [6.7] Find and replace bar",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 52
+     "order": 51
     },
     {
      "number": 286,
@@ -2037,7 +2117,7 @@
      "title": "extra-widgets: [6.8] Keyboard shortcuts editor",
      "phase": "Extra widgets 3 - specialized views and assistants",
      "kind": "Extra widgets",
-     "order": 53
+     "order": 52
     }
    ]
   },

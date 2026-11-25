@@ -60,7 +60,7 @@ Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252
 
 ## Used by Chassis
 
-Chassis 6.2 [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) Build and run.
+Chassis 6.2 [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) Build and run, Chassis 9.7 [#318](https://github.com/KenSuenobu/rust-pushrod/issues/318) Assistant activity, review mode, and safety.
 
 ## Implementation notes
 

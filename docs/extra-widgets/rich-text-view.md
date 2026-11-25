@@ -58,6 +58,10 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 1.18 [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate), Pushrod 1.27 [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) Wrapped text: multi-line labels that reflow, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 2.22 [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) Link label
 
+## Used by Chassis
+
+Chassis 9.9 [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) Assistant drawer: chat inside Chassis.
+
 ## Implementation notes
 
 - **Crate:** `pushrod-extra-widgets`, using only the public APIs of `pushrod` and `pushrod-widgets`. Anything missing from the core is added to the core first.

@@ -230,6 +230,7 @@ Generated code and your code never share a function body, so regenerating can't 
 | Where Chassis lives | A `chassis/` crate in this repository's workspace, so Pushrod API changes and Chassis updates land together; it can move to its own repository once Pushrod's APIs settle |
 | Tree view | Not needed: the project drawer uses expander sections with lists, and the designer's breadcrumb navigates nested layouts |
 | Generic widgets | The drawer, tool palette (widget palette), breadcrumb bar, and property grid come from `pushrod-extra-widgets` ([extra widgets roadmap](ROADMAP_EXTRA_WIDGETS.md)), not private Chassis code, so any application can use them |
+| AI assistant | Through MCP, not a built-in model: Chassis runs an MCP server in its own process whose tools are the designer's commands, so any MCP client (Claude Code, the Claude desktop app, others) can see and edit the live project with validation and undo. Off by default, local only, behind a token, with review before applying; every one of these checks is a setting with a safe default. An optional chat drawer uses the same tools (Epic 9, Chassis v2) |
 
 ## Relationship to Pushrod
 
@@ -297,6 +298,7 @@ The Chassis MVP is a version in which a developer can:
 | 6 ([#162](https://github.com/KenSuenobu/rust-pushrod/issues/162)) | Build and run | Code generation rules, a command-line generator, build and run, error list, templates. | 6 | 3 |
 | 7 ([#163](https://github.com/KenSuenobu/rust-pushrod/issues/163)) | Quality, documentation, and release | CI and golden screenshots, documentation, the sample project, packaging. | 4 | 3 |
 | 8 ([#207](https://github.com/KenSuenobu/rust-pushrod/issues/207)) | Example projects | Small, complete applications built with Chassis at the MVP, kept in the repository for learning and testing. | 8 | 0 |
+| 9 ([#311](https://github.com/KenSuenobu/rust-pushrod/issues/311)) | AI assistant (MCP) | Let an AI assistant such as Claude see and edit the open project through the Model Context Protocol, then offer the same help inside Chassis. | 10 | 0 |
 
 ## Epic 1: Application shell ([#157](https://github.com/KenSuenobu/rust-pushrod/issues/157))
 
@@ -1755,6 +1757,267 @@ Built entirely in Chassis; lives in `examples/chassis/dice/` with its `.prsc` fi
 
 **Documentation.** `pushrod-docs/docs/chassis/examples.md` ("Example projects", Chassis group, update).
 
+## Epic 9: AI assistant (MCP) ([#311](https://github.com/KenSuenobu/rust-pushrod/issues/311))
+
+Let an AI assistant such as Claude see and edit the open project through the Model Context Protocol, then offer the same help inside Chassis.
+
+**Problem.** Describing a form or a change in words is often faster than building it by hand, and assistants are good at writing small event handlers. An assistant that only edits files on disk can't see the designer, the selection, or the result, and its changes bypass undo.
+
+**Scope.** Chassis runs an MCP server inside its own process. Its tools are the designer's own commands, so an assistant's changes appear on the canvas as they happen, are validated against the widget registry, and are undone like any other edit. Any MCP client works (Claude Code, the Claude desktop app, or another vendor's). An optional chat drawer inside Chassis uses the same tools. Nothing is sent anywhere unless the user turns the assistant on.
+
+| Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
+|---|---|---|---|---|---|---|---|---|
+| 9.1 ([#312](https://github.com/KenSuenobu/rust-pushrod/issues/312)) | Command catalog: every designer command by name, with typed arguments | Each designer command gets a stable name, typed arguments, a description, and a JSON schema, and can be run without the mouse or menus. | `assistant`, `chassis`, `chassis-v2`, `size/M` | N | N | post | M | `chassis/src/commands/catalog.rs`, `chassis/src/commands/` |
+| 9.2 ([#313](https://github.com/KenSuenobu/rust-pushrod/issues/313)) | MCP server inside Chassis | Chassis listens for MCP clients on this computer only, behind a token, when the user turns it on. | `assistant`, `chassis`, `chassis-v2`, `size/M` | N | N | post | M | `chassis/src/assistant/server.rs`, `chassis/src/assistant/mod.rs`, `chassis/Cargo.toml` |
+| 9.3 ([#314](https://github.com/KenSuenobu/rust-pushrod/issues/314)) | Assistant tools: read the project | Tools that let an assistant look: the project, forms, widget types and their properties, the selection, resources, and build errors. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/S` | Y | N | post | S | `chassis/src/assistant/tools_read.rs` |
+| 9.4 ([#315](https://github.com/KenSuenobu/rust-pushrod/issues/315)) | Assistant tools: edit forms and resources | Tools that create forms, add, move, and delete widgets, set properties and layout, and edit resources, each validated and undoable. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/assistant/tools_write.rs` |
+| 9.5 ([#316](https://github.com/KenSuenobu/rust-pushrod/issues/316)) | Assistant tools: events, handler code, and builds | Tools to list a widget's events, read and write a handler's code, build the project, and read the errors. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/assistant/tools_code.rs` |
+| 9.6 ([#317](https://github.com/KenSuenobu/rust-pushrod/issues/317)) | Assistant tool: a picture of the form | A tool that returns an image of a form, so the assistant can see what it built. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/S` | Y | N | post | S | `chassis/src/assistant/tools_view.rs` |
+| 9.7 ([#318](https://github.com/KenSuenobu/rust-pushrod/issues/318)) | Assistant activity, review mode, and safety | Chassis shows when an assistant is connected and what it changed, and can hold its changes as a preview to apply or discard. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/assistant/activity.rs`, `chassis/src/assistant/review.rs`, `chassis/src/shell/status.rs` |
+| 9.8 ([#319](https://github.com/KenSuenobu/rust-pushrod/issues/319)) | Connect dialog and assistant guide | A dialog with the address, token, and ready-to-paste setup for common clients, and a guide page with a worked example. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/S` | Y | N | post | S | `chassis/src/assistant/connect_dialog.rs`, `pushrod-docs/docs/chassis/assistant.md` |
+| 9.9 ([#320](https://github.com/KenSuenobu/rust-pushrod/issues/320)) | Assistant drawer: chat inside Chassis | A chat panel in Chassis that talks to a model directly and uses the same tools, for people who want one window. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/L` | Y | N | post | L | `chassis/src/assistant/chat.rs`, `chassis/src/assistant/provider.rs` |
+| 9.10 ([#322](https://github.com/KenSuenobu/rust-pushrod/issues/322)) | Assistant settings: every check is configurable | One settings page where each assistant check, confirmation, and limit can be turned on, off, or adjusted, with safe defaults. | `assistant`, `chassis`, `chassis-v2`, `parallelizable`, `size/M` | Y | N | post | M | `chassis/src/assistant/settings.rs`, `chassis/src/assistant/policy.rs`, `chassis/src/settings/` |
+
+### 9.1: Command catalog: every designer command by name, with typed arguments
+
+*Issue [#312](https://github.com/KenSuenobu/rust-pushrod/issues/312) · Chassis v2*
+
+**Problem Statement.** Commands (1.4) are run by menus, keys, and the mouse. Anything else that wants to drive the designer (an assistant, scripts, tests, the command palette with arguments) needs to call them by name with data, and to know what arguments each takes.
+
+**Solution / Scope.** A catalog built on the commands of 1.4: every command registers `name` (`form.add_widget`, `widget.set_property`, `form.create`, ...), a typed argument struct (serde), a one-line description, and a JSON schema derived from the struct. `catalog.run(name, json) -> Result<Outcome, CommandError>` validates the arguments (unknown widget types and properties are checked against the registry, Pushrod 6.1 and 6.2), runs the command through the same undo stack, and returns what changed (new widget IDs, old and new values). Errors are specific and readable ("`Buton` is not a widget type; did you mean `Button`?"). Commands can be grouped into one undo step.
+
+**Acceptance Criteria.**
+
+- Every designer command is in the catalog with a name, argument schema, and description
+- `run` validates, executes through undo, and reports what changed
+- Readable errors with suggestions for near misses
+- A group of commands undoes as one step
+
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 1.4 ([#170](https://github.com/KenSuenobu/rust-pushrod/issues/170)), 3.3 ([#181](https://github.com/KenSuenobu/rust-pushrod/issues/181)), 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187)); Pushrod: Pushrod 6.1 [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) Widget registry and factory, Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, new).
+
+### 9.2: MCP server inside Chassis
+
+*Issue [#313](https://github.com/KenSuenobu/rust-pushrod/issues/313) · Chassis v2*
+
+**Problem Statement.** For an assistant to work on the live project, it has to talk to the running Chassis, not to files behind its back. That connection must be off by default, local, and authenticated.
+
+**Solution / Scope.** **Tools > Assistant > Allow connections** starts an MCP server in the Chassis process using `rmcp`'s Streamable HTTP transport, by default bound to `127.0.0.1` on a free port and requiring a random token shown in the Connect dialog (9.8); the address, port, and token requirement are settings (9.10). The server runs on its own thread; each tool call is posted to the UI thread as a custom event (Pushrod 1.13), run there, and the result sent back, so the engine stays single-threaded. `chassis --mcp-stdio <project>` offers the stdio transport for clients that prefer to launch Chassis themselves. The settings are per user, off by default, and never stored in the project. The server advertises its tools (9.3 to 9.6) and a short instructions text describing Chassis and Pushrod's form model.
+
+![chassis-assistant-2.png](mockups/chassis-assistant-2.png)
+
+**Acceptance Criteria.**
+
+- Off by default; with default settings, listens on localhost only and rejects requests without the token
+- Tool calls run on the UI thread and never block painting
+- Works with Streamable HTTP and stdio
+- Turning it off disconnects clients at once
+
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 9.1 ([#312](https://github.com/KenSuenobu/rust-pushrod/issues/312)); Pushrod: Pushrod 1.13 [#78](https://github.com/KenSuenobu/rust-pushrod/issues/78) Custom application events with payloads
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.3: Assistant tools: read the project
+
+*Issue [#314](https://github.com/KenSuenobu/rust-pushrod/issues/314) · Chassis v2*
+
+**Problem Statement.** An assistant can only help with what it can see. It needs the project's structure and, above all, the list of widget types and properties that actually exist, so it doesn't invent them.
+
+**Solution / Scope.** Read-only tools: `project_info`, `list_forms`, `get_form` (the widget tree with names, types, properties that differ from defaults, layout, and events with handlers), `list_widget_types` and `describe_widget_type` (from the registry and property introspection, including extra widgets and third-party libraries), `get_selection`, `list_resources` and `get_resource` (strings, images, icons, files, by ID), and `get_build_errors`. Outputs are compact JSON sized for a model's context: large forms can be read by subtree. MCP resources expose the same data for clients that browse.
+
+**Acceptance Criteria.**
+
+- Every tool returns valid, compact JSON for the sample project
+- `describe_widget_type` covers every registered type, including extra widgets
+- Large forms can be read by subtree
+- No read tool changes anything
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.2 ([#313](https://github.com/KenSuenobu/rust-pushrod/issues/313)); Pushrod: Pushrod 6.1 [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) Widget registry and factory, Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.4: Assistant tools: edit forms and resources
+
+*Issue [#315](https://github.com/KenSuenobu/rust-pushrod/issues/315) · Chassis v2*
+
+**Problem Statement.** The assistant's edits must be exactly as safe as the user's: validated, visible on the canvas, and undoable. They also need to be coarse enough that building a form doesn't take hundreds of calls.
+
+**Solution / Scope.** Write tools that map to catalog commands (9.1): `create_form`, `add_widget` (type, parent, position in the layout, properties), `set_properties`, `move_widget`, `delete_widget`, `set_layout`, `rename`, `add_resource` and `set_string`, plus `apply_form` to create or replace a whole widget subtree from one description, validated before anything changes. Each assistant turn is one undo group named for the request ("Assistant: add a Cancel button"). The canvas updates as calls arrive and selects what changed. In review mode (9.7) the changes are held as a preview instead. Tests replay recorded tool-call transcripts against the tools; no live model in CI.
+
+**Acceptance Criteria.**
+
+- Each write tool validates, applies through undo, and reports the result
+- `apply_form` builds a complete form in one call, or changes nothing if invalid
+- One assistant turn is one undo step
+- Transcript tests run in CI without a model
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.3 ([#314](https://github.com/KenSuenobu/rust-pushrod/issues/314))
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.5: Assistant tools: events, handler code, and builds
+
+*Issue [#316](https://github.com/KenSuenobu/rust-pushrod/issues/316) · Chassis v2*
+
+**Problem Statement.** Half of a form is its behavior. An assistant should be able to attach a handler, write its body, and check that it compiles, using Chassis's own model of which event belongs to which widget.
+
+**Solution / Scope.** `list_events` (a widget's events and which have handlers), `get_handler` and `set_handler` (the body of one callback, in the handler file Chassis maintains, 5.4), `get_state_type` (the application state the handlers receive), `build` (runs the project's build, 6.2, and returns when done), and `get_build_errors` (file, line, message, and the handler each belongs to). An API summary of Pushrod's `Ui` and common widget calls is offered as an MCP resource so handlers use real functions. Clients that edit files themselves (Claude Code) are detected by Chassis's file watcher, and the code tab reloads.
+
+**Acceptance Criteria.**
+
+- A handler can be created, read, and replaced through tools
+- `build` returns structured errors tied to handlers
+- Outside edits to handler files are picked up
+- The API summary is generated from the code, not hand-written
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.3 ([#314](https://github.com/KenSuenobu/rust-pushrod/issues/314)), 5.4 ([#189](https://github.com/KenSuenobu/rust-pushrod/issues/189)), 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196))
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.6: Assistant tool: a picture of the form
+
+*Issue [#317](https://github.com/KenSuenobu/rust-pushrod/issues/317) · Chassis v2*
+
+**Problem Statement.** A widget tree says what is on a form, not whether it looks right: overlapping widgets, truncated text, and awkward spacing are visible only in a picture.
+
+**Solution / Scope.** `render_form` draws the form off-screen at a chosen size (using the form preview, 3.9) and returns a PNG, optionally with widget names labeled or the selection marked. `render_widget` returns one widget's area. Images are scaled down to a sensible limit.
+
+**Acceptance Criteria.**
+
+- Returns a PNG that matches the designer
+- Optional name labels
+- Size limited and configurable
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.2 ([#313](https://github.com/KenSuenobu/rust-pushrod/issues/313)), 3.9 ([#202](https://github.com/KenSuenobu/rust-pushrod/issues/202)); Pushrod: Pushrod 7.2 [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) Golden-image rendering tests
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.7: Assistant activity, review mode, and safety
+
+*Issue [#318](https://github.com/KenSuenobu/rust-pushrod/issues/318) · Chassis v2*
+
+**Problem Statement.** Users must always know when something else is editing their project, see what it did, and be able to refuse it.
+
+**Solution / Scope.** A status-bar indicator shows "Assistant connected" with the client's name; clicking it opens the Assistant panel (a drawer): a log of each turn and its tool calls (log view), each with Undo. **Review changes before applying** (on by default; every check here is a setting, 9.10): an assistant turn's edits are drawn on the canvas as dotted outlines and listed in the panel, with code changes shown as a before/after view; **Apply** commits them as one undo step, **Discard** drops them. With review off, edits apply as they arrive. A **Stop** button rejects further calls for the turn. Destructive tools (delete form, delete resource) ask first. Limits: no tool can read or write outside the project folder or run anything but the project's build. Each of these checks, and the indicator, follows the settings in 9.10; the defaults are the safe ones described here.
+
+![chassis-assistant-1.png](mockups/chassis-assistant-1.png)
+
+![chassis-assistant-3.png](mockups/chassis-assistant-3.png)
+
+**Acceptance Criteria.**
+
+- Indicator visible whenever a client is connected
+- Every assistant change is listed and individually undoable
+- Review mode previews, then applies or discards as one step
+- Stop works mid-turn; with default settings destructive actions confirm and nothing outside the project is reachable
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.4 ([#315](https://github.com/KenSuenobu/rust-pushrod/issues/315)), 9.5 ([#316](https://github.com/KenSuenobu/rust-pushrod/issues/316)); Extra widgets: extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel), extra-widgets 4.13 [#303](https://github.com/KenSuenobu/rust-pushrod/issues/303) Log view (append-only output)
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.8: Connect dialog and assistant guide
+
+*Issue [#319](https://github.com/KenSuenobu/rust-pushrod/issues/319) · Chassis v2*
+
+**Problem Statement.** Connecting an MCP client means copying an address and token into the client's configuration. If that takes more than a minute, people won't try it.
+
+**Solution / Scope.** **Tools > Assistant > Connect…** shows the server's status, address, and token (Copy, Regenerate), and tabs with the exact setup for Claude Code (one command to copy), the Claude desktop app, and a generic MCP client (JSON). A Test button confirms a client has connected. The guide walks through a session on the contacts sample: "add a phone field under e-mail", "make OK the default button", "when OK is clicked, validate the e-mail", with screenshots. It also states plainly what the assistant can see and what leaves the computer (only what the user's own MCP client sends to its model).
+
+![chassis-assistant-2.png](mockups/chassis-assistant-2.png)
+
+**Acceptance Criteria.**
+
+- Copyable setup for Claude Code, the Claude desktop app, and generic clients
+- Test confirms a connection
+- Guide reproduces on the sample project
+- Privacy statement in the dialog and the guide
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.2 ([#313](https://github.com/KenSuenobu/rust-pushrod/issues/313))
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.9: Assistant drawer: chat inside Chassis
+
+*Issue [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) · Chassis v2*
+
+**Problem Statement.** With an outside client, the conversation is in another window. Some users want to type the request where the form is, and see the preview next to the message.
+
+**Solution / Scope.** An Assistant tab in the right drawer: a message list (formatted with the rich text view), a text area, and Send. Chassis calls a model's API itself, with the tools of 9.3 to 9.6 offered as tool definitions and executed in process; review mode (9.7) and the settings of 9.10 apply as usual, with Apply and Discard under each reply. The selection and open form are attached as context automatically. Providers are pluggable behind a trait: the Claude API first, others and local models possible. The user supplies their own API key (stored in the operating system's keychain, never in the project); requests run on a worker thread and stream back as custom events. A clear notice says what is sent. Optional and off until a key is entered.
+
+![chassis-assistant-4.png](mockups/chassis-assistant-4.png)
+
+**Acceptance Criteria.**
+
+- Chat requests build and edit forms through the same tools as MCP clients
+- Streaming replies; the interface never blocks
+- Key stored in the system keychain; nothing sent without one
+- Provider trait with the Claude API implemented
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.7 ([#318](https://github.com/KenSuenobu/rust-pushrod/issues/318)), 9.10 ([#322](https://github.com/KenSuenobu/rust-pushrod/issues/322)); Pushrod: Pushrod 1.13 [#78](https://github.com/KenSuenobu/rust-pushrod/issues/78) Custom application events with payloads, Pushrod 2.18 [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) Multi-line text area; Extra widgets: extra-widgets 4.15 [#308](https://github.com/KenSuenobu/rust-pushrod/issues/308) Rich text view (formatted, read-only), extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel)
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
+### 9.10: Assistant settings: every check is configurable
+
+*Issue [#322](https://github.com/KenSuenobu/rust-pushrod/issues/322) · Chassis v2*
+
+**Problem Statement.** The assistant's checks (review before applying, confirmations, local-only connections, the token, the project-folder limit, which tools are offered) suit most people, but not everyone: a solo developer may want edits applied at once, a team may want the assistant read-only, someone on two machines may need to connect across their network. Hard-wired checks force one way of working.
+
+**Solution / Scope.** An **Assistant** page in Chassis's settings, backed by one `AssistantPolicy` that the server (9.2), the tools (9.3 to 9.6), and the review code (9.7) consult; nothing checks a rule on its own. Every check is a setting with a default:
+
+| Setting | Default | Choices |
+|---|---|---|
+| Allow assistants to connect | Off | Off, On |
+| Review changes before applying | On | On, Off (apply as they arrive), Forms only, Code only |
+| Confirm destructive actions (delete form, widget tree, resource) | Always | Always, Only outside review, Never |
+| Group each turn as one undo step | On | On, Off (one step per change) |
+| Tool groups offered | All | Read, Edit forms, Edit resources, Edit code, Build, Picture: each on or off (Read only = look but don't touch) |
+| Validate against the widget registry | Strict | Strict (reject unknown types and properties), Lenient (accept, mark as unknown) |
+| Folders the tools can reach | Project folder | Project folder, plus listed folders |
+| Commands the build tool may run | The project's build | The project's build, plus listed commands |
+| Listen on | This computer only | This computer only, a chosen address and port |
+| Require the token | On | On, Off |
+| Show the connected indicator | On | On, Off |
+| Keep the activity log | This session | Off, This session, Saved with the workspace |
+| Limits | 200 calls a turn, 1024 px pictures | adjustable |
+
+Settings that lower protection (review off, no confirmation, more folders or commands, a non-local address, no token, no indicator) are marked on the page and ask once when changed, saying plainly what becomes possible; listening beyond this computer without a token asks every time it is switched on. Settings are per user. A project can carry its own assistant settings (`assistant.toml`), but a project file can only tighten the user's settings, never loosen them, so opening someone else's project cannot switch a check off. **Restore defaults** returns everything to the table above. The Connect dialog (9.8) and the assistant panel (9.7) show the current policy in one line.
+
+![chassis-assistant-5.png](mockups/chassis-assistant-5.png)
+
+**Acceptance Criteria.**
+
+- Every check, confirmation, and limit in 9.2 to 9.7 is read from the policy; none is hard-coded
+- Defaults are the safe values in the table; Restore defaults works
+- Lowering a protection is marked and asks, stating the consequence
+- Project settings can tighten but never loosen the user's settings
+- Each setting has a test showing the tools obey it
+
+**Parallelism / Dependencies.** Parallelizable. Chassis: 9.7 ([#318](https://github.com/KenSuenobu/rust-pushrod/issues/318)); Pushrod: Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows
+
+**Technical Stack.** Rust, Pushrod, rmcp (the official Rust SDK for MCP)
+
+**Documentation.** `pushrod-docs/docs/chassis/assistant.md` ("Working with an AI assistant", Chassis group, update).
+
 ## Work Order
 
 Work in this order; items in the same phase can run in parallel unless their dependencies say otherwise. Phases M1 to M5 make the Chassis MVP (label `chassis-mvp`); then come the example projects (`chassis-examples`) and Chassis v2 (`chassis-v2`).
@@ -1839,6 +2102,16 @@ Work in this order; items in the same phase can run in parallel unless their dep
 - 4.6 ([#222](https://github.com/KenSuenobu/rust-pushrod/issues/222)) Data bindings in the inspector
 - 5.8 ([#223](https://github.com/KenSuenobu/rust-pushrod/issues/223)) Code intelligence with rust-analyzer
 - 6.6 ([#224](https://github.com/KenSuenobu/rust-pushrod/issues/224)) Build targets, including the Atari ST
+- 9.1 ([#312](https://github.com/KenSuenobu/rust-pushrod/issues/312)) Command catalog: every designer command by name, with typed arguments
+- 9.2 ([#313](https://github.com/KenSuenobu/rust-pushrod/issues/313)) MCP server inside Chassis
+- 9.3 ([#314](https://github.com/KenSuenobu/rust-pushrod/issues/314)) Assistant tools: read the project
+- 9.4 ([#315](https://github.com/KenSuenobu/rust-pushrod/issues/315)) Assistant tools: edit forms and resources
+- 9.5 ([#316](https://github.com/KenSuenobu/rust-pushrod/issues/316)) Assistant tools: events, handler code, and builds
+- 9.6 ([#317](https://github.com/KenSuenobu/rust-pushrod/issues/317)) Assistant tool: a picture of the form
+- 9.7 ([#318](https://github.com/KenSuenobu/rust-pushrod/issues/318)) Assistant activity, review mode, and safety
+- 9.8 ([#319](https://github.com/KenSuenobu/rust-pushrod/issues/319)) Connect dialog and assistant guide
+- 9.10 ([#322](https://github.com/KenSuenobu/rust-pushrod/issues/322)) Assistant settings: every check is configurable
+- 9.9 ([#320](https://github.com/KenSuenobu/rust-pushrod/issues/320)) Assistant drawer: chat inside Chassis
 
 ## Action Plan
 
@@ -1868,7 +2141,7 @@ flowchart LR
 | **Chassis M4: inspector, events, and code** | Property inspector, events menu and indicators, handler creation, and the code view. | 4.1 ([#186](https://github.com/KenSuenobu/rust-pushrod/issues/186)), 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187)), 4.3 ([#188](https://github.com/KenSuenobu/rust-pushrod/issues/188)), 5.4 ([#189](https://github.com/KenSuenobu/rust-pushrod/issues/189)), 5.3 ([#190](https://github.com/KenSuenobu/rust-pushrod/issues/190)), 4.4 ([#191](https://github.com/KenSuenobu/rust-pushrod/issues/191)), 5.1 ([#192](https://github.com/KenSuenobu/rust-pushrod/issues/192)), 5.2 ([#193](https://github.com/KenSuenobu/rust-pushrod/issues/193)), 5.5 ([#194](https://github.com/KenSuenobu/rust-pushrod/issues/194)), 5.6 ([#195](https://github.com/KenSuenobu/rust-pushrod/issues/195)) | M3 done; Pushrod event metadata (6.13), context menu (2.19), choice button (3.6), code editor (Epic 11) |
 | **Chassis M5: build, run, and release (MVP)** | Build and run from Chassis, CI, documentation, and the sample project. Completes the Chassis MVP. | 6.2 ([#196](https://github.com/KenSuenobu/rust-pushrod/issues/196)), 7.1 ([#197](https://github.com/KenSuenobu/rust-pushrod/issues/197)), 7.2 ([#198](https://github.com/KenSuenobu/rust-pushrod/issues/198)), 7.3 ([#199](https://github.com/KenSuenobu/rust-pushrod/issues/199)) | M4 done |
 | **Chassis examples** | Example projects built with Chassis once it reaches the MVP: small, complete applications that exercise its features and that anyone can build and test against. | 8.1 ([#208](https://github.com/KenSuenobu/rust-pushrod/issues/208)), 8.2 ([#209](https://github.com/KenSuenobu/rust-pushrod/issues/209)), 8.3 ([#210](https://github.com/KenSuenobu/rust-pushrod/issues/210)), 8.4 ([#211](https://github.com/KenSuenobu/rust-pushrod/issues/211)), 8.5 ([#212](https://github.com/KenSuenobu/rust-pushrod/issues/212)), 8.6 ([#213](https://github.com/KenSuenobu/rust-pushrod/issues/213)), 8.7 ([#214](https://github.com/KenSuenobu/rust-pushrod/issues/214)), 8.8 ([#215](https://github.com/KenSuenobu/rust-pushrod/issues/215)) | Chassis MVP released; each example can be built independently by anyone |
-| **Chassis v2** | The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets. | 1.5 ([#200](https://github.com/KenSuenobu/rust-pushrod/issues/200)), 2.7 ([#201](https://github.com/KenSuenobu/rust-pushrod/issues/201)), 3.9 ([#202](https://github.com/KenSuenobu/rust-pushrod/issues/202)), 4.5 ([#203](https://github.com/KenSuenobu/rust-pushrod/issues/203)), 6.3 ([#204](https://github.com/KenSuenobu/rust-pushrod/issues/204)), 6.4 ([#205](https://github.com/KenSuenobu/rust-pushrod/issues/205)), 7.4 ([#206](https://github.com/KenSuenobu/rust-pushrod/issues/206)), 1.6 ([#216](https://github.com/KenSuenobu/rust-pushrod/issues/216)), 1.7 ([#217](https://github.com/KenSuenobu/rust-pushrod/issues/217)), 2.9 ([#218](https://github.com/KenSuenobu/rust-pushrod/issues/218)), 2.10 ([#219](https://github.com/KenSuenobu/rust-pushrod/issues/219)), 3.10 ([#220](https://github.com/KenSuenobu/rust-pushrod/issues/220)), 3.11 ([#221](https://github.com/KenSuenobu/rust-pushrod/issues/221)), 4.6 ([#222](https://github.com/KenSuenobu/rust-pushrod/issues/222)), 5.8 ([#223](https://github.com/KenSuenobu/rust-pushrod/issues/223)), 6.6 ([#224](https://github.com/KenSuenobu/rust-pushrod/issues/224)) | Chassis MVP released |
+| **Chassis v2** | The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets, and an AI assistant through MCP. | 1.5 ([#200](https://github.com/KenSuenobu/rust-pushrod/issues/200)), 2.7 ([#201](https://github.com/KenSuenobu/rust-pushrod/issues/201)), 3.9 ([#202](https://github.com/KenSuenobu/rust-pushrod/issues/202)), 4.5 ([#203](https://github.com/KenSuenobu/rust-pushrod/issues/203)), 6.3 ([#204](https://github.com/KenSuenobu/rust-pushrod/issues/204)), 6.4 ([#205](https://github.com/KenSuenobu/rust-pushrod/issues/205)), 7.4 ([#206](https://github.com/KenSuenobu/rust-pushrod/issues/206)), 1.6 ([#216](https://github.com/KenSuenobu/rust-pushrod/issues/216)), 1.7 ([#217](https://github.com/KenSuenobu/rust-pushrod/issues/217)), 2.9 ([#218](https://github.com/KenSuenobu/rust-pushrod/issues/218)), 2.10 ([#219](https://github.com/KenSuenobu/rust-pushrod/issues/219)), 3.10 ([#220](https://github.com/KenSuenobu/rust-pushrod/issues/220)), 3.11 ([#221](https://github.com/KenSuenobu/rust-pushrod/issues/221)), 4.6 ([#222](https://github.com/KenSuenobu/rust-pushrod/issues/222)), 5.8 ([#223](https://github.com/KenSuenobu/rust-pushrod/issues/223)), 6.6 ([#224](https://github.com/KenSuenobu/rust-pushrod/issues/224)), 9.1 ([#312](https://github.com/KenSuenobu/rust-pushrod/issues/312)), 9.2 ([#313](https://github.com/KenSuenobu/rust-pushrod/issues/313)), 9.3 ([#314](https://github.com/KenSuenobu/rust-pushrod/issues/314)), 9.4 ([#315](https://github.com/KenSuenobu/rust-pushrod/issues/315)), 9.5 ([#316](https://github.com/KenSuenobu/rust-pushrod/issues/316)), 9.6 ([#317](https://github.com/KenSuenobu/rust-pushrod/issues/317)), 9.7 ([#318](https://github.com/KenSuenobu/rust-pushrod/issues/318)), 9.8 ([#319](https://github.com/KenSuenobu/rust-pushrod/issues/319)), 9.10 ([#322](https://github.com/KenSuenobu/rust-pushrod/issues/322)), 9.9 ([#320](https://github.com/KenSuenobu/rust-pushrod/issues/320)) | Chassis MVP released |
 
 ### Example projects
 

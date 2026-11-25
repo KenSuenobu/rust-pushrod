@@ -1997,6 +1997,125 @@ def showcase_layouts():
     b = _showcase(470, 270, "Layouts"); form(b, 196, 80, 250)
     return [("Form layout page", a, None), ("Window narrowed: the fields shrink, the labels stay aligned", b, None)]
 
+# ---- Chassis assistant (Chassis Epic 9) ----
+def _assist_panel(c, title, draw):
+    """Replaces the inspector with an Assistant panel; `draw(c, x, y, w)` fills it."""
+    x = CW_W - RIGHT_W
+    c.rect(x, TOP, RIGHT_W, CW_H - TOP - STATUS_H, fill=WHITE, outline=None); c.line(x, TOP, x, CW_H - STATUS_H, GRAY)
+    c.text(x + 10, TOP + 8, "ASSISTANT", DARK, 11); c.text(x + RIGHT_W - 22, TOP + 5, "×", DARK, 15)
+    c.text(x + 10, TOP + 28, title, BLACK, 15)
+    draw(c, x, TOP + 60, RIGHT_W)
+
+def _phone_row(c, pending=False):
+    """The widget an assistant adds to the Contact form: a Help button at the bottom left."""
+    x, y = FORM_X + 24, FORM_Y + 230
+    if pending:
+        c.dotted(x - 3, y - 3, 96, 34); c.ctext(x, y, 90, 28, "Help", MID, 14)
+    else:
+        c.button(x, y, 90, 28, "Help")
+
+def _tool_lines(c, x, y, w, lines):
+    for kind, t in lines:
+        if kind == "turn":
+            c.rect(x, y, w, 22, fill=PANEL, outline=None); c.text(x + 10, y + 2, t, BLACK, 12); c.text(x + w - 44, y + 2, "Undo", (50, 80, 160), 12); y += 26
+        else:
+            c.text(x + 18, y, t, DARK, 12); y += 20
+    return y
+
+@sb("chassis-assistant", 1)
+def chassis_assistant_activity():
+    c, (x0, y0, w, h) = _chassis_window(status=["contacts.prsc", "ContactDialog · 10 widgets", "● Assistant connected: Claude Code", "Grid 8 px"])
+    _ch_grid(c, x0, y0, w, h); _ch_form(c, selected=None); _phone_row(c)
+    def draw(c, x, y, w):
+        y = _tool_lines(c, x, y, w, [("turn", "Add a Help button at the bottom left"), ("", "get_form  ContactDialog"), ("", "describe_widget_type  button"),
+                                     ("", "add_widget  Button  HelpButton"), ("", "set_properties  HelpButton  text"), ("", "render_form"),
+                                     ("turn", "Make OK the default button"), ("", "set_properties  OkButton  default")])
+        c.checkbox(x + 10, CW_H - STATUS_H - 70, "Review changes before applying"); c.button(x + 10, CW_H - STATUS_H - 38, 70, 26, "Stop", disabled=True)
+    _assist_panel(c, "Claude Code", draw)
+    return [("An assistant connected through MCP: the status bar says so, the form shows its edits, and the panel lists each turn's tool calls with Undo", c, None)]
+
+@sb("chassis-assistant", 2)
+def chassis_assistant_connect():
+    c = C(620, 400); c.rect(0, 0, 620, 400, fill=PANEL); c.rect(0, 0, 620, 26, fill=WHITE); c.ctext(0, 0, 620, 26, "Connect an Assistant", BLACK, 13)
+    c.checkbox(20, 42, "Allow assistants on this computer to connect to Chassis", "on")
+    c.text(20, 80, "Address:", BLACK, 13); c.field(100, 78, 330, "http://127.0.0.1:47821/mcp"); c.button(440, 78, 70, 24, "Copy")
+    c.text(20, 114, "Token:", BLACK, 13); c.field(100, 112, 330, "••••••••••••••••••••"); c.button(440, 112, 70, 24, "Copy"); c.button(518, 112, 90, 24, "Regenerate")
+    _tabs(c, 20, 152, 580, 150, ["Claude Code", "Claude desktop app", "Other MCP client"], 0)
+    c.text(36, 190, "Run this once in your project folder:", BLACK, 13)
+    c.rect(36, 216, 470, 50, fill=WHITE); c.text(44, 220, "claude mcp add --transport http chassis \\", BLACK, 12); c.text(44, 240, "  http://127.0.0.1:47821/mcp --header \"Authorization: Bearer …\"", BLACK, 12)
+    c.button(516, 216, 70, 24, "Copy")
+    c.text(20, 316, "The assistant can read and change this project only. What is sent to a model is", DARK, 12); c.text(20, 334, "decided by your own client; Chassis sends nothing anywhere.", DARK, 12)
+    c.text(20, 366, "Status: waiting for a client", BLACK, 13); c.button(430, 360, 80, 26, "Test"); c.button(520, 360, 80, 26, "Done", default=True)
+    return [("Tools > Assistant > Connect: local address, token, and ready-to-paste setup; off until the box is checked", c, None)]
+
+@sb("chassis-assistant", 3)
+def chassis_assistant_review():
+    c, (x0, y0, w, h) = _chassis_window(status=["contacts.prsc", "ContactDialog · 9 widgets", "● Assistant connected: Claude Code", "1 change waiting for review"])
+    _ch_grid(c, x0, y0, w, h); _ch_form(c, selected=None); _phone_row(c, pending=True)
+    c.rect(x0, y0, w, 34, fill=WHITE); c.line(x0, y0 + 34, x0 + w, y0 + 34, BLACK)
+    c.text(x0 + 12, y0 + 6, "The assistant proposes 1 change to ContactDialog.", BLACK, 13)
+    c.button(x0 + w - 190, y0 + 4, 80, 26, "Apply", default=True); c.button(x0 + w - 100, y0 + 4, 80, 26, "Discard")
+    def draw(c, x, y, w):
+        y = _tool_lines(c, x, y, w, [("turn", "Add a Help button at the bottom left")])
+        c.text(x + 10, y, "Waiting for review:", BLACK, 12); y += 22
+        for t in ["+ Button  HelpButton  \"Help\""]:
+            c.checkbox(x + 14, y - 2, t, "on"); y += 24
+        c.checkbox(x + 10, CW_H - STATUS_H - 70, "Review changes before applying", "on"); c.button(x + 10, CW_H - STATUS_H - 38, 70, 26, "Stop")
+    _assist_panel(c, "Claude Code", draw)
+    return [("Review mode: a proposed widget is a dotted outline until Apply; Discard drops it; each change can be unticked", c, "Apply commits one undo step")]
+
+@sb("chassis-assistant", 4)
+def chassis_assistant_chat():
+    c, (x0, y0, w, h) = _chassis_window(status=["contacts.prsc", "ContactDialog · 10 widgets", "● Assistant: built in", "Grid 8 px"])
+    _ch_grid(c, x0, y0, w, h); _ch_form(c, selected=None); _phone_row(c)
+    def draw(c, x, y, w):
+        def bubble(y, who, lines, mine):
+            hh = 22 + 18 * len(lines); c.rect(x + 10, y, w - 20, hh, fill=PANEL if mine else WHITE)
+            c.text(x + 18, y + 2, who, DARK, 11)
+            for n, l in enumerate(lines): c.text(x + 18, y + 20 + n * 18, l, BLACK, 12)
+            return y + hh + 8
+        y = bubble(y, "You", ["Add a Help button at the bottom left"], True)
+        y = bubble(y, "Assistant", ["Added a button named HelpButton", "at the bottom left, aligned with", "Cancel and OK."], False)
+        c.button(x + 10, y, 70, 24, "Undo"); c.text(x + 90, y + 3, "1 change applied", DARK, 12); y += 36
+        y = bubble(y, "You", ["When OK is clicked, check that", "the e-mail contains an @"], True)
+        y = bubble(y, "Assistant", ["Writing on_ok_clicked…"], False)
+        by = CW_H - STATUS_H - 96
+        c.text(x + 10, by - 20, "Context: ContactDialog, OkButton", MID, 11)
+        c.rect(x + 10, by, w - 20, 54, fill=WHITE); c.text(x + 16, by + 4, "Ask for a change…", MID, 13)
+        c.button(x + w - 80, by + 60, 70, 26, "Send", default=True); c.button(x + 10, by + 60, 70, 26, "Stop")
+    _assist_panel(c, "Chat", draw)
+    return [("Optional chat drawer: the same tools, in one window, with your own API key", c, None)]
+
+@sb("chassis-assistant", 5)
+def chassis_assistant_settings():
+    c = C(760, 560); c.rect(0, 0, 760, 560, fill=PANEL); c.rect(0, 0, 760, 26, fill=WHITE); c.ctext(0, 0, 760, 26, "Settings", BLACK, 13)
+    c.listbox(10, 36, 150, ["General", "Designer", "Code", "Build", "Assistant"], selected={4}, scroll=False)
+    x = 180; c.text(x, 34, "Assistant", BLACK, 17)
+    rows = [("Allow assistants to connect", "check", True, False), ("Review changes before applying", "choice", "On", False),
+            ("Confirm destructive actions", "choice", "Always", False), ("Group each turn as one undo step", "check", True, False),
+            ("Validate against the widget registry", "choice", "Strict", False), ("Folders the tools can reach", "choice", "Project folder", False),
+            ("Commands the build tool may run", "choice", "The project's build", False), ("Listen on", "choice", "This computer only", False),
+            ("Require the token", "check", True, False), ("Show the connected indicator", "check", True, False), ("Keep the activity log", "choice", "This session", False)]
+    y = 70
+    for label, kind, val, _ in rows:
+        c.text(x, y + 2, label, BLACK, 13)
+        if kind == "check": c.checkbox(x + 290, y, "", "on" if val else "off")
+        else: _choice(c, x + 290, y - 1, 200, val)
+        y += 30
+    c.text(x, y + 4, "Tools offered", BLACK, 13)
+    for n, (t, on) in enumerate([("Read", True), ("Edit forms", True), ("Edit resources", True), ("Edit code", False), ("Build", True), ("Picture", True)]):
+        c.checkbox(x + 290 + (n % 2) * 130, y + 2 + (n // 2) * 24, t, "on" if on else "off")
+    y += 84
+    c.line(x, y, 740, y, GRAY)
+    c.text(x, y + 8, "A project's own settings can tighten these, never loosen them.", DARK, 12)
+    c.button(x, 518, 140, 26, "Restore Defaults"); c.button(570, 518, 80, 26, "Cancel"); c.button(660, 518, 80, 26, "OK", default=True)
+    d = C(470, 190); d.rect(0, 0, 470, 190, fill=PANEL); d.rect(0, 0, 470, 26, fill=WHITE); d.ctext(0, 0, 470, 26, "Chassis", BLACK, 13)
+    d.ellipse(18, 42, 32, 32); d.ctext(18, 42, 32, 32, "!", BLACK, 18)
+    d.text(64, 40, "Turn off review?", BLACK, 16)
+    for n, l in enumerate(["The assistant's changes will be applied to your forms", "and code as they arrive. You can still undo each turn."]): d.text(64, 70 + n * 20, l, DARK, 12)
+    d.button(270, 146, 90, 26, "Cancel", default=True); d.button(368, 146, 90, 26, "Turn Off")
+    return [("Every check is a setting, with safe defaults", c, None), ("Lowering a protection asks once and says what changes", d, None)]
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
