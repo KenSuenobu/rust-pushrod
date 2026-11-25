@@ -1,8 +1,9 @@
+use pushrod::appearance::StateStyle;
 use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, EngineEventKind, Event, EventMask, EventTarget, MaskScope};
 use pushrod::geometry::{point, size};
-use pushrod::widget::{Behavior, Widget};
+use pushrod::widget::{Behavior, VisualState, Widget};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
@@ -109,6 +110,37 @@ pub fn main() {
     );
     disabled.set_enabled(false);
     engine.add_child_widget(panel_id, disabled);
+
+    // Per-state appearance: the button turns blue while the pointer is over it, and dark blue
+    // while it is pressed.  Everything else about its look stays at the defaults.
+    let mut styled = ButtonWidget::new(
+        point(20, 320),
+        size(120, 20),
+        String::from(FONT),
+        FontStyle::NORMAL,
+        14,
+        Color::BLACK,
+        TextJustify::Center,
+        String::from("Hover me"),
+        2,
+    );
+    styled.set_style(
+        VisualState::HOVERED,
+        StateStyle {
+            background: Some(Color::BLUE),
+            foreground: Some(Color::WHITE),
+            ..StateStyle::default()
+        },
+    );
+    styled.set_style(
+        VisualState::PRESSED,
+        StateStyle {
+            background: Some(Color::RGB(0, 0, 128)),
+            foreground: Some(Color::WHITE),
+            ..StateStyle::default()
+        },
+    );
+    engine.add_child_widget(panel_id, styled);
 
     let quit_id = engine.add_child_widget(
         panel_id,

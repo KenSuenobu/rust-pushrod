@@ -52,7 +52,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 16 | [#94](https://github.com/KenSuenobu/rust-pushrod/issues/94) | pushrod: [9.2] Event propagation: capture, target, and bubble phases with handled/ignored (done) |
 | ✅ 17 | [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) | pushrod: [9.4] Reusable input controllers: click, drag, scroll, hover, long-press, key (done) |
 | ✅ 18 | [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) | pushrod: [1.4] Keyboard focus, Tab order, and Return/Escape (done) |
-| 19 | [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) | pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state |
+| ✅ 19 | [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) | pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state (done) |
 | 20 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks |
 | 21 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
 | 22 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking |
@@ -528,11 +528,11 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] `StateStyle` and `Appearance` on every widget with fallback to normal and built-in defaults
-- [ ] Hover, press/release, focus, disabled, checked, and drag-over switch the effective style automatically
-- [ ] Default look unchanged (golden images identical)
-- [ ] Repaint only when the effective style changes
-- [ ] Stored in form files
+- [x] `StateStyle` and `Appearance` on every widget with fallback to normal and built-in defaults
+- [x] Hover, press/release, focus, disabled, checked, and drag-over switch the effective style automatically (the drag-over flag is set by drag and drop, which is not built yet; `set_state` sets it by hand)
+- [x] Default look unchanged (golden images identical; no golden images exist yet, so the existing paint tests guard it)
+- [x] Repaint only when the effective style changes
+- [ ] Stored in form files (deferred to 6.2 (#61), property introspection)
 
 ### Step 20: Timers and idle callbacks
 

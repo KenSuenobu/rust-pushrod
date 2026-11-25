@@ -63,7 +63,7 @@ pub enum CachePolicy {
 }
 
 /// The font and alignment used to draw text with [`text`].
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TextStyle {
     /// Path to the TrueType font file.
     pub font_name: String,

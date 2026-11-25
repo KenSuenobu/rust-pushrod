@@ -43,6 +43,7 @@
 // apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").
 #![warn(missing_docs, clippy::missing_panics_doc, clippy::missing_errors_doc)]
 
+pub mod appearance;
 pub mod backend;
 pub mod cache;
 pub mod color;

@@ -61,13 +61,14 @@ impl Widget for TextWidget {
     /// * `p` - The painter, targeting the widget.
     fn paint(&self, p: &mut dyn Painter) {
         let size = self.get_size();
+        let style = self.style();
 
-        paint::fill(p, self.get_color());
+        paint::fill(p, style.background.unwrap_or(self.get_color()));
         paint::text(
             p,
             Rect::new(0, 0, size.w, size.h),
-            &self.style,
-            self.style.font_color,
+            style.font.as_ref().unwrap_or(&self.style),
+            style.foreground.unwrap_or(self.style.font_color),
             &self.msg,
         );
     }

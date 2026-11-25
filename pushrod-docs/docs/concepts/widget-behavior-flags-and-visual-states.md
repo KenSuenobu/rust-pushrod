@@ -87,7 +87,7 @@ After a widget's `paint`, Pushrod calls `paint::state_overlay`, which draws the 
 | `FOCUSED` | A dotted outline, one pixel inside the edge. |
 | `INDETERMINATE` | A dotted bar through the middle. |
 
-The other states (`PRESSED`, `CHECKED`, `HOVERED`, `DRAG_OVER`) depend on what the widget is, so the widget draws them itself by reading `self.state()` in `paint`. Call `set_state` when one changes so the widget is repainted.
+The other states (`PRESSED`, `CHECKED`, `HOVERED`, `DRAG_OVER`) depend on what the widget is, so the widget draws them itself by reading `self.state()` or, better, the effective `self.style()` in `paint`. Call `set_state` when one changes so the widget is repainted. Applications can restyle every state: see [Per-state appearance](./per-state-appearance.md).
 
 The overlay uses `Painter::dither_overlay`, which blends a color over every other pixel. A custom `Painter` backend must implement it.
 

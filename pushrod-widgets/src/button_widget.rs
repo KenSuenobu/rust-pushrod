@@ -29,7 +29,7 @@ use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle};
-use pushrod::widget::{Widget, WidgetCore};
+use pushrod::widget::{VisualState, Widget, WidgetCore};
 
 /// A push button with a text label.
 ///
@@ -65,18 +65,25 @@ impl Widget for ButtonWidget {
 
     /// Draws the button: a fill, the label inset by the border width, and a one-pixel frame.
     ///
-    /// When selected, the colors are inverted (black background, white text).
+    /// When selected, the colors are inverted (black background, white text).  Colors, border and
+    /// font set with [`Widget::set_style`] for the current state override these defaults.
     ///
     /// # Arguments
     ///
     /// * `p` - The painter, targeting the button.
     fn paint(&self, p: &mut dyn Painter) {
         let size = self.get_size();
+        let style = self.style();
         let (background, foreground) = if self.selected {
             (Color::BLACK, Color::WHITE)
         } else {
             (self.get_color(), self.style.font_color)
         };
+        let (background, foreground) = (
+            style.background.unwrap_or(background),
+            style.foreground.unwrap_or(foreground),
+        );
+        let font = style.font.as_ref().unwrap_or(&self.style);
         let inset = self.border_width as u32 + 1;
 
         paint::fill(p, background);
@@ -85,13 +92,18 @@ impl Widget for ButtonWidget {
             paint::text(
                 p,
                 Rect::new(inset as i32, 0, size.w - inset * 2, size.h),
-                &self.style,
+                font,
                 foreground,
                 &self.msg,
             );
         }
 
-        paint::border(p, size, Color::BLACK, 1);
+        paint::border(
+            p,
+            size,
+            style.border_color.unwrap_or(Color::BLACK),
+            style.border_width.unwrap_or(1),
+        );
     }
 
     /// Feeds the button's [`ClickController`] and re-emits the pointer events.
@@ -259,7 +271,11 @@ impl ButtonWidget {
 
     fn set_selected(&mut self, state: bool) {
         if self.selected != state {
+            let mut visual = self.state();
+
+            visual.set(VisualState::PRESSED, state);
             self.selected = state;
+            self.set_state(visual);
             self.set_invalidated(true);
         }
     }

@@ -65,8 +65,15 @@ impl Widget for BoxWidget {
     ///
     /// * `p` - The painter, targeting the box.
     fn paint(&self, p: &mut dyn Painter) {
-        paint::fill(p, self.get_color());
-        paint::border(p, self.get_size(), self.border_color, self.border_width);
+        let style = self.style();
+
+        paint::fill(p, style.background.unwrap_or(self.get_color()));
+        paint::border(
+            p,
+            self.get_size(),
+            style.border_color.unwrap_or(self.border_color),
+            style.border_width.unwrap_or(self.border_width),
+        );
     }
 }
 

@@ -44,6 +44,7 @@
 //! If the compiler is happy, the `Widget` is complete: there are no lists of `Widget` types to
 //! update elsewhere in the library.
 
+use crate::appearance::{Appearance, StateStyle};
 use crate::color::Color;
 use crate::controllers::{Controller, ControllerEvent, Controllers};
 use crate::event::{Event, EventCtx, EventMask, Propagation};
@@ -141,7 +142,7 @@ bitflags! {
 /// Store one `WidgetCore` in each `Widget` structure and return it from [`Widget::core`] and
 /// [`Widget::core_mut`]; every getter and setter on the `Widget` trait works against it.  It holds
 /// the `Widget`'s ID and parent ID (assigned by the `WidgetCache`), its origin relative to its
-/// parent, its size, its background color, its [`Behavior`] flags (including hidden) and [`VisualState`] flags, its [`EventMask`], whether it needs repainting, and
+/// parent, its size, its background color, its [`Behavior`] flags (including hidden) and [`VisualState`] flags, its [`Appearance`] (a style per state), its [`EventMask`], whether it needs repainting, and
 /// the GPU texture it paints into.
 ///
 /// # Examples
@@ -162,6 +163,7 @@ pub struct WidgetCore {
     color: Color,
     behavior: Behavior,
     state: VisualState,
+    appearance: Appearance,
     event_mask: EventMask,
     invalidated: bool,
     controllers: Controllers,
@@ -219,6 +221,7 @@ impl WidgetCore {
             color: Color::RGBA(255, 255, 255, 0),
             behavior: Behavior::empty(),
             state: VisualState::empty(),
+            appearance: Appearance::default(),
             event_mask: EventMask::NONE,
             invalidated: true,
             controllers: Controllers::default(),
@@ -495,16 +498,89 @@ pub trait Widget: Any {
         self.core().state
     }
 
-    /// Replaces the `Widget`'s visual state flags, and invalidates it only if they changed.
+    /// Replaces the `Widget`'s visual state flags, and invalidates it only if the change can alter
+    /// how it looks.
+    ///
+    /// A change to `PRESSED`, `CHECKED`, `INDETERMINATE`, `DISABLED` or `FOCUSED` always repaints,
+    /// since built-in looks and the state overlay depend on them.  A change to `HOVERED` or
+    /// `DRAG_OVER` repaints only if the effective style (see [`Widget::style`]) changed.
     ///
     /// # Arguments
     ///
     /// * `state` - The new flags.
     fn set_state(&mut self, state: VisualState) {
-        if self.core().state != state {
-            self.core_mut().state = state;
+        let old = self.core().state;
+
+        if old == state {
+            return;
+        }
+
+        let built_in = VisualState::PRESSED
+            | VisualState::CHECKED
+            | VisualState::INDETERMINATE
+            | VisualState::DISABLED
+            | VisualState::FOCUSED;
+        let appearance = &self.core().appearance;
+        let changed_look = appearance.effective(old) != appearance.effective(state);
+
+        self.core_mut().state = state;
+
+        if changed_look || (old ^ state).intersects(built_in) {
             self.set_invalidated(true);
         }
+    }
+
+    /// Returns the `Widget`'s per-state appearance.
+    ///
+    /// # Returns
+    ///
+    /// The [`Appearance`] holding one [`StateStyle`] per visual state.
+    fn appearance(&self) -> &Appearance {
+        &self.core().appearance
+    }
+
+    /// Returns the `Widget`'s per-state appearance for modification, and invalidates the `Widget`.
+    ///
+    /// Use [`Widget::set_style`] to change one state and repaint only when it matters.
+    ///
+    /// # Returns
+    ///
+    /// The [`Appearance`], to be edited in place.
+    fn appearance_mut(&mut self) -> &mut Appearance {
+        self.set_invalidated(true);
+        &mut self.core_mut().appearance
+    }
+
+    /// Sets the style for one visual state, and invalidates the `Widget` only if the effective
+    /// style for its current state changed.
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The visual state flag to style, such as [`VisualState::HOVERED`]; an empty set
+    ///   styles the normal state.
+    /// * `style` - The overrides for that state.
+    fn set_style(&mut self, state: VisualState, style: StateStyle) {
+        let current = self.core().state;
+        let before = self.core().appearance.effective(current);
+
+        self.core_mut().appearance.set(state, style);
+
+        if self.core().appearance.effective(current) != before {
+            self.set_invalidated(true);
+        }
+    }
+
+    /// Returns the effective style for the `Widget`'s current state.
+    ///
+    /// The style for the highest-priority active state wins, unset fields fall back to `normal`,
+    /// and fields still `None` mean "use the built-in default".  `paint` implementations read
+    /// this.
+    ///
+    /// # Returns
+    ///
+    /// The resolved [`StateStyle`].
+    fn style(&self) -> StateStyle {
+        self.core().appearance.effective(self.core().state)
     }
 
     /// Returns whether the `Widget` is enabled.
