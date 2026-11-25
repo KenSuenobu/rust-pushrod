@@ -1,4 +1,4 @@
 # Pushrod Changelog
 
 [0] Added AGENTS.md file with rules for AI agents. [kenji]
-
+[#69] CI also runs on macOS and Windows; sample-data check flags home paths [kenji]

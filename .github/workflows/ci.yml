@@ -10,17 +10,54 @@ env:
 
 jobs:
   rust:
-    name: Rust ${{ matrix.toolchain }}
-    runs-on: ubuntu-latest
+    name: Rust ${{ matrix.toolchain }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
-        # The minimum supported version (rust-version in Cargo.toml) and the latest stable.
-        toolchain: ["1.100.0", stable]
+        # Linux runs the minimum supported version (rust-version in Cargo.toml) and the latest
+        # stable; macOS and Windows run the latest stable.
+        include:
+          - { os: ubuntu-latest, toolchain: "1.100.0" }
+          - { os: ubuntu-latest, toolchain: stable }
+          - { os: macos-latest, toolchain: stable }
+          - { os: windows-latest, toolchain: stable }
+    env:
+      # Windows only: where the SDL2 development libraries are unpacked (see "Install SDL2").
+      SDL_DIR: ${{ github.workspace }}/sdl
     steps:
       - uses: actions/checkout@v4
-      - name: Install SDL2
+      - name: Install SDL2 (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+      - name: Install SDL2 (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install sdl2 sdl2_image sdl2_ttf
+          echo "LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
+      - name: Install SDL2 (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mkdir -p "$SDL_DIR" && cd "$SDL_DIR"
+          base=https://github.com/libsdl-org
+          curl -fsSL -o sdl2.zip "$base/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-VC.zip"
+          curl -fsSL -o ttf.zip "$base/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-devel-2.22.0-VC.zip"
+          curl -fsSL -o image.zip "$base/SDL_image/releases/download/release-2.8.2/SDL2_image-devel-2.8.2-VC.zip"
+          for z in sdl2 ttf image; do unzip -q -o "$z.zip"; done
+          # The linker finds the .lib files through LIB; the tests find the .dll files through PATH.
+          libs=""
+          for d in SDL2-2.30.9 SDL2_ttf-2.22.0 SDL2_image-2.8.2; do
+            dir=$(cygpath -w "$SDL_DIR/$d/lib/x64")
+            echo "$dir" >> "$GITHUB_PATH"
+            libs="$libs$dir;"
+          done
+          echo "LIB=$libs${LIB:-}" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
@@ -54,18 +91,9 @@ jobs:
         run: npm ci && npm run build
 
   sample-data:
-    name: Sample data (no real e-mail addresses)
+    name: Sample data (no real e-mail addresses or home paths)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Only reserved example domains in files
-        run: |
-          hits=$(git ls-files \
-            | grep -v -E '^(Cargo\.toml|pushrod-widgets/Cargo\.toml|Cargo\.lock|LICENSE)$|package-lock\.json|\.(png|ttf)$' \
-            | xargs grep -n -I -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' \
-            | grep -v -E '@example\.(com|org|net)' || true)
-          if [ -n "$hits" ]; then
-            echo "Use jane.doe@example.com-style placeholders (see CONTRIBUTING.md):"
-            echo "$hits"
-            exit 1
-          fi
+      - name: Only reserved example domains and placeholder home paths
+        run: python3 scripts/check_sample_data.py
