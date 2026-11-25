@@ -9,6 +9,8 @@ The work is organized in four GitHub projects. This file lists what each contain
 | **Chassis v2** | Chassis v2 and the additional Pushrod work it needs. | 22 |
 | **Chassis Examples** | Example projects built with Chassis once it reaches the MVP; open for anyone to pick up. | 9 |
 
+For the exact step-by-step order across all four projects, see [`roadmaps/ORDER_OF_EXECUTION.md`](roadmaps/ORDER_OF_EXECUTION.md).
+
 Order of work: **Pushrod Core MVP** first; then **Chassis MVP**, whose "Pushrod for Mx" phases are the post-MVP Pushrod issues each Chassis phase needs; then **Chassis Examples** and **Chassis v2**.
 
 ## Creating the projects

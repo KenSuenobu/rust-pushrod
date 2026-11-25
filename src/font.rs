@@ -18,34 +18,52 @@
 //! The `FontCache` loads TrueType fonts through SDL2_ttf and renders text into GPU textures for
 //! the [`paint::text`](crate::paint::text) helper.  The `Engine` owns one `FontCache` and passes
 //! it to every `Widget::paint` call.
+//!
+//! SDL2_ttf is initialized once per process, the first time text is drawn, and never shut down
+//! while the process runs.  Its initialization and shutdown are not thread-safe, so creating and
+//! dropping engines (for example in tests running in parallel) must never touch it.
 
 use sdl2::pixels::Color;
 use sdl2::render::{Canvas, Texture, TextureQuery};
 use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::video::Window;
 use std::path::Path;
+use std::sync::OnceLock;
+
+/// The process-wide SDL2_ttf context, created on first use and kept for the life of the process.
+static TTF_CONTEXT: OnceLock<Result<Sdl2TtfContext, String>> = OnceLock::new();
+
+/// Returns the process-wide SDL2_ttf context, initializing SDL2_ttf the first time.
+///
+/// # Returns
+///
+/// The context, or the SDL2_ttf error message if initialization failed (the failure is
+/// remembered, so it is reported the same way on every call).
+fn ttf_context() -> Result<&'static Sdl2TtfContext, String> {
+    TTF_CONTEXT
+        .get_or_init(|| sdl2::ttf::init().map_err(|e| e.to_string()))
+        .as_ref()
+        .map_err(|e| e.clone())
+}
 
 /// Loads fonts and renders text into textures.
 ///
 /// The `Engine` owns one and passes it to [`Widget::paint`](crate::widget::Widget::paint).
 pub struct FontCache {
-    ttf_context: Sdl2TtfContext,
+    _private: (),
 }
 
 impl FontCache {
-    /// Initializes SDL2_ttf and creates a font cache.
+    /// Creates a font cache.
+    ///
+    /// SDL2_ttf is not touched here; it is initialized once per process when text is first
+    /// rendered.
     ///
     /// # Returns
     ///
     /// The new `FontCache`.
-    ///
-    /// # Panics
-    ///
-    /// Panics if SDL2_ttf cannot be initialized.
     pub fn new() -> Self {
-        Self {
-            ttf_context: sdl2::ttf::init().map_err(|e| e.to_string()).unwrap(),
-        }
+        Self { _private: () }
     }
 
     /// Renders text into a new texture.
@@ -70,7 +88,8 @@ impl FontCache {
     ///
     /// # Panics
     ///
-    /// Panics if the font file cannot be loaded or the text cannot be rendered.
+    /// Panics if SDL2_ttf cannot be initialized, the font file cannot be loaded, or the text cannot
+    /// be rendered.
     #[allow(clippy::too_many_arguments)]
     pub fn render_text(
         &mut self,
@@ -83,8 +102,8 @@ impl FontCache {
         width: u32,
     ) -> (Texture, u32, u32) {
         let texture_creator = c.texture_creator();
-        let mut font = self
-            .ttf_context
+        let mut font = ttf_context()
+            .unwrap()
             .load_font(Path::new(font_name), font_size)
             .unwrap();
 
@@ -112,10 +131,6 @@ impl Default for FontCache {
     /// # Returns
     ///
     /// The new `FontCache`.
-    ///
-    /// # Panics
-    ///
-    /// Panics if SDL2_ttf cannot be initialized.
     fn default() -> Self {
         Self::new()
     }
