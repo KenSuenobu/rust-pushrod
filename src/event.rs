@@ -664,10 +664,6 @@ pub enum Event {
 }
 
 impl Event {
-    /// Returns the kind of this event, without its data.
-    ///
-    /// # Returns
-    ///
     /// The widget a widget-addressed event is for.
     ///
     /// # Returns
@@ -695,6 +691,10 @@ impl Event {
         }
     }
 
+    /// Returns the kind of this event, without its data.
+    ///
+    /// # Returns
+    ///
     /// The matching [`EventKind`].
     pub fn kind(&self) -> EventKind {
         match self {
