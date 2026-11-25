@@ -382,6 +382,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 ### 1.7 (#3): GPU text: font cache with a glyph atlas texture
 
+**Status:** done (#3).
+
 *Reuses existing issue #3.*
 
 **Problem Statement.** `FontCache::render_text` reloads the font from disk and rasterizes a new surface on the CPU for every repaint of every text widget. Original issue #3 also asked for the font cache to live with the `WidgetCache`.

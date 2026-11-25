@@ -30,6 +30,8 @@ flowchart TD
 | `WidgetAdded { id, parent }` | A widget is added to the window. Not sent for the root widget the engine creates. |
 | `EventBroadcast { kind, recipients }` | An event was [broadcast](../concepts/broadcast-events-to-all-interested-widgets.md) to every interested widget. `recipients` is how many received it. |
 | `CustomEventDropped { target }` | A [custom event](./custom-events.md) was discarded because the per-frame limit was reached. |
+| `FontLoaded { font_name, font_size }` | A font was loaded from disk, the first time text was drawn with it. See [GPU text](../concepts/gpu-text.md). |
+| `GlyphAtlasPageAdded { pages }` | A glyph atlas texture was created. `pages` is how many exist now. |
 
 More variants are added by the features that need them (focus, dialogs, menus, timers, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
 
