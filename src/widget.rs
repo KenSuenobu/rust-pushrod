@@ -45,7 +45,7 @@
 //! update elsewhere in the library.
 
 use crate::color::Color;
-use crate::event::{Event, EventCtx, EventMask};
+use crate::event::{Event, EventCtx, EventMask, Propagation};
 use crate::geometry::{Point, Size};
 use crate::paint::Painter;
 use crate::texture::TextureStore;
@@ -260,8 +260,30 @@ pub trait Widget: Any {
     /// # Arguments
     ///
     /// * `_event` - The event sent to this `Widget`.
-    /// * `_ctx` - The context used to queue events the `Widget` generates.
-    fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) {}
+    /// * `_ctx` - The context used to queue events the `Widget` generates;
+    ///   [`EventCtx::phase`](crate::event::EventCtx::phase) says whether the event is being
+    ///   captured, handled as the target, or bubbled.
+    ///
+    /// # Returns
+    ///
+    /// [`Propagation::Stop`] to end delivery of an input event, or [`Propagation::Continue`] (the
+    /// default) to let the next `Widget` in the capture, target, bubble path see it.
+    fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) -> Propagation {
+        Propagation::Continue
+    }
+
+    /// Returns `true` if this `Widget` wants input events in the capture phase.
+    ///
+    /// A capturing `Widget` sees pointer and key events *before* its descendants, and can return
+    /// [`Propagation::Stop`] to keep them from reaching the target.  Every `Widget` receives
+    /// events in the bubble phase regardless.
+    ///
+    /// # Returns
+    ///
+    /// `false` by default.
+    fn handles_capture(&self) -> bool {
+        false
+    }
 
     /// Returns the classes of events this `Widget` wants to receive.
     ///

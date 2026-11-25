@@ -18,4 +18,5 @@
 [#78] Custom events: ui.post, ctx.post, on_custom, thread-safe Sender [kenji]
 [#111] TextLayout trait, layout cache, and Parley engine behind a feature [kenji]
 [#3] GPU text: glyph atlas, fonts load once, WidgetCache owns FontCache [kenji]
+[#94] Event propagation: capture, target, bubble phases, Propagation::Stop [kenji]
 [#71] Widget gallery example with --screenshot, used for the README [kenji]

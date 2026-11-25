@@ -23,7 +23,7 @@ This widget switches between two colors each time it is clicked and emits `Click
 
 ```rust
 use pushrod::engine::Engine;
-use pushrod::event::{Event, EventCtx};
+use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::geometry::{point, size, Point, Size};
 use pushrod::paint::{self, Painter};
 use pushrod::widget::{Widget, WidgetCore};
@@ -103,7 +103,11 @@ impl Widget for SwatchWidget {
     ///
     /// * `event` - The event sent to the swatch.
     /// * `ctx` - The context used to emit `Clicked`.
-    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) {
+    ///
+    /// # Returns
+    ///
+    /// `Stop` after a click, so parents do not see the release; otherwise `Continue`.
+    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
         if let Event::PointerReleased {
             button: MouseButton::Left,
             count,
@@ -117,7 +121,10 @@ impl Widget for SwatchWidget {
                 button: MouseButton::Left,
                 count: *count,
             });
+            return Propagation::Stop;
         }
+
+        Propagation::Continue
     }
 }
 ```
@@ -136,7 +143,7 @@ Pushrod's own widgets are built the same way: a box is `fill` + `border`, a butt
 
 ### Handling events
 
-`handle_event` receives each event routed to the widget (see [Handling events](./handling-events.md)). Change the widget's state, call `set_invalidated(true)` if its look changed, and queue events for the application with `ctx.emit(...)`. Mouse events arrive as `Event::PointerPressed`, `Event::PointerReleased`, and `Event::PointerMoved`, plus `Event::PointerEntered` and `Event::PointerExited` when the pointer crosses the widget's edge. See the [Event reference](../events/event-reference.md).
+`handle_event` receives each event routed to the widget (see [Handling events](./handling-events.md)). Change the widget's state, call `set_invalidated(true)` if its look changed, and queue events for the application with `ctx.emit(...)`. Mouse events arrive as `Event::PointerPressed`, `Event::PointerReleased`, and `Event::PointerMoved`, plus `Event::PointerEntered` and `Event::PointerExited` when the pointer crosses the widget's edge. `handle_event` returns a [`Propagation`](../events/event-propagation.md): `Stop` consumes an input event, `Continue` lets parents see it. See the [Event reference](../events/event-reference.md).
 
 ## Using the widget
 

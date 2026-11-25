@@ -2,7 +2,7 @@
 //! cross-thread posting.  Everything runs headless through `Engine::dispatch`.
 
 use pushrod::engine::{Engine, MAX_CUSTOM_EVENTS_PER_FRAME};
-use pushrod::event::{EngineEvent, Event, EventCtx, EventMask, EventTarget};
+use pushrod::event::{EngineEvent, Event, EventCtx, EventMask, EventTarget, Propagation};
 use pushrod::geometry::{point, size};
 use pushrod::paint::Painter;
 use pushrod::widget::{Widget, WidgetCore, WidgetId};
@@ -40,7 +40,7 @@ impl Widget for Probe {
     fn paint(&self, _p: &mut dyn Painter) {}
 
     /// Logs the payload; reposts a `Progress` if asked.
-    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) {
+    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
         if let Some(Progress(percent)) = event.payload::<Progress>() {
             self.log
                 .borrow_mut()
@@ -50,6 +50,8 @@ impl Widget for Probe {
                 ctx.post(target, Progress(percent + 1));
             }
         }
+
+        Propagation::Continue
     }
 }
 

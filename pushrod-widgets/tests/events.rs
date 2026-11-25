@@ -267,8 +267,13 @@ impl pushrod::widget::Widget for Recorder {
 
     fn paint(&self, _p: &mut dyn pushrod::paint::Painter) {}
 
-    fn handle_event(&mut self, event: &Event, ctx: &mut pushrod::event::EventCtx) {
+    fn handle_event(
+        &mut self,
+        event: &Event,
+        ctx: &mut pushrod::event::EventCtx,
+    ) -> pushrod::event::Propagation {
         ctx.emit(event.clone());
+        pushrod::event::Propagation::Stop
     }
 }
 
