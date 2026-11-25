@@ -2026,7 +2026,6 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 | 9.7 (#99) | Callback handles: disconnect, block, and unblock | Every registration returns a handle to remove or temporarily silence the callback. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `src/engine.rs` |
 | 9.8 (#100) | Drag and drop within the application | Drag data between widgets (list to list, file icon to drop zone) with drop targets and feedback. | `chassis`, `enhancement`, `events`, `parallelizable`, `size/L`, `usability` | Y | N | L | `src/dnd.rs (new)`, `src/cache.rs` |
 | 9.9 (#101) | Pointer cursor per widget | Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links). | `enhancement`, `events`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
-| 9.10 (#109) | Engine events: every internal action Pushrod performs emits an event | A system-wide EngineEvent for each internal action (mode changes, focus, modals, menus, tree changes, forms, drags, timers, window changes), broadcast to widgets and callbacks. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
 | 9.11 (#124) | Event-loop style: keep parity with callbacks | Everything delivered to callbacks is also returned by next_event, and both styles can be combined. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs`, `src/event.rs` |
 
 ### 9.1 (#93): Event vocabulary: modern event names and structure
@@ -2275,6 +2274,8 @@ Like every widget, it can also receive application-defined custom events in `han
 - Kind filter for widgets and callbacks
 - No re-entrant loops (engine events never trigger internal actions on their own)
 - Guide and PR checklist state the rule
+
+**Status:** done (#109).
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 9.1 (#93), 1.2 (#6).
 

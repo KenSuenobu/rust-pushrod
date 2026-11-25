@@ -129,7 +129,7 @@ parameter under `# Arguments`, and `# Returns`). Run it before opening a pull re
 - New widgets follow the existing drawing style (`paint::fill`, `paint::border`,
   `paint::text`) and draw everything through Pushrod; no OS-native controls, and no glass, shadows,
   bevels, gradients, or rounded corners ([DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md)).
-- Any internal action you add emits an engine event (see roadmap issue 9.10).
+- Any internal action you add emits an engine event: add its `EngineEvent` variant, emit it after the action completes, and test it (see [Engine events](pushrod-docs/docs/events/engine-events.md)).
 - The pull request template's checklist is filled in.
 
 ## Sample data and privacy

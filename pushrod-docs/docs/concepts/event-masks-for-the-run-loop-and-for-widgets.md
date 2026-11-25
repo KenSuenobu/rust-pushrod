@@ -27,6 +27,7 @@ An event is handled only if its class is in **both** masks. Everything else is d
 | `LIFECYCLE` | `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `PropertyChanged`, `ViewportChanged` |
 | `TIMER` | `Tick` |
 | `CUSTOM` | `Custom`, `Raw` |
+| `ENGINE` | `Engine` (widgets only; callbacks always receive them, see [Engine events](../events/engine-events.md)) |
 
 `EventMask::NONE` and `EventMask::ALL` are the empty and full sets; combine classes with `|`, and remove one with `& !`. The events a widget *emits* for your application (`Clicked`, `Activated`, `ValueChanged`, ...), `CloseRequested`, and `Engine(..)` events are never filtered.
 

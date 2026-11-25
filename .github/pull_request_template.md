@@ -12,6 +12,7 @@
 - [ ] Screenshots updated if anything looks different
 - [ ] Code samples compile
 - [ ] `CHANGELOG.md` entry under `Unreleased`
+- [ ] Any internal action this adds has its `EngineEvent` variant, emitted after the action completes
 - [ ] Fictional sample data only (no real names or personal information)
 - [ ] Or: **No documentation changes**, because:
 
