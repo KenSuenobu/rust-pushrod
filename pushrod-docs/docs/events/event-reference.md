@@ -95,7 +95,7 @@ Positions are `Point`s in window coordinates.
 | `Raw(sdl2::event::Event)` | An SDL2 event Pushrod has not mapped yet. |
 
 :::note[What emits what today]
-The cache currently produces the pointer events (`PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`), and `ButtonWidget` emits `Clicked`. The other variants are the shared vocabulary that later features (keyboard, focus, new widgets, timers) emit; `EngineEvent` has no actions yet.
+The cache currently produces the pointer events (`PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`), and `ButtonWidget` emits `Clicked`. The other variants are the shared vocabulary that later features (keyboard, focus, new widgets, timers) emit; `EngineEvent` currently has one action, `EventMaskChanged { scope, old, new }`, emitted when the run-loop mask or a widget's [event mask](../concepts/event-masks-for-the-run-loop-and-for-widgets.md) changes.
 :::
 
 ## Renamed from the first release

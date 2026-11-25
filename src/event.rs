@@ -97,12 +97,163 @@ pub struct CustomEvent {
     pub name: String,
 }
 
+/// A set of event classes, used to filter events for the run loop and for each `Widget`.
+///
+/// An event is handled only when its class is in both the run loop's mask
+/// ([`Engine::set_event_mask`](crate::engine::Engine::set_event_mask)) and the receiving
+/// `Widget`'s mask ([`Widget::event_mask`](crate::widget::Widget::event_mask)).  Combine classes
+/// with `|`.
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::event::EventMask;
+///
+/// let mask = EventMask::POINTER_BUTTONS | EventMask::KEYBOARD;
+///
+/// assert!(mask.contains(EventMask::KEYBOARD));
+/// assert!(!mask.contains(EventMask::SCROLL));
+/// assert!(EventMask::ALL.contains(mask));
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub struct EventMask(u16);
+
+impl EventMask {
+    /// No classes: nothing is delivered.
+    pub const NONE: EventMask = EventMask(0);
+    /// Mouse button presses and releases ([`Event::PointerPressed`], [`Event::PointerReleased`]).
+    pub const POINTER_BUTTONS: EventMask = EventMask(1);
+    /// Pointer movement ([`Event::PointerMoved`]).
+    pub const POINTER_MOTION: EventMask = EventMask(1 << 1);
+    /// The pointer entering or leaving a `Widget` ([`Event::PointerEntered`], [`Event::PointerExited`]).
+    pub const HOVER: EventMask = EventMask(1 << 2);
+    /// Scroll wheel and trackpad scrolling ([`Event::Scrolled`]).
+    pub const SCROLL: EventMask = EventMask(1 << 3);
+    /// Key presses and releases ([`Event::KeyPressed`], [`Event::KeyReleased`]).
+    pub const KEYBOARD: EventMask = EventMask(1 << 4);
+    /// Text input ([`Event::TextEntered`]).
+    pub const TEXT: EventMask = EventMask(1 << 5);
+    /// Keyboard focus changes ([`Event::FocusGained`], [`Event::FocusLost`]).
+    pub const FOCUS: EventMask = EventMask(1 << 6);
+    /// Window events ([`Event::WindowResized`], [`Event::WindowFocusChanged`]).
+    pub const WINDOW: EventMask = EventMask(1 << 7);
+    /// `Widget` lifecycle and layout changes ([`Event::Shown`], [`Event::Resized`], [`Event::Removed`], ...).
+    pub const LIFECYCLE: EventMask = EventMask(1 << 8);
+    /// Timer ticks ([`Event::Tick`]).  Without it the run loop blocks while idle.
+    pub const TIMER: EventMask = EventMask(1 << 9);
+    /// Custom and unmapped events ([`Event::Custom`], [`Event::Raw`]).
+    pub const CUSTOM: EventMask = EventMask(1 << 10);
+    /// Every class.
+    pub const ALL: EventMask = EventMask((1 << 11) - 1);
+
+    /// Returns whether every class in `other` is in this mask.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The classes to look for.
+    ///
+    /// # Returns
+    ///
+    /// `true` if all of `other`'s classes are present.
+    pub fn contains(self, other: EventMask) -> bool {
+        self.0 & other.0 == other.0
+    }
+
+    /// Returns whether this mask and `other` share at least one class.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The classes to compare with.
+    ///
+    /// # Returns
+    ///
+    /// `true` if any class is in both.
+    pub fn intersects(self, other: EventMask) -> bool {
+        self.0 & other.0 != 0
+    }
+
+    /// Returns whether the mask holds no classes.
+    ///
+    /// # Returns
+    ///
+    /// `true` for [`EventMask::NONE`].
+    pub fn is_empty(self) -> bool {
+        self.0 == 0
+    }
+}
+
+impl std::ops::BitOr for EventMask {
+    type Output = EventMask;
+
+    /// Returns the union of two masks.
+    ///
+    /// # Arguments
+    ///
+    /// * `rhs` - The classes to add.
+    ///
+    /// # Returns
+    ///
+    /// A mask with the classes of both.
+    fn bitor(self, rhs: EventMask) -> EventMask {
+        EventMask(self.0 | rhs.0)
+    }
+}
+
+impl std::ops::BitAnd for EventMask {
+    type Output = EventMask;
+
+    /// Returns the classes present in both masks.
+    ///
+    /// # Arguments
+    ///
+    /// * `rhs` - The classes to keep.
+    ///
+    /// # Returns
+    ///
+    /// A mask with only the classes in both.
+    fn bitand(self, rhs: EventMask) -> EventMask {
+        EventMask(self.0 & rhs.0)
+    }
+}
+
+impl std::ops::Not for EventMask {
+    type Output = EventMask;
+
+    /// Returns every class not in the mask.
+    ///
+    /// # Returns
+    ///
+    /// The complement of the mask within [`EventMask::ALL`].
+    fn not(self) -> EventMask {
+        EventMask(!self.0 & EventMask::ALL.0)
+    }
+}
+
+/// What an event mask belongs to, in [`EngineEvent::EventMaskChanged`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MaskScope {
+    /// The run loop's mask.
+    RunLoop,
+    /// The mask of one `Widget`.
+    Widget(WidgetId),
+}
+
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
 ///
-/// No actions are defined yet; they are added as the engine gains them.
+/// More actions are added as the engine gains them.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
-pub enum EngineEvent {}
+pub enum EngineEvent {
+    /// An event mask changed.
+    EventMaskChanged {
+        /// Whose mask changed.
+        scope: MaskScope,
+        /// The mask before the change.
+        old: EventMask,
+        /// The mask after the change.
+        new: EventMask,
+    },
+}
 
 /// The kind of an [`Event`], without its data.  Used by masks and the callback registry.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -175,6 +326,49 @@ pub enum EventKind {
     Custom,
     /// See [`Event::Raw`].
     Raw,
+}
+
+impl EventKind {
+    /// Returns the mask class this kind of event is filtered by.
+    ///
+    /// # Returns
+    ///
+    /// The class, or `None` when the event is never filtered: close requests, engine events, and
+    /// the events `Widget`s generate for the application (`Clicked`, `Activated`, ...).
+    pub fn mask_class(self) -> Option<EventMask> {
+        use EventKind as K;
+
+        match self {
+            K::PointerPressed | K::PointerReleased => Some(EventMask::POINTER_BUTTONS),
+            K::PointerMoved => Some(EventMask::POINTER_MOTION),
+            K::PointerEntered | K::PointerExited => Some(EventMask::HOVER),
+            K::Scrolled => Some(EventMask::SCROLL),
+            K::KeyPressed | K::KeyReleased => Some(EventMask::KEYBOARD),
+            K::TextEntered => Some(EventMask::TEXT),
+            K::FocusGained | K::FocusLost => Some(EventMask::FOCUS),
+            K::WindowResized | K::WindowFocusChanged => Some(EventMask::WINDOW),
+            K::PropertyChanged
+            | K::ViewportChanged
+            | K::Shown
+            | K::Hidden
+            | K::Resized
+            | K::Moved
+            | K::Removed => Some(EventMask::LIFECYCLE),
+            K::Tick => Some(EventMask::TIMER),
+            K::Custom | K::Raw => Some(EventMask::CUSTOM),
+            K::Clicked
+            | K::Activated
+            | K::Toggled
+            | K::ValueChanged
+            | K::SelectionChanged
+            | K::TextChanged
+            | K::EditingFinished
+            | K::Triggered
+            | K::ContextMenuRequested
+            | K::CloseRequested
+            | K::Engine => None,
+        }
+    }
 }
 
 /// An event generated by Pushrod or by a `Widget`.
@@ -587,5 +781,37 @@ impl EventCtx {
     /// The queued events, in the order emitted.
     pub fn into_events(self) -> Vec<Event> {
         self.events
+    }
+}
+
+#[cfg(test)]
+mod mask_tests {
+    use super::*;
+
+    #[test]
+    fn masks_combine_and_compare() {
+        let mask = EventMask::HOVER | EventMask::SCROLL;
+
+        assert!(mask.contains(EventMask::HOVER));
+        assert!(!mask.contains(EventMask::HOVER | EventMask::KEYBOARD));
+        assert!(mask.intersects(EventMask::HOVER | EventMask::KEYBOARD));
+        assert!((mask & EventMask::HOVER) == EventMask::HOVER);
+        assert!(EventMask::NONE.is_empty());
+        assert_eq!(!EventMask::NONE, EventMask::ALL);
+        assert_eq!(!EventMask::ALL, EventMask::NONE);
+        assert_eq!(EventMask::default(), EventMask::NONE);
+    }
+
+    #[test]
+    fn input_kinds_have_a_class_and_outputs_and_close_have_none() {
+        assert_eq!(
+            EventKind::PointerMoved.mask_class(),
+            Some(EventMask::POINTER_MOTION)
+        );
+        assert_eq!(EventKind::Tick.mask_class(), Some(EventMask::TIMER));
+        assert_eq!(EventKind::Raw.mask_class(), Some(EventMask::CUSTOM));
+        assert_eq!(EventKind::CloseRequested.mask_class(), None);
+        assert_eq!(EventKind::Engine.mask_class(), None);
+        assert_eq!(EventKind::Clicked.mask_class(), None);
     }
 }

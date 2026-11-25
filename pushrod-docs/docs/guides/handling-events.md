@@ -66,6 +66,10 @@ SDL2 event ──> WidgetCache ──> Widget::handle_event(&mut self, &event, c
 2. The widget updates itself and may queue events with `ctx.emit(...)`. A button, for example, emits `Clicked` when released while still pressed.
 3. After routing, Pushrod delivers each queued event, in order: to your callbacks (callback style), or as the return value of `next_event` (event-loop style). Because no widget is borrowed at that point, your code can freely change your state and any widget.
 
+## Choosing which events to receive
+
+By default every widget has an empty [event mask](../concepts/event-masks-for-the-run-loop-and-for-widgets.md) and receives nothing; widgets that handle events (such as `ButtonWidget`) ask for the classes they need. Use `Engine::set_event_mask` to drop whole classes, such as pointer motion, for the entire window.
+
 ## Events
 
 The pointer events a widget receives, and the most common events it emits, are below. The [Event reference](../events/event-reference.md) lists every event.

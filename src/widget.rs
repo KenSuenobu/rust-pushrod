@@ -45,7 +45,7 @@
 //! update elsewhere in the library.
 
 use crate::color::Color;
-use crate::event::{Event, EventCtx};
+use crate::event::{Event, EventCtx, EventMask};
 use crate::geometry::{Point, Size};
 use crate::paint::Painter;
 use crate::texture::TextureStore;
@@ -140,7 +140,7 @@ bitflags! {
 /// Store one `WidgetCore` in each `Widget` structure and return it from [`Widget::core`] and
 /// [`Widget::core_mut`]; every getter and setter on the `Widget` trait works against it.  It holds
 /// the `Widget`'s ID and parent ID (assigned by the `WidgetCache`), its origin relative to its
-/// parent, its size, its background color, its [`Behavior`] flags (including hidden) and [`VisualState`] flags, whether it needs repainting, and
+/// parent, its size, its background color, its [`Behavior`] flags (including hidden) and [`VisualState`] flags, its [`EventMask`], whether it needs repainting, and
 /// the GPU texture it paints into.
 ///
 /// # Examples
@@ -161,12 +161,26 @@ pub struct WidgetCore {
     color: Color,
     behavior: Behavior,
     state: VisualState,
+    event_mask: EventMask,
     invalidated: bool,
     /// The GPU texture the `Widget` paints into, created and resized by the `WidgetCache`.
     pub(crate) texture: TextureStore,
 }
 
 impl WidgetCore {
+    /// Sets the event mask the `Widget` reports from [`Widget::event_mask`].
+    ///
+    /// Use it while building a `Widget`.  To change a mask after the `Widget` is in a window, use
+    /// [`WidgetCache::set_event_mask`](crate::cache::WidgetCache::set_event_mask), which also emits
+    /// the change.
+    ///
+    /// # Arguments
+    ///
+    /// * `mask` - The classes of events the `Widget` wants.
+    pub fn set_event_mask(&mut self, mask: EventMask) {
+        self.event_mask = mask;
+    }
+
     /// Creates the shared state for a new `Widget`.
     ///
     /// The `Widget` starts visible, invalidated (so it is painted on the first frame), with a
@@ -190,6 +204,7 @@ impl WidgetCore {
             color: Color::RGBA(255, 255, 255, 0),
             behavior: Behavior::empty(),
             state: VisualState::empty(),
+            event_mask: EventMask::NONE,
             invalidated: true,
             texture: TextureStore::default(),
         }
@@ -247,6 +262,21 @@ pub trait Widget: Any {
     /// * `_event` - The event sent to this `Widget`.
     /// * `_ctx` - The context used to queue events the `Widget` generates.
     fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) {}
+
+    /// Returns the classes of events this `Widget` wants to receive.
+    ///
+    /// The `WidgetCache` skips the `Widget` for every event whose class is not in this mask, so a
+    /// `Widget` that handles no events costs nothing.  An event is delivered only when it is also
+    /// in the run loop's mask.
+    ///
+    /// # Returns
+    ///
+    /// The mask; [`EventMask::NONE`] by default.  A `Widget` that handles events calls
+    /// `core_mut().set_event_mask(..)` at creation, or an application calls
+    /// [`WidgetCache::set_event_mask`](crate::cache::WidgetCache::set_event_mask).
+    fn event_mask(&self) -> EventMask {
+        self.core().event_mask
+    }
 
     /// Returns the `Widget`'s ID.
     ///

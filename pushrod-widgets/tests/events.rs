@@ -3,9 +3,9 @@
 use pushrod::cache::WidgetCache;
 use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
-use pushrod::event::{Event, EventKind};
+use pushrod::event::{EngineEvent, Event, EventKind, EventMask, MaskScope};
 use pushrod::geometry::{point, size};
-use pushrod::widget::{Behavior, VisualState};
+use pushrod::widget::{Behavior, VisualState, Widget};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
@@ -269,9 +269,11 @@ impl pushrod::widget::Widget for Recorder {
 }
 
 fn recorder(x: i32, y: i32) -> Recorder {
-    Recorder {
-        core: pushrod::widget::WidgetCore::new(point(x, y), size(100, 20)),
-    }
+    let mut core = pushrod::widget::WidgetCore::new(point(x, y), size(100, 20));
+
+    core.set_event_mask(EventMask::ALL);
+
+    Recorder { core }
 }
 
 #[test]
@@ -436,4 +438,134 @@ fn disabled_widgets_receive_no_input_and_block_widgets_beneath_them() {
     cache.get_mut(button).unwrap().set_enabled(true);
     cache.handle_event(down(40, 40));
     assert_eq!(clicks(&cache.handle_event(up(40, 40))), vec![button]);
+}
+
+#[test]
+fn widgets_with_an_empty_mask_receive_nothing_while_a_button_still_clicks() {
+    let mut cache = WidgetCache::new();
+
+    cache.add(Box::new(BaseWidget::new(point(0, 0), size(400, 300))));
+
+    let mut quiet = recorder(10, 10);
+
+    quiet.core_mut().set_event_mask(EventMask::NONE);
+
+    let quiet_id = cache.add(Box::new(quiet));
+    let button_id = cache.add(Box::new(button(10, 50)));
+
+    // The quiet widget is hit but filtered: nothing is generated for it.
+    assert!(cache.handle_event(down(20, 15)).is_empty());
+    assert!(cache.handle_event(up(20, 15)).is_empty());
+    assert_eq!(cache.get(quiet_id).unwrap().event_mask(), EventMask::NONE);
+
+    // The button still clicks.
+    cache.handle_event(down(20, 55));
+
+    let kinds: Vec<_> = cache
+        .handle_event(up(20, 55))
+        .iter()
+        .map(Event::kind)
+        .collect();
+
+    assert_eq!(kinds, vec![EventKind::Clicked]);
+    assert!(cache.get(button_id).is_some());
+}
+
+#[test]
+fn a_widget_only_receives_the_classes_in_its_mask() {
+    let mut cache = WidgetCache::new();
+
+    cache.add(Box::new(BaseWidget::new(point(0, 0), size(400, 300))));
+
+    let mut hover_only = recorder(10, 10);
+
+    hover_only.core_mut().set_event_mask(EventMask::HOVER);
+    cache.add(Box::new(hover_only));
+
+    let kinds: Vec<_> = cache
+        .handle_event(motion(20, 15))
+        .iter()
+        .map(Event::kind)
+        .collect();
+
+    assert_eq!(kinds, vec![EventKind::PointerEntered]);
+}
+
+#[test]
+fn the_run_loop_mask_filters_before_widgets_and_close_is_always_delivered() {
+    let mut engine: Engine<Vec<EventKind>> = Engine::new(size(400, 300), 30);
+
+    engine.add_widget(recorder(10, 10));
+    engine.on_event(|seen: &mut Vec<EventKind>, _ui, event| seen.push(event.kind()));
+    engine.set_event_mask(EventMask::HOVER);
+
+    let mut seen = Vec::new();
+
+    engine.dispatch(down(20, 15), &mut seen);
+    engine.dispatch(motion(20, 15), &mut seen);
+
+    // The mask change event, then hover only: PointerMoved and presses are filtered.
+    assert_eq!(seen, vec![EventKind::Engine, EventKind::PointerEntered]);
+
+    engine.set_event_mask(EventMask::NONE);
+    engine.dispatch(SdlEvent::Quit { timestamp: 0 }, &mut seen);
+
+    assert!(!engine.is_running());
+}
+
+#[test]
+fn changing_masks_emits_event_mask_changed_once_per_change() {
+    let mut engine: Engine<Vec<Event>> = Engine::new(size(400, 300), 30);
+    let id = engine.add_widget(recorder(10, 10));
+
+    engine.on_event(|seen: &mut Vec<Event>, _ui, event| seen.push(event.clone()));
+    engine.set_event_mask(EventMask::KEYBOARD);
+    engine.set_event_mask(EventMask::KEYBOARD);
+    engine.widgets().set_event_mask(id, EventMask::TEXT);
+
+    let mut seen = Vec::new();
+
+    // Pending events are delivered with the next dispatched event.
+    engine.dispatch(motion(500, 500), &mut seen);
+
+    let changes: Vec<_> = seen
+        .iter()
+        .filter_map(|event| match event {
+            Event::Engine(EngineEvent::EventMaskChanged { scope, old, new }) => {
+                Some((*scope, *old, *new))
+            }
+            _ => None,
+        })
+        .collect();
+
+    assert_eq!(
+        changes,
+        vec![
+            (MaskScope::RunLoop, EventMask::ALL, EventMask::KEYBOARD),
+            (MaskScope::Widget(id), EventMask::ALL, EventMask::TEXT),
+        ]
+    );
+}
+
+#[test]
+fn callbacks_can_change_the_run_loop_mask() {
+    let mut engine: Engine<usize> = Engine::new(size(400, 300), 30);
+    let id = engine.add_widget(button(10, 10));
+
+    engine.on_click(id, |_state: &mut usize, ui| {
+        ui.set_event_mask(EventMask::NONE)
+    });
+    engine.on_event(|count: &mut usize, _ui, event| {
+        if matches!(event, Event::Engine(_)) {
+            *count += 1;
+        }
+    });
+
+    let mut count = 0;
+
+    engine.dispatch(down(20, 15), &mut count);
+    engine.dispatch(up(20, 15), &mut count);
+
+    assert_eq!(engine.event_mask(), EventMask::NONE);
+    assert_eq!(count, 1);
 }
