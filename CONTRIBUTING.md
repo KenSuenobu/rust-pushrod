@@ -18,6 +18,10 @@ Components built for the Chassis designer (label `chassis`) are specified the sa
   widget behavior (flags, states, focus, clipping). No widgets except `RootWidget`.
 - **`pushrod-widgets` (`pushrod-widgets/src/`):** the standard widgets. Use only the core's public
   API; if a widget needs something the core doesn't expose, add it to the core in its own change.
+- **`pushrod-extra-widgets` (planned, `pushrod-extra-widgets/src/`):** larger and compound widgets
+  (pickers, tree view, property grid, panels, dialogs). Same flat look; public APIs of `pushrod` and
+  `pushrod-widgets` only. A widget that is not one control with one job belongs here, not in the
+  standard set ([roadmap](docs/ROADMAP_EXTRA_WIDGETS.md)).
 
 ## Documentation is part of every contribution
 

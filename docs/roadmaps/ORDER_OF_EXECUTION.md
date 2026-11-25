@@ -1,8 +1,8 @@
 # Order of Execution
 
-The complete plan of action for Pushrod and Chassis: **every open issue in the exact order to do it**, one step at a time, from the first Pushrod commit to Chassis v2. Each step is one piece of work, one pull request, and one video.
+The complete plan of action for Pushrod, Chassis, and `pushrod-extra-widgets`: **every open issue in the exact order to do it**, one step at a time, from the first Pushrod commit to Chassis v2 and the extra widgets. Each step is one piece of work, one pull request, and one video.
 
-**193 steps:** 184 issues and 9 checkpoints (releases and phase demos). The order is generated from the roadmaps and checked: every step comes after everything it depends on.
+**236 steps:** 225 issues and 11 checkpoints (releases and phase demos). The order is generated from the roadmaps and checked: every step comes after everything it depends on.
 
 ## How to use this document
 
@@ -11,9 +11,9 @@ The complete plan of action for Pushrod and Chassis: **every open issue in the e
 - **Done steps** keep their number (marked *done*), so the series numbering never shifts; their videos can be recaps.
 - **Checkpoints** are episodes of their own: a release or the end of a phase, demonstrating everything built so far.
 - **Every step ships its documentation** (Docusaurus pages, full doc headers, changelog entry), as CONTRIBUTING.md requires.
-- **Suggested video title:** `Pushrod #<step>: <title>` (or `Chassis #<step>: ...`), so the series sorts in order on YouTube.
+- **Suggested video title:** `Pushrod #<step>: <title>` (or `Chassis #<step>: ...`, `Extra Widgets #<step>: ...`), so the series sorts in order on YouTube.
 
-Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis roadmap](../ROADMAP_CHASSIS.md) (Action Plan), [GitHub projects](../PROJECTS.md). When a roadmap changes, regenerate this file.
+Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis roadmap](../ROADMAP_CHASSIS.md) (Action Plan), [extra widgets roadmap](../ROADMAP_EXTRA_WIDGETS.md), [GitHub projects](../PROJECTS.md). When a roadmap changes, regenerate this file.
 
 ## Overview
 
@@ -22,13 +22,15 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | [Part 1: Pushrod v0.1, dialog applications](#part-1-pushrod-v01-dialog-applications) | 1 to 54 (54) | Everything needed to build and ship real dialog-style applications with Pushrod, ending with the first crates.io release. |
 | [Part 2: Pushrod v0.2, forms and resources](#part-2-pushrod-v02-forms-and-resources) | 55 to 68 (14) | Forms, form files, and resources by ID (the runtime foundation for Chassis), plus input methods, mnemonics, accessibility, and specs. |
 | [Part 3: Chassis M1: core without UI](#part-3-chassis-m1-core-without-ui) | 69 to 74 (6) | Project model, resource access, code generation, and a command-line generator, all testable without a window. |
-| [Part 4: Chassis M2: shell and project](#part-4-chassis-m2-shell-and-project) | 75 to 100 (26) | The main window, three panes, Designer/Code tabs, commands, and the project drawer with resource editors. |
-| [Part 5: Chassis M3: form designer](#part-5-chassis-m3-form-designer) | 101 to 113 (13) | Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo. |
-| [Part 6: Chassis M4: inspector, events, and code](#part-6-chassis-m4-inspector-events-and-code) | 114 to 133 (20) | Property inspector, events menu and indicators, handler creation, and the code view. |
-| [Part 7: Chassis M5: build, run, and release (MVP)](#part-7-chassis-m5-build-run-and-release-mvp) | 134 to 138 (5) | Build and run from Chassis, CI, documentation, and the sample project. |
-| [Part 8: Chassis example projects](#part-8-chassis-example-projects) | 139 to 147 (9) | Example projects built with Chassis once it reaches the MVP: small, complete applications that exercise its features and that anyone can build and test against. |
-| [Part 9: Chassis v2](#part-9-chassis-v2) | 148 to 170 (23) | The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets. |
-| [Part 10: Remaining Pushrod backlog](#part-10-remaining-pushrod-backlog) | 171 to 193 (23) | Pushrod issues not needed by Chassis, in roadmap order. |
+| [Part 4: Chassis M2: shell and project](#part-4-chassis-m2-shell-and-project) | 75 to 103 (29) | The main window, three panes, Designer/Code tabs, commands, and the project drawer with resource editors. |
+| [Part 5: Chassis M3: form designer](#part-5-chassis-m3-form-designer) | 104 to 119 (16) | Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo. |
+| [Part 6: Chassis M4: inspector, events, and code](#part-6-chassis-m4-inspector-events-and-code) | 120 to 140 (21) | Property inspector, events menu and indicators, handler creation, and the code view. |
+| [Part 7: Chassis M5: build, run, and release (MVP)](#part-7-chassis-m5-build-run-and-release-mvp) | 141 to 145 (5) | Build and run from Chassis, CI, documentation, and the sample project. |
+| [Part 8: Chassis example projects](#part-8-chassis-example-projects) | 146 to 154 (9) | Example projects built with Chassis once it reaches the MVP: small, complete applications that exercise its features and that anyone can build and test against. |
+| [Part 9: Chassis v2](#part-9-chassis-v2) | 155 to 177 (23) | The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets. |
+| [Part 10: Extra widgets 1 and 2 (the pushrod-extra-widgets MVP)](#part-10-extra-widgets-1-and-2-the-pushrod-extra-widgets-mvp) | 178 to 203 (26) | The rest of the `pushrod-extra-widgets` crate's first two milestones: the popover and gallery, then everyday controls, pickers, lists, panels, and dialogs. |
+| [Part 11: Extra widgets 3, specialized views and assistants](#part-11-extra-widgets-3-specialized-views-and-assistants) | 204 to 224 (21) | Specialized views and assistants in `pushrod-extra-widgets`. |
+| [Part 12: Remaining Pushrod backlog](#part-12-remaining-pushrod-backlog) | 225 to 236 (12) | Pushrod issues not needed by Chassis, in roadmap order. |
 
 ## Step index
 
@@ -123,110 +125,153 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | 87 | [#34](https://github.com/KenSuenobu/rust-pushrod/issues/34) | pushrod: [2.8] Icon widget (picture with caption) |
 | 88 | [#38](https://github.com/KenSuenobu/rust-pushrod/issues/38) | pushrod: [2.12] File chooser dialog (drawn by Pushrod) |
 | 89 | [#47](https://github.com/KenSuenobu/rust-pushrod/issues/47) | pushrod: [3.9] Split view (panes with draggable dividers) |
-| 90 | [#168](https://github.com/KenSuenobu/rust-pushrod/issues/168) | chassis: [1.1] Chassis crate and main window |
-| 91 | [#169](https://github.com/KenSuenobu/rust-pushrod/issues/169) | chassis: [1.2] Three-pane workspace |
-| 92 | [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) | chassis: [1.4] Commands, menus, and shortcuts |
-| 93 | [#171](https://github.com/KenSuenobu/rust-pushrod/issues/171) | chassis: [1.3] Designer and Code tabs |
-| 94 | [#172](https://github.com/KenSuenobu/rust-pushrod/issues/172) | chassis: [2.2] New, open, and save |
-| 95 | [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) | chassis: [2.3] Project drawer |
-| 96 | [#174](https://github.com/KenSuenobu/rust-pushrod/issues/174) | chassis: [2.4] Manage resources and IDs |
-| 97 | [#175](https://github.com/KenSuenobu/rust-pushrod/issues/175) | chassis: [2.5] String table editor |
-| 98 | [#176](https://github.com/KenSuenobu/rust-pushrod/issues/176) | chassis: [2.6] Images and icons |
-| 99 | [#177](https://github.com/KenSuenobu/rust-pushrod/issues/177) | chassis: [2.8] Files |
-| **100** | checkpoint | **Chassis M2: shell and project complete** |
-| 101 | [#95](https://github.com/KenSuenobu/rust-pushrod/issues/95) | pushrod: [9.3] Event filters: observe or intercept another widget's events |
-| 102 | [#105](https://github.com/KenSuenobu/rust-pushrod/issues/105) | pushrod: [10.1] Drawing modes: live or outline feedback while moving and resizing |
-| 103 | [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) | pushrod: [6.9] Design-mode hooks for Chassis |
-| 104 | [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) | pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets |
-| 105 | [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) | chassis: [3.1] Design surface |
-| 106 | [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) | chassis: [3.2] Widget palette |
-| 107 | [#180](https://github.com/KenSuenobu/rust-pushrod/issues/180) | chassis: [3.4] Selection, move, and resize |
-| 108 | [#181](https://github.com/KenSuenobu/rust-pushrod/issues/181) | chassis: [3.3] Drag and drop placement |
-| 109 | [#182](https://github.com/KenSuenobu/rust-pushrod/issues/182) | chassis: [3.5] Snapping and alignment |
-| 110 | [#183](https://github.com/KenSuenobu/rust-pushrod/issues/183) | chassis: [3.7] Clipboard and undo |
-| 111 | [#184](https://github.com/KenSuenobu/rust-pushrod/issues/184) | chassis: [3.6] Containers, z-order, and tab order |
-| 112 | [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) | chassis: [3.8] Layout managers in the designer |
-| **113** | checkpoint | **Chassis M3: form designer complete** |
-| 114 | [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) | pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes |
-| 115 | [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) | pushrod: [2.19] Context menus |
-| 116 | [#113](https://github.com/KenSuenobu/rust-pushrod/issues/113) | pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline |
-| 117 | [#142](https://github.com/KenSuenobu/rust-pushrod/issues/142) | pushrod: [11.1] Chassis: Code editor crate and editing core |
-| 118 | [#143](https://github.com/KenSuenobu/rust-pushrod/issues/143) | pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret |
-| 119 | [#144](https://github.com/KenSuenobu/rust-pushrod/issues/144) | pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods |
-| 120 | [#145](https://github.com/KenSuenobu/rust-pushrod/issues/145) | pushrod: [11.4] Chassis: Code editor undo and redo |
-| 121 | [#146](https://github.com/KenSuenobu/rust-pushrod/issues/146) | pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter |
-| 122 | [#149](https://github.com/KenSuenobu/rust-pushrod/issues/149) | pushrod: [11.8] Chassis: Code editor API for the Chassis designer |
-| 123 | [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) | chassis: [4.1] Inspector drawer |
-| 124 | [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) | chassis: [4.2] Property grid |
-| 125 | [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) | chassis: [4.3] Typed property editors |
-| 126 | [#189](https://github.com/KenSuenobu/rust-pushrod/issues/189) | chassis: [5.4] Code view |
-| 127 | [#190](https://github.com/KenSuenobu/rust-pushrod/issues/190) | chassis: [5.3] Create and open handlers |
-| 128 | [#191](https://github.com/KenSuenobu/rust-pushrod/issues/191) | chassis: [4.4] Names and IDs |
-| 129 | [#192](https://github.com/KenSuenobu/rust-pushrod/issues/192) | chassis: [5.1] Events context menu |
-| 130 | [#193](https://github.com/KenSuenobu/rust-pushrod/issues/193) | chassis: [5.2] Inspector Events tab |
-| 131 | [#194](https://github.com/KenSuenobu/rust-pushrod/issues/194) | chassis: [5.5] Code indicator on the design surface |
-| 132 | [#195](https://github.com/KenSuenobu/rust-pushrod/issues/195) | chassis: [5.6] Keep handlers in sync |
-| **133** | checkpoint | **Chassis M4: inspector, events, and code complete** |
-| 134 | [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) | chassis: [6.2] Build and run |
-| 135 | [#197](https://github.com/KenSuenobu/rust-pushrod/issues/197) | chassis: [7.1] CI and golden screenshots |
-| 136 | [#198](https://github.com/KenSuenobu/rust-pushrod/issues/198) | chassis: [7.2] Chassis documentation |
-| 137 | [#199](https://github.com/KenSuenobu/rust-pushrod/issues/199) | chassis: [7.3] Sample project |
-| **138** | checkpoint | **Chassis MVP released** |
-| 139 | [#208](https://github.com/KenSuenobu/rust-pushrod/issues/208) | chassis: [8.1] Hello, Chassis |
-| 140 | [#209](https://github.com/KenSuenobu/rust-pushrod/issues/209) | chassis: [8.2] Temperature converter |
-| 141 | [#210](https://github.com/KenSuenobu/rust-pushrod/issues/210) | chassis: [8.3] Tip calculator |
-| 142 | [#211](https://github.com/KenSuenobu/rust-pushrod/issues/211) | chassis: [8.4] Settings dialog |
-| 143 | [#212](https://github.com/KenSuenobu/rust-pushrod/issues/212) | chassis: [8.5] Image viewer |
-| 144 | [#213](https://github.com/KenSuenobu/rust-pushrod/issues/213) | chassis: [8.6] Stopwatch |
-| 145 | [#214](https://github.com/KenSuenobu/rust-pushrod/issues/214) | chassis: [8.7] Quiz |
-| 146 | [#215](https://github.com/KenSuenobu/rust-pushrod/issues/215) | chassis: [8.8] Dice roller |
-| **147** | checkpoint | **All example projects built** |
-| 148 | [#98](https://github.com/KenSuenobu/rust-pushrod/issues/98) | pushrod: [9.6] Property bindings: keep two properties in sync |
-| 149 | [#82](https://github.com/KenSuenobu/rust-pushrod/issues/82) | pushrod: [1.16] Multiple windows: separate OS windows, each with its own engine |
-| 150 | [#67](https://github.com/KenSuenobu/rust-pushrod/issues/67) | pushrod: [6.8] Bind actions by name from form files |
-| 151 | [#107](https://github.com/KenSuenobu/rust-pushrod/issues/107) | pushrod: [10.3] no_std + alloc core crate |
-| 152 | [#108](https://github.com/KenSuenobu/rust-pushrod/issues/108) | pushrod: [10.4] Experimental: Atari ST / TOS backend |
-| 153 | [#135](https://github.com/KenSuenobu/rust-pushrod/issues/135) | pushrod: [10.5] SDL3 backend (pushrod-sdl3) |
-| 154 | [#200](https://github.com/KenSuenobu/rust-pushrod/issues/200) | chassis: [1.5] Workspace settings |
-| 155 | [#201](https://github.com/KenSuenobu/rust-pushrod/issues/201) | chassis: [2.7] Menu editor |
-| 156 | [#202](https://github.com/KenSuenobu/rust-pushrod/issues/202) | chassis: [3.9] Form preview |
-| 157 | [#203](https://github.com/KenSuenobu/rust-pushrod/issues/203) | chassis: [4.5] Multiple selection editing |
-| 158 | [#204](https://github.com/KenSuenobu/rust-pushrod/issues/204) | chassis: [6.3] Error list |
-| 159 | [#205](https://github.com/KenSuenobu/rust-pushrod/issues/205) | chassis: [6.4] Project templates |
-| 160 | [#206](https://github.com/KenSuenobu/rust-pushrod/issues/206) | chassis: [7.4] Packaging and releases |
-| 161 | [#216](https://github.com/KenSuenobu/rust-pushrod/issues/216) | chassis: [1.6] Find in project |
-| 162 | [#217](https://github.com/KenSuenobu/rust-pushrod/issues/217) | chassis: [1.7] Multiple windows per project |
-| 163 | [#218](https://github.com/KenSuenobu/rust-pushrod/issues/218) | chassis: [2.9] Localization |
-| 164 | [#219](https://github.com/KenSuenobu/rust-pushrod/issues/219) | chassis: [2.10] Source control status |
-| 165 | [#220](https://github.com/KenSuenobu/rust-pushrod/issues/220) | chassis: [3.10] Visual form inheritance |
-| 166 | [#221](https://github.com/KenSuenobu/rust-pushrod/issues/221) | chassis: [3.11] Accessibility and usability checks |
-| 167 | [#222](https://github.com/KenSuenobu/rust-pushrod/issues/222) | chassis: [4.6] Data bindings in the inspector |
-| 168 | [#223](https://github.com/KenSuenobu/rust-pushrod/issues/223) | chassis: [5.8] Code intelligence with rust-analyzer |
-| 169 | [#224](https://github.com/KenSuenobu/rust-pushrod/issues/224) | chassis: [6.6] Build targets, including the Atari ST |
-| **170** | checkpoint | **Chassis v2 released** |
-| 171 | [#99](https://github.com/KenSuenobu/rust-pushrod/issues/99) | pushrod: [9.7] Callback handles: disconnect, block, and unblock |
-| 172 | [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) | pushrod: [9.9] Pointer cursor per widget |
-| 173 | [#26](https://github.com/KenSuenobu/rust-pushrod/issues/26) | pushrod: [1.11] Application lifecycle: startup and close-request callbacks |
-| 174 | [#119](https://github.com/KenSuenobu/rust-pushrod/issues/119) | pushrod: [5.8] Grid layout |
-| 175 | [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) | pushrod: [5.9] Stack layout (one child visible at a time) |
-| 176 | [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) | pushrod: [5.10] Flow layout (wrapping rows) |
-| 177 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) | pushrod: [3.7] Column browser (multi-column hierarchical browser) |
-| 178 | [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) | pushrod: [4.2] Spin box |
-| 179 | [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) | pushrod: [4.6] Combo box |
-| 180 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) | pushrod: [3.11] Date picker |
-| 181 | [#77](https://github.com/KenSuenobu/rust-pushrod/issues/77) | pushrod: [2.13] Tooltips |
-| 182 | [#86](https://github.com/KenSuenobu/rust-pushrod/issues/86) | pushrod: [2.17] Switch (on/off slide toggle) |
-| 183 | [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) | pushrod: [2.18] Multi-line text area |
-| 184 | [#89](https://github.com/KenSuenobu/rust-pushrod/issues/89) | pushrod: [2.20] Message bar (non-modal inline notice) |
-| 185 | [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) | pushrod: [2.22] Link label |
-| 186 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) | pushrod: [3.12] Dial (rotary knob) |
-| 187 | [#128](https://github.com/KenSuenobu/rust-pushrod/issues/128) | pushrod: [4.10] Busy spinner |
-| 188 | [#24](https://github.com/KenSuenobu/rust-pushrod/issues/24) | pushrod: [1.9] Dirty-rectangle redraw |
-| 189 | [#147](https://github.com/KenSuenobu/rust-pushrod/issues/147) | pushrod: [11.6] Chassis: Code editor find |
-| 190 | [#148](https://github.com/KenSuenobu/rust-pushrod/issues/148) | pushrod: [11.7] Chassis: Code editor auto-indent and bracket matching |
-| 191 | [#150](https://github.com/KenSuenobu/rust-pushrod/issues/150) | pushrod: [11.9] Chassis: Code editor documentation, example, and tests |
-| 192 | [#74](https://github.com/KenSuenobu/rust-pushrod/issues/74) | pushrod: [8.1] Theme for colors and metrics (future) |
-| 193 | [#75](https://github.com/KenSuenobu/rust-pushrod/issues/75) | pushrod: [8.2] Skins: image-based widget rendering (future) |
+| 90 | [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) | pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets |
+| 91 | [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) | extra-widgets: [1.1] Create the pushrod-extra-widgets crate |
+| 92 | [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) | extra-widgets: [5.1] Drawer (collapsible side panel) |
+| 93 | [#168](https://github.com/KenSuenobu/rust-pushrod/issues/168) | chassis: [1.1] Chassis crate and main window |
+| 94 | [#169](https://github.com/KenSuenobu/rust-pushrod/issues/169) | chassis: [1.2] Three-pane workspace |
+| 95 | [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) | chassis: [1.4] Commands, menus, and shortcuts |
+| 96 | [#171](https://github.com/KenSuenobu/rust-pushrod/issues/171) | chassis: [1.3] Designer and Code tabs |
+| 97 | [#172](https://github.com/KenSuenobu/rust-pushrod/issues/172) | chassis: [2.2] New, open, and save |
+| 98 | [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) | chassis: [2.3] Project drawer |
+| 99 | [#174](https://github.com/KenSuenobu/rust-pushrod/issues/174) | chassis: [2.4] Manage resources and IDs |
+| 100 | [#175](https://github.com/KenSuenobu/rust-pushrod/issues/175) | chassis: [2.5] String table editor |
+| 101 | [#176](https://github.com/KenSuenobu/rust-pushrod/issues/176) | chassis: [2.6] Images and icons |
+| 102 | [#177](https://github.com/KenSuenobu/rust-pushrod/issues/177) | chassis: [2.8] Files |
+| **103** | checkpoint | **Chassis M2: shell and project complete** |
+| 104 | [#95](https://github.com/KenSuenobu/rust-pushrod/issues/95) | pushrod: [9.3] Event filters: observe or intercept another widget's events |
+| 105 | [#105](https://github.com/KenSuenobu/rust-pushrod/issues/105) | pushrod: [10.1] Drawing modes: live or outline feedback while moving and resizing |
+| 106 | [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) | pushrod: [5.10] Flow layout (wrapping rows) |
+| 107 | [#77](https://github.com/KenSuenobu/rust-pushrod/issues/77) | pushrod: [2.13] Tooltips |
+| 108 | [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) | pushrod: [6.9] Design-mode hooks for Chassis |
+| 109 | [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) | extra-widgets: [2.6] Tool palette (grid of tool buttons) |
+| 110 | [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) | extra-widgets: [4.9] Breadcrumb bar (path control) |
+| 111 | [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) | chassis: [3.1] Design surface |
+| 112 | [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) | chassis: [3.2] Widget palette |
+| 113 | [#180](https://github.com/KenSuenobu/rust-pushrod/issues/180) | chassis: [3.4] Selection, move, and resize |
+| 114 | [#181](https://github.com/KenSuenobu/rust-pushrod/issues/181) | chassis: [3.3] Drag and drop placement |
+| 115 | [#182](https://github.com/KenSuenobu/rust-pushrod/issues/182) | chassis: [3.5] Snapping and alignment |
+| 116 | [#183](https://github.com/KenSuenobu/rust-pushrod/issues/183) | chassis: [3.7] Clipboard and undo |
+| 117 | [#184](https://github.com/KenSuenobu/rust-pushrod/issues/184) | chassis: [3.6] Containers, z-order, and tab order |
+| 118 | [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) | chassis: [3.8] Layout managers in the designer |
+| **119** | checkpoint | **Chassis M3: form designer complete** |
+| 120 | [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) | pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes |
+| 121 | [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) | pushrod: [2.19] Context menus |
+| 122 | [#113](https://github.com/KenSuenobu/rust-pushrod/issues/113) | pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline |
+| 123 | [#142](https://github.com/KenSuenobu/rust-pushrod/issues/142) | pushrod: [11.1] Chassis: Code editor crate and editing core |
+| 124 | [#143](https://github.com/KenSuenobu/rust-pushrod/issues/143) | pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret |
+| 125 | [#144](https://github.com/KenSuenobu/rust-pushrod/issues/144) | pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods |
+| 126 | [#145](https://github.com/KenSuenobu/rust-pushrod/issues/145) | pushrod: [11.4] Chassis: Code editor undo and redo |
+| 127 | [#146](https://github.com/KenSuenobu/rust-pushrod/issues/146) | pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter |
+| 128 | [#149](https://github.com/KenSuenobu/rust-pushrod/issues/149) | pushrod: [11.8] Chassis: Code editor API for the Chassis designer |
+| 129 | [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) | extra-widgets: [4.5] Property grid (name and value inspector) |
+| 130 | [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) | chassis: [4.1] Inspector drawer |
+| 131 | [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) | chassis: [4.2] Property grid |
+| 132 | [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) | chassis: [4.3] Typed property editors |
+| 133 | [#189](https://github.com/KenSuenobu/rust-pushrod/issues/189) | chassis: [5.4] Code view |
+| 134 | [#190](https://github.com/KenSuenobu/rust-pushrod/issues/190) | chassis: [5.3] Create and open handlers |
+| 135 | [#191](https://github.com/KenSuenobu/rust-pushrod/issues/191) | chassis: [4.4] Names and IDs |
+| 136 | [#192](https://github.com/KenSuenobu/rust-pushrod/issues/192) | chassis: [5.1] Events context menu |
+| 137 | [#193](https://github.com/KenSuenobu/rust-pushrod/issues/193) | chassis: [5.2] Inspector Events tab |
+| 138 | [#194](https://github.com/KenSuenobu/rust-pushrod/issues/194) | chassis: [5.5] Code indicator on the design surface |
+| 139 | [#195](https://github.com/KenSuenobu/rust-pushrod/issues/195) | chassis: [5.6] Keep handlers in sync |
+| **140** | checkpoint | **Chassis M4: inspector, events, and code complete** |
+| 141 | [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) | chassis: [6.2] Build and run |
+| 142 | [#197](https://github.com/KenSuenobu/rust-pushrod/issues/197) | chassis: [7.1] CI and golden screenshots |
+| 143 | [#198](https://github.com/KenSuenobu/rust-pushrod/issues/198) | chassis: [7.2] Chassis documentation |
+| 144 | [#199](https://github.com/KenSuenobu/rust-pushrod/issues/199) | chassis: [7.3] Sample project |
+| **145** | checkpoint | **Chassis MVP released** |
+| 146 | [#208](https://github.com/KenSuenobu/rust-pushrod/issues/208) | chassis: [8.1] Hello, Chassis |
+| 147 | [#209](https://github.com/KenSuenobu/rust-pushrod/issues/209) | chassis: [8.2] Temperature converter |
+| 148 | [#210](https://github.com/KenSuenobu/rust-pushrod/issues/210) | chassis: [8.3] Tip calculator |
+| 149 | [#211](https://github.com/KenSuenobu/rust-pushrod/issues/211) | chassis: [8.4] Settings dialog |
+| 150 | [#212](https://github.com/KenSuenobu/rust-pushrod/issues/212) | chassis: [8.5] Image viewer |
+| 151 | [#213](https://github.com/KenSuenobu/rust-pushrod/issues/213) | chassis: [8.6] Stopwatch |
+| 152 | [#214](https://github.com/KenSuenobu/rust-pushrod/issues/214) | chassis: [8.7] Quiz |
+| 153 | [#215](https://github.com/KenSuenobu/rust-pushrod/issues/215) | chassis: [8.8] Dice roller |
+| **154** | checkpoint | **All example projects built** |
+| 155 | [#98](https://github.com/KenSuenobu/rust-pushrod/issues/98) | pushrod: [9.6] Property bindings: keep two properties in sync |
+| 156 | [#82](https://github.com/KenSuenobu/rust-pushrod/issues/82) | pushrod: [1.16] Multiple windows: separate OS windows, each with its own engine |
+| 157 | [#67](https://github.com/KenSuenobu/rust-pushrod/issues/67) | pushrod: [6.8] Bind actions by name from form files |
+| 158 | [#107](https://github.com/KenSuenobu/rust-pushrod/issues/107) | pushrod: [10.3] no_std + alloc core crate |
+| 159 | [#108](https://github.com/KenSuenobu/rust-pushrod/issues/108) | pushrod: [10.4] Experimental: Atari ST / TOS backend |
+| 160 | [#135](https://github.com/KenSuenobu/rust-pushrod/issues/135) | pushrod: [10.5] SDL3 backend (pushrod-sdl3) |
+| 161 | [#200](https://github.com/KenSuenobu/rust-pushrod/issues/200) | chassis: [1.5] Workspace settings |
+| 162 | [#201](https://github.com/KenSuenobu/rust-pushrod/issues/201) | chassis: [2.7] Menu editor |
+| 163 | [#202](https://github.com/KenSuenobu/rust-pushrod/issues/202) | chassis: [3.9] Form preview |
+| 164 | [#203](https://github.com/KenSuenobu/rust-pushrod/issues/203) | chassis: [4.5] Multiple selection editing |
+| 165 | [#204](https://github.com/KenSuenobu/rust-pushrod/issues/204) | chassis: [6.3] Error list |
+| 166 | [#205](https://github.com/KenSuenobu/rust-pushrod/issues/205) | chassis: [6.4] Project templates |
+| 167 | [#206](https://github.com/KenSuenobu/rust-pushrod/issues/206) | chassis: [7.4] Packaging and releases |
+| 168 | [#216](https://github.com/KenSuenobu/rust-pushrod/issues/216) | chassis: [1.6] Find in project |
+| 169 | [#217](https://github.com/KenSuenobu/rust-pushrod/issues/217) | chassis: [1.7] Multiple windows per project |
+| 170 | [#218](https://github.com/KenSuenobu/rust-pushrod/issues/218) | chassis: [2.9] Localization |
+| 171 | [#219](https://github.com/KenSuenobu/rust-pushrod/issues/219) | chassis: [2.10] Source control status |
+| 172 | [#220](https://github.com/KenSuenobu/rust-pushrod/issues/220) | chassis: [3.10] Visual form inheritance |
+| 173 | [#221](https://github.com/KenSuenobu/rust-pushrod/issues/221) | chassis: [3.11] Accessibility and usability checks |
+| 174 | [#222](https://github.com/KenSuenobu/rust-pushrod/issues/222) | chassis: [4.6] Data bindings in the inspector |
+| 175 | [#223](https://github.com/KenSuenobu/rust-pushrod/issues/223) | chassis: [5.8] Code intelligence with rust-analyzer |
+| 176 | [#224](https://github.com/KenSuenobu/rust-pushrod/issues/224) | chassis: [6.6] Build targets, including the Atari ST |
+| **177** | checkpoint | **Chassis v2 released** |
+| 178 | [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) | pushrod: [5.9] Stack layout (one child visible at a time) |
+| 179 | [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) | pushrod: [4.2] Spin box |
+| 180 | [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) | pushrod: [4.6] Combo box |
+| 181 | [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) | pushrod: [2.18] Multi-line text area |
+| 182 | [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) | extra-widgets: [1.2] Extra widgets gallery example |
+| 183 | [#254](https://github.com/KenSuenobu/rust-pushrod/issues/254) | extra-widgets: [1.3] Popover: a floating panel anchored to a control |
+| 184 | [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258) | extra-widgets: [2.1] Menu button and split button |
+| 185 | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) | extra-widgets: [2.2] Segmented control |
+| 186 | [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259) | extra-widgets: [2.3] Stepper (up and down arrows) |
+| 187 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) | extra-widgets: [2.4] Dial (rotary knob) |
+| 188 | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) | extra-widgets: [2.5] Level indicator (meter) |
+| 189 | [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260) | extra-widgets: [3.1] Calendar (month view) |
+| 190 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) | extra-widgets: [3.2] Date picker |
+| 191 | [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) | extra-widgets: [3.3] Time field and date-time field |
+| 192 | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) | extra-widgets: [3.4] Color well and color picker |
+| 193 | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) | extra-widgets: [3.5] Font chooser |
+| 194 | [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262) | extra-widgets: [3.6] Path field (file or folder with Browse) |
+| 195 | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) | extra-widgets: [4.1] Tree view (outline) |
+| 196 | [#263](https://github.com/KenSuenobu/rust-pushrod/issues/263) | extra-widgets: [4.6] Check list |
+| 197 | [#264](https://github.com/KenSuenobu/rust-pushrod/issues/264) | extra-widgets: [4.7] Editable list (add, remove, reorder) |
+| 198 | [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265) | extra-widgets: [5.2] Accordion (one section open at a time) |
+| 199 | [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266) | extra-widgets: [5.3] Sidebar (navigation list) |
+| 200 | [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267) | extra-widgets: [6.1] Input dialog (ask for one value) |
+| 201 | [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268) | extra-widgets: [6.2] Progress dialog |
+| 202 | [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269) | extra-widgets: [6.3] Task dialog (alert with details and options) |
+| **203** | checkpoint | **pushrod-extra-widgets MVP released** |
+| 204 | [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) | pushrod: [9.9] Pointer cursor per widget |
+| 205 | [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) | pushrod: [2.22] Link label |
+| 206 | [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) | extra-widgets: [2.7] Ruler |
+| 207 | [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) | extra-widgets: [2.8] Shortcut field (key combination recorder) |
+| 208 | [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) | extra-widgets: [3.7] Image well |
+| 209 | [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) | extra-widgets: [3.8] New password (enter, confirm, strength) |
+| 210 | [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) | extra-widgets: [3.9] Character picker |
+| 211 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) | extra-widgets: [4.2] Column browser |
+| 212 | [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275) | extra-widgets: [4.3] Icon grid view |
+| 213 | [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) | extra-widgets: [4.4] Data grid (editable table) |
+| 214 | [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) | extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees) |
+| 215 | [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278) | extra-widgets: [4.8] Dual list (list builder) |
+| 216 | [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) | extra-widgets: [4.11] Rule editor (query builder) |
+| 217 | [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) | extra-widgets: [4.12] Image viewer (zoom and pan) |
+| 218 | [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281) | extra-widgets: [5.4] Document tabs (closable and reorderable) |
+| 219 | [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282) | extra-widgets: [6.4] Wizard (step-by-step assistant) |
+| 220 | [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283) | extra-widgets: [6.5] Settings dialog |
+| 221 | [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) | extra-widgets: [6.6] About dialog |
+| 222 | [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) | extra-widgets: [6.7] Find and replace bar |
+| 223 | [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) | extra-widgets: [6.8] Keyboard shortcuts editor |
+| **224** | checkpoint | **Extra widgets 3 released** |
+| 225 | [#99](https://github.com/KenSuenobu/rust-pushrod/issues/99) | pushrod: [9.7] Callback handles: disconnect, block, and unblock |
+| 226 | [#26](https://github.com/KenSuenobu/rust-pushrod/issues/26) | pushrod: [1.11] Application lifecycle: startup and close-request callbacks |
+| 227 | [#119](https://github.com/KenSuenobu/rust-pushrod/issues/119) | pushrod: [5.8] Grid layout |
+| 228 | [#86](https://github.com/KenSuenobu/rust-pushrod/issues/86) | pushrod: [2.17] Switch (on/off slide toggle) |
+| 229 | [#89](https://github.com/KenSuenobu/rust-pushrod/issues/89) | pushrod: [2.20] Message bar (non-modal inline notice) |
+| 230 | [#128](https://github.com/KenSuenobu/rust-pushrod/issues/128) | pushrod: [4.10] Busy spinner |
+| 231 | [#24](https://github.com/KenSuenobu/rust-pushrod/issues/24) | pushrod: [1.9] Dirty-rectangle redraw |
+| 232 | [#147](https://github.com/KenSuenobu/rust-pushrod/issues/147) | pushrod: [11.6] Chassis: Code editor find |
+| 233 | [#148](https://github.com/KenSuenobu/rust-pushrod/issues/148) | pushrod: [11.7] Chassis: Code editor auto-indent and bracket matching |
+| 234 | [#150](https://github.com/KenSuenobu/rust-pushrod/issues/150) | pushrod: [11.9] Chassis: Code editor documentation, example, and tests |
+| 235 | [#74](https://github.com/KenSuenobu/rust-pushrod/issues/74) | pushrod: [8.1] Theme for colors and metrics (future) |
+| 236 | [#75](https://github.com/KenSuenobu/rust-pushrod/issues/75) | pushrod: [8.2] Skins: image-based widget rendering (future) |
 
 ## Part 1: Pushrod v0.1, dialog applications
 
@@ -1271,7 +1316,7 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 ## Part 3: Chassis M1: core without UI
 
-Project model, resource access, code generation, and a command-line generator, all testable without a window. Can start as soon as Pushrod's resource manager (6.10 to 6.12) lands. Pushrod work this phase needs comes first.
+Project model, resource access, code generation, and a command-line generator, all testable without a window. Can start as soon as Pushrod's resource manager (6.10 to 6.12) lands. Pushrod work and extra widgets this phase needs come first.
 
 ### Step 69: Event metadata in the widget registry
 
@@ -1346,7 +1391,7 @@ Project model, resource access, code generation, and a command-line generator, a
 
 ## Part 4: Chassis M2: shell and project
 
-The main window, three panes, Designer/Code tabs, commands, and the project drawer with resource editors. Pushrod work this phase needs comes first.
+The main window, three panes, Designer/Code tabs, commands, and the project drawer with resource editors. Pushrod work and extra widgets this phase needs come first.
 
 ### Step 75: Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
 
@@ -1588,7 +1633,53 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Extra space distributed by stretch factor
 - [ ] Positions settable and readable; outline mode supported
 
-### Step 90: Chassis crate and main window
+### Step 90: Widget libraries: extend or replace pushrod-widgets
+
+**Issue:** [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) `pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets`
+
+**Delivers:** Make it straightforward for a separate crate to add widgets alongside pushrod-widgets, or to replace it with a different look.
+
+**Builds on:** step 1, step 58.
+
+**Show on video:**
+
+- [ ] A separate crate adds a widget that works with IDs, events, callbacks, and focus like a standard one
+- [ ] A replacement library registers standard type names and a form loads with its look
+- [ ] Docs page explains extending and replacing
+
+### Step 91: Create the pushrod-extra-widgets crate
+
+**Issue:** [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) `extra-widgets: [1.1] Create the pushrod-extra-widgets crate`
+
+**Delivers:** The crate, its registration function, its docs section, and its place in CI.
+
+**Builds on:** step 1, step 90, step 58, step 21.
+
+**Mockups:** [xw-1.1-1.png](../mockups/xw-1.1-1.png)
+
+**Show on video:**
+
+- [ ] Workspace builds with the new crate; CI runs fmt, clippy, tests, `check_docs`, and rustdoc on it
+- [ ] `register` adds widgets under `extra.` and a test loads a form using one
+- [ ] Documentation site has an Extra widgets section and the crate appears in Widget libraries
+
+### Step 92: Drawer (collapsible side panel)
+
+**Issue:** [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) `extra-widgets: [5.1] Drawer (collapsible side panel)`
+
+**Delivers:** A side panel with a title bar that collapses to a thin strip and remembers its width.
+
+**Builds on:** step 91, step 89, step 30, step 75.
+
+**Mockups:** [xw-5.1-1.png](../mockups/xw-5.1-1.png)
+
+**Show on video:**
+
+- [ ] Collapses to a strip and restores its width
+- [ ] Left, right, and bottom sides
+- [ ] Toggle by button and action shortcut
+
+### Step 93: Chassis crate and main window
 
 **Issue:** [#168](https://github.com/KenSuenobu/rust-pushrod/issues/168) `chassis: [1.1] Chassis crate and main window`
 
@@ -1604,13 +1695,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Menus open and toolbar buttons trigger their commands (stubs where later issues implement them)
 - [ ] Status bar updates with the selection
 
-### Step 91: Three-pane workspace
+### Step 94: Three-pane workspace
 
 **Issue:** [#169](https://github.com/KenSuenobu/rust-pushrod/issues/169) `chassis: [1.2] Three-pane workspace`
 
 **Delivers:** Project drawer, editor, and inspector in resizable, collapsible split views.
 
-**Builds on:** step 90, step 89.
+**Builds on:** step 93, step 89.
 
 **Mockups:** [chassis-1.png](../mockups/chassis-1.png)
 
@@ -1620,13 +1711,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] F4 toggles the inspector
 - [ ] Layout matches the mockup at 1200 x 760 and scales up
 
-### Step 92: Commands, menus, and shortcuts
+### Step 95: Commands, menus, and shortcuts
 
 **Issue:** [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) `chassis: [1.4] Commands, menus, and shortcuts`
 
 **Delivers:** Every command as an action, reachable from menus, toolbar, and familiar shortcuts.
 
-**Builds on:** step 90, step 75.
+**Builds on:** step 93, step 75.
 
 **Show on video:**
 
@@ -1634,13 +1725,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Commands disabled when not applicable
 - [ ] Shortcut list on the docs site
 
-### Step 93: Designer and Code tabs
+### Step 96: Designer and Code tabs
 
 **Issue:** [#171](https://github.com/KenSuenobu/rust-pushrod/issues/171) `chassis: [1.3] Designer and Code tabs`
 
 **Delivers:** Two tabs per open form; F12 switches; each keeps its scroll, selection, and caret.
 
-**Builds on:** step 91, step 80.
+**Builds on:** step 94, step 80.
 
 **Mockups:** [chassis-4.png](../mockups/chassis-4.png)
 
@@ -1650,13 +1741,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Selection, scroll, and caret preserved across switches
 - [ ] Opening another form keeps the active tab
 
-### Step 94: New, open, and save
+### Step 97: New, open, and save
 
 **Issue:** [#172](https://github.com/KenSuenobu/rust-pushrod/issues/172) `chassis: [2.2] New, open, and save`
 
 **Delivers:** Create a project from scratch, open an existing one, save the resource file and generated code.
 
-**Builds on:** step 70, step 92, step 71, step 88, step 63.
+**Builds on:** step 70, step 95, step 71, step 88, step 63.
 
 **Show on video:**
 
@@ -1664,13 +1755,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Save then reopen restores every resource exactly
 - [ ] Closing with unsaved changes asks to save
 
-### Step 95: Project drawer
+### Step 98: Project drawer
 
 **Issue:** [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) `chassis: [2.3] Project drawer`
 
 **Delivers:** Resource sections (Forms, Strings, Images, Icons, Files, Menus) as expanders with lists.
 
-**Builds on:** step 91, step 70, step 82, step 79.
+**Builds on:** step 94, step 70, step 82, step 79, step 92.
 
 **Mockups:** [chassis-1.png](../mockups/chassis-1.png)
 
@@ -1680,13 +1771,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Double-click opens the right editor
 - [ ] Selection follows the open form
 
-### Step 96: Manage resources and IDs
+### Step 99: Manage resources and IDs
 
 **Issue:** [#174](https://github.com/KenSuenobu/rust-pushrod/issues/174) `chassis: [2.4] Manage resources and IDs`
 
 **Delivers:** Add, rename, duplicate, and delete resources; see and copy each resource's ID.
 
-**Builds on:** step 95, step 65, step 66, step 77.
+**Builds on:** step 98, step 65, step 66, step 77.
 
 **Show on video:**
 
@@ -1694,13 +1785,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Copy ID Constant copies the exact generated name
 - [ ] IDs never change when other resources are added or removed
 
-### Step 97: String table editor
+### Step 100: String table editor
 
 **Issue:** [#175](https://github.com/KenSuenobu/rust-pushrod/issues/175) `chassis: [2.5] String table editor`
 
 **Delivers:** Edit the resource file's strings: name, text, and ID.
 
-**Builds on:** step 95, step 67, step 65, step 81.
+**Builds on:** step 98, step 67, step 65, step 81.
 
 **Show on video:**
 
@@ -1708,13 +1799,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Widgets can use a string resource for their text
 - [ ] Deleting a used string warns
 
-### Step 98: Images and icons
+### Step 101: Images and icons
 
 **Issue:** [#176](https://github.com/KenSuenobu/rust-pushrod/issues/176) `chassis: [2.6] Images and icons`
 
 **Delivers:** Import images and icons into the resource file and use them in widgets by ID.
 
-**Builds on:** step 95, step 67, step 65, step 29, step 87, step 76.
+**Builds on:** step 98, step 67, step 65, step 29, step 87, step 76.
 
 **Show on video:**
 
@@ -1722,13 +1813,13 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Widgets reference them by ID
 - [ ] Replacing keeps the ID and updates every widget
 
-### Step 99: Files
+### Step 102: Files
 
 **Issue:** [#177](https://github.com/KenSuenobu/rust-pushrod/issues/177) `chassis: [2.8] Files`
 
 **Delivers:** Add arbitrary files (license text, templates, data) to the resource file and load them by ID.
 
-**Builds on:** step 95, step 67, step 65.
+**Builds on:** step 98, step 67, step 65.
 
 **Show on video:**
 
@@ -1736,15 +1827,15 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 - [ ] Text files preview
 - [ ] Files load at run time by ID
 
-### Step 100: Checkpoint: Chassis M2: shell and project complete
+### Step 103: Checkpoint: Chassis M2: shell and project complete
 
 **Video:** Open Chassis: create a project, browse the project drawer, add strings, images, icons, and files.
 
 ## Part 5: Chassis M3: form designer
 
-Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo. Pushrod work this phase needs comes first.
+Design surface, palette, drag and drop, selection, snapping, containers, layouts, and undo. Pushrod work and extra widgets this phase needs come first.
 
-### Step 101: Event filters: observe or intercept another widget's events
+### Step 104: Event filters: observe or intercept another widget's events
 
 **Issue:** [#95](https://github.com/KenSuenobu/rust-pushrod/issues/95) `pushrod: [9.3] Event filters: observe or intercept another widget's events`
 
@@ -1758,7 +1849,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 - [ ] Stop prevents delivery
 - [ ] Removal works
 
-### Step 102: Drawing modes: live or outline feedback while moving and resizing
+### Step 105: Drawing modes: live or outline feedback while moving and resizing
 
 **Issue:** [#105](https://github.com/KenSuenobu/rust-pushrod/issues/105) `pushrod: [10.1] Drawing modes: live or outline feedback while moving and resizing`
 
@@ -1777,1035 +1868,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 - [ ] `ui.set_drawing_mode` switches at run time; in-progress interactions finish in their starting mode
 - [ ] Each change broadcasts `DrawingModeChanged { old, new, reason }`
 
-### Step 103: Design-mode hooks for Chassis
-
-**Issue:** [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) `pushrod: [6.9] Design-mode hooks for Chassis`
-
-**Delivers:** Select, move, resize, and edit widgets without triggering their behavior.
-
-**Builds on:** step 59, step 101, step 77, step 48, step 38.
-
-**Show on video:**
-
-- [ ] No widget reacts in design mode
-- [ ] Select/move/resize/reparent, undoable
-- [ ] Back to run mode restores behavior
-
-### Step 104: Widget libraries: extend or replace pushrod-widgets
-
-**Issue:** [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) `pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets`
-
-**Delivers:** Make it straightforward for a separate crate to add widgets alongside pushrod-widgets, or to replace it with a different look.
-
-**Builds on:** step 1, step 58.
-
-**Show on video:**
-
-- [ ] A separate crate adds a widget that works with IDs, events, callbacks, and focus like a standard one
-- [ ] A replacement library registers standard type names and a form loads with its look
-- [ ] Docs page explains extending and replacing
-
-### Step 105: Design surface
-
-**Issue:** [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) `chassis: [3.1] Design surface`
-
-**Delivers:** The open form on a dotted grid, in Pushrod design mode.
-
-**Builds on:** step 93, step 70, step 103, step 62.
-
-**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
-
-**Show on video:**
-
-- [ ] Forms look exactly as at run time
-- [ ] Widgets don't react in the designer
-- [ ] Grid size and visibility adjustable
-
-### Step 106: Widget palette
-
-**Issue:** [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) `chassis: [3.2] Widget palette`
-
-**Delivers:** Every registered widget type, searchable and grouped, including layouts.
-
-**Builds on:** step 91, step 58, step 104.
-
-**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
-
-**Show on video:**
-
-- [ ] All registered types listed and searchable
-- [ ] A widget library added to the project appears in the palette
-
-### Step 107: Selection, move, and resize
-
-**Issue:** [#180](https://github.com/KenSuenobu/rust-pushrod/issues/180) `chassis: [3.4] Selection, move, and resize`
-
-**Delivers:** Click, Shift+click, marquee; eight handles; keyboard nudge.
-
-**Builds on:** step 105, step 102.
-
-**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
-
-**Show on video:**
-
-- [ ] All gestures work and update the inspector live
-- [ ] Multi-selection moves together
-
-### Step 108: Drag and drop placement
-
-**Issue:** [#181](https://github.com/KenSuenobu/rust-pushrod/issues/181) `chassis: [3.3] Drag and drop placement`
-
-**Delivers:** Drag from the palette; outline preview; drop creates and selects.
-
-**Builds on:** step 105, step 106, step 76.
-
-**Mockups:** [chassis-2.png](../mockups/chassis-2.png)
-
-**Show on video:**
-
-- [ ] Outline follows the pointer and snaps; drop creates and selects
-- [ ] Escape cancels; one undo removes the widget
-
-### Step 109: Snapping and alignment
-
-**Issue:** [#182](https://github.com/KenSuenobu/rust-pushrod/issues/182) `chassis: [3.5] Snapping and alignment`
-
-**Delivers:** Grid snap, guides to neighbors, align and distribute commands.
-
-**Builds on:** step 107.
-
-**Mockups:** [chassis-2.png](../mockups/chassis-2.png)
-
-**Show on video:**
-
-- [ ] Guides appear when edges or centers line up
-- [ ] Align and distribute work on multi-selections
-
-### Step 110: Clipboard and undo
-
-**Issue:** [#183](https://github.com/KenSuenobu/rust-pushrod/issues/183) `chassis: [3.7] Clipboard and undo`
-
-**Delivers:** Cut, copy, paste, duplicate; every designer change undoable.
-
-**Builds on:** step 107, step 77.
-
-**Show on video:**
-
-- [ ] Every change undoes and redoes exactly
-- [ ] Pasted widgets get unique names
-
-### Step 111: Containers, z-order, and tab order
-
-**Issue:** [#184](https://github.com/KenSuenobu/rust-pushrod/issues/184) `chassis: [3.6] Containers, z-order, and tab order`
-
-**Delivers:** Drop into group boxes and containers; bring forward and back; set the Tab order.
-
-**Builds on:** step 107, step 18, step 28, step 43.
-
-**Show on video:**
-
-- [ ] Moving a group box moves its children
-- [ ] Tab order edits persist to the resource file
-
-### Step 112: Layout managers in the designer
-
-**Issue:** [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) `chassis: [3.8] Layout managers in the designer`
-
-**Delivers:** Insert widgets into Column, Row, Form, and Grid layouts; spacers; breadcrumb; live resize.
-
-**Builds on:** step 108, step 107, step 39, step 40, step 41.
-
-**Mockups:** [chassis-layout-1.png](../mockups/chassis-layout-1.png), [chassis-layout-2.png](../mockups/chassis-layout-2.png), [chassis-layout-3.png](../mockups/chassis-layout-3.png), [chassis-layout-4.png](../mockups/chassis-layout-4.png), [chassis-layout-5.png](../mockups/chassis-layout-5.png), [chassis-layout-6.png](../mockups/chassis-layout-6.png)
-
-**Show on video:**
-
-- [ ] The contact dialog can be built entirely with layouts, as in the layout mockups
-- [ ] Resizing in the designer matches the running application
-- [ ] Reordering by drag, and undo, work inside layouts
-- [ ] Breadcrumb and Escape select parents
-
-### Step 113: Checkpoint: Chassis M3: form designer complete
-
-**Video:** Build the contact dialog by dragging widgets, then again with layouts; resize it live.
-
-## Part 6: Chassis M4: inspector, events, and code
-
-Property inspector, events menu and indicators, handler creation, and the code view. Pushrod work this phase needs comes first.
-
-### Step 114: Choice button: pop-up list and click-to-cycle modes
-
-**Issue:** [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) `pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes`
-
-**Delivers:** Pick one of several options compactly, as a pop-up list or a click-to-cycle button.
-
-**Builds on:** step 38, step 37, step 11.
-
-**Mockups:** [3.6-1.png](../mockups/3.6-1.png), [3.6-2.png](../mockups/3.6-2.png)
-
-**Show on video:**
-
-- [ ] Popup opens over the current item; selects by mouse/keyboard
-- [ ] Cycle mode advances and reverses
-- [ ] Parts are retrievable and modifiable as described
-
-### Step 115: Context menus
-
-**Issue:** [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) `pushrod: [2.19] Context menus`
-
-**Delivers:** Right-click (or long-press) pop-up menus for a widget.
-
-**Builds on:** step 17, step 83.
-
-**Mockups:** [2.19-1.png](../mockups/2.19-1.png)
-
-**Show on video:**
-
-- [ ] Opens on secondary click, long-press, and Menu key
-- [ ] Dynamic menus via callback
-
-### Step 116: Layers and invalidation: cache hints, texture memory budget, incremental pipeline
-
-**Issue:** [#113](https://github.com/KenSuenobu/rust-pushrod/issues/113) `pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline`
-
-**Delivers:** Decide which widgets get their own GPU texture, cap texture memory, and invalidate layout, paint, and compositing separately.
-
-**Builds on:** step 5, step 45.
-
-**Show on video:**
-
-- [ ] Cache hints honored; Auto measurably reduces texture count on the gallery
-- [ ] Memory budget enforced with eviction
-- [ ] Moving a widget re-composites without repainting
-- [ ] Golden images unchanged
-
-### Step 117: Chassis: Code editor crate and editing core
-
-**Issue:** [#142](https://github.com/KenSuenobu/rust-pushrod/issues/142) `pushrod: [11.1] Chassis: Code editor crate and editing core`
-
-**Delivers:** Create `chassis-code-editor` with its text buffer, cursor and selection model, and edit commands, independent of drawing.
-
-**Builds on:** step 1, step 104.
-
-**Show on video:**
-
-- [ ] Edits, moves, and selections covered by unit tests, including multi-byte characters
-- [ ] A 100,000-line file opens and edits without noticeable delay
-- [ ] Core has no dependency on drawing or the backend
-
-### Step 118: Chassis: Code editor view: gutter, visible-line rendering, caret
-
-**Issue:** [#143](https://github.com/KenSuenobu/rust-pushrod/issues/143) `pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret`
-
-**Delivers:** The `CodeEditor` widget: draws line numbers, the visible lines, the current line, and the caret, and scrolls through files of any length.
-
-**Builds on:** step 117, step 43, step 23, step 46, step 116, step 14, step 13.
-
-**Mockups:** [11.2-1.png](../mockups/11.2-1.png)
-
-**Show on video:**
-
-- [ ] Smooth scrolling through a 5,000-line file
-- [ ] Typing repaints only the edited line
-- [ ] Sharp at 1x and 2x (1.10)
-- [ ] Line numbers and current-line band as in the mockup
-
-### Step 119: Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods
-
-**Issue:** [#144](https://github.com/KenSuenobu/rust-pushrod/issues/144) `pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods`
-
-**Delivers:** Editing with the keyboard and mouse the way users expect from a code editor.
-
-**Builds on:** step 118, step 17, step 56, step 75, step 18.
-
-**Mockups:** [11.3-1.png](../mockups/11.3-1.png)
-
-**Show on video:**
-
-- [ ] Every listed key and gesture works
-- [ ] Composition text from an input method appears inline
-- [ ] `TextChanged` and `SelectionChanged` carry the changed range
-
-### Step 120: Chassis: Code editor undo and redo
-
-**Issue:** [#145](https://github.com/KenSuenobu/rust-pushrod/issues/145) `pushrod: [11.4] Chassis: Code editor undo and redo`
-
-**Delivers:** Undo and redo every edit, with consecutive typing grouped into one step.
-
-**Builds on:** step 77, step 117.
-
-**Show on video:**
-
-- [ ] Typing a word and undoing removes the whole word
-- [ ] Undo restores the previous selection
-- [ ] Chassis edits undo as one step
-
-### Step 121: Chassis: Code editor syntax highlighting with tree-sitter
-
-**Issue:** [#146](https://github.com/KenSuenobu/rust-pushrod/issues/146) `pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter`
-
-**Delivers:** Highlight code incrementally as it is edited, with a small, flat color scheme.
-
-**Builds on:** step 118.
-
-**Mockups:** [11.5-1.png](../mockups/11.5-1.png)
-
-**Show on video:**
-
-- [ ] Highlighting stays correct while typing inside strings and comments
-- [ ] Editing re-parses incrementally, not the whole file
-- [ ] Rust highlighted out of the box; other languages registrable
-
-### Step 122: Chassis: Code editor API for the Chassis designer
-
-**Issue:** [#149](https://github.com/KenSuenobu/rust-pushrod/issues/149) `pushrod: [11.8] Chassis: Code editor API for the Chassis designer`
-
-**Delivers:** Let Chassis insert, find, and protect generated code: double-click a control and land in its event handler.
-
-**Builds on:** step 121, step 120.
-
-**Mockups:** [11.8-1.png](../mockups/11.8-1.png)
-
-**Show on video:**
-
-- [ ] Double-click flow from the mockup works end to end in an example
-- [ ] Guarded ranges refuse edits and track surrounding edits
-- [ ] Generated insertions undo as one step
-
-### Step 123: Inspector drawer
-
-**Issue:** [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) `chassis: [4.1] Inspector drawer`
-
-**Delivers:** Identity header and Properties/Events tabs for the selection.
-
-**Builds on:** step 91.
-
-**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
-
-**Show on video:**
-
-- [ ] Follows the selection in the designer and the caret's handler in the code view
-- [ ] Collapses and restores
-
-### Step 124: Property grid
-
-**Issue:** [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) `chassis: [4.2] Property grid`
-
-**Delivers:** Every property from introspection, grouped and labeled.
-
-**Builds on:** step 123, step 59, step 41.
-
-**Mockups:** [chassis-1.png](../mockups/chassis-1.png), [chassis-layout-4.png](../mockups/chassis-layout-4.png)
-
-**Show on video:**
-
-- [ ] Any registered widget's properties appear, including third-party widgets
-- [ ] Changes show in the designer immediately and undo
-- [ ] Layout settings for the selection's parent layout appear in an "In <layout>" section
-
-### Step 125: Typed property editors
-
-**Issue:** [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) `chassis: [4.3] Typed property editors`
-
-**Delivers:** Text, number, check, choice, color, font, string-resource, and image editors.
-
-**Builds on:** step 124, step 97, step 98, step 36, step 32, step 114, step 23.
-
-**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
-
-**Show on video:**
-
-- [ ] Each kind has its editor; invalid values can't be applied
-- [ ] Behavior flags appear as grouped check boxes
-- [ ] Text and images can reference resources by ID
-
-### Step 126: Code view
-
-**Issue:** [#189](https://github.com/KenSuenobu/rust-pushrod/issues/189) `chassis: [5.4] Code view`
-
-**Delivers:** The Code tab: the form's handler file in the Chassis code editor.
-
-**Builds on:** step 93, step 118, step 119, step 122.
-
-**Mockups:** [chassis-4.png](../mockups/chassis-4.png)
-
-**Show on video:**
-
-- [ ] Guarded lines can't be edited; bodies can
-- [ ] Caret in a handler selects its widget
-
-### Step 127: Create and open handlers
-
-**Issue:** [#190](https://github.com/KenSuenobu/rust-pushrod/issues/190) `chassis: [5.3] Create and open handlers`
-
-**Delivers:** Choosing an event (or double-clicking a widget) creates or opens its handler.
-
-**Builds on:** step 126, step 70, step 69, step 122.
-
-**Mockups:** [chassis-3.png](../mockups/chassis-3.png), [chassis-4.png](../mockups/chassis-4.png)
-
-**Show on video:**
-
-- [ ] Existing handlers open; missing ones are created once, never duplicated
-- [ ] New stubs compile immediately
-- [ ] Undo removes the stub and its wiring
-
-### Step 128: Names and IDs
-
-**Issue:** [#191](https://github.com/KenSuenobu/rust-pushrod/issues/191) `chassis: [4.4] Names and IDs`
-
-**Delivers:** Validated, unique Rust identifiers; renames carried into constants and handlers.
-
-**Builds on:** step 124, step 127, step 66, step 122.
-
-**Show on video:**
-
-- [ ] Invalid or duplicate names refused with a message
-- [ ] Renaming renames handlers and the project still builds
-
-### Step 129: Events context menu
-
-**Issue:** [#192](https://github.com/KenSuenobu/rust-pushrod/issues/192) `chassis: [5.1] Events context menu`
-
-**Delivers:** Right-click lists the widget's events, with a dot where code exists.
-
-**Builds on:** step 127, step 69, step 115.
-
-**Mockups:** [chassis-3.png](../mockups/chassis-3.png)
-
-**Show on video:**
-
-- [ ] Lists exactly the widget's events, default first
-- [ ] Dots and handler names reflect the code file
-- [ ] Choosing an event opens or creates its handler
-
-### Step 130: Inspector Events tab
-
-**Issue:** [#193](https://github.com/KenSuenobu/rust-pushrod/issues/193) `chassis: [5.2] Inspector Events tab`
-
-**Delivers:** Every event with its handler name or "add..."; count on the tab.
-
-**Builds on:** step 123, step 127, step 69.
-
-**Mockups:** [chassis-4.png](../mockups/chassis-4.png)
-
-**Show on video:**
-
-- [ ] Matches the context menu's information
-- [ ] Count updates as handlers are added and removed
-
-### Step 131: Code indicator on the design surface
-
-**Issue:** [#194](https://github.com/KenSuenobu/rust-pushrod/issues/194) `chassis: [5.5] Code indicator on the design surface`
-
-**Delivers:** Corner mark on widgets that have handlers.
-
-**Builds on:** step 105, step 70.
-
-**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
-
-**Show on video:**
-
-- [ ] Appears and disappears as handlers are added and removed
-
-### Step 132: Keep handlers in sync
-
-**Issue:** [#195](https://github.com/KenSuenobu/rust-pushrod/issues/195) `chassis: [5.6] Keep handlers in sync`
-
-**Delivers:** Renames, deletions, and orphaned handlers.
-
-**Builds on:** step 127, step 72.
-
-**Show on video:**
-
-- [ ] Renames update handler names and wiring
-- [ ] Deleting a widget never silently deletes code
-
-### Step 133: Checkpoint: Chassis M4: inspector, events, and code complete
-
-**Video:** Select widgets, edit properties, right-click for events, create handlers, and write code in the Code tab.
-
-## Part 7: Chassis M5: build, run, and release (MVP)
-
-Build and run from Chassis, CI, documentation, and the sample project. Completes the Chassis MVP. Pushrod work this phase needs comes first.
-
-### Step 134: Build and run
-
-**Issue:** [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) `chassis: [6.2] Build and run`
-
-**Delivers:** Run (F5) builds with Cargo and launches the application; output panel.
-
-**Builds on:** step 94, step 71.
-
-**Show on video:**
-
-- [ ] F5 builds and launches the app
-- [ ] Build output visible; failures reported
-
-### Step 135: CI and golden screenshots
-
-**Issue:** [#197](https://github.com/KenSuenobu/rust-pushrod/issues/197) `chassis: [7.1] CI and golden screenshots`
-
-**Delivers:** Build, test, and compare Chassis's own screens with goldens.
-
-**Builds on:** step 90, step 44, step 21.
-
-**Show on video:**
-
-- [ ] Core tests from M1 onward
-- [ ] Golden images for designer, events menu, and code view
-
-### Step 136: Chassis documentation
-
-**Issue:** [#198](https://github.com/KenSuenobu/rust-pushrod/issues/198) `chassis: [7.2] Chassis documentation`
-
-**Delivers:** A Chassis section on the docs site with a start-to-finish tutorial.
-
-**Builds on:** step 134, step 3.
-
-**Show on video:**
-
-- [ ] All pages published with screenshots from Chassis itself
-- [ ] Tutorial reproduces the sample project
-
-### Step 137: Sample project
-
-**Issue:** [#199](https://github.com/KenSuenobu/rust-pushrod/issues/199) `chassis: [7.3] Sample project`
-
-**Delivers:** The contacts sample, built with Chassis, fictional data only.
-
-**Builds on:** step 134, step 73.
-
-**Show on video:**
-
-- [ ] Builds and runs in CI
-- [ ] Matches the tutorial
-
-### Step 138: Checkpoint: Chassis MVP released
-
-**Video:** Press F5: the contact dialog builds and runs. Publish the Chassis MVP.
-
-## Part 8: Chassis example projects
-
-Example projects built with Chassis once it reaches the MVP: small, complete applications that exercise its features and that anyone can build and test against.
-
-### Step 139: Hello, Chassis
-
-**Issue:** [#208](https://github.com/KenSuenobu/rust-pushrod/issues/208) `chassis: [8.1] Hello, Chassis`
-
-**Delivers:** The smallest Chassis application: one form, a label, and a button that counts clicks.
-
-**Builds on:** step 134, step 73, step 135, step 31, step 49.
-
-**Mockups:** [chassis-example-hello-1.png](../mockups/chassis-example-hello-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 140: Temperature converter
-
-**Issue:** [#209](https://github.com/KenSuenobu/rust-pushrod/issues/209) `chassis: [8.2] Temperature converter`
-
-**Delivers:** Two linked fields that convert between Celsius and Fahrenheit as you type.
-
-**Builds on:** step 134, step 73, step 135, step 36, step 35, step 41.
-
-**Mockups:** [chassis-example-temperature-1.png](../mockups/chassis-example-temperature-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 141: Tip calculator
-
-**Issue:** [#210](https://github.com/KenSuenobu/rust-pushrod/issues/210) `chassis: [8.3] Tip calculator`
-
-**Delivers:** Enter a bill, pick a tip percentage, and split it between people.
-
-**Builds on:** step 134, step 73, step 135, step 33, step 35, step 28, step 40.
-
-**Mockups:** [chassis-example-tip-calculator-1.png](../mockups/chassis-example-tip-calculator-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 142: Settings dialog
-
-**Issue:** [#211](https://github.com/KenSuenobu/rust-pushrod/issues/211) `chassis: [8.4] Settings dialog`
-
-**Delivers:** A classic preferences dialog with OK, Cancel, and Apply.
-
-**Builds on:** step 134, step 73, step 135, step 49, step 31, step 32, step 33, step 28.
-
-**Mockups:** [chassis-example-settings-dialog-1.png](../mockups/chassis-example-settings-dialog-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 143: Image viewer
-
-**Issue:** [#212](https://github.com/KenSuenobu/rust-pushrod/issues/212) `chassis: [8.5] Image viewer`
-
-**Delivers:** Browse a set of pictures stored in the resource file.
-
-**Builds on:** step 134, step 73, step 135, step 29, step 43, step 67.
-
-**Mockups:** [chassis-example-image-viewer-1.png](../mockups/chassis-example-image-viewer-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 144: Stopwatch
-
-**Issue:** [#213](https://github.com/KenSuenobu/rust-pushrod/issues/213) `chassis: [8.6] Stopwatch`
-
-**Delivers:** Start, stop, lap, and reset, with a progress bar for the current minute.
-
-**Builds on:** step 134, step 73, step 135, step 20, step 34.
-
-**Mockups:** [chassis-example-stopwatch-1.png](../mockups/chassis-example-stopwatch-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 145: Quiz
-
-**Issue:** [#214](https://github.com/KenSuenobu/rust-pushrod/issues/214) `chassis: [8.7] Quiz`
-
-**Delivers:** A short multiple-choice quiz whose questions live in the resource file.
-
-**Builds on:** step 134, step 73, step 135, step 33, step 34, step 50, step 67.
-
-**Mockups:** [chassis-example-quiz-1.png](../mockups/chassis-example-quiz-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 146: Dice roller
-
-**Issue:** [#215](https://github.com/KenSuenobu/rust-pushrod/issues/215) `chassis: [8.8] Dice roller`
-
-**Delivers:** Roll one to four dice and keep a running total.
-
-**Builds on:** step 134, step 73, step 135, step 87, step 35, step 40, step 67.
-
-**Mockups:** [chassis-example-dice-1.png](../mockups/chassis-example-dice-1.png)
-
-**Show on video:**
-
-- [ ] Created and maintained in Chassis (no hand-edited generated code)
-- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
-- [ ] Golden screenshots match the mockup
-- [ ] README lists the Chassis and Pushrod features it exercises
-
-### Step 147: Checkpoint: All example projects built
-
-**Video:** Tour the eight examples; show each one's CI test and golden screenshots.
-
-## Part 9: Chassis v2
-
-The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets. Pushrod work it needs comes first.
-
-### Step 148: Property bindings: keep two properties in sync
-
-**Issue:** [#98](https://github.com/KenSuenobu/rust-pushrod/issues/98) `pushrod: [9.6] Property bindings: keep two properties in sync`
-
-**Delivers:** Bind a source widget property to a target property, one-way or two-way, with optional conversion.
-
-**Builds on:** step 59.
-
-**Show on video:**
-
-- [ ] One-way and two-way bindings with transforms
-- [ ] No infinite loops
-- [ ] Unbind
-
-### Step 149: Multiple windows: separate OS windows, each with its own engine
-
-**Issue:** [#82](https://github.com/KenSuenobu/rust-pushrod/issues/82) `pushrod: [1.16] Multiple windows: separate OS windows, each with its own engine`
-
-**Delivers:** Open additional operating-system windows (dialogs, palettes, inspectors), each driven by its own engine instance and widget tree.
-
-**Builds on:** step 4.
-
-**Show on video:**
-
-- [ ] Two OS windows, each with its own engine and widget tree, render and receive input independently
-- [ ] Shared application state; callbacks can open, find, and close other windows
-- [ ] Closing one window doesn't end the application unless it's the last
-- [ ] Works in both callback and event-loop styles
-
-### Step 150: Bind actions by name from form files
-
-**Issue:** [#67](https://github.com/KenSuenobu/rust-pushrod/issues/67) `pushrod: [6.8] Bind actions by name from form files`
-
-**Delivers:** Form files name the action a control triggers; applications register handlers by name.
-
-**Builds on:** step 62, step 75.
-
-**Show on video:**
-
-- [ ] Actions bind at load time
-- [ ] Missing actions reported
-
-### Step 151: no_std + alloc core crate
-
-**Issue:** [#107](https://github.com/KenSuenobu/rust-pushrod/issues/107) `pushrod: [10.3] no_std + alloc core crate`
-
-**Delivers:** Split the widget tree, events, and widgets into a core crate that builds without the standard library.
-
-**Builds on:** step 55, step 21.
-
-**Show on video:**
-
-- [ ] `pushrod-core` builds for a `no_std` target with `alloc`
-- [ ] `pushrod` API unchanged
-
-### Step 152: Experimental: Atari ST / TOS backend
-
-**Issue:** [#108](https://github.com/KenSuenobu/rust-pushrod/issues/108) `pushrod: [10.4] Experimental: Atari ST / TOS backend`
-
-**Delivers:** Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing.
-
-**Builds on:** step 5, step 102, step 151.
-
-**Show on video:**
-
-- [ ] A Pushrod form with a button and callback runs in the Hatari emulator
-- [ ] Size and speed measured and documented
-- [ ] Runs on real ST hardware
-
-### Step 153: SDL3 backend (pushrod-sdl3)
-
-**Issue:** [#135](https://github.com/KenSuenobu/rust-pushrod/issues/135) `pushrod: [10.5] SDL3 backend (pushrod-sdl3)`
-
-**Delivers:** A second backend crate on SDL3, a drop-in replacement for pushrod-sdl2.
-
-**Builds on:** step 44, step 21.
-
-**Show on video:**
-
-- [ ] The gallery and reference application run on SDL3 unchanged
-- [ ] Golden images match the SDL2 backend
-- [ ] pushrod-sdl2 keeps working; applications choose either
-
-### Step 154: Workspace settings
-
-**Issue:** [#200](https://github.com/KenSuenobu/rust-pushrod/issues/200) `chassis: [1.5] Workspace settings`
-
-**Delivers:** Remember window size, pane widths, open forms, and recent projects.
-
-**Builds on:** step 91, step 94.
-
-**Show on video:**
-
-- [ ] Restarting restores the layout and reopens the last project
-- [ ] Recent projects in the File menu
-
-### Step 155: Menu editor
-
-**Issue:** [#201](https://github.com/KenSuenobu/rust-pushrod/issues/201) `chassis: [2.7] Menu editor`
-
-**Delivers:** Design menu bars and context menus stored in the resource file.
-
-**Builds on:** step 95, step 65, step 150, step 83.
-
-**Show on video:**
-
-- [ ] Create, nest, reorder menu items
-- [ ] Items bind to actions by name
-- [ ] Menus load at run time by ID
-
-### Step 156: Form preview
-
-**Issue:** [#202](https://github.com/KenSuenobu/rust-pushrod/issues/202) `chassis: [3.9] Form preview`
-
-**Delivers:** Run the form live inside Chassis without building.
-
-**Builds on:** step 105, step 149.
-
-**Show on video:**
-
-- [ ] Preview behaves like the running form except for handlers
-- [ ] Tab order and resizing can be tested
-
-### Step 157: Multiple selection editing
-
-**Issue:** [#203](https://github.com/KenSuenobu/rust-pushrod/issues/203) `chassis: [4.5] Multiple selection editing`
-
-**Delivers:** Edit the properties several selected widgets share.
-
-**Builds on:** step 124.
-
-**Show on video:**
-
-- [ ] Shared properties shown; differing values blank
-- [ ] One edit applies to all, undoable in one step
-
-### Step 158: Error list
-
-**Issue:** [#204](https://github.com/KenSuenobu/rust-pushrod/issues/204) `chassis: [6.3] Error list`
-
-**Delivers:** Compiler errors listed and linked to the code view.
-
-**Builds on:** step 134, step 126.
-
-**Show on video:**
-
-- [ ] Errors listed and navigable
-- [ ] Handler errors marked in the events list
-
-### Step 159: Project templates
-
-**Issue:** [#205](https://github.com/KenSuenobu/rust-pushrod/issues/205) `chassis: [6.4] Project templates`
-
-**Delivers:** Start from an empty app, a dialog app, or the contacts sample.
-
-**Builds on:** step 94.
-
-**Show on video:**
-
-- [ ] Each template builds and runs unchanged
-
-### Step 160: Packaging and releases
-
-**Issue:** [#206](https://github.com/KenSuenobu/rust-pushrod/issues/206) `chassis: [7.4] Packaging and releases`
-
-**Delivers:** `cargo install chassis` and downloadable builds.
-
-**Builds on:** step 135, step 136, step 53, step 47.
-
-**Show on video:**
-
-- [ ] `cargo install chassis` works
-- [ ] Release builds start on a clean machine
-
-### Step 161: Find in project
-
-**Issue:** [#216](https://github.com/KenSuenobu/rust-pushrod/issues/216) `chassis: [1.6] Find in project`
-
-**Delivers:** Search forms, widget names and properties, resources, and code from one place.
-
-**Builds on:** step 70, step 126, step 79.
-
-**Show on video:**
-
-- [ ] One search covers forms, resources, and code
-- [ ] Every result navigates to its source
-
-### Step 162: Multiple windows per project
-
-**Issue:** [#217](https://github.com/KenSuenobu/rust-pushrod/issues/217) `chassis: [1.7] Multiple windows per project`
-
-**Delivers:** Design applications with several windows, each its own form, and choose which opens first.
-
-**Builds on:** step 94, step 72, step 149.
-
-**Show on video:**
-
-- [ ] A project with two windows builds and runs both
-- [ ] Startup window configurable
-
-### Step 163: Localization
-
-**Issue:** [#218](https://github.com/KenSuenobu/rust-pushrod/issues/218) `chassis: [2.9] Localization`
-
-**Delivers:** String tables per language, a language switch in the designer, and missing-translation reports.
-
-**Builds on:** step 97, step 65.
-
-**Show on video:**
-
-- [ ] Strings editable per language
-- [ ] Designer previews any language
-- [ ] Missing translations listed
-
-### Step 164: Source control status
-
-**Issue:** [#219](https://github.com/KenSuenobu/rust-pushrod/issues/219) `chassis: [2.10] Source control status`
-
-**Delivers:** Show which forms, resources, and code files have changed since the last commit.
-
-**Builds on:** step 95.
-
-**Show on video:**
-
-- [ ] Changed and new items marked
-- [ ] Branch shown in the status bar
-- [ ] No effect outside Git repositories
-
-### Step 165: Visual form inheritance
-
-**Issue:** [#220](https://github.com/KenSuenobu/rust-pushrod/issues/220) `chassis: [3.10] Visual form inheritance`
-
-**Delivers:** Base a form on another form and override only what differs.
-
-**Builds on:** step 112, step 70, step 65.
-
-**Show on video:**
-
-- [ ] Derived forms update when the base changes
-- [ ] Overrides survive base changes
-- [ ] Inherited widgets visibly marked
-
-### Step 166: Accessibility and usability checks
-
-**Issue:** [#221](https://github.com/KenSuenobu/rust-pushrod/issues/221) `chassis: [3.11] Accessibility and usability checks`
-
-**Delivers:** Warn about missing labels, Tab order gaps, mnemonic conflicts, and tiny click targets.
-
-**Builds on:** step 111, step 73, step 60, step 57.
-
-**Show on video:**
-
-- [ ] Each check detects its problem on a test form
-- [ ] Problems navigate to the widget
-- [ ] `chassis check` reports them
-
-### Step 167: Data bindings in the inspector
-
-**Issue:** [#222](https://github.com/KenSuenobu/rust-pushrod/issues/222) `chassis: [4.6] Data bindings in the inspector`
-
-**Delivers:** Bind a widget property to another property or to application state without writing code.
-
-**Builds on:** step 124, step 148.
-
-**Show on video:**
-
-- [ ] A slider-to-label binding works without code
-- [ ] Bindings round-trip through the resource file
-- [ ] Bound properties marked in the inspector
-
-### Step 168: Code intelligence with rust-analyzer
-
-**Issue:** [#223](https://github.com/KenSuenobu/rust-pushrod/issues/223) `chassis: [5.8] Code intelligence with rust-analyzer`
-
-**Delivers:** Completion, hover, signature help, and inline errors in the Code tab, through the Language Server Protocol.
-
-**Builds on:** step 126, step 122.
-
-**Show on video:**
-
-- [ ] Completion and hover work in handler files
-- [ ] Errors appear inline while typing
-- [ ] Chassis works when rust-analyzer is absent
-
-### Step 169: Build targets, including the Atari ST
-
-**Issue:** [#224](https://github.com/KenSuenobu/rust-pushrod/issues/224) `chassis: [6.6] Build targets, including the Atari ST`
-
-**Delivers:** Choose a build target and backend: desktop SDL2, SDL3 when available, and the experimental Atari ST backend.
-
-**Builds on:** step 134, step 153, step 152.
-
-**Show on video:**
-
-- [ ] Switching targets builds the right backend
-- [ ] Atari ST build produces a runnable program in an emulator
-
-### Step 170: Checkpoint: Chassis v2 released
-
-**Video:** Show the v2 features, including an Atari ST build running in an emulator.
-
-## Part 10: Remaining Pushrod backlog
-
-Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays last, as the distant future it was planned to be.
-
-### Step 171: Callback handles: disconnect, block, and unblock
-
-**Issue:** [#99](https://github.com/KenSuenobu/rust-pushrod/issues/99) `pushrod: [9.7] Callback handles: disconnect, block, and unblock`
-
-**Delivers:** Every registration returns a handle to remove or temporarily silence the callback.
-
-**Builds on:** step 11.
-
-**Show on video:**
-
-- [ ] Disconnect removes; block suppresses until unblock
-- [ ] Scoped blocking restores state even on early return
-
-### Step 172: Pointer cursor per widget
-
-**Issue:** [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) `pushrod: [9.9] Pointer cursor per widget`
-
-**Delivers:** Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links).
-
-**Builds on:** step 4.
-
-**Show on video:**
-
-- [ ] Cursor changes on hover and restores on exit
-- [ ] Busy cursor while `ui.set_busy(true)`
-
-### Step 173: Application lifecycle: startup and close-request callbacks
-
-**Issue:** [#26](https://github.com/KenSuenobu/rust-pushrod/issues/26) `pushrod: [1.11] Application lifecycle: startup and close-request callbacks`
-
-**Delivers:** Run code before the first frame; confirm or veto closing the window.
-
-**Builds on:** step 4.
-
-**Show on video:**
-
-- [ ] `on_start` runs once before the first draw
-- [ ] `on_close_request` can veto
-- [ ] Tests via `Engine::dispatch`
-
-### Step 174: Grid layout
-
-**Issue:** [#119](https://github.com/KenSuenobu/rust-pushrod/issues/119) `pushrod: [5.8] Grid layout`
-
-**Delivers:** Rows and columns of cells with spans, per-row/column stretch, and alignment.
-
-**Builds on:** step 39.
-
-**Mockups:** [5.8-1.png](../mockups/5.8-1.png)
-
-**Show on video:**
-
-- [ ] Spans, stretch, alignment, spacing
-- [ ] Correct min/preferred sizes from cell hints
-
-### Step 175: Stack layout (one child visible at a time)
-
-**Issue:** [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) `pushrod: [5.9] Stack layout (one child visible at a time)`
-
-**Delivers:** Children occupy the same area; one is shown at a time (pages, wizards, tab contents).
-
-**Builds on:** step 39.
-
-**Show on video:**
-
-- [ ] Switching pages hides others and keeps their state
-- [ ] Size policy: largest or current
-
-### Step 176: Flow layout (wrapping rows)
+### Step 106: Flow layout (wrapping rows)
 
 **Issue:** [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) `pushrod: [5.10] Flow layout (wrapping rows)`
 
@@ -2820,73 +1883,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Reflows on resize
 - [ ] Height-for-width measurement
 
-### Step 177: Column browser (multi-column hierarchical browser)
-
-**Issue:** [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) `pushrod: [3.7] Column browser (multi-column hierarchical browser)`
-
-**Delivers:** Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view.
-
-**Builds on:** step 38, step 79, step 43.
-
-**Mockups:** [3.7-1.png](../mockups/3.7-1.png), [3.7-2.png](../mockups/3.7-2.png)
-
-**Show on video:**
-
-- [ ] Selecting in column n fills column n+1 and clears columns to its right
-- [ ] Leaf selection clears columns to the right; optional preview pane
-- [ ] Horizontal scrolling keeps the newest column visible; column widths are resizable
-- [ ] Keyboard navigation: Up/Down, Right into a branch, Left to parent, type-ahead, Return
-- [ ] `path()`/`set_path()`, `columns()` part access
-- [ ] Works with a filesystem model and an in-memory tree model
-
-### Step 178: Spin box
-
-**Issue:** [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) `pushrod: [4.2] Spin box`
-
-**Delivers:** Numeric field with up/down arrows, range, and step.
-
-**Builds on:** step 38, step 36, step 30.
-
-**Mockups:** [4.2-1.png](../mockups/4.2-1.png)
-
-**Show on video:**
-
-- [ ] Arrows, keys, wheel adjust within range
-- [ ] Typed values clamp
-- [ ] Parts are retrievable and modifiable as described
-
-### Step 179: Combo box
-
-**Issue:** [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) `pushrod: [4.6] Combo box`
-
-**Delivers:** Text field with a drop-down list of suggestions.
-
-**Builds on:** step 38, step 36, step 37, step 79.
-
-**Mockups:** [4.6-1.png](../mockups/4.6-1.png)
-
-**Show on video:**
-
-- [ ] Typing filters; arrow opens; choosing fills
-- [ ] Parts are retrievable and modifiable as described
-
-### Step 180: Date picker
-
-**Issue:** [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) `pushrod: [3.11] Date picker`
-
-**Delivers:** A date field with a drop-down month calendar.
-
-**Builds on:** step 38, step 36, step 37.
-
-**Mockups:** [3.11-1.png](../mockups/3.11-1.png)
-
-**Show on video:**
-
-- [ ] Calendar navigation by mouse and keyboard
-- [ ] Typed and picked dates agree
-- [ ] Parts are retrievable and modifiable as described
-
-### Step 181: Tooltips
+### Step 107: Tooltips
 
 **Issue:** [#77](https://github.com/KenSuenobu/rust-pushrod/issues/77) `pushrod: [2.13] Tooltips`
 
@@ -2902,21 +1899,1045 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Stays inside the window; never under the pointer
 - [ ] Emits the corresponding `EngineEvent` (9.10)
 
-### Step 182: Switch (on/off slide toggle)
+### Step 108: Design-mode hooks for Chassis
 
-**Issue:** [#86](https://github.com/KenSuenobu/rust-pushrod/issues/86) `pushrod: [2.17] Switch (on/off slide toggle)`
+**Issue:** [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) `pushrod: [6.9] Design-mode hooks for Chassis`
 
-**Delivers:** A sliding on/off switch for settings that take effect immediately.
+**Delivers:** Select, move, resize, and edit widgets without triggering their behavior.
 
-**Builds on:** step 6, step 11.
-
-**Mockups:** [2.17-1.png](../mockups/2.17-1.png)
+**Builds on:** step 59, step 104, step 77, step 48, step 38.
 
 **Show on video:**
 
-- [ ] Click, drag, Space toggle
+- [ ] No widget reacts in design mode
+- [ ] Select/move/resize/reparent, undoable
+- [ ] Back to run mode restores behavior
 
-### Step 183: Multi-line text area
+### Step 109: Tool palette (grid of tool buttons)
+
+**Issue:** [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) `extra-widgets: [2.6] Tool palette (grid of tool buttons)`
+
+**Delivers:** A grid of icon buttons with one-of-many selection and optional drag out, for tools, swatches, or components.
+
+**Builds on:** step 91, step 84, step 107, step 106, step 76.
+
+**Mockups:** [xw-2.6-1.png](../mockups/xw-2.6-1.png)
+
+**Show on video:**
+
+- [ ] Select, Click, and Drag modes
+- [ ] Grid and List layouts, group header rows, and tooltips
+- [ ] Grid reflows with width; keyboard navigation
+
+### Step 110: Breadcrumb bar (path control)
+
+**Issue:** [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) `extra-widgets: [4.9] Breadcrumb bar (path control)`
+
+**Delivers:** A row of clickable path segments, with a menu of siblings on each separator.
+
+**Builds on:** step 91, step 31, step 83, step 13.
+
+**Mockups:** [xw-4.9-1.png](../mockups/xw-4.9-1.png)
+
+**Show on video:**
+
+- [ ] Clickable segments and sibling menus
+- [ ] Overflow collapses into a menu
+- [ ] Keyboard navigation
+
+### Step 111: Design surface
+
+**Issue:** [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) `chassis: [3.1] Design surface`
+
+**Delivers:** The open form on a dotted grid, in Pushrod design mode.
+
+**Builds on:** step 96, step 70, step 108, step 62.
+
+**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
+
+**Show on video:**
+
+- [ ] Forms look exactly as at run time
+- [ ] Widgets don't react in the designer
+- [ ] Grid size and visibility adjustable
+
+### Step 112: Widget palette
+
+**Issue:** [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) `chassis: [3.2] Widget palette`
+
+**Delivers:** Every registered widget type, searchable and grouped, including layouts.
+
+**Builds on:** step 94, step 58, step 90, step 109.
+
+**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
+
+**Show on video:**
+
+- [ ] All registered types listed and searchable
+- [ ] A widget library added to the project appears in the palette
+
+### Step 113: Selection, move, and resize
+
+**Issue:** [#180](https://github.com/KenSuenobu/rust-pushrod/issues/180) `chassis: [3.4] Selection, move, and resize`
+
+**Delivers:** Click, Shift+click, marquee; eight handles; keyboard nudge.
+
+**Builds on:** step 111, step 105.
+
+**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
+
+**Show on video:**
+
+- [ ] All gestures work and update the inspector live
+- [ ] Multi-selection moves together
+
+### Step 114: Drag and drop placement
+
+**Issue:** [#181](https://github.com/KenSuenobu/rust-pushrod/issues/181) `chassis: [3.3] Drag and drop placement`
+
+**Delivers:** Drag from the palette; outline preview; drop creates and selects.
+
+**Builds on:** step 111, step 112, step 76.
+
+**Mockups:** [chassis-2.png](../mockups/chassis-2.png)
+
+**Show on video:**
+
+- [ ] Outline follows the pointer and snaps; drop creates and selects
+- [ ] Escape cancels; one undo removes the widget
+
+### Step 115: Snapping and alignment
+
+**Issue:** [#182](https://github.com/KenSuenobu/rust-pushrod/issues/182) `chassis: [3.5] Snapping and alignment`
+
+**Delivers:** Grid snap, guides to neighbors, align and distribute commands.
+
+**Builds on:** step 113.
+
+**Mockups:** [chassis-2.png](../mockups/chassis-2.png)
+
+**Show on video:**
+
+- [ ] Guides appear when edges or centers line up
+- [ ] Align and distribute work on multi-selections
+
+### Step 116: Clipboard and undo
+
+**Issue:** [#183](https://github.com/KenSuenobu/rust-pushrod/issues/183) `chassis: [3.7] Clipboard and undo`
+
+**Delivers:** Cut, copy, paste, duplicate; every designer change undoable.
+
+**Builds on:** step 113, step 77.
+
+**Show on video:**
+
+- [ ] Every change undoes and redoes exactly
+- [ ] Pasted widgets get unique names
+
+### Step 117: Containers, z-order, and tab order
+
+**Issue:** [#184](https://github.com/KenSuenobu/rust-pushrod/issues/184) `chassis: [3.6] Containers, z-order, and tab order`
+
+**Delivers:** Drop into group boxes and containers; bring forward and back; set the Tab order.
+
+**Builds on:** step 113, step 18, step 28, step 43.
+
+**Show on video:**
+
+- [ ] Moving a group box moves its children
+- [ ] Tab order edits persist to the resource file
+
+### Step 118: Layout managers in the designer
+
+**Issue:** [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) `chassis: [3.8] Layout managers in the designer`
+
+**Delivers:** Insert widgets into Column, Row, Form, and Grid layouts; spacers; breadcrumb; live resize.
+
+**Builds on:** step 114, step 113, step 39, step 40, step 41, step 110.
+
+**Mockups:** [chassis-layout-1.png](../mockups/chassis-layout-1.png), [chassis-layout-2.png](../mockups/chassis-layout-2.png), [chassis-layout-3.png](../mockups/chassis-layout-3.png), [chassis-layout-4.png](../mockups/chassis-layout-4.png), [chassis-layout-5.png](../mockups/chassis-layout-5.png), [chassis-layout-6.png](../mockups/chassis-layout-6.png)
+
+**Show on video:**
+
+- [ ] The contact dialog can be built entirely with layouts, as in the layout mockups
+- [ ] Resizing in the designer matches the running application
+- [ ] Reordering by drag, and undo, work inside layouts
+- [ ] Breadcrumb and Escape select parents
+
+### Step 119: Checkpoint: Chassis M3: form designer complete
+
+**Video:** Build the contact dialog by dragging widgets, then again with layouts; resize it live.
+
+## Part 6: Chassis M4: inspector, events, and code
+
+Property inspector, events menu and indicators, handler creation, and the code view. Pushrod work and extra widgets this phase needs come first.
+
+### Step 120: Choice button: pop-up list and click-to-cycle modes
+
+**Issue:** [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) `pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes`
+
+**Delivers:** Pick one of several options compactly, as a pop-up list or a click-to-cycle button.
+
+**Builds on:** step 38, step 37, step 11.
+
+**Mockups:** [3.6-1.png](../mockups/3.6-1.png), [3.6-2.png](../mockups/3.6-2.png)
+
+**Show on video:**
+
+- [ ] Popup opens over the current item; selects by mouse/keyboard
+- [ ] Cycle mode advances and reverses
+- [ ] Parts are retrievable and modifiable as described
+
+### Step 121: Context menus
+
+**Issue:** [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) `pushrod: [2.19] Context menus`
+
+**Delivers:** Right-click (or long-press) pop-up menus for a widget.
+
+**Builds on:** step 17, step 83.
+
+**Mockups:** [2.19-1.png](../mockups/2.19-1.png)
+
+**Show on video:**
+
+- [ ] Opens on secondary click, long-press, and Menu key
+- [ ] Dynamic menus via callback
+
+### Step 122: Layers and invalidation: cache hints, texture memory budget, incremental pipeline
+
+**Issue:** [#113](https://github.com/KenSuenobu/rust-pushrod/issues/113) `pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline`
+
+**Delivers:** Decide which widgets get their own GPU texture, cap texture memory, and invalidate layout, paint, and compositing separately.
+
+**Builds on:** step 5, step 45.
+
+**Show on video:**
+
+- [ ] Cache hints honored; Auto measurably reduces texture count on the gallery
+- [ ] Memory budget enforced with eviction
+- [ ] Moving a widget re-composites without repainting
+- [ ] Golden images unchanged
+
+### Step 123: Chassis: Code editor crate and editing core
+
+**Issue:** [#142](https://github.com/KenSuenobu/rust-pushrod/issues/142) `pushrod: [11.1] Chassis: Code editor crate and editing core`
+
+**Delivers:** Create `chassis-code-editor` with its text buffer, cursor and selection model, and edit commands, independent of drawing.
+
+**Builds on:** step 1, step 90.
+
+**Show on video:**
+
+- [ ] Edits, moves, and selections covered by unit tests, including multi-byte characters
+- [ ] A 100,000-line file opens and edits without noticeable delay
+- [ ] Core has no dependency on drawing or the backend
+
+### Step 124: Chassis: Code editor view: gutter, visible-line rendering, caret
+
+**Issue:** [#143](https://github.com/KenSuenobu/rust-pushrod/issues/143) `pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret`
+
+**Delivers:** The `CodeEditor` widget: draws line numbers, the visible lines, the current line, and the caret, and scrolls through files of any length.
+
+**Builds on:** step 123, step 43, step 23, step 46, step 122, step 14, step 13.
+
+**Mockups:** [11.2-1.png](../mockups/11.2-1.png)
+
+**Show on video:**
+
+- [ ] Smooth scrolling through a 5,000-line file
+- [ ] Typing repaints only the edited line
+- [ ] Sharp at 1x and 2x (1.10)
+- [ ] Line numbers and current-line band as in the mockup
+
+### Step 125: Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods
+
+**Issue:** [#144](https://github.com/KenSuenobu/rust-pushrod/issues/144) `pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods`
+
+**Delivers:** Editing with the keyboard and mouse the way users expect from a code editor.
+
+**Builds on:** step 124, step 17, step 56, step 75, step 18.
+
+**Mockups:** [11.3-1.png](../mockups/11.3-1.png)
+
+**Show on video:**
+
+- [ ] Every listed key and gesture works
+- [ ] Composition text from an input method appears inline
+- [ ] `TextChanged` and `SelectionChanged` carry the changed range
+
+### Step 126: Chassis: Code editor undo and redo
+
+**Issue:** [#145](https://github.com/KenSuenobu/rust-pushrod/issues/145) `pushrod: [11.4] Chassis: Code editor undo and redo`
+
+**Delivers:** Undo and redo every edit, with consecutive typing grouped into one step.
+
+**Builds on:** step 77, step 123.
+
+**Show on video:**
+
+- [ ] Typing a word and undoing removes the whole word
+- [ ] Undo restores the previous selection
+- [ ] Chassis edits undo as one step
+
+### Step 127: Chassis: Code editor syntax highlighting with tree-sitter
+
+**Issue:** [#146](https://github.com/KenSuenobu/rust-pushrod/issues/146) `pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter`
+
+**Delivers:** Highlight code incrementally as it is edited, with a small, flat color scheme.
+
+**Builds on:** step 124.
+
+**Mockups:** [11.5-1.png](../mockups/11.5-1.png)
+
+**Show on video:**
+
+- [ ] Highlighting stays correct while typing inside strings and comments
+- [ ] Editing re-parses incrementally, not the whole file
+- [ ] Rust highlighted out of the box; other languages registrable
+
+### Step 128: Chassis: Code editor API for the Chassis designer
+
+**Issue:** [#149](https://github.com/KenSuenobu/rust-pushrod/issues/149) `pushrod: [11.8] Chassis: Code editor API for the Chassis designer`
+
+**Delivers:** Let Chassis insert, find, and protect generated code: double-click a control and land in its event handler.
+
+**Builds on:** step 127, step 126.
+
+**Mockups:** [11.8-1.png](../mockups/11.8-1.png)
+
+**Show on video:**
+
+- [ ] Double-click flow from the mockup works end to end in an example
+- [ ] Guarded ranges refuse edits and track surrounding edits
+- [ ] Generated insertions undo as one step
+
+### Step 129: Property grid (name and value inspector)
+
+**Issue:** [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) `extra-widgets: [4.5] Property grid (name and value inspector)`
+
+**Delivers:** Categorized name/value rows with an editor per value type.
+
+**Builds on:** step 91, step 59, step 41, step 36, step 32, step 120, step 82.
+
+**Mockups:** [xw-4.5-1.png](../mockups/xw-4.5-1.png)
+
+**Show on video:**
+
+- [ ] Categories, divider, and changed-from-default marking
+- [ ] Typed editors and custom editors by kind
+- [ ] Works from Pushrod property introspection and from any source
+
+### Step 130: Inspector drawer
+
+**Issue:** [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) `chassis: [4.1] Inspector drawer`
+
+**Delivers:** Identity header and Properties/Events tabs for the selection.
+
+**Builds on:** step 94, step 92.
+
+**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
+
+**Show on video:**
+
+- [ ] Follows the selection in the designer and the caret's handler in the code view
+- [ ] Collapses and restores
+
+### Step 131: Property grid
+
+**Issue:** [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) `chassis: [4.2] Property grid`
+
+**Delivers:** Every property from introspection, grouped and labeled.
+
+**Builds on:** step 130, step 59, step 41, step 129.
+
+**Mockups:** [chassis-1.png](../mockups/chassis-1.png), [chassis-layout-4.png](../mockups/chassis-layout-4.png)
+
+**Show on video:**
+
+- [ ] Any registered widget's properties appear, including third-party widgets
+- [ ] Changes show in the designer immediately and undo
+- [ ] Layout settings for the selection's parent layout appear in an "In <layout>" section
+
+### Step 132: Typed property editors
+
+**Issue:** [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) `chassis: [4.3] Typed property editors`
+
+**Delivers:** Text, number, check, choice, color, font, string-resource, and image editors.
+
+**Builds on:** step 131, step 100, step 101, step 36, step 32, step 120, step 23.
+
+**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
+
+**Show on video:**
+
+- [ ] Each kind has its editor; invalid values can't be applied
+- [ ] Behavior flags appear as grouped check boxes
+- [ ] Text and images can reference resources by ID
+
+### Step 133: Code view
+
+**Issue:** [#189](https://github.com/KenSuenobu/rust-pushrod/issues/189) `chassis: [5.4] Code view`
+
+**Delivers:** The Code tab: the form's handler file in the Chassis code editor.
+
+**Builds on:** step 96, step 124, step 125, step 128.
+
+**Mockups:** [chassis-4.png](../mockups/chassis-4.png)
+
+**Show on video:**
+
+- [ ] Guarded lines can't be edited; bodies can
+- [ ] Caret in a handler selects its widget
+
+### Step 134: Create and open handlers
+
+**Issue:** [#190](https://github.com/KenSuenobu/rust-pushrod/issues/190) `chassis: [5.3] Create and open handlers`
+
+**Delivers:** Choosing an event (or double-clicking a widget) creates or opens its handler.
+
+**Builds on:** step 133, step 70, step 69, step 128.
+
+**Mockups:** [chassis-3.png](../mockups/chassis-3.png), [chassis-4.png](../mockups/chassis-4.png)
+
+**Show on video:**
+
+- [ ] Existing handlers open; missing ones are created once, never duplicated
+- [ ] New stubs compile immediately
+- [ ] Undo removes the stub and its wiring
+
+### Step 135: Names and IDs
+
+**Issue:** [#191](https://github.com/KenSuenobu/rust-pushrod/issues/191) `chassis: [4.4] Names and IDs`
+
+**Delivers:** Validated, unique Rust identifiers; renames carried into constants and handlers.
+
+**Builds on:** step 131, step 134, step 66, step 128.
+
+**Show on video:**
+
+- [ ] Invalid or duplicate names refused with a message
+- [ ] Renaming renames handlers and the project still builds
+
+### Step 136: Events context menu
+
+**Issue:** [#192](https://github.com/KenSuenobu/rust-pushrod/issues/192) `chassis: [5.1] Events context menu`
+
+**Delivers:** Right-click lists the widget's events, with a dot where code exists.
+
+**Builds on:** step 134, step 69, step 121.
+
+**Mockups:** [chassis-3.png](../mockups/chassis-3.png)
+
+**Show on video:**
+
+- [ ] Lists exactly the widget's events, default first
+- [ ] Dots and handler names reflect the code file
+- [ ] Choosing an event opens or creates its handler
+
+### Step 137: Inspector Events tab
+
+**Issue:** [#193](https://github.com/KenSuenobu/rust-pushrod/issues/193) `chassis: [5.2] Inspector Events tab`
+
+**Delivers:** Every event with its handler name or "add..."; count on the tab.
+
+**Builds on:** step 130, step 134, step 69.
+
+**Mockups:** [chassis-4.png](../mockups/chassis-4.png)
+
+**Show on video:**
+
+- [ ] Matches the context menu's information
+- [ ] Count updates as handlers are added and removed
+
+### Step 138: Code indicator on the design surface
+
+**Issue:** [#194](https://github.com/KenSuenobu/rust-pushrod/issues/194) `chassis: [5.5] Code indicator on the design surface`
+
+**Delivers:** Corner mark on widgets that have handlers.
+
+**Builds on:** step 111, step 70.
+
+**Mockups:** [chassis-1.png](../mockups/chassis-1.png)
+
+**Show on video:**
+
+- [ ] Appears and disappears as handlers are added and removed
+
+### Step 139: Keep handlers in sync
+
+**Issue:** [#195](https://github.com/KenSuenobu/rust-pushrod/issues/195) `chassis: [5.6] Keep handlers in sync`
+
+**Delivers:** Renames, deletions, and orphaned handlers.
+
+**Builds on:** step 134, step 72.
+
+**Show on video:**
+
+- [ ] Renames update handler names and wiring
+- [ ] Deleting a widget never silently deletes code
+
+### Step 140: Checkpoint: Chassis M4: inspector, events, and code complete
+
+**Video:** Select widgets, edit properties, right-click for events, create handlers, and write code in the Code tab.
+
+## Part 7: Chassis M5: build, run, and release (MVP)
+
+Build and run from Chassis, CI, documentation, and the sample project. Completes the Chassis MVP. Pushrod work and extra widgets this phase needs come first.
+
+### Step 141: Build and run
+
+**Issue:** [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) `chassis: [6.2] Build and run`
+
+**Delivers:** Run (F5) builds with Cargo and launches the application; output panel.
+
+**Builds on:** step 97, step 71.
+
+**Show on video:**
+
+- [ ] F5 builds and launches the app
+- [ ] Build output visible; failures reported
+
+### Step 142: CI and golden screenshots
+
+**Issue:** [#197](https://github.com/KenSuenobu/rust-pushrod/issues/197) `chassis: [7.1] CI and golden screenshots`
+
+**Delivers:** Build, test, and compare Chassis's own screens with goldens.
+
+**Builds on:** step 93, step 44, step 21.
+
+**Show on video:**
+
+- [ ] Core tests from M1 onward
+- [ ] Golden images for designer, events menu, and code view
+
+### Step 143: Chassis documentation
+
+**Issue:** [#198](https://github.com/KenSuenobu/rust-pushrod/issues/198) `chassis: [7.2] Chassis documentation`
+
+**Delivers:** A Chassis section on the docs site with a start-to-finish tutorial.
+
+**Builds on:** step 141, step 3.
+
+**Show on video:**
+
+- [ ] All pages published with screenshots from Chassis itself
+- [ ] Tutorial reproduces the sample project
+
+### Step 144: Sample project
+
+**Issue:** [#199](https://github.com/KenSuenobu/rust-pushrod/issues/199) `chassis: [7.3] Sample project`
+
+**Delivers:** The contacts sample, built with Chassis, fictional data only.
+
+**Builds on:** step 141, step 73.
+
+**Show on video:**
+
+- [ ] Builds and runs in CI
+- [ ] Matches the tutorial
+
+### Step 145: Checkpoint: Chassis MVP released
+
+**Video:** Press F5: the contact dialog builds and runs. Publish the Chassis MVP.
+
+## Part 8: Chassis example projects
+
+Example projects built with Chassis once it reaches the MVP: small, complete applications that exercise its features and that anyone can build and test against.
+
+### Step 146: Hello, Chassis
+
+**Issue:** [#208](https://github.com/KenSuenobu/rust-pushrod/issues/208) `chassis: [8.1] Hello, Chassis`
+
+**Delivers:** The smallest Chassis application: one form, a label, and a button that counts clicks.
+
+**Builds on:** step 141, step 73, step 142, step 31, step 49.
+
+**Mockups:** [chassis-example-hello-1.png](../mockups/chassis-example-hello-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 147: Temperature converter
+
+**Issue:** [#209](https://github.com/KenSuenobu/rust-pushrod/issues/209) `chassis: [8.2] Temperature converter`
+
+**Delivers:** Two linked fields that convert between Celsius and Fahrenheit as you type.
+
+**Builds on:** step 141, step 73, step 142, step 36, step 35, step 41.
+
+**Mockups:** [chassis-example-temperature-1.png](../mockups/chassis-example-temperature-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 148: Tip calculator
+
+**Issue:** [#210](https://github.com/KenSuenobu/rust-pushrod/issues/210) `chassis: [8.3] Tip calculator`
+
+**Delivers:** Enter a bill, pick a tip percentage, and split it between people.
+
+**Builds on:** step 141, step 73, step 142, step 33, step 35, step 28, step 40.
+
+**Mockups:** [chassis-example-tip-calculator-1.png](../mockups/chassis-example-tip-calculator-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 149: Settings dialog
+
+**Issue:** [#211](https://github.com/KenSuenobu/rust-pushrod/issues/211) `chassis: [8.4] Settings dialog`
+
+**Delivers:** A classic preferences dialog with OK, Cancel, and Apply.
+
+**Builds on:** step 141, step 73, step 142, step 49, step 31, step 32, step 33, step 28.
+
+**Mockups:** [chassis-example-settings-dialog-1.png](../mockups/chassis-example-settings-dialog-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 150: Image viewer
+
+**Issue:** [#212](https://github.com/KenSuenobu/rust-pushrod/issues/212) `chassis: [8.5] Image viewer`
+
+**Delivers:** Browse a set of pictures stored in the resource file.
+
+**Builds on:** step 141, step 73, step 142, step 29, step 43, step 67.
+
+**Mockups:** [chassis-example-image-viewer-1.png](../mockups/chassis-example-image-viewer-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 151: Stopwatch
+
+**Issue:** [#213](https://github.com/KenSuenobu/rust-pushrod/issues/213) `chassis: [8.6] Stopwatch`
+
+**Delivers:** Start, stop, lap, and reset, with a progress bar for the current minute.
+
+**Builds on:** step 141, step 73, step 142, step 20, step 34.
+
+**Mockups:** [chassis-example-stopwatch-1.png](../mockups/chassis-example-stopwatch-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 152: Quiz
+
+**Issue:** [#214](https://github.com/KenSuenobu/rust-pushrod/issues/214) `chassis: [8.7] Quiz`
+
+**Delivers:** A short multiple-choice quiz whose questions live in the resource file.
+
+**Builds on:** step 141, step 73, step 142, step 33, step 34, step 50, step 67.
+
+**Mockups:** [chassis-example-quiz-1.png](../mockups/chassis-example-quiz-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 153: Dice roller
+
+**Issue:** [#215](https://github.com/KenSuenobu/rust-pushrod/issues/215) `chassis: [8.8] Dice roller`
+
+**Delivers:** Roll one to four dice and keep a running total.
+
+**Builds on:** step 141, step 73, step 142, step 87, step 35, step 40, step 67.
+
+**Mockups:** [chassis-example-dice-1.png](../mockups/chassis-example-dice-1.png)
+
+**Show on video:**
+
+- [ ] Created and maintained in Chassis (no hand-edited generated code)
+- [ ] CI regenerates with `chassis generate`, builds, and runs a scripted test through `Engine::dispatch` on the headless backend
+- [ ] Golden screenshots match the mockup
+- [ ] README lists the Chassis and Pushrod features it exercises
+
+### Step 154: Checkpoint: All example projects built
+
+**Video:** Tour the eight examples; show each one's CI test and golden screenshots.
+
+## Part 9: Chassis v2
+
+The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets. Pushrod work it needs comes first.
+
+### Step 155: Property bindings: keep two properties in sync
+
+**Issue:** [#98](https://github.com/KenSuenobu/rust-pushrod/issues/98) `pushrod: [9.6] Property bindings: keep two properties in sync`
+
+**Delivers:** Bind a source widget property to a target property, one-way or two-way, with optional conversion.
+
+**Builds on:** step 59.
+
+**Show on video:**
+
+- [ ] One-way and two-way bindings with transforms
+- [ ] No infinite loops
+- [ ] Unbind
+
+### Step 156: Multiple windows: separate OS windows, each with its own engine
+
+**Issue:** [#82](https://github.com/KenSuenobu/rust-pushrod/issues/82) `pushrod: [1.16] Multiple windows: separate OS windows, each with its own engine`
+
+**Delivers:** Open additional operating-system windows (dialogs, palettes, inspectors), each driven by its own engine instance and widget tree.
+
+**Builds on:** step 4.
+
+**Show on video:**
+
+- [ ] Two OS windows, each with its own engine and widget tree, render and receive input independently
+- [ ] Shared application state; callbacks can open, find, and close other windows
+- [ ] Closing one window doesn't end the application unless it's the last
+- [ ] Works in both callback and event-loop styles
+
+### Step 157: Bind actions by name from form files
+
+**Issue:** [#67](https://github.com/KenSuenobu/rust-pushrod/issues/67) `pushrod: [6.8] Bind actions by name from form files`
+
+**Delivers:** Form files name the action a control triggers; applications register handlers by name.
+
+**Builds on:** step 62, step 75.
+
+**Show on video:**
+
+- [ ] Actions bind at load time
+- [ ] Missing actions reported
+
+### Step 158: no_std + alloc core crate
+
+**Issue:** [#107](https://github.com/KenSuenobu/rust-pushrod/issues/107) `pushrod: [10.3] no_std + alloc core crate`
+
+**Delivers:** Split the widget tree, events, and widgets into a core crate that builds without the standard library.
+
+**Builds on:** step 55, step 21.
+
+**Show on video:**
+
+- [ ] `pushrod-core` builds for a `no_std` target with `alloc`
+- [ ] `pushrod` API unchanged
+
+### Step 159: Experimental: Atari ST / TOS backend
+
+**Issue:** [#108](https://github.com/KenSuenobu/rust-pushrod/issues/108) `pushrod: [10.4] Experimental: Atari ST / TOS backend`
+
+**Delivers:** Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing.
+
+**Builds on:** step 5, step 105, step 158.
+
+**Show on video:**
+
+- [ ] A Pushrod form with a button and callback runs in the Hatari emulator
+- [ ] Size and speed measured and documented
+- [ ] Runs on real ST hardware
+
+### Step 160: SDL3 backend (pushrod-sdl3)
+
+**Issue:** [#135](https://github.com/KenSuenobu/rust-pushrod/issues/135) `pushrod: [10.5] SDL3 backend (pushrod-sdl3)`
+
+**Delivers:** A second backend crate on SDL3, a drop-in replacement for pushrod-sdl2.
+
+**Builds on:** step 44, step 21.
+
+**Show on video:**
+
+- [ ] The gallery and reference application run on SDL3 unchanged
+- [ ] Golden images match the SDL2 backend
+- [ ] pushrod-sdl2 keeps working; applications choose either
+
+### Step 161: Workspace settings
+
+**Issue:** [#200](https://github.com/KenSuenobu/rust-pushrod/issues/200) `chassis: [1.5] Workspace settings`
+
+**Delivers:** Remember window size, pane widths, open forms, and recent projects.
+
+**Builds on:** step 94, step 97.
+
+**Show on video:**
+
+- [ ] Restarting restores the layout and reopens the last project
+- [ ] Recent projects in the File menu
+
+### Step 162: Menu editor
+
+**Issue:** [#201](https://github.com/KenSuenobu/rust-pushrod/issues/201) `chassis: [2.7] Menu editor`
+
+**Delivers:** Design menu bars and context menus stored in the resource file.
+
+**Builds on:** step 98, step 65, step 157, step 83.
+
+**Show on video:**
+
+- [ ] Create, nest, reorder menu items
+- [ ] Items bind to actions by name
+- [ ] Menus load at run time by ID
+
+### Step 163: Form preview
+
+**Issue:** [#202](https://github.com/KenSuenobu/rust-pushrod/issues/202) `chassis: [3.9] Form preview`
+
+**Delivers:** Run the form live inside Chassis without building.
+
+**Builds on:** step 111, step 156.
+
+**Show on video:**
+
+- [ ] Preview behaves like the running form except for handlers
+- [ ] Tab order and resizing can be tested
+
+### Step 164: Multiple selection editing
+
+**Issue:** [#203](https://github.com/KenSuenobu/rust-pushrod/issues/203) `chassis: [4.5] Multiple selection editing`
+
+**Delivers:** Edit the properties several selected widgets share.
+
+**Builds on:** step 131.
+
+**Show on video:**
+
+- [ ] Shared properties shown; differing values blank
+- [ ] One edit applies to all, undoable in one step
+
+### Step 165: Error list
+
+**Issue:** [#204](https://github.com/KenSuenobu/rust-pushrod/issues/204) `chassis: [6.3] Error list`
+
+**Delivers:** Compiler errors listed and linked to the code view.
+
+**Builds on:** step 141, step 133.
+
+**Show on video:**
+
+- [ ] Errors listed and navigable
+- [ ] Handler errors marked in the events list
+
+### Step 166: Project templates
+
+**Issue:** [#205](https://github.com/KenSuenobu/rust-pushrod/issues/205) `chassis: [6.4] Project templates`
+
+**Delivers:** Start from an empty app, a dialog app, or the contacts sample.
+
+**Builds on:** step 97.
+
+**Show on video:**
+
+- [ ] Each template builds and runs unchanged
+
+### Step 167: Packaging and releases
+
+**Issue:** [#206](https://github.com/KenSuenobu/rust-pushrod/issues/206) `chassis: [7.4] Packaging and releases`
+
+**Delivers:** `cargo install chassis` and downloadable builds.
+
+**Builds on:** step 142, step 143, step 53, step 47.
+
+**Show on video:**
+
+- [ ] `cargo install chassis` works
+- [ ] Release builds start on a clean machine
+
+### Step 168: Find in project
+
+**Issue:** [#216](https://github.com/KenSuenobu/rust-pushrod/issues/216) `chassis: [1.6] Find in project`
+
+**Delivers:** Search forms, widget names and properties, resources, and code from one place.
+
+**Builds on:** step 70, step 133, step 79.
+
+**Show on video:**
+
+- [ ] One search covers forms, resources, and code
+- [ ] Every result navigates to its source
+
+### Step 169: Multiple windows per project
+
+**Issue:** [#217](https://github.com/KenSuenobu/rust-pushrod/issues/217) `chassis: [1.7] Multiple windows per project`
+
+**Delivers:** Design applications with several windows, each its own form, and choose which opens first.
+
+**Builds on:** step 97, step 72, step 156.
+
+**Show on video:**
+
+- [ ] A project with two windows builds and runs both
+- [ ] Startup window configurable
+
+### Step 170: Localization
+
+**Issue:** [#218](https://github.com/KenSuenobu/rust-pushrod/issues/218) `chassis: [2.9] Localization`
+
+**Delivers:** String tables per language, a language switch in the designer, and missing-translation reports.
+
+**Builds on:** step 100, step 65.
+
+**Show on video:**
+
+- [ ] Strings editable per language
+- [ ] Designer previews any language
+- [ ] Missing translations listed
+
+### Step 171: Source control status
+
+**Issue:** [#219](https://github.com/KenSuenobu/rust-pushrod/issues/219) `chassis: [2.10] Source control status`
+
+**Delivers:** Show which forms, resources, and code files have changed since the last commit.
+
+**Builds on:** step 98.
+
+**Show on video:**
+
+- [ ] Changed and new items marked
+- [ ] Branch shown in the status bar
+- [ ] No effect outside Git repositories
+
+### Step 172: Visual form inheritance
+
+**Issue:** [#220](https://github.com/KenSuenobu/rust-pushrod/issues/220) `chassis: [3.10] Visual form inheritance`
+
+**Delivers:** Base a form on another form and override only what differs.
+
+**Builds on:** step 118, step 70, step 65.
+
+**Show on video:**
+
+- [ ] Derived forms update when the base changes
+- [ ] Overrides survive base changes
+- [ ] Inherited widgets visibly marked
+
+### Step 173: Accessibility and usability checks
+
+**Issue:** [#221](https://github.com/KenSuenobu/rust-pushrod/issues/221) `chassis: [3.11] Accessibility and usability checks`
+
+**Delivers:** Warn about missing labels, Tab order gaps, mnemonic conflicts, and tiny click targets.
+
+**Builds on:** step 117, step 73, step 60, step 57.
+
+**Show on video:**
+
+- [ ] Each check detects its problem on a test form
+- [ ] Problems navigate to the widget
+- [ ] `chassis check` reports them
+
+### Step 174: Data bindings in the inspector
+
+**Issue:** [#222](https://github.com/KenSuenobu/rust-pushrod/issues/222) `chassis: [4.6] Data bindings in the inspector`
+
+**Delivers:** Bind a widget property to another property or to application state without writing code.
+
+**Builds on:** step 131, step 155.
+
+**Show on video:**
+
+- [ ] A slider-to-label binding works without code
+- [ ] Bindings round-trip through the resource file
+- [ ] Bound properties marked in the inspector
+
+### Step 175: Code intelligence with rust-analyzer
+
+**Issue:** [#223](https://github.com/KenSuenobu/rust-pushrod/issues/223) `chassis: [5.8] Code intelligence with rust-analyzer`
+
+**Delivers:** Completion, hover, signature help, and inline errors in the Code tab, through the Language Server Protocol.
+
+**Builds on:** step 133, step 128.
+
+**Show on video:**
+
+- [ ] Completion and hover work in handler files
+- [ ] Errors appear inline while typing
+- [ ] Chassis works when rust-analyzer is absent
+
+### Step 176: Build targets, including the Atari ST
+
+**Issue:** [#224](https://github.com/KenSuenobu/rust-pushrod/issues/224) `chassis: [6.6] Build targets, including the Atari ST`
+
+**Delivers:** Choose a build target and backend: desktop SDL2, SDL3 when available, and the experimental Atari ST backend.
+
+**Builds on:** step 141, step 160, step 159.
+
+**Show on video:**
+
+- [ ] Switching targets builds the right backend
+- [ ] Atari ST build produces a runnable program in an emulator
+
+### Step 177: Checkpoint: Chassis v2 released
+
+**Video:** Show the v2 features, including an Atari ST build running in an emulator.
+
+## Part 10: Extra widgets 1 and 2 (the pushrod-extra-widgets MVP)
+
+The rest of the `pushrod-extra-widgets` crate's first two milestones: the popover and gallery, then everyday controls, pickers, lists, panels, and dialogs. Pushrod work these need comes first.
+
+### Step 178: Stack layout (one child visible at a time)
+
+**Issue:** [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) `pushrod: [5.9] Stack layout (one child visible at a time)`
+
+**Delivers:** Children occupy the same area; one is shown at a time (pages, wizards, tab contents).
+
+**Builds on:** step 39.
+
+**Show on video:**
+
+- [ ] Switching pages hides others and keeps their state
+- [ ] Size policy: largest or current
+
+### Step 179: Spin box
+
+**Issue:** [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) `pushrod: [4.2] Spin box`
+
+**Delivers:** Numeric field with up/down arrows, range, and step.
+
+**Builds on:** step 38, step 36, step 30.
+
+**Mockups:** [4.2-1.png](../mockups/4.2-1.png)
+
+**Show on video:**
+
+- [ ] Arrows, keys, wheel adjust within range
+- [ ] Typed values clamp
+- [ ] Parts are retrievable and modifiable as described
+
+### Step 180: Combo box
+
+**Issue:** [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) `pushrod: [4.6] Combo box`
+
+**Delivers:** Text field with a drop-down list of suggestions.
+
+**Builds on:** step 38, step 36, step 37, step 79.
+
+**Mockups:** [4.6-1.png](../mockups/4.6-1.png)
+
+**Show on video:**
+
+- [ ] Typing filters; arrow opens; choosing fills
+- [ ] Parts are retrievable and modifiable as described
+
+### Step 181: Multi-line text area
 
 **Issue:** [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) `pushrod: [2.18] Multi-line text area`
 
@@ -2931,23 +2952,365 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Editing, selection, clipboard, undo
 - [ ] Smooth with 10,000 lines
 
-### Step 184: Message bar (non-modal inline notice)
+### Step 182: Extra widgets gallery example
 
-**Issue:** [#89](https://github.com/KenSuenobu/rust-pushrod/issues/89) `pushrod: [2.20] Message bar (non-modal inline notice)`
+**Issue:** [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) `extra-widgets: [1.2] Extra widgets gallery example`
 
-**Delivers:** A dismissible banner for warnings and information that doesn't block the window.
+**Delivers:** A runnable gallery showing every extra widget, used for golden screenshots.
 
-**Builds on:** step 20, step 38, step 31.
+**Builds on:** step 91, step 44, step 15, step 80.
 
-**Mockups:** [2.20-1.png](../mockups/2.20-1.png)
+**Mockups:** [xw-1.2-1.png](../mockups/xw-1.2-1.png)
 
 **Show on video:**
 
-- [ ] Shows, hides, and dismisses
-- [ ] Action buttons fire callbacks
-- [ ] Parts are retrievable and modifiable as described
+- [ ] Gallery runs and shows every widget built so far
+- [ ] Golden images captured in CI
+- [ ] Contributing guide says new widgets must be added to the gallery
 
-### Step 185: Link label
+### Step 183: Popover: a floating panel anchored to a control
+
+**Issue:** [#254](https://github.com/KenSuenobu/rust-pushrod/issues/254) `extra-widgets: [1.3] Popover: a floating panel anchored to a control`
+
+**Delivers:** A borderless panel that opens next to a control, holds any widgets, and closes on Escape or a click outside.
+
+**Builds on:** step 91, step 37, step 38, step 16, step 18.
+
+**Mockups:** [xw-1.3-1.png](../mockups/xw-1.3-1.png)
+
+**Show on video:**
+
+- [ ] Placement flips to stay inside the window
+- [ ] Escape and an outside click close it; focus returns to the anchor
+- [ ] Any widget tree can be the content
+- [ ] Modal and modeless modes
+
+### Step 184: Menu button and split button
+
+**Issue:** [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258) `extra-widgets: [2.1] Menu button and split button`
+
+**Delivers:** A button that opens a menu, and a button with a separate arrow part that opens one.
+
+**Builds on:** step 91, step 31, step 83, step 75.
+
+**Mockups:** [xw-2.1-1.png](../mockups/xw-2.1-1.png)
+
+**Show on video:**
+
+- [ ] Menu button opens its menu by click, Space, and Alt+Down
+- [ ] Split button: main part runs the default action, arrow part opens the menu
+- [ ] Menu items are actions with shortcuts and enabled state
+
+### Step 185: Segmented control
+
+**Issue:** [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) `extra-widgets: [2.2] Segmented control`
+
+**Delivers:** A row of joined buttons: pick one, or toggle several.
+
+**Builds on:** step 91, step 31, step 33, step 19.
+
+**Mockups:** [xw-2.2-1.png](../mockups/xw-2.2-1.png)
+
+**Show on video:**
+
+- [ ] One and Many modes
+- [ ] Per-segment disabled state, text, and icons
+- [ ] Keyboard navigation and selection
+
+### Step 186: Stepper (up and down arrows)
+
+**Issue:** [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259) `extra-widgets: [2.3] Stepper (up and down arrows)`
+
+**Delivers:** A pair of small up/down arrows that step a value, attachable to any field.
+
+**Builds on:** step 91, step 30, step 20, step 17, step 155.
+
+**Mockups:** [xw-2.3-1.png](../mockups/xw-2.3-1.png)
+
+**Show on video:**
+
+- [ ] Click steps; holding repeats with a delay
+- [ ] Limits disable the matching arrow unless wrapping
+- [ ] Buddy binding keeps another widget in step
+
+### Step 187: Dial (rotary knob)
+
+**Issue:** [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) `extra-widgets: [2.4] Dial (rotary knob)`
+
+**Delivers:** A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle.
+
+**Builds on:** step 91, step 11, step 17.
+
+**Mockups:** [xw-2.4-1.png](../mockups/xw-2.4-1.png)
+
+**Show on video:**
+
+- [ ] Drag, wheel, and keys change the value within range
+- [ ] Wrapping mode for angles
+- [ ] Notches and optional value text
+
+### Step 188: Level indicator (meter)
+
+**Issue:** [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) `extra-widgets: [2.5] Level indicator (meter)`
+
+**Delivers:** A bar showing a level against warning and critical thresholds, continuous or in discrete segments.
+
+**Builds on:** step 91, step 6, step 19, step 17.
+
+**Mockups:** [xw-2.5-1.png](../mockups/xw-2.5-1.png)
+
+**Show on video:**
+
+- [ ] Continuous and discrete styles
+- [ ] Warning and critical thresholds visible without color
+- [ ] Optional text and editable mode
+
+### Step 189: Calendar (month view)
+
+**Issue:** [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260) `extra-widgets: [3.1] Calendar (month view)`
+
+**Delivers:** A month grid for choosing a day or a range of days, usable on its own or in the date picker.
+
+**Builds on:** step 91, step 30, step 17, step 18.
+
+**Mockups:** [xw-3.1-1.png](../mockups/xw-3.1-1.png)
+
+**Show on video:**
+
+- [ ] Single and range selection
+- [ ] Min/max limits and marked days
+- [ ] Keyboard navigation by day and month
+
+### Step 190: Date picker
+
+**Issue:** [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) `extra-widgets: [3.2] Date picker`
+
+**Delivers:** A date field with a drop-down month calendar.
+
+**Builds on:** step 183, step 189, step 36, step 30.
+
+**Mockups:** [xw-3.2-1.png](../mockups/xw-3.2-1.png)
+
+**Show on video:**
+
+- [ ] Typed and chosen dates stay in step
+- [ ] Min/max enforced
+- [ ] Up/Down steps the date part under the caret
+
+### Step 191: Time field and date-time field
+
+**Issue:** [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) `extra-widgets: [3.3] Time field and date-time field`
+
+**Delivers:** A time entry with steppable parts, and a combined date-and-time field.
+
+**Builds on:** step 186, step 190, step 36.
+
+**Mockups:** [xw-3.3-1.png](../mockups/xw-3.3-1.png)
+
+**Show on video:**
+
+- [ ] Part-by-part editing with keys and stepper
+- [ ] 12- and 24-hour formats
+- [ ] Date-time field keeps one combined value
+
+### Step 192: Color well and color picker
+
+**Issue:** [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) `extra-widgets: [3.4] Color well and color picker`
+
+**Delivers:** A swatch button that opens a color picker with swatches, sliders, and a hex field.
+
+**Builds on:** step 183, step 109, step 35, step 36, step 76.
+
+**Mockups:** [xw-3.4-1.png](../mockups/xw-3.4-1.png)
+
+**Show on video:**
+
+- [ ] Swatches, recent colors, RGB and HSV sliders, hex field
+- [ ] Popover and inline use
+- [ ] Drag a color between wells
+
+### Step 193: Font chooser
+
+**Issue:** [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) `extra-widgets: [3.5] Font chooser`
+
+**Delivers:** A font button that opens a chooser with family, style, size, and a preview.
+
+**Builds on:** step 183, step 79, step 23, step 36, step 49.
+
+**Mockups:** [xw-3.5-1.png](../mockups/xw-3.5-1.png)
+
+**Show on video:**
+
+- [ ] Family, style, and size lists with filtering
+- [ ] Preview text editable
+- [ ] Popover and dialog use
+
+### Step 194: Path field (file or folder with Browse)
+
+**Issue:** [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262) `extra-widgets: [3.6] Path field (file or folder with Browse)`
+
+**Delivers:** A text field for a file or folder path, with a Browse button and drop support.
+
+**Builds on:** step 91, step 36, step 88, step 76.
+
+**Mockups:** [xw-3.6-1.png](../mockups/xw-3.6-1.png)
+
+**Show on video:**
+
+- [ ] Browse opens the chooser at the current path
+- [ ] Typed, browsed, and dropped paths
+- [ ] Missing-path mark when required
+
+### Step 195: Tree view (outline)
+
+**Issue:** [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) `extra-widgets: [4.1] Tree view (outline)`
+
+**Delivers:** A hierarchical list with expand/collapse triangles, backed by a tree data source.
+
+**Builds on:** step 91, step 79, step 81, step 43, step 76.
+
+**Mockups:** [xw-4.1-1.png](../mockups/xw-4.1-1.png)
+
+**Show on video:**
+
+- [ ] Expand and collapse by mouse and keyboard
+- [ ] Lazy children from a data source
+- [ ] Optional columns and drag to reparent
+
+### Step 196: Check list
+
+**Issue:** [#263](https://github.com/KenSuenobu/rust-pushrod/issues/263) `extra-widgets: [4.6] Check list`
+
+**Delivers:** A list with a check box on every row, separate from the selection.
+
+**Builds on:** step 91, step 79, step 32.
+
+**Mockups:** [xw-4.6-1.png](../mockups/xw-4.6-1.png)
+
+**Show on video:**
+
+- [ ] Check state independent of selection
+- [ ] Space toggles the selected rows
+- [ ] Check-all header with mixed state
+
+### Step 197: Editable list (add, remove, reorder)
+
+**Issue:** [#264](https://github.com/KenSuenobu/rust-pushrod/issues/264) `extra-widgets: [4.7] Editable list (add, remove, reorder)`
+
+**Delivers:** A list with + and - buttons underneath, in-place editing, and reordering.
+
+**Builds on:** step 91, step 79, step 30, step 36, step 76.
+
+**Mockups:** [xw-4.7-1.png](../mockups/xw-4.7-1.png)
+
+**Show on video:**
+
+- [ ] Add, remove, edit, and reorder
+- [ ] Validation and uniqueness
+- [ ] Buttons disabled when not applicable
+
+### Step 198: Accordion (one section open at a time)
+
+**Issue:** [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265) `extra-widgets: [5.2] Accordion (one section open at a time)`
+
+**Delivers:** A stack of titled sections where opening one closes the others.
+
+**Builds on:** step 91, step 82, step 40.
+
+**Mockups:** [xw-5.2-1.png](../mockups/xw-5.2-1.png)
+
+**Show on video:**
+
+- [ ] Opening one closes the others (or multiple mode)
+- [ ] Open section fills the height
+- [ ] Keyboard navigation between headers
+
+### Step 199: Sidebar (navigation list)
+
+**Issue:** [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266) `extra-widgets: [5.3] Sidebar (navigation list)`
+
+**Delivers:** A list of sections with icons and headings that switches the page beside it.
+
+**Builds on:** step 91, step 79, step 178.
+
+**Mockups:** [xw-5.3-1.png](../mockups/xw-5.3-1.png)
+
+**Show on video:**
+
+- [ ] Headings, icons, and counts
+- [ ] Bound to a stack layout
+- [ ] Keyboard navigation
+
+### Step 200: Input dialog (ask for one value)
+
+**Issue:** [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267) `extra-widgets: [6.1] Input dialog (ask for one value)`
+
+**Delivers:** A one-call modal dialog asking for a single text, number, or choice.
+
+**Builds on:** step 91, step 49, step 36, step 179, step 180.
+
+**Mockups:** [xw-6.1-1.png](../mockups/xw-6.1-1.png)
+
+**Show on video:**
+
+- [ ] Text, number, and choice forms
+- [ ] Validation disables OK
+- [ ] Completion receives None on Cancel
+
+### Step 201: Progress dialog
+
+**Issue:** [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268) `extra-widgets: [6.2] Progress dialog`
+
+**Delivers:** A modal dialog with a message, a progress bar, and Cancel, for long tasks.
+
+**Builds on:** step 91, step 49, step 34, step 20.
+
+**Mockups:** [xw-6.2-1.png](../mockups/xw-6.2-1.png)
+
+**Show on video:**
+
+- [ ] Delayed appearance for quick tasks
+- [ ] Determinate and busy progress
+- [ ] Cancel reported to the task
+
+### Step 202: Task dialog (alert with details and options)
+
+**Issue:** [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269) `extra-widgets: [6.3] Task dialog (alert with details and options)`
+
+**Delivers:** An alert with a main instruction, expandable details, a "don't ask again" box, and command choices.
+
+**Builds on:** step 91, step 50, step 82, step 32, step 181, step 49.
+
+**Mockups:** [xw-6.3-1.png](../mockups/xw-6.3-1.png)
+
+**Show on video:**
+
+- [ ] Instruction, message, and copyable details
+- [ ] Check box state returned
+- [ ] Command choices with descriptions
+
+### Step 203: Checkpoint: pushrod-extra-widgets MVP released
+
+**Video:** Publish `pushrod-extra-widgets`; tour the gallery: pickers in popovers, tree and check lists, accordion and sidebar, and the one-call dialogs.
+
+## Part 11: Extra widgets 3, specialized views and assistants
+
+Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these need comes first.
+
+### Step 204: Pointer cursor per widget
+
+**Issue:** [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) `pushrod: [9.9] Pointer cursor per widget`
+
+**Delivers:** Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links).
+
+**Builds on:** step 4.
+
+**Show on video:**
+
+- [ ] Cursor changes on hover and restores on exit
+- [ ] Busy cursor while `ui.set_busy(true)`
+
+### Step 205: Link label
 
 **Issue:** [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) `pushrod: [2.22] Link label`
 
@@ -2963,23 +3326,375 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] URL targets open the system browser unless the callback cancels
 - [ ] Hover cursor and focus outline
 
-### Step 186: Dial (rotary knob)
+### Step 206: Ruler
 
-**Issue:** [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) `pushrod: [3.12] Dial (rotary knob)`
+**Issue:** [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) `extra-widgets: [2.7] Ruler`
 
-**Delivers:** A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle.
+**Delivers:** A horizontal or vertical scale in pixels, points, or units, with markers that can be dragged.
 
-**Builds on:** step 17, step 11.
+**Builds on:** step 91, step 25, step 43, step 17.
 
-**Mockups:** [3.12-1.png](../mockups/3.12-1.png)
+**Mockups:** [xw-2.7-1.png](../mockups/xw-2.7-1.png)
 
 **Show on video:**
 
-- [ ] Drag, wheel, and keys change the value within range
-- [ ] Wrapping mode for angles
-- [ ] Notches and optional value text
+- [ ] Units, origin, and zoom
+- [ ] Follows an attached container's scroll
+- [ ] Pointer tracking line and draggable markers
 
-### Step 187: Busy spinner
+### Step 207: Shortcut field (key combination recorder)
+
+**Issue:** [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) `extra-widgets: [2.8] Shortcut field (key combination recorder)`
+
+**Delivers:** A field that records the key combination pressed while it has focus.
+
+**Builds on:** step 91, step 36, step 75, step 18.
+
+**Mockups:** [xw-2.8-1.png](../mockups/xw-2.8-1.png)
+
+**Show on video:**
+
+- [ ] Records combinations with modifiers
+- [ ] Escape cancels, Backspace clears
+- [ ] Conflicts reported inline
+
+### Step 208: Image well
+
+**Issue:** [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) `extra-widgets: [3.7] Image well`
+
+**Delivers:** A framed area that shows an image and accepts a new one by drop, paste, or Choose.
+
+**Builds on:** step 91, step 29, step 76, step 88.
+
+**Mockups:** [xw-3.7-1.png](../mockups/xw-3.7-1.png)
+
+**Show on video:**
+
+- [ ] Drop, paste, choose, and clear
+- [ ] Drop feedback outline
+- [ ] Optional square crop
+
+### Step 209: New password (enter, confirm, strength)
+
+**Issue:** [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) `extra-widgets: [3.8] New password (enter, confirm, strength)`
+
+**Delivers:** Two password fields with a strength meter and a match check.
+
+**Builds on:** step 188, step 36, step 155.
+
+**Mockups:** [xw-3.8-1.png](../mockups/xw-3.8-1.png)
+
+**Show on video:**
+
+- [ ] Strength meter and rule messages
+- [ ] Match check and show/hide
+- [ ] Acceptable state bindable to OK
+
+### Step 210: Character picker
+
+**Issue:** [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) `extra-widgets: [3.9] Character picker`
+
+**Delivers:** A searchable grid of characters by block, with a preview and code point.
+
+**Builds on:** step 91, step 13, step 36, step 43, step 120.
+
+**Mockups:** [xw-3.9-1.png](../mockups/xw-3.9-1.png)
+
+**Show on video:**
+
+- [ ] Blocks, name search, and recent characters
+- [ ] Preview with name and code point
+- [ ] Grid virtualized for large blocks
+
+### Step 211: Column browser
+
+**Issue:** [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) `extra-widgets: [4.2] Column browser`
+
+**Delivers:** Columns of lists where selecting an item in one column fills the next, as in NeXTSTEP and the Mac Finder.
+
+**Builds on:** step 91, step 79, step 43, step 42.
+
+**Mockups:** [xw-4.2-1.png](../mockups/xw-4.2-1.png)
+
+**Show on video:**
+
+- [ ] Selecting fills the next column
+- [ ] Keyboard navigation across columns
+- [ ] Horizontal scrolling keeps the selection visible
+
+### Step 212: Icon grid view
+
+**Issue:** [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275) `extra-widgets: [4.3] Icon grid view`
+
+**Delivers:** A scrolling grid of icons with captions, rubber-band selection, and drag and drop.
+
+**Builds on:** step 91, step 87, step 43, step 17, step 76.
+
+**Mockups:** [xw-4.3-1.png](../mockups/xw-4.3-1.png)
+
+**Show on video:**
+
+- [ ] Reflowing, virtualized grid
+- [ ] Rubber-band and keyboard selection, type-to-find
+- [ ] Drag and drop and in-place rename
+
+### Step 213: Data grid (editable table)
+
+**Issue:** [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) `extra-widgets: [4.4] Data grid (editable table)`
+
+**Delivers:** A table whose cells edit in place with typed editors, with row add and delete.
+
+**Builds on:** step 190, step 81, step 36, step 32, step 120.
+
+**Mockups:** [xw-4.4-1.png](../mockups/xw-4.4-1.png)
+
+**Show on video:**
+
+- [ ] Typed cell editors with validation
+- [ ] Spreadsheet-style keyboard editing
+- [ ] Add and delete rows through the data source
+
+### Step 214: Filter field (live filter for lists, tables, and trees)
+
+**Issue:** [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) `extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees)`
+
+**Delivers:** A search field bound to a list, table, or tree that hides non-matching rows as you type.
+
+**Builds on:** step 195, step 36, step 79, step 81.
+
+**Mockups:** [xw-4.10-1.png](../mockups/xw-4.10-1.png)
+
+**Show on video:**
+
+- [ ] Works with list, table, and tree views
+- [ ] Tree filtering keeps ancestors
+- [ ] Custom matching and no-match message
+
+### Step 215: Dual list (list builder)
+
+**Issue:** [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278) `extra-widgets: [4.8] Dual list (list builder)`
+
+**Delivers:** Available and chosen lists side by side, with buttons to move items between them and order the chosen list.
+
+**Builds on:** step 214, step 79, step 31, step 76.
+
+**Mockups:** [xw-4.8-1.png](../mockups/xw-4.8-1.png)
+
+**Show on video:**
+
+- [ ] Move items by buttons, double-click, and drag
+- [ ] Order the chosen list
+- [ ] Buttons disabled when not applicable
+
+### Step 216: Rule editor (query builder)
+
+**Issue:** [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) `extra-widgets: [4.11] Rule editor (query builder)`
+
+**Delivers:** Rows of "field, operator, value" with add and remove buttons, joined by All or Any.
+
+**Builds on:** step 190, step 120, step 36, step 30, step 40.
+
+**Mockups:** [xw-4.11-1.png](../mockups/xw-4.11-1.png)
+
+**Show on video:**
+
+- [ ] Operators follow the field's type
+- [ ] Add, remove, and optional nested groups
+- [ ] Rules returned as plain, serializable data
+
+### Step 217: Image viewer (zoom and pan)
+
+**Issue:** [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) `extra-widgets: [4.12] Image viewer (zoom and pan)`
+
+**Delivers:** An image in a scrollable view with zoom to fit, actual size, zoom by wheel, and drag to pan.
+
+**Builds on:** step 91, step 29, step 43, step 17, step 204.
+
+**Mockups:** [xw-4.12-1.png](../mockups/xw-4.12-1.png)
+
+**Show on video:**
+
+- [ ] Fit, fill, 100%, and zoom around the pointer
+- [ ] Drag to pan
+- [ ] Tiled drawing for large images
+
+### Step 218: Document tabs (closable and reorderable)
+
+**Issue:** [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281) `extra-widgets: [5.4] Document tabs (closable and reorderable)`
+
+**Delivers:** A tab bar for open documents: close buttons, a modified mark, drag to reorder, and overflow.
+
+**Builds on:** step 91, step 80, step 76, step 121, step 83.
+
+**Mockups:** [xw-5.4-1.png](../mockups/xw-5.4-1.png)
+
+**Show on video:**
+
+- [ ] Close buttons, modified marks, middle-click close
+- [ ] Drag to reorder and context menu
+- [ ] Overflow arrows and tab list menu
+
+### Step 219: Wizard (step-by-step assistant)
+
+**Issue:** [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282) `extra-widgets: [6.4] Wizard (step-by-step assistant)`
+
+**Delivers:** Pages shown one at a time with Back, Next, and Finish, and a list of steps.
+
+**Builds on:** step 91, step 178, step 49, step 31.
+
+**Mockups:** [xw-6.4-1.png](../mockups/xw-6.4-1.png)
+
+**Show on video:**
+
+- [ ] Back, Next, Finish, and Cancel with page validation
+- [ ] Step list and conditional pages
+- [ ] Summary page optional
+
+### Step 220: Settings dialog
+
+**Issue:** [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283) `extra-widgets: [6.5] Settings dialog`
+
+**Delivers:** A sidebar of categories, a page per category, and OK, Cancel, and Apply.
+
+**Builds on:** step 199, step 178, step 41, step 49, step 80.
+
+**Mockups:** [xw-6.5-1.png](../mockups/xw-6.5-1.png)
+
+**Show on video:**
+
+- [ ] Sidebar or tabs layout
+- [ ] Apply enabled only on changes; OK applies and closes
+- [ ] Restore Defaults per page and optional search
+
+### Step 221: About dialog
+
+**Issue:** [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) `extra-widgets: [6.6] About dialog`
+
+**Delivers:** The application's icon, name, version, copyright, website, and credits and license pages.
+
+**Builds on:** step 91, step 49, step 29, step 205, step 181.
+
+**Mockups:** [xw-6.6-1.png](../mockups/xw-6.6-1.png)
+
+**Show on video:**
+
+- [ ] Icon, name, version, copyright, and website
+- [ ] Credits and license pages
+- [ ] Values from Cargo metadata
+
+### Step 222: Find and replace bar
+
+**Issue:** [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) `extra-widgets: [6.7] Find and replace bar`
+
+**Delivers:** A bar with find and replace fields, match options, a match count, and next and previous.
+
+**Builds on:** step 91, step 36, step 32, step 30, step 181, step 75.
+
+**Mockups:** [xw-6.7-1.png](../mockups/xw-6.7-1.png)
+
+**Show on video:**
+
+- [ ] Find, next, previous, and match count
+- [ ] Case, whole word, and regular expression options
+- [ ] Replace and Replace All through the Searchable trait
+
+### Step 223: Keyboard shortcuts editor
+
+**Issue:** [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) `extra-widgets: [6.8] Keyboard shortcuts editor`
+
+**Delivers:** A filterable table of actions and their shortcuts, edited with the shortcut field.
+
+**Builds on:** step 207, step 214, step 81, step 75.
+
+**Mockups:** [xw-6.8-1.png](../mockups/xw-6.8-1.png)
+
+**Show on video:**
+
+- [ ] Filter by name or key combination
+- [ ] Conflict detection with reassign
+- [ ] Reset one or all
+
+### Step 224: Checkpoint: Extra widgets 3 released
+
+**Video:** Tour the specialized widgets: column browser, icon grid, data grid, rule editor, wizard, settings dialog, find bar, and shortcuts editor.
+
+## Part 12: Remaining Pushrod backlog
+
+Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays last, as the distant future it was planned to be.
+
+### Step 225: Callback handles: disconnect, block, and unblock
+
+**Issue:** [#99](https://github.com/KenSuenobu/rust-pushrod/issues/99) `pushrod: [9.7] Callback handles: disconnect, block, and unblock`
+
+**Delivers:** Every registration returns a handle to remove or temporarily silence the callback.
+
+**Builds on:** step 11.
+
+**Show on video:**
+
+- [ ] Disconnect removes; block suppresses until unblock
+- [ ] Scoped blocking restores state even on early return
+
+### Step 226: Application lifecycle: startup and close-request callbacks
+
+**Issue:** [#26](https://github.com/KenSuenobu/rust-pushrod/issues/26) `pushrod: [1.11] Application lifecycle: startup and close-request callbacks`
+
+**Delivers:** Run code before the first frame; confirm or veto closing the window.
+
+**Builds on:** step 4.
+
+**Show on video:**
+
+- [ ] `on_start` runs once before the first draw
+- [ ] `on_close_request` can veto
+- [ ] Tests via `Engine::dispatch`
+
+### Step 227: Grid layout
+
+**Issue:** [#119](https://github.com/KenSuenobu/rust-pushrod/issues/119) `pushrod: [5.8] Grid layout`
+
+**Delivers:** Rows and columns of cells with spans, per-row/column stretch, and alignment.
+
+**Builds on:** step 39.
+
+**Mockups:** [5.8-1.png](../mockups/5.8-1.png)
+
+**Show on video:**
+
+- [ ] Spans, stretch, alignment, spacing
+- [ ] Correct min/preferred sizes from cell hints
+
+### Step 228: Switch (on/off slide toggle)
+
+**Issue:** [#86](https://github.com/KenSuenobu/rust-pushrod/issues/86) `pushrod: [2.17] Switch (on/off slide toggle)`
+
+**Delivers:** A sliding on/off switch for settings that take effect immediately.
+
+**Builds on:** step 6, step 11.
+
+**Mockups:** [2.17-1.png](../mockups/2.17-1.png)
+
+**Show on video:**
+
+- [ ] Click, drag, Space toggle
+
+### Step 229: Message bar (non-modal inline notice)
+
+**Issue:** [#89](https://github.com/KenSuenobu/rust-pushrod/issues/89) `pushrod: [2.20] Message bar (non-modal inline notice)`
+
+**Delivers:** A dismissible banner for warnings and information that doesn't block the window.
+
+**Builds on:** step 20, step 38, step 31.
+
+**Mockups:** [2.20-1.png](../mockups/2.20-1.png)
+
+**Show on video:**
+
+- [ ] Shows, hides, and dismisses
+- [ ] Action buttons fire callbacks
+- [ ] Parts are retrievable and modifiable as described
+
+### Step 230: Busy spinner
 
 **Issue:** [#128](https://github.com/KenSuenobu/rust-pushrod/issues/128) `pushrod: [4.10] Busy spinner`
 
@@ -2995,7 +3710,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Static fallback in outline mode
 - [ ] Fits inline with text and inside buttons
 
-### Step 188: Dirty-rectangle redraw
+### Step 231: Dirty-rectangle redraw
 
 **Issue:** [#24](https://github.com/KenSuenobu/rust-pushrod/issues/24) `pushrod: [1.9] Dirty-rectangle redraw`
 
@@ -3009,13 +3724,13 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Golden tests (7.2) pass
 - [ ] Benchmark in the PR
 
-### Step 189: Chassis: Code editor find
+### Step 232: Chassis: Code editor find
 
 **Issue:** [#147](https://github.com/KenSuenobu/rust-pushrod/issues/147) `pushrod: [11.6] Chassis: Code editor find`
 
 **Delivers:** A find bar inside the editor: type to search, step through matches.
 
-**Builds on:** step 36, step 30, step 119.
+**Builds on:** step 36, step 30, step 125.
 
 **Mockups:** [11.6-1.png](../mockups/11.6-1.png)
 
@@ -3025,13 +3740,13 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Stepping wraps around the file
 - [ ] Escape returns focus to the editor at the current match
 
-### Step 190: Chassis: Code editor auto-indent and bracket matching
+### Step 233: Chassis: Code editor auto-indent and bracket matching
 
 **Issue:** [#148](https://github.com/KenSuenobu/rust-pushrod/issues/148) `pushrod: [11.7] Chassis: Code editor auto-indent and bracket matching`
 
 **Delivers:** New lines keep and adjust indentation, and the bracket matching the one at the caret is boxed.
 
-**Builds on:** step 121, step 119.
+**Builds on:** step 127, step 125.
 
 **Mockups:** [11.7-1.png](../mockups/11.7-1.png)
 
@@ -3041,13 +3756,13 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Typing '}' on a blank line outdents it
 - [ ] Matching brackets boxed; brackets in strings ignored
 
-### Step 191: Chassis: Code editor documentation, example, and tests
+### Step 234: Chassis: Code editor documentation, example, and tests
 
 **Issue:** [#150](https://github.com/KenSuenobu/rust-pushrod/issues/150) `pushrod: [11.9] Chassis: Code editor documentation, example, and tests`
 
 **Delivers:** Document the code editor on the site, ship an example editor, and cover it with golden-image tests.
 
-**Builds on:** step 44, step 122, step 189, step 190.
+**Builds on:** step 44, step 128, step 232, step 233.
 
 **Show on video:**
 
@@ -3055,7 +3770,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Golden images for each mockup state
 - [ ] Benchmarks in CI
 
-### Step 192: Theme for colors and metrics (future)
+### Step 235: Theme for colors and metrics (future)
 
 **Issue:** [#74](https://github.com/KenSuenobu/rust-pushrod/issues/74) `pushrod: [8.1] Theme for colors and metrics (future)`
 
@@ -3067,13 +3782,13 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 
 - [ ] (Future) classic theme matches goldens
 
-### Step 193: Skins: image-based widget rendering (future)
+### Step 236: Skins: image-based widget rendering (future)
 
 **Issue:** [#75](https://github.com/KenSuenobu/rust-pushrod/issues/75) `pushrod: [8.2] Skins: image-based widget rendering (future)`
 
 **Delivers:** Let a skin replace paint with nine-slice images.
 
-**Builds on:** step 192.
+**Builds on:** step 235.
 
 **Show on video:**
 

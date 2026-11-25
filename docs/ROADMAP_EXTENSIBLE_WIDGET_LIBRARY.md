@@ -45,7 +45,7 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, a reference application built only with Pushrod, a guide for writing widgets, and documentation for everything.
 7. Draw everything through a backend crate (SDL2 today, SDL3 later) into GPU textures, with no OS-native UI, no per-frame CPU pixel work, sharp rendering on high-DPI displays, and no SDL types in the core or widget APIs.
 
-MVP scope: **66 of 124 active issues**, delivered in two release stages. The MVP column shows each issue's stage, and GitHub milestones match.
+MVP scope: **66 of 121 active issues**, delivered in two release stages. The MVP column shows each issue's stage, and GitHub milestones match.
 
 - **v0.1: dialog applications** (53 issues): Build and ship real dialog-style applications: core, backends, events, focus, the core widgets, composition, layouts, high-DPI, modal dialogs, CI, docs, and the first crates.io release.
 - **v0.2: forms (MVP complete)** (13 issues): Forms and form files (the runtime foundation for Chassis), plus input methods, mnemonics, accessibility, and written specs. Completes the MVP.
@@ -58,7 +58,7 @@ Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, 
 |---|---|---|---|---|
 | 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 25 | 19 |
 | 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 22 | 10 |
-| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, expander, and date picker. | 9 | 3 |
+| 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, split view, and expander. | 6 | 3 |
 | 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 7 | 1 |
 | 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers. | 10 | 6 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 13 | 10 |
@@ -105,7 +105,7 @@ flowchart LR
 
 Each widget has its own roadmap in [`docs/widgets/`](widgets/README.md), the specification for what it is, what it does, how it looks, and how it responds. This file keeps the core, event, form, and release work, and the order everything is built in.
 
-[Boxed Label](widgets/boxed-label.md) · [Glyph Button](widgets/glyph-button.md) · [Button](widgets/button.md) · [Check Box](widgets/check-box.md) · [Radio Button](widgets/radio-button.md) · [Text Field](widgets/text-field.md) · [Image](widgets/image.md) · [Icon](widgets/icon.md) · [Alert](widgets/alert.md) · [Custom Paint](widgets/custom-paint.md) · [Menu Bar and Menus](widgets/menu-bar-and-menus.md) · [File Chooser](widgets/file-chooser.md) · [Tooltip](widgets/tooltip.md) · [Separator](widgets/separator.md) · [Toolbar](widgets/toolbar.md) · [Status Bar](widgets/status-bar.md) · [Switch](widgets/switch.md) · [Text Area](widgets/text-area.md) · [Context Menu](widgets/context-menu.md) · [Message Bar](widgets/message-bar.md) · [Image Button](widgets/image-button.md) · [Link Label](widgets/link-label.md) · [Scroll Bar](widgets/scroll-bar.md) · [Slider](widgets/slider.md) · [Group Box](widgets/group-box.md) · [Choice Button](widgets/choice-button.md) · [Column Browser](widgets/column-browser.md) · [Split View](widgets/split-view.md) · [Expander](widgets/expander.md) · [Date Picker](widgets/date-picker.md) · [Dial](widgets/dial.md) · [Progress Bar](widgets/progress-bar.md) · [Spin Box](widgets/spin-box.md) · [Tab View](widgets/tab-view.md) · [List View](widgets/list-view.md) · [Combo Box](widgets/combo-box.md) · [Table View](widgets/table-view.md) · [Spinner](widgets/spinner.md) · [Container](widgets/container.md)
+[Boxed Label](widgets/boxed-label.md) · [Glyph Button](widgets/glyph-button.md) · [Button](widgets/button.md) · [Check Box](widgets/check-box.md) · [Radio Button](widgets/radio-button.md) · [Text Field](widgets/text-field.md) · [Image](widgets/image.md) · [Icon](widgets/icon.md) · [Alert](widgets/alert.md) · [Custom Paint](widgets/custom-paint.md) · [Menu Bar and Menus](widgets/menu-bar-and-menus.md) · [File Chooser](widgets/file-chooser.md) · [Tooltip](widgets/tooltip.md) · [Separator](widgets/separator.md) · [Toolbar](widgets/toolbar.md) · [Status Bar](widgets/status-bar.md) · [Switch](widgets/switch.md) · [Text Area](widgets/text-area.md) · [Context Menu](widgets/context-menu.md) · [Message Bar](widgets/message-bar.md) · [Image Button](widgets/image-button.md) · [Link Label](widgets/link-label.md) · [Scroll Bar](widgets/scroll-bar.md) · [Slider](widgets/slider.md) · [Group Box](widgets/group-box.md) · [Choice Button](widgets/choice-button.md) · [Split View](widgets/split-view.md) · [Expander](widgets/expander.md) · [Progress Bar](widgets/progress-bar.md) · [Spin Box](widgets/spin-box.md) · [Tab View](widgets/tab-view.md) · [List View](widgets/list-view.md) · [Combo Box](widgets/combo-box.md) · [Table View](widgets/table-view.md) · [Spinner](widgets/spinner.md) · [Container](widgets/container.md)
 
 ## Modern foundations
 
@@ -1030,7 +1030,7 @@ Clickable text that looks like a link and opens a URL or runs a callback. **Widg
 
 ## Epic 3: Value and choice controls (#13)
 
-Scroll bar, slider, group box, choice button, expander, and date picker.
+Scroll bar, slider, group box, choice button, split view, and expander.
 
 **Problem.** Picking a value from a range, scrolling, and choosing one of several options are needed everywhere. Older systems made applications build these by hand; later toolkits provide a small set of consistent controls.
 
@@ -1044,11 +1044,8 @@ Scroll bar, slider, group box, choice button, expander, and date picker.
 | 3.2 (#40) | Slider | Horizontal/vertical slider with range, optional ticks, and value label. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/slider.rs (new)` |
 | 3.3 (#41) | Group box (titled frame) | A frame with a title in its top border, grouping related controls. | `chassis`, `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/group_box.rs (new)` |
 | 3.6 (#44) | Choice button: pop-up list and click-to-cycle modes | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | `chassis`, `enhancement`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/choice_button.rs (new)` |
-| 3.7 (#45) | Column browser (multi-column hierarchical browser) | Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. | `enhancement`, `parallelizable`, `size/L`, `usability`, `widget` | Y | N | L | `pushrod-widgets/src/column_browser.rs (new)` |
 | 3.9 (#47) | Split view (panes with draggable dividers) | Two or more panes side by side or stacked, separated by dividers the user drags to resize them. | `chassis`, `enhancement`, `layout`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/split_view.rs (new)` |
 | 3.10 (#90) | Expander (collapsible section) | A titled section that shows or hides its contents when clicked. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/expander.rs (new)` |
-| 3.11 (#91) | Date picker | A date field with a drop-down month calendar. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `pushrod-widgets/src/date_picker.rs (new)` |
-| 3.12 (#127) | Dial (rotary knob) | A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/dial.rs (new)` |
 
 ### 3.1 (#39): Scroll bar
 
@@ -1074,12 +1071,6 @@ Pick one of several options compactly, as a pop-up list or a click-to-cycle butt
 
 **Dependencies.** Requires 1.6 (#22), 5.1 (#56), 5.2 (#57).
 
-### 3.7 (#45): Column browser (multi-column hierarchical browser)
-
-Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. **Widget roadmap:** [`docs/widgets/column-browser.md`](widgets/column-browser.md) (look, behavior, events, acceptance criteria).
-
-**Dependencies.** Requires 4.5 (#52), 5.2 (#57), 5.3 (#58).
-
 ### 3.9 (#47): Split view (panes with draggable dividers)
 
 Two or more panes side by side or stacked, separated by dividers the user drags to resize them. **Widget roadmap:** [`docs/widgets/split-view.md`](widgets/split-view.md) (look, behavior, events, acceptance criteria).
@@ -1091,18 +1082,6 @@ Two or more panes side by side or stacked, separated by dividers the user drags 
 A titled section that shows or hides its contents when clicked. **Widget roadmap:** [`docs/widgets/expander.md`](widgets/expander.md) (look, behavior, events, acceptance criteria).
 
 **Dependencies.** Requires 1.1 (#19), 5.4 (#59).
-
-### 3.11 (#91): Date picker
-
-A date field with a drop-down month calendar. **Widget roadmap:** [`docs/widgets/date-picker.md`](widgets/date-picker.md) (look, behavior, events, acceptance criteria).
-
-**Dependencies.** Requires 2.6 (#32), 5.1 (#56), 5.2 (#57).
-
-### 3.12 (#127): Dial (rotary knob)
-
-A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. **Widget roadmap:** [`docs/widgets/dial.md`](widgets/dial.md) (look, behavior, events, acceptance criteria).
-
-**Dependencies.** Requires 1.6 (#22), 9.4 (#96).
 
 ## Epic 4: Lists, tables, progress, spin boxes, and tabs (#14)
 
@@ -2666,14 +2645,12 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 5.9 (#120) Stack layout (one child visible at a time)
 - 5.10 (#121) Flow layout (wrapping rows)
 - 4.5 (#52) List view
-- 3.7 (#45) Column browser (multi-column hierarchical browser)
 - 4.2 (#49) Spin box
 - 4.4 (#51) Tab view
 - 4.6 (#53) Combo box
 - 4.9 (#92) Table view
 - 3.6 (#44) Choice button: pop-up list and click-to-cycle modes
 - 3.10 (#90) Expander (collapsible section)
-- 3.11 (#91) Date picker
 - 2.11 (#37) Menu bar and drop-down menus (drawn by Pushrod)
 - 2.13 (#77) Tooltips
 - 2.21 (#125) Image button
@@ -2686,7 +2663,6 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 2.8 (#34) Icon widget (picture with caption)
 - 2.12 (#38) File chooser dialog (drawn by Pushrod)
 - 2.22 (#126) Link label
-- 3.12 (#127) Dial (rotary knob)
 - 4.10 (#128) Busy spinner
 - 3.9 (#47) Split view (panes with draggable dividers)
 
@@ -2726,13 +2702,23 @@ Considered and closed as *not planned*, to keep Pushrod focused on usability. Ea
 
 | Issue | Title | Why parked |
 |---|---|---|
-| 3.4 (#42) | Matrix of cells (grid of buttons with selection modes) | Radio groups (2.5 (#31)) and the choice button (3.6 (#44)) cover the common cases; palettes can be built from buttons. |
 | 3.5 (#43) | Labeled field rows | Text fields with built-in labels (2.6 (#32)) cover this. |
-| 3.8 (#46) | Color well and picker | Rarely needed in ordinary dialogs; revisit if the Chassis inspector needs it. |
-| 4.3 (#50) | Segmented control | Radio groups and the choice button's cycle mode cover the same choices. |
-| 4.7 (#54) | Level indicator | The progress bar covers capacity displays. |
-| 4.8 (#55) | Outline view (expandable tree list) | Specialized and not a core widget. A tree view fits naturally in a separate widget library that extends pushrod-widgets (1.22 (#131)); community contributions welcome. |
-| 3.13 (#129) | Font chooser | Specialized; most applications don't let users pick fonts. Revisit alongside the color picker. |
+
+### Moved to pushrod-extra-widgets
+
+Larger and compound widgets live in the separate `pushrod-extra-widgets` crate, outside the Pushrod MVP, so the standard set stays simple ([extra widgets roadmap](ROADMAP_EXTRA_WIDGETS.md)). Their issues keep their numbers.
+
+| Widget | Now | Issue |
+|---|---|---|
+| [Segmented control](extra-widgets/segmented-control.md) | extra-widgets 2.2 | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) |
+| [Dial (rotary knob)](extra-widgets/dial.md) | extra-widgets 2.4 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) |
+| [Level indicator (meter)](extra-widgets/level-indicator.md) | extra-widgets 2.5 | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) |
+| [Tool palette (grid of tool buttons)](extra-widgets/tool-palette.md) | extra-widgets 2.6 | [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) |
+| [Date picker](extra-widgets/date-picker.md) | extra-widgets 3.2 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) |
+| [Color well and color picker](extra-widgets/color-picker.md) | extra-widgets 3.4 | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) |
+| [Font chooser](extra-widgets/font-chooser.md) | extra-widgets 3.5 | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) |
+| [Tree view (outline)](extra-widgets/tree-view.md) | extra-widgets 4.1 | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) |
+| [Column browser](extra-widgets/column-browser.md) | extra-widgets 4.2 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) |
 
 ## Existing issues
 

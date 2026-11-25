@@ -229,6 +229,7 @@ Generated code and your code never share a function body, so regenerating can't 
 | Default layout for new forms | Fixed positions (the classic designer feel); **New Form with Layout** creates a Column with a Form layout and a button Row instead |
 | Where Chassis lives | A `chassis/` crate in this repository's workspace, so Pushrod API changes and Chassis updates land together; it can move to its own repository once Pushrod's APIs settle |
 | Tree view | Not needed: the project drawer uses expander sections with lists, and the designer's breadcrumb navigates nested layouts |
+| Generic widgets | The drawer, tool palette (widget palette), breadcrumb bar, and property grid come from `pushrod-extra-widgets` ([extra widgets roadmap](ROADMAP_EXTRA_WIDGETS.md)), not private Chassis code, so any application can use them |
 
 ## Relationship to Pushrod
 
@@ -525,7 +526,7 @@ Project model, open and save, the project drawer, and editors for forms, strings
 
 **Problem Statement.** Everything in the resource file must be visible and one double-click from its editor.
 
-**Solution / Scope.** The top of the left drawer: the file name, then an expander section per resource kind (Forms, Strings, Images, Icons, Files, Menus) with a count, each holding a list with an icon per entry. Double-click opens the resource's editor (forms open in the Designer). No tree view: nested structure inside a form is navigated with the designer's breadcrumb (3.8).
+**Solution / Scope.** The left drawer is the extra-widgets drawer (extra-widgets 5.1). The top of the left drawer: the file name, then an expander section per resource kind (Forms, Strings, Images, Icons, Files, Menus) with a count, each holding a list with an icon per entry. Double-click opens the resource's editor (forms open in the Designer). No tree view: nested structure inside a form is navigated with the designer's breadcrumb (3.8).
 
 ![chassis-1.png](mockups/chassis-1.png)
 
@@ -535,7 +536,7 @@ Project model, open and save, the project drawer, and editors for forms, strings
 - Double-click opens the right editor
 - Selection follows the open form
 
-**Parallelism / Dependencies.** Parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)), 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view
+**Parallelism / Dependencies.** Parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)), 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view; Extra widgets: extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -731,7 +732,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 
 **Problem Statement.** Users need every available widget at hand, including ones from widget libraries other than pushrod-widgets.
 
-**Solution / Scope.** The lower part of the left drawer: a search field and expander sections (Basic, Values, Containers, Lists, Layouts, plus one per extra widget library) listing every registered type with its icon and display name. Widget libraries that register types appear without changes to Chassis.
+**Solution / Scope.** The lower part of the left drawer: a search field and expander sections (Basic, Values, Containers, Lists, Layouts, plus one per extra widget library) listing every registered type with its icon and display name. Widget libraries that register types appear without changes to Chassis. Built on the extra-widgets tool palette (extra-widgets 2.6) in its List layout and Drag mode.
 
 ![chassis-1.png](mockups/chassis-1.png)
 
@@ -740,7 +741,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 - All registered types listed and searchable
 - A widget library added to the project appears in the palette
 
-**Parallelism / Dependencies.** Parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)); Pushrod: Pushrod 6.1 [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) Widget registry and factory, Pushrod 1.22 [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) Widget libraries: extend or replace pushrod-widgets
+**Parallelism / Dependencies.** Parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)); Pushrod: Pushrod 6.1 [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) Widget registry and factory, Pushrod 1.22 [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) Widget libraries: extend or replace pushrod-widgets; Extra widgets: extra-widgets 2.6 [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) Tool palette (grid of tool buttons)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -853,7 +854,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 
 **Problem Statement.** Fixed positions break when text gets longer or the window resizes. Layout managers adapt, but only if the designer makes them as easy as dropping a widget at a position.
 
-**Solution / Scope.** A Layouts palette section (Column, Row, Form, Grid, Stack, Flow, Spacer) and a Layout property on the form and every container. Layouts get a dotted outline and name tag in the designer. Dragging over a layout shows an insertion bar; dropping inserts there; dropping into a Form layout adds a label-and-field row; dragging a child reorders it or moves it between layouts. A Spacer is drawn as a spring. The layout settings (spacing, margins, label alignment, wrap width) and each child's "In <layout>" settings are stored as properties, so the inspector (4.2) shows them. Dragging the form's edge re-runs layouts live. A breadcrumb above the surface selects parents; Escape selects the parent. Column, Row, Form, and Spacer are in the MVP; Grid, Stack, and Flow appear when Pushrod ships them.
+**Solution / Scope.** A Layouts palette section (Column, Row, Form, Grid, Stack, Flow, Spacer) and a Layout property on the form and every container. Layouts get a dotted outline and name tag in the designer. Dragging over a layout shows an insertion bar; dropping inserts there; dropping into a Form layout adds a label-and-field row; dragging a child reorders it or moves it between layouts. A Spacer is drawn as a spring. The layout settings (spacing, margins, label alignment, wrap width) and each child's "In <layout>" settings are stored as properties, so the inspector (4.2) shows them. Dragging the form's edge re-runs layouts live. A breadcrumb above the surface (the extra-widgets breadcrumb bar, extra-widgets 4.9) selects parents; Escape selects the parent. Column, Row, Form, and Spacer are in the MVP; Grid, Stack, and Flow appear when Pushrod ships them.
 
 ![chassis-layout-1.png](mockups/chassis-layout-1.png)
 
@@ -874,7 +875,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 - Reordering by drag, and undo, work inside layouts
 - Breadcrumb and Escape select parents
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 3.3 ([#181](https://github.com/KenSuenobu/rust-pushrod/issues/181)), 3.4 ([#180](https://github.com/KenSuenobu/rust-pushrod/issues/180)); Pushrod: Pushrod 5.5 [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) Layout manager foundation: Layout trait, size hints, measure and arrange, Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 3.3 ([#181](https://github.com/KenSuenobu/rust-pushrod/issues/181)), 3.4 ([#180](https://github.com/KenSuenobu/rust-pushrod/issues/180)); Pushrod: Pushrod 5.5 [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) Layout manager foundation: Layout trait, size hints, measure and arrange, Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows; Extra widgets: extra-widgets 4.9 [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) Breadcrumb bar (path control)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -962,7 +963,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 
 **Problem Statement.** Users need to see what is selected and edit it without covering the form.
 
-**Solution / Scope.** The right drawer (a drawer, not a callout: it never covers the form, stays open between selections, and has room for long lists): the widget's name, then its type, ID, and registry type name; then Properties and Events tabs. With nothing selected, the form's own properties. F4 or the close button collapses it.
+**Solution / Scope.** The right drawer (a drawer, not a callout: it never covers the form, stays open between selections, and has room for long lists): the widget's name, then its type, ID, and registry type name; then Properties and Events tabs. With nothing selected, the form's own properties. F4 or the close button collapses it. Built on the extra-widgets drawer (extra-widgets 5.1).
 
 ![chassis-1.png](mockups/chassis-1.png)
 
@@ -971,7 +972,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 - Follows the selection in the designer and the caret's handler in the code view
 - Collapses and restores
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169))
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)); Extra widgets: extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -983,7 +984,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 
 **Problem Statement.** Every widget type has different properties; the inspector must show them all without per-widget code in Chassis.
 
-**Solution / Scope.** Properties come from Pushrod's introspection (6.2): name, kind, value, category. Rows grouped under headers (Identity, Layout, Behavior, Appearance, then the type's own categories), label left, editor right. Edits apply immediately and record undo. When the selection is inside a layout, an "In Row" (or Column, Form, Grid) section shows its layout settings (stretch, alignment, margin; grid cell and spans), and a selected layout shows its own (spacing, margins, label alignment, wrap width), as in the layout mockups.
+**Solution / Scope.** Built on the extra-widgets property grid (extra-widgets 4.5), which supplies categories, the name/value divider, typed editors, and changed-from-default marking; Chassis adds the layout sections and undo. Properties come from Pushrod's introspection (6.2): name, kind, value, category. Rows grouped under headers (Identity, Layout, Behavior, Appearance, then the type's own categories), label left, editor right. Edits apply immediately and record undo. When the selection is inside a layout, an "In Row" (or Column, Form, Grid) section shows its layout settings (stretch, alignment, margin; grid cell and spans), and a selected layout shows its own (spacing, margins, label alignment, wrap width), as in the layout mockups.
 
 ![chassis-1.png](mockups/chassis-1.png)
 
@@ -995,7 +996,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 - Changes show in the designer immediately and undo
 - Layout settings for the selection's parent layout appear in an "In <layout>" section
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 4.1 ([#186](https://github.com/KenSuenobu/rust-pushrod/issues/186)); Pushrod: Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 4.1 ([#186](https://github.com/KenSuenobu/rust-pushrod/issues/186)); Pushrod: Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows; Extra widgets: extra-widgets 4.5 [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) Property grid (name and value inspector)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -1007,7 +1008,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 
 **Problem Statement.** Each kind of property needs an editor that prevents invalid values.
 
-**Solution / Scope.** Text (text field, or a string resource via `@strings.NAME`), integer (numeric field with range), boolean (check box; behavior flags grouped), enumeration (choice button), color (swatch plus hex field; the color picker is parked), font (choice of registered fonts; the font chooser is parked), image and icon (choice of the resource file's images and icons, 2.6). Invalid input is marked and not applied.
+**Solution / Scope.** Text (text field, or a string resource via `@strings.NAME`), integer (numeric field with range), boolean (check box; behavior flags grouped), enumeration (choice button), color (swatch plus hex field; the extra-widgets color well, extra-widgets 3.4, when it ships), font (choice of registered fonts; the extra-widgets font chooser, extra-widgets 3.5, when it ships), image and icon (choice of the resource file's images and icons, 2.6). Invalid input is marked and not applied.
 
 ![chassis-1.png](mockups/chassis-1.png)
 
@@ -1903,21 +1904,23 @@ Issues **after the Pushrod MVP** that the Chassis MVP needs, directly or through
 |---|---|---|
 | 1.15 ([#81](https://github.com/KenSuenobu/rust-pushrod/issues/81)) | Undo and redo command stack | 2.4, 3.7 (first in M2) |
 | 1.20 ([#113](https://github.com/KenSuenobu/rust-pushrod/issues/113)) | Layers and invalidation: cache hints, texture memory budget, incremental pipeline | indirectly, through 11.2, 11.3, 11.8 (first in M4) |
-| 1.22 ([#131](https://github.com/KenSuenobu/rust-pushrod/issues/131)) | Widget libraries: extend or replace pushrod-widgets | 3.2 (first in M3) |
+| 1.22 ([#131](https://github.com/KenSuenobu/rust-pushrod/issues/131)) | Widget libraries: extend or replace pushrod-widgets | 3.2 (first in M2) |
 | 2.8 ([#34](https://github.com/KenSuenobu/rust-pushrod/issues/34)) | Icon widget (picture with caption) | 2.6 (first in M2) |
 | 2.11 ([#37](https://github.com/KenSuenobu/rust-pushrod/issues/37)) | Menu bar and drop-down menus (drawn by Pushrod) | 1.1 (first in M2) |
 | 2.12 ([#38](https://github.com/KenSuenobu/rust-pushrod/issues/38)) | File chooser dialog (drawn by Pushrod) | 2.2 (first in M2) |
+| 2.13 ([#77](https://github.com/KenSuenobu/rust-pushrod/issues/77)) | Tooltips | indirectly, through extra-widgets 2.6 (first in M3) |
 | 2.15 ([#84](https://github.com/KenSuenobu/rust-pushrod/issues/84)) | Toolbar | 1.1 (first in M2) |
 | 2.16 ([#85](https://github.com/KenSuenobu/rust-pushrod/issues/85)) | Status bar | 1.1 (first in M2) |
 | 2.19 ([#88](https://github.com/KenSuenobu/rust-pushrod/issues/88)) | Context menus | 5.1 (first in M4) |
-| 2.21 ([#125](https://github.com/KenSuenobu/rust-pushrod/issues/125)) | Image button | indirectly, through 2.15 (first in M2) |
+| 2.21 ([#125](https://github.com/KenSuenobu/rust-pushrod/issues/125)) | Image button | indirectly, through 2.15, extra-widgets 2.6 (first in M2) |
 | 3.6 ([#44](https://github.com/KenSuenobu/rust-pushrod/issues/44)) | Choice button: pop-up list and click-to-cycle modes | 4.3 (first in M4) |
 | 3.9 ([#47](https://github.com/KenSuenobu/rust-pushrod/issues/47)) | Split view (panes with draggable dividers) | 1.2 (first in M2) |
 | 3.10 ([#90](https://github.com/KenSuenobu/rust-pushrod/issues/90)) | Expander (collapsible section) | 2.3 (first in M2) |
 | 4.4 ([#51](https://github.com/KenSuenobu/rust-pushrod/issues/51)) | Tab view | 1.3 (first in M2) |
 | 4.5 ([#52](https://github.com/KenSuenobu/rust-pushrod/issues/52)) | List view | 2.3 (first in M2) |
 | 4.9 ([#92](https://github.com/KenSuenobu/rust-pushrod/issues/92)) | Table view | 2.5 (first in M2) |
-| 5.4 ([#59](https://github.com/KenSuenobu/rust-pushrod/issues/59)) | Autoresizing (keep margins or stretch on resize) | indirectly, through 3.10 (first in M2) |
+| 5.4 ([#59](https://github.com/KenSuenobu/rust-pushrod/issues/59)) | Autoresizing (keep margins or stretch on resize) | indirectly, through 3.10, extra-widgets 4.5 (first in M2) |
+| 5.10 ([#121](https://github.com/KenSuenobu/rust-pushrod/issues/121)) | Flow layout (wrapping rows) | indirectly, through extra-widgets 2.6 (first in M3) |
 | 6.9 ([#68](https://github.com/KenSuenobu/rust-pushrod/issues/68)) | Design-mode hooks for Chassis | 3.1 (first in M3) |
 | 6.13 ([#156](https://github.com/KenSuenobu/rust-pushrod/issues/156)) | Event metadata in the widget registry | 5.1, 5.2, 5.3, 5.7 (first in M1) |
 | 9.3 ([#95](https://github.com/KenSuenobu/rust-pushrod/issues/95)) | Event filters: observe or intercept another widget's events | indirectly, through 6.9 (first in M3) |
@@ -1931,9 +1934,21 @@ Issues **after the Pushrod MVP** that the Chassis MVP needs, directly or through
 | 11.5 ([#146](https://github.com/KenSuenobu/rust-pushrod/issues/146)) | Chassis: Code editor syntax highlighting with tree-sitter | indirectly, through 11.8 (first in M4) |
 | 11.8 ([#149](https://github.com/KenSuenobu/rust-pushrod/issues/149)) | Chassis: Code editor API for the Chassis designer | 4.4, 5.3, 5.4 (first in M4) |
 
+### Extra widgets Chassis depends on
+
+Generic widgets that any application can use live in the `pushrod-extra-widgets` crate ([extra widgets roadmap](ROADMAP_EXTRA_WIDGETS.md)) rather than inside Chassis. The Chassis MVP needs these (labeled `chassis`):
+
+| Extra widget | Needed by |
+|---|---|
+| extra-widgets 1.1 [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) Create the pushrod-extra-widgets crate | 2.3, 3.2, 3.8, 4.1, 4.2 |
+| extra-widgets 2.6 [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) Tool palette (grid of tool buttons) | 3.2 |
+| extra-widgets 4.5 [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) Property grid (name and value inspector) | 4.2 |
+| extra-widgets 4.9 [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) Breadcrumb bar (path control) | 3.8 |
+| extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel) | 2.3, 4.1 |
+
 ### Parallel tracks
 
-- **Track A, Pushrod widgets and services:** the table above, in phase order.
+- **Track A, Pushrod widgets and services:** the tables above, in phase order, including the extra widgets.
 - **Track B, Chassis:** M1 immediately after Pushrod's resource work; then M2 to M5 as Track A delivers.
 - **Track C, Chassis code editor (Pushrod Epic 11):** independent until M4 needs it.
 

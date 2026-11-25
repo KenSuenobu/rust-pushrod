@@ -1,6 +1,6 @@
 # Widget roadmaps
 
-One roadmap per widget: what it is, what it does, how it looks, and how it responds. Each file is the specification for its widget; change a widget by editing its file in a pull request. These are the standard widgets in the `pushrod-widgets` crate. Specialized or more graphically ambitious widgets (tree views, graph views, 3D containers, shadows and gradients) belong in separate widget libraries that extend or replace it ([1.22](https://github.com/KenSuenobu/rust-pushrod/issues/131)). The [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) covers the core, events, forms, and release work, and the order everything is built in. Every widget follows the [design philosophy](../../DESIGN_PHILOSOPHY.md): simple, flat, and predictable.
+One roadmap per widget: what it is, what it does, how it looks, and how it responds. Each file is the specification for its widget; change a widget by editing its file in a pull request. These are the standard widgets in the `pushrod-widgets` crate. Specialized or more graphically ambitious widgets (tree views, graph views, 3D containers, shadows and gradients) belong in separate widget libraries that extend or replace it ([1.22](https://github.com/KenSuenobu/rust-pushrod/issues/131)). Larger and compound widgets (pickers, tree view, property grid, wizard, and more) are in [`pushrod-extra-widgets`](../extra-widgets/README.md). The [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) covers the core, events, forms, and release work, and the order everything is built in. Every widget follows the [design philosophy](../../DESIGN_PHILOSOPHY.md): simple, flat, and predictable.
 
 ## Core dialog widgets
 
@@ -37,11 +37,8 @@ One roadmap per widget: what it is, what it does, how it looks, and how it respo
 | [Slider](slider.md) | Horizontal/vertical slider with range, optional ticks, and value label. | [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) | MVP |
 | [Group Box](group-box.md) | A frame with a title in its top border, grouping related controls. | [#41](https://github.com/KenSuenobu/rust-pushrod/issues/41) | MVP |
 | [Choice Button](choice-button.md) | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) | later |
-| [Column Browser](column-browser.md) | Columns of lists where selecting an item in one column fills the next, as in the NeXTSTEP browser and the Mac Finder's column view. | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) | later |
 | [Split View](split-view.md) | Two or more panes side by side or stacked, separated by dividers the user drags to resize them. | [#47](https://github.com/KenSuenobu/rust-pushrod/issues/47) | later |
 | [Expander](expander.md) | A titled section that shows or hides its contents when clicked. | [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) | later |
-| [Date Picker](date-picker.md) | A date field with a drop-down month calendar. | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) | later |
-| [Dial](dial.md) | A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) | later |
 
 ## Lists, tables, progress, spin boxes, and tabs
 
@@ -67,10 +64,20 @@ Considered and not planned. Reopen the issue if real applications need one.
 
 | Widget | Why parked | Issue |
 |---|---|---|
-| Matrix of cells (grid of buttons with selection modes) | Radio groups ([2.5 Radio Button](radio-button.md)) and the choice button ([3.6 Choice Button](choice-button.md)) cover the common cases; palettes can be built from buttons. | [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) |
 | Labeled field rows | Text fields with built-in labels ([2.6 Text Field](text-field.md)) cover this. | [#43](https://github.com/KenSuenobu/rust-pushrod/issues/43) |
-| Color well and picker | Rarely needed in ordinary dialogs; revisit if the Chassis inspector needs it. | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) |
-| Segmented control | Radio groups and the choice button's cycle mode cover the same choices. | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) |
-| Level indicator | The progress bar covers capacity displays. | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) |
-| Outline view (expandable tree list) | Specialized and not a core widget. A tree view fits naturally in a separate widget library that extends pushrod-widgets ([1.22](https://github.com/KenSuenobu/rust-pushrod/issues/131)); community contributions welcome. | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) |
-| Font chooser | Specialized; most applications don't let users pick fonts. Revisit alongside the color picker. | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) |
+
+## Moved to pushrod-extra-widgets
+
+Larger and compound widgets live in the separate `pushrod-extra-widgets` crate, outside the Pushrod MVP, so the standard set stays simple ([extra widgets roadmap](../ROADMAP_EXTRA_WIDGETS.md)). Their issues keep their numbers.
+
+| Widget | Now | Issue |
+|---|---|---|
+| [Segmented control](../extra-widgets/segmented-control.md) | extra-widgets 2.2 | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) |
+| [Dial (rotary knob)](../extra-widgets/dial.md) | extra-widgets 2.4 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) |
+| [Level indicator (meter)](../extra-widgets/level-indicator.md) | extra-widgets 2.5 | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) |
+| [Tool palette (grid of tool buttons)](../extra-widgets/tool-palette.md) | extra-widgets 2.6 | [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) |
+| [Date picker](../extra-widgets/date-picker.md) | extra-widgets 3.2 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) |
+| [Color well and color picker](../extra-widgets/color-picker.md) | extra-widgets 3.4 | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) |
+| [Font chooser](../extra-widgets/font-chooser.md) | extra-widgets 3.5 | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) |
+| [Tree view (outline)](../extra-widgets/tree-view.md) | extra-widgets 4.1 | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) |
+| [Column browser](../extra-widgets/column-browser.md) | extra-widgets 4.2 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) |
