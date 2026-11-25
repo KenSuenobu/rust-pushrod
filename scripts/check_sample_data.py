@@ -22,7 +22,7 @@ SKIP_PATH = re.compile(
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 RESERVED_DOMAINS = {"example.com", "example.org", "example.net"}
 # A home-directory prefix followed by a user name; the capture group is the name.
-HOME_PATH = re.compile(r"(?:/home/|/Users/|[A-Za-z]:\\{1,2}Users\\{1,2})([^/\\\s\"'`<>)\]]+)", re.IGNORECASE)
+HOME_PATH = re.compile(r"(?:/home/|/Users/|[A-Za-z]:\\{1,2}Users\\{1,2})([A-Za-z0-9_$%][^/\\\s\"'`<>)\]]*)", re.IGNORECASE)
 # User names that are placeholders or shell/system variables, not real accounts.
 ALLOWED_USERS = {"user", "$user", "${user}", "%username%", "<user>", "<username>", "username", "name", "you"}
 
