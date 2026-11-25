@@ -22,3 +22,4 @@
 [#71] Widget gallery example with --screenshot, used for the README [kenji]
 [#96] Input controllers: click, drag, scroll, hover, long-press, key [kenji]
 [#20] Keyboard focus: click, Tab, arrows, Return/Escape, FocusChanged [kenji]
+[#104] Per-state appearance: StateStyle and Appearance per visual state [kenji]

@@ -108,6 +108,10 @@ Input events travel through capture, target, and bubble phases: see [Event propa
 
 A disabled widget (`set_enabled(false)`) receives no mouse events, so it never emits `Clicked` and your callbacks don't fire. See [Widget behavior flags and visual states](../concepts/widget-behavior-flags-and-visual-states.md).
 
+## Hover and press styling
+
+Pointer events also set `HOVERED` and `PRESSED` on the widget, so you can change its look without handling `PointerEntered` or `PointerPressed` yourself. Call `set_style(VisualState::HOVERED, ..)`: see [Per-state appearance](../concepts/per-state-appearance.md).
+
 ## Callbacks
 
 | Method | Runs when | Signature |

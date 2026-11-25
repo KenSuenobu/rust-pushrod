@@ -67,7 +67,7 @@ impl Widget for BaseWidget {
     ///
     /// * `p` - The painter, targeting the panel.
     fn paint(&self, p: &mut dyn Painter) {
-        paint::fill(p, self.get_color());
+        paint::fill(p, self.style().background.unwrap_or(self.get_color()));
     }
 }
 

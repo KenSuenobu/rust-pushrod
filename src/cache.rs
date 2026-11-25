@@ -39,7 +39,7 @@ use crate::event::{
 use crate::font::{FontCache, FontNotice};
 use crate::geometry::{Point, make_rect, point};
 use crate::paint::{self, CachePolicy};
-use crate::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
+use crate::widget::{ROOT_WIDGET_ID, VisualState, Widget, WidgetId};
 use sdl2::event::Event as SdlEvent;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
@@ -817,6 +817,7 @@ impl WidgetCache {
                 let target = self.current_widget_id;
 
                 self.captured_widget_id = Some(target);
+                self.set_state_flag(target, VisualState::PRESSED, true);
                 self.focus_for_click(target);
                 self.propagate_with(
                     target,
@@ -844,6 +845,7 @@ impl WidgetCache {
                     .take()
                     .unwrap_or(self.current_widget_id);
 
+                self.set_state_flag(target, VisualState::PRESSED, false);
                 self.propagate_with(
                     target,
                     &Event::PointerReleased {
@@ -862,6 +864,8 @@ impl WidgetCache {
                 self.current_widget_id = self.widget_at(x, y);
 
                 if self.current_widget_id != previous_widget_id {
+                    self.set_state_flag(previous_widget_id, VisualState::HOVERED, false);
+                    self.set_state_flag(self.current_widget_id, VisualState::HOVERED, true);
                     self.send(
                         previous_widget_id,
                         &Event::PointerExited {
@@ -877,6 +881,15 @@ impl WidgetCache {
                         },
                         EventPhase::Target,
                         &mut ctx,
+                    );
+                }
+
+                if let Some(captured) = self.captured_widget_id {
+                    // A held button stays pressed only while the pointer is over the widget.
+                    self.set_state_flag(
+                        captured,
+                        VisualState::PRESSED,
+                        captured == self.current_widget_id,
                     );
                 }
 
@@ -927,6 +940,23 @@ impl WidgetCache {
         }
 
         ctx.into_events()
+    }
+
+    /// Sets or clears one [`VisualState`] flag on a `Widget`, repainting it only if its look
+    /// changes (see [`Widget::set_state`]).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget`; an unknown ID is ignored.
+    /// * `flag` - The flag to change.
+    /// * `on` - `true` to set the flag, `false` to clear it.
+    pub(crate) fn set_state_flag(&mut self, id: WidgetId, flag: VisualState, on: bool) {
+        if let Some(widget) = self.get_mut(id) {
+            let mut state = widget.state();
+
+            state.set(flag, on);
+            widget.set_state(state);
+        }
     }
 
     /// Paints a single `Widget` into its texture.
