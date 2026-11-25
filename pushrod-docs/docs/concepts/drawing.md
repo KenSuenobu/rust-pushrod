@@ -19,3 +19,7 @@ This is why widgets never draw directly to the screen and why changing a widget 
 - Draw only inside `paint`, from `(0, 0)` to `get_size()`.
 - Use the `paint` helpers (`fill`, `border`, `text`) so widgets share one look: flat, with no gradients, bevels, shadows, or rounded corners ([design philosophy](../design-philosophy.md)).
 - Pushrod never uses operating-system menus, dialogs, or controls: everything on screen is a Pushrod widget, so applications look the same everywhere.
+
+## Renderer on macOS
+
+On macOS, Pushrod asks SDL2 for the OpenGL renderer. With the Metal and software renderers the whole window appeared to move one pixel each time a click repainted a widget. To pick a different renderer, set the `SDL_RENDER_DRIVER` environment variable (`metal`, `opengl`, or `software`) before starting your application; Pushrod then leaves the choice alone.

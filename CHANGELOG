@@ -3,3 +3,4 @@
 [0] Added AGENTS.md file with rules for AI agents. [kenji]
 [#69] CI also runs on macOS and Windows; sample-data check flags home paths [kenji]
 [#122] Docs site deploys to GitHub Pages with API reference; widget-page and sample checks [kenji]
+[0] macOS uses the OpenGL renderer, fixing the 1-pixel view shift on click [kenji]

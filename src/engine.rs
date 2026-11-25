@@ -457,7 +457,17 @@ impl<S> Engine<S> {
 
     /// Creates the hardware-accelerated canvas that widget textures are drawn to, cleared to
     /// white.
+    ///
+    /// On macOS the OpenGL renderer is requested unless the `SDL_RENDER_DRIVER` environment
+    /// variable is set: with the Metal and software renderers the whole window appears to move
+    /// one pixel each time a click repaints a widget, and OpenGL does not.  Set
+    /// `SDL_RENDER_DRIVER` to choose another renderer.
     fn create_canvas(window: Window) -> Canvas<Window> {
+        #[cfg(target_os = "macos")]
+        if std::env::var_os("SDL_RENDER_DRIVER").is_none() {
+            sdl2::hint::set("SDL_RENDER_DRIVER", "opengl");
+        }
+
         let mut canvas = window
             .into_canvas()
             .target_texture()
