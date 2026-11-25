@@ -101,7 +101,7 @@ The pointer events a widget receives, and the most common events it emits, are b
 Every event has `event.kind()` (an `EventKind`, used by masks and the callback registry) and `event.widget()` (the widget it concerns, if any).
 
 :::note[Planned changes]
-Propagation, keyboard focus, and more callbacks are on the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md). This page will change with them.
+Input events travel through capture, target, and bubble phases: see [Event propagation](../events/event-propagation.md). Keyboard focus and more callbacks are on the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md). This page will change with them.
 :::
 
 ## Disabled widgets

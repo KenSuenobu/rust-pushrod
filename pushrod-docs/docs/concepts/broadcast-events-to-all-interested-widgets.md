@@ -51,7 +51,7 @@ Keyboard events are **not** broadcast. They go to the focused widget and bubble 
 A widget asks for window events by putting `WINDOW` in its mask, then handles them in `handle_event`:
 
 ```rust checked title="src/lib.rs"
-use pushrod::event::{Event, EventCtx, EventMask};
+use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{Point, Size};
 use pushrod::paint::Painter;
 use pushrod::widget::{Widget, WidgetCore};
@@ -92,11 +92,13 @@ impl Widget for FocusBanner {
 
     fn paint(&self, _p: &mut dyn Painter) {}
 
-    fn handle_event(&mut self, event: &Event, _ctx: &mut EventCtx) {
+    fn handle_event(&mut self, event: &Event, _ctx: &mut EventCtx) -> Propagation {
         if let Event::WindowFocusChanged { focused } = event {
             self.focused = *focused;
             self.set_invalidated(true);
         }
+
+        Propagation::Continue
     }
 }
 ```

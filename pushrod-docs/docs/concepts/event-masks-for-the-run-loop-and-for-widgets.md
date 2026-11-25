@@ -60,7 +60,7 @@ fn main() {
 `Widget::event_mask()` returns the classes a widget wants. The default is `EventMask::NONE`, so a `BoxWidget` or `BaseWidget` receives nothing, while a `ButtonWidget` asks for `POINTER_BUTTONS | HOVER` and still clicks. A widget that handles events sets its mask when it is built:
 
 ```rust checked title="src/main.rs"
-use pushrod::event::{Event, EventCtx, EventMask};
+use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{point, size};
 use pushrod::paint::{self, Painter};
 use pushrod::widget::{Widget, WidgetCore};
@@ -87,7 +87,9 @@ impl Widget for Clickable {
         paint::fill(p, self.get_color());
     }
 
-    fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) {}
+    fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) -> Propagation {
+        Propagation::Continue
+    }
 }
 
 fn main() {

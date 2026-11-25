@@ -97,7 +97,7 @@ Window events are [broadcast](../concepts/broadcast-events-to-all-interested-wid
 | `Raw(sdl2::event::Event)` | An SDL2 event Pushrod has not mapped yet. |
 
 :::note[What emits what today]
-The cache currently produces the pointer events (`PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`), and `ButtonWidget` emits `Clicked`. The other variants are the shared vocabulary that later features (keyboard, focus, new widgets, timers) emit; `EngineEvent` currently has `EventMaskChanged { scope, old, new }` and `WidgetAdded { id, parent }`; see [Engine events](./engine-events.md).
+Pointer, key, and text events propagate: see [Event propagation](./event-propagation.md). The cache currently produces the pointer events (`PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`), and `ButtonWidget` emits `Clicked`. The other variants are the shared vocabulary that later features (keyboard, focus, new widgets, timers) emit; `EngineEvent` currently has `EventMaskChanged { scope, old, new }` and `WidgetAdded { id, parent }`; see [Engine events](./engine-events.md).
 :::
 
 ## Renamed from the first release

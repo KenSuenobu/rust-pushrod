@@ -25,7 +25,7 @@
 //! button is still selected.
 
 use pushrod::color::{Color, FontStyle};
-use pushrod::event::{Event, EventCtx, EventMask};
+use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle};
 use pushrod::widget::{Widget, WidgetCore};
@@ -108,10 +108,15 @@ impl Widget for ButtonWidget {
     /// * `event` - The event sent to the button.
     /// * `ctx` - The context used to emit `Clicked`.
     ///
+    /// # Returns
+    ///
+    /// [`Propagation::Stop`] for the pointer events the button handles, so they do not bubble to its
+    /// parents; otherwise [`Propagation::Continue`].
+    ///
     /// After the button has updated itself, it also re-emits `PointerPressed`, `PointerReleased`,
     /// `PointerEntered` and `PointerExited` so the application's `on_press`, `on_release` and
     /// `on_hover` callbacks run (each is emitted after `Clicked`, when there is one).
-    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) {
+    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
         self.track(event, ctx);
 
         if matches!(
@@ -122,7 +127,10 @@ impl Widget for ButtonWidget {
                 | Event::PointerExited { .. }
         ) {
             ctx.emit(event.clone());
+            return Propagation::Stop;
         }
+
+        Propagation::Continue
     }
 }
 

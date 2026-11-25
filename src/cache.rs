@@ -33,8 +33,8 @@
 
 use crate::backend::sdl2::{Sdl2Painter, to_sdl_rect};
 use crate::event::{
-    CustomEvent, EngineEvent, EngineEventKind, Event, EventCtx, EventMask, EventTarget, MaskScope,
-    engine_filter_accepts,
+    CustomEvent, EngineEvent, EngineEventKind, Event, EventCtx, EventMask, EventPhase, EventTarget,
+    MaskScope, Propagation, engine_filter_accepts,
 };
 use crate::font::{FontCache, FontNotice};
 use crate::geometry::{Point, make_rect, point};
@@ -576,20 +576,137 @@ impl WidgetCache {
         self.needs_full_redraw || self.cache.iter().any(|w| w.is_invalidated())
     }
 
-    /// Sends an event to a `Widget`.  Disabled `Widget`s, and `Widget`s whose event mask excludes
-    /// the event's class, receive nothing.
-    fn send(&mut self, id: WidgetId, event: &Event, ctx: &mut EventCtx) {
+    /// Sends an event to a `Widget`.  Disabled and hidden `Widget`s, and `Widget`s whose event mask
+    /// excludes the event's class, receive nothing.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The receiving `Widget`.
+    /// * `event` - The event.
+    /// * `phase` - The phase of delivery, readable through [`EventCtx::phase`].
+    /// * `ctx` - The context collecting generated events.
+    ///
+    /// # Returns
+    ///
+    /// What the `Widget` returned, or [`Propagation::Continue`] if it received nothing.
+    fn send(
+        &mut self,
+        id: WidgetId,
+        event: &Event,
+        phase: EventPhase,
+        ctx: &mut EventCtx,
+    ) -> Propagation {
         let loop_mask = self.loop_mask;
 
         if let Some(widget) = self.get_mut(id)
             && widget.is_enabled()
+            && !widget.is_hidden()
             && event.kind().mask_class().is_none_or(|class| {
                 loop_mask.intersects(class) && widget.event_mask().intersects(class)
             })
         {
             ctx.set_source(Some(id));
-            widget.handle_event(event, ctx);
+            ctx.set_phase(phase);
+
+            let result = widget.handle_event(event, ctx);
+
+            ctx.set_phase(EventPhase::Target);
+
+            return result;
         }
+
+        Propagation::Continue
+    }
+
+    /// Returns the ancestors of a `Widget`, nearest parent first, ending at the root.
+    fn ancestors(&self, id: WidgetId) -> Vec<WidgetId> {
+        let mut path = Vec::new();
+        let mut current = id;
+
+        while let Some(widget) = self.get(current) {
+            let parent = widget.get_parent();
+
+            if parent == current || path.contains(&parent) {
+                break;
+            }
+
+            path.push(parent);
+            current = parent;
+        }
+
+        path
+    }
+
+    /// Delivers an input event to `target` through the capture, target, and bubble phases.
+    ///
+    /// 1. **Capture:** from the root down to the target's parent, only `Widget`s whose
+    ///    [`handles_capture`](Widget::handles_capture) is `true`.
+    /// 2. **Target:** the `Widget` itself.
+    /// 3. **Bubble:** from the target's parent up to the root.
+    ///
+    /// [`Propagation::Stop`] from any `Widget` ends delivery.  Disabled and hidden `Widget`s, and
+    /// those whose mask excludes the event, are skipped.  Events that do not propagate (see
+    /// [`EventKind::propagates`](crate::event::EventKind::propagates)) go to the target only.
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - The `Widget` the event is for: under the pointer, capturing the mouse, or
+    ///   focused.
+    /// * `event` - The event.
+    /// * `ctx` - The context collecting generated events.
+    ///
+    /// # Returns
+    ///
+    /// [`Propagation::Stop`] if a `Widget` stopped delivery, otherwise [`Propagation::Continue`].
+    pub fn propagate_with(
+        &mut self,
+        target: WidgetId,
+        event: &Event,
+        ctx: &mut EventCtx,
+    ) -> Propagation {
+        if !event.kind().propagates() {
+            return self.send(target, event, EventPhase::Target, ctx);
+        }
+
+        let ancestors = self.ancestors(target);
+
+        for &id in ancestors.iter().rev() {
+            if self.get(id).is_some_and(|w| w.handles_capture())
+                && self.send(id, event, EventPhase::Capture, ctx) == Propagation::Stop
+            {
+                return Propagation::Stop;
+            }
+        }
+
+        if self.send(target, event, EventPhase::Target, ctx) == Propagation::Stop {
+            return Propagation::Stop;
+        }
+
+        for &id in &ancestors {
+            if self.send(id, event, EventPhase::Bubble, ctx) == Propagation::Stop {
+                return Propagation::Stop;
+            }
+        }
+
+        Propagation::Continue
+    }
+
+    /// Delivers an input event, such as a key press for the focused `Widget`, through the
+    /// capture, target, and bubble phases.  See [`WidgetCache::propagate_with`].
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - The `Widget` the event is for.
+    /// * `event` - The event.
+    ///
+    /// # Returns
+    ///
+    /// The events the `Widget`s generated while handling it, in the order emitted.
+    pub fn propagate(&mut self, target: WidgetId, event: &Event) -> Vec<Event> {
+        let mut ctx = EventCtx::default();
+
+        self.propagate_with(target, event, &mut ctx);
+        ctx.into_events()
     }
 
     /// Delivers a custom event to the `Widget`s its target names.
@@ -656,6 +773,8 @@ impl WidgetCache {
     ///   `Widget`, or the `Widget` under the pointer.
     /// - A mouse button release sends `PointerReleased` to the capturing `Widget`, then ends the
     ///   capture.
+    /// - Presses, releases, and motion travel through the capture, target, and bubble phases (see
+    ///   [`WidgetCache::propagate_with`]); hover events go to one `Widget`.
     /// - Other events are ignored.
     /// - Disabled `Widget`s receive none of these events, but still block the `Widget`s beneath them.
     ///
@@ -686,7 +805,7 @@ impl WidgetCache {
                 let target = self.current_widget_id;
 
                 self.captured_widget_id = Some(target);
-                self.send(
+                self.propagate_with(
                     target,
                     &Event::PointerPressed {
                         id: target,
@@ -712,7 +831,7 @@ impl WidgetCache {
                     .take()
                     .unwrap_or(self.current_widget_id);
 
-                self.send(
+                self.propagate_with(
                     target,
                     &Event::PointerReleased {
                         id: target,
@@ -735,6 +854,7 @@ impl WidgetCache {
                         &Event::PointerExited {
                             id: previous_widget_id,
                         },
+                        EventPhase::Target,
                         &mut ctx,
                     );
                     self.send(
@@ -742,13 +862,14 @@ impl WidgetCache {
                         &Event::PointerEntered {
                             id: self.current_widget_id,
                         },
+                        EventPhase::Target,
                         &mut ctx,
                     );
                 }
 
                 let target = self.captured_widget_id.unwrap_or(self.current_widget_id);
 
-                self.send(
+                self.propagate_with(
                     target,
                     &Event::PointerMoved {
                         id: target,
@@ -942,8 +1063,9 @@ mod broadcast_tests {
         ///
         /// * `_event` - The event.
         /// * `_ctx` - The context.
-        fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) {
+        fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) -> Propagation {
             self.log.borrow_mut().push(self.get_id());
+            Propagation::Continue
         }
     }
 
@@ -1044,5 +1166,239 @@ mod broadcast_tests {
             }
             other => panic!("unexpected pending events: {other:?}"),
         }
+    }
+    /// A `Widget` that logs `(name, phase)` for every input event, and can capture or stop.
+    struct Probe {
+        core: WidgetCore,
+        name: &'static str,
+        capture: bool,
+        stops_in: Option<EventPhase>,
+        log: Rc<RefCell<Vec<(&'static str, EventPhase)>>>,
+    }
+
+    impl Widget for Probe {
+        /// Returns the shared state.
+        ///
+        /// # Returns
+        ///
+        /// The `WidgetCore`.
+        fn core(&self) -> &WidgetCore {
+            &self.core
+        }
+
+        /// Returns the shared state for modification.
+        ///
+        /// # Returns
+        ///
+        /// The `WidgetCore`.
+        fn core_mut(&mut self) -> &mut WidgetCore {
+            &mut self.core
+        }
+
+        /// Draws nothing.
+        ///
+        /// # Arguments
+        ///
+        /// * `_p` - The painter.
+        fn paint(&self, _p: &mut dyn crate::paint::Painter) {}
+
+        /// Whether this probe captures.
+        ///
+        /// # Returns
+        ///
+        /// The configured flag.
+        fn handles_capture(&self) -> bool {
+            self.capture
+        }
+
+        /// Logs the phase; stops in the configured phase.
+        ///
+        /// # Arguments
+        ///
+        /// * `_event` - The event.
+        /// * `ctx` - The context.
+        fn handle_event(&mut self, _event: &Event, ctx: &mut EventCtx) -> Propagation {
+            self.log.borrow_mut().push((self.name, ctx.phase()));
+
+            if self.stops_in == Some(ctx.phase()) {
+                Propagation::Stop
+            } else {
+                Propagation::Continue
+            }
+        }
+    }
+
+    type PhaseLog = Rc<RefCell<Vec<(&'static str, EventPhase)>>>;
+
+    /// Adds a probe with every event class enabled under `parent`.
+    fn probe(
+        cache: &mut WidgetCache,
+        parent: WidgetId,
+        name: &'static str,
+        capture: bool,
+        stops_in: Option<EventPhase>,
+        log: &PhaseLog,
+    ) -> WidgetId {
+        let mut core = WidgetCore::new(point(0, 0), size(50, 50));
+
+        core.set_event_mask(EventMask::ALL);
+        cache.add_child(
+            parent,
+            Box::new(Probe {
+                core,
+                name,
+                capture,
+                stops_in,
+                log: log.clone(),
+            }),
+        )
+    }
+
+    fn key_press(id: WidgetId) -> Event {
+        Event::KeyPressed {
+            id,
+            key: sdl2::keyboard::Keycode::Return,
+            modifiers: sdl2::keyboard::Mod::NOMOD,
+            repeat: false,
+        }
+    }
+
+    #[test]
+    fn delivery_is_capture_then_target_then_bubble() {
+        use EventPhase::{Bubble, Capture, Target};
+
+        let log: PhaseLog = Rc::default();
+        let mut cache = cache();
+        let dialog = probe(&mut cache, 0, "dialog", true, None, &log);
+        let group = probe(&mut cache, dialog, "group", false, None, &log);
+        let field = probe(&mut cache, group, "field", true, None, &log);
+
+        cache.propagate(field, &key_press(field));
+
+        assert_eq!(
+            *log.borrow(),
+            vec![
+                ("dialog", Capture),
+                ("field", Target),
+                ("group", Bubble),
+                ("dialog", Bubble),
+            ]
+        );
+    }
+
+    #[test]
+    fn stop_in_each_phase_ends_delivery() {
+        use EventPhase::{Bubble, Capture, Target};
+
+        for (phase, expected) in [
+            (Capture, vec![("outer", Capture)]),
+            (Target, vec![("outer", Capture), ("field", Target)]),
+            (
+                Bubble,
+                vec![("outer", Capture), ("field", Target), ("inner", Bubble)],
+            ),
+        ] {
+            let log: PhaseLog = Rc::default();
+            let mut cache = cache();
+            let stopper = |name| {
+                if name == "outer" && phase == Capture {
+                    Some(Capture)
+                } else {
+                    None
+                }
+            };
+            let outer = probe(&mut cache, 0, "outer", true, stopper("outer"), &log);
+            let inner_stop = if phase == Bubble { Some(Bubble) } else { None };
+            let inner = probe(&mut cache, outer, "inner", false, inner_stop, &log);
+            let field_stop = if phase == Target { Some(Target) } else { None };
+            let field = probe(&mut cache, inner, "field", false, field_stop, &log);
+
+            let mut ctx = EventCtx::default();
+            let result = cache.propagate_with(field, &key_press(field), &mut ctx);
+
+            assert_eq!(result, Propagation::Stop);
+            assert_eq!(*log.borrow(), expected, "stop in {phase:?}");
+        }
+    }
+
+    #[test]
+    fn a_default_button_sees_the_key_a_text_field_ignored() {
+        use EventPhase::{Bubble, Target};
+
+        let log: PhaseLog = Rc::default();
+        let mut cache = cache();
+        let dialog = probe(&mut cache, 0, "dialog", false, Some(Bubble), &log);
+        let field = probe(&mut cache, dialog, "field", false, None, &log);
+
+        let mut ctx = EventCtx::default();
+        let result = cache.propagate_with(field, &key_press(field), &mut ctx);
+
+        assert_eq!(result, Propagation::Stop);
+        assert_eq!(*log.borrow(), vec![("field", Target), ("dialog", Bubble)]);
+    }
+
+    #[test]
+    fn disabled_hidden_and_masked_widgets_are_skipped() {
+        use EventPhase::Target;
+
+        let log: PhaseLog = Rc::default();
+        let mut cache = cache();
+        let disabled = probe(&mut cache, 0, "disabled", false, None, &log);
+        let hidden = probe(&mut cache, disabled, "hidden", false, None, &log);
+        let masked = probe(&mut cache, hidden, "masked", false, None, &log);
+        let target = probe(&mut cache, masked, "target", false, None, &log);
+
+        cache.get_mut(disabled).unwrap().set_enabled(false);
+        cache.get_mut(hidden).unwrap().set_hidden(true);
+        cache.set_event_mask(masked, EventMask::POINTER_BUTTONS);
+        cache.propagate(target, &key_press(target));
+
+        assert_eq!(*log.borrow(), vec![("target", Target)]);
+    }
+
+    #[test]
+    fn semantic_and_hover_events_do_not_propagate() {
+        let log: PhaseLog = Rc::default();
+        let mut cache = cache();
+        let parent = probe(&mut cache, 0, "parent", true, None, &log);
+        let child = probe(&mut cache, parent, "child", false, None, &log);
+
+        cache.propagate(child, &Event::PointerEntered { id: child });
+        cache.propagate(
+            child,
+            &Event::Clicked {
+                id: child,
+                button: sdl2::mouse::MouseButton::Left,
+                count: 1,
+            },
+        );
+
+        assert_eq!(
+            *log.borrow(),
+            vec![("child", EventPhase::Target), ("child", EventPhase::Target)],
+            "each event reaches the target once, and never the capturing parent"
+        );
+    }
+
+    #[test]
+    fn a_pointer_press_bubbles_to_parents_through_the_cache() {
+        let log: PhaseLog = Rc::default();
+        let mut cache = cache();
+        let parent = probe(&mut cache, 0, "parent", false, None, &log);
+        probe(&mut cache, parent, "child", false, None, &log);
+
+        cache.handle_event(SdlEvent::MouseButtonDown {
+            timestamp: 0,
+            window_id: 0,
+            which: 0,
+            mouse_btn: sdl2::mouse::MouseButton::Left,
+            clicks: 1,
+            x: 5,
+            y: 5,
+        });
+
+        let names: Vec<_> = log.borrow().iter().map(|(n, _)| *n).collect();
+
+        assert_eq!(names, vec!["child", "parent"]);
     }
 }
