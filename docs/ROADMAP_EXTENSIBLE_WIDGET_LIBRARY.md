@@ -318,6 +318,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 ### 1.4 (#20): Keyboard focus, Tab order, and Return/Escape
 
+**Status:** done (#20). Focus groups are sibling `EXCLUSIVE` widgets; `Widget::accepts_text_input` starts SDL text input.
+
 **Problem Statement.** There is no keyboard focus. Every desktop system lets users move between fields with Tab, use arrow keys within a group, press Return for the default button, and press Escape to cancel.
 
 **Solution / Scope.** Track `focused` in `WidgetCache`. Clicking a `FOCUSABLE` widget focuses it. Tab/Shift-Tab moves between focus groups in ID order (the order designed in the form); arrow keys move within a group (for example a radio group). Return activates the `DEFAULT_ACTION` widget of the current form; Escape (and Cmd-. on macOS) activates `CANCEL_ACTION`. Focus changes emit `FocusLost` then `FocusGained`. SDL text input starts and stops with focus on text widgets. `Ui::set_focus(id)`, `Ui::focused()`. Emits its engine event (9.10 (#109)).

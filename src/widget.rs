@@ -539,6 +539,20 @@ pub trait Widget: Any {
         self.behavior().contains(Behavior::FOCUSABLE) && self.is_enabled() && !self.is_hidden()
     }
 
+    /// Returns whether the `Widget` is a text editor.
+    ///
+    /// While a `Widget` that returns `true` has the keyboard focus, the `Engine` asks the
+    /// operating system for text input, so typed characters arrive as
+    /// [`Event::TextEntered`].  Override it in text fields and
+    /// editors; the default is `false`.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` accepts typed text.
+    fn accepts_text_input(&self) -> bool {
+        false
+    }
+
     /// Returns whether the `Widget` needs to be repainted.
     ///
     /// # Returns

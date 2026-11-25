@@ -51,7 +51,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 15 | [#71](https://github.com/KenSuenobu/rust-pushrod/issues/71) | pushrod: [7.3] Widget gallery example (done) |
 | ✅ 16 | [#94](https://github.com/KenSuenobu/rust-pushrod/issues/94) | pushrod: [9.2] Event propagation: capture, target, and bubble phases with handled/ignored (done) |
 | ✅ 17 | [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) | pushrod: [9.4] Reusable input controllers: click, drag, scroll, hover, long-press, key (done) |
-| 18 | [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) | pushrod: [1.4] Keyboard focus, Tab order, and Return/Escape |
+| ✅ 18 | [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) | pushrod: [1.4] Keyboard focus, Tab order, and Return/Escape (done) |
 | 19 | [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) | pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state |
 | 20 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks |
 | 21 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
@@ -510,11 +510,11 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Focus moves by click, Tab, Shift-Tab, and arrows within groups
-- [ ] Return/Escape activate default/cancel
-- [ ] `FocusGained`/`FocusLost` delivered and tested
-- [ ] `Ui::set_focus`/`Ui::focused`
-- [ ] Emits the corresponding `EngineEvent` (9.10)
+- [x] Focus moves by click, Tab, Shift-Tab, and arrows within groups
+- [x] Return/Escape activate default/cancel
+- [x] `FocusGained`/`FocusLost` delivered and tested
+- [x] `Ui::set_focus`/`Ui::focused`
+- [x] Emits the corresponding `EngineEvent` (9.10)
 
 ### Step 19: Per-state appearance: colors, border, and font for each visual state
 
