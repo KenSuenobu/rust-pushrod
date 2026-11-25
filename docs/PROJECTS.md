@@ -7,7 +7,7 @@ The work is organized in six GitHub projects. This file lists what each contains
 | **Pushrod Core MVP** | Pushrod's MVP: v0.1 (dialog applications) and v0.2 (forms and resources). | 77 |
 | **Pushrod Showcase** | The interactive demo of every widget and core feature, built right after the Pushrod MVP. | 8 |
 | **Chassis MVP** | The Chassis MVP (phases M1 to M5) and the post-MVP Pushrod work it depends on. | 86 |
-| **Chassis v2** | Chassis v2 and the additional Pushrod work it needs. | 32 |
+| **Chassis v2** | Chassis v2 and the additional Pushrod work it needs. | 33 |
 | **Extra Widgets** | The pushrod-extra-widgets crate: larger and compound widgets outside the Pushrod MVP. | 52 |
 | **Chassis Examples** | Example projects built with Chassis once it reaches the MVP; open for anyone to pick up. | 9 |
 
@@ -321,7 +321,7 @@ After the Chassis MVP. Pushrod prerequisites first, then the v2 issues. Roadmap:
 | 6 | [#108](https://github.com/KenSuenobu/rust-pushrod/issues/108) | pushrod: [10.4] Experimental: Atari ST / TOS backend |
 | 7 | [#135](https://github.com/KenSuenobu/rust-pushrod/issues/135) | pushrod: [10.5] SDL3 backend (pushrod-sdl3) |
 
-### Chassis v2 (25)
+### Chassis v2 (26)
 
 | Order | Issue | Title |
 |---|---|---|
@@ -349,7 +349,8 @@ After the Chassis MVP. Pushrod prerequisites first, then the v2 issues. Roadmap:
 | 29 | [#317](https://github.com/KenSuenobu/rust-pushrod/issues/317) | chassis: [9.6] Assistant tool: a picture of the form |
 | 30 | [#318](https://github.com/KenSuenobu/rust-pushrod/issues/318) | chassis: [9.7] Assistant activity, review mode, and safety |
 | 31 | [#319](https://github.com/KenSuenobu/rust-pushrod/issues/319) | chassis: [9.8] Connect dialog and assistant guide |
-| 32 | [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) | chassis: [9.9] Assistant drawer: chat inside Chassis |
+| 32 | [#322](https://github.com/KenSuenobu/rust-pushrod/issues/322) | chassis: [9.10] Assistant settings: every check is configurable |
+| 33 | [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) | chassis: [9.9] Assistant drawer: chat inside Chassis |
 
 ## Extra Widgets
 

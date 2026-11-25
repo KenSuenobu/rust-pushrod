@@ -1674,12 +1674,20 @@
      "order": 31
     },
     {
+     "number": 322,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/322",
+     "title": "chassis: [9.10] Assistant settings: every check is configurable",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 32
+    },
+    {
      "number": 320,
      "url": "https://github.com/KenSuenobu/rust-pushrod/issues/320",
      "title": "chassis: [9.9] Assistant drawer: chat inside Chassis",
      "phase": "Chassis v2",
      "kind": "Chassis",
-     "order": 32
+     "order": 33
     }
    ]
   },

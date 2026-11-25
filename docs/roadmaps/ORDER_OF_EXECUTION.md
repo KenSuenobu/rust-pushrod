@@ -2,7 +2,7 @@
 
 The complete plan of action for Pushrod, Chassis, and `pushrod-extra-widgets`: **every open issue in the exact order to do it**, one step at a time, from the first Pushrod commit to Chassis v2 and the extra widgets. Each step is one piece of work, one pull request, and one video.
 
-**267 steps:** 255 issues and 12 checkpoints (releases and phase demos). The order is generated from the roadmaps and checked: every step comes after everything it depends on.
+**268 steps:** 256 issues and 12 checkpoints (releases and phase demos). The order is generated from the roadmaps and checked: every step comes after everything it depends on.
 
 ## How to use this document
 
@@ -28,10 +28,10 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | [Part 7: Chassis M4: inspector, events, and code](#part-7-chassis-m4-inspector-events-and-code) | 133 to 155 (23) | Property inspector, events menu and indicators, handler creation, and the code view. |
 | [Part 8: Chassis M5: build, run, and release (MVP)](#part-8-chassis-m5-build-run-and-release-mvp) | 156 to 161 (6) | Build and run from Chassis, CI, documentation, and the sample project. |
 | [Part 9: Chassis example projects](#part-9-chassis-example-projects) | 162 to 170 (9) | Example projects built with Chassis once it reaches the MVP: small, complete applications that exercise its features and that anyone can build and test against. |
-| [Part 10: Chassis v2](#part-10-chassis-v2) | 171 to 205 (35) | The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets, and an AI assistant through MCP. |
-| [Part 11: Extra widgets 1 and 2 (the pushrod-extra-widgets MVP)](#part-11-extra-widgets-1-and-2-the-pushrod-extra-widgets-mvp) | 206 to 232 (27) | The rest of the `pushrod-extra-widgets` crate's first two milestones: the popover and gallery, then everyday controls, pickers, lists, panels, and dialogs. |
-| [Part 12: Extra widgets 3, specialized views and assistants](#part-12-extra-widgets-3-specialized-views-and-assistants) | 233 to 251 (19) | Specialized views and assistants in `pushrod-extra-widgets`. |
-| [Part 13: Remaining Pushrod backlog](#part-13-remaining-pushrod-backlog) | 252 to 267 (16) | Pushrod issues not needed by Chassis, in roadmap order. |
+| [Part 10: Chassis v2](#part-10-chassis-v2) | 171 to 206 (36) | The second release: settings, menu editor, form preview, multi-selection, error list, templates, packaging, code intelligence, localization, form inheritance, bindings, project search, multiple windows, accessibility checks, source control, and more build targets, and an AI assistant through MCP. |
+| [Part 11: Extra widgets 1 and 2 (the pushrod-extra-widgets MVP)](#part-11-extra-widgets-1-and-2-the-pushrod-extra-widgets-mvp) | 207 to 233 (27) | The rest of the `pushrod-extra-widgets` crate's first two milestones: the popover and gallery, then everyday controls, pickers, lists, panels, and dialogs. |
+| [Part 12: Extra widgets 3, specialized views and assistants](#part-12-extra-widgets-3-specialized-views-and-assistants) | 234 to 252 (19) | Specialized views and assistants in `pushrod-extra-widgets`. |
+| [Part 13: Remaining Pushrod backlog](#part-13-remaining-pushrod-backlog) | 253 to 268 (16) | Pushrod issues not needed by Chassis, in roadmap order. |
 
 ## Step index
 
@@ -240,70 +240,71 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | 201 | [#317](https://github.com/KenSuenobu/rust-pushrod/issues/317) | chassis: [9.6] Assistant tool: a picture of the form |
 | 202 | [#318](https://github.com/KenSuenobu/rust-pushrod/issues/318) | chassis: [9.7] Assistant activity, review mode, and safety |
 | 203 | [#319](https://github.com/KenSuenobu/rust-pushrod/issues/319) | chassis: [9.8] Connect dialog and assistant guide |
-| 204 | [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) | chassis: [9.9] Assistant drawer: chat inside Chassis |
-| **205** | checkpoint | **Chassis v2 released** |
-| 206 | [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) | pushrod: [5.9] Stack layout (one child visible at a time) |
-| 207 | [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) | pushrod: [4.2] Spin box |
-| 208 | [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) | pushrod: [4.6] Combo box |
-| 209 | [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) | extra-widgets: [1.2] Extra widgets gallery example |
-| 210 | [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258) | extra-widgets: [2.1] Menu button and split button |
-| 211 | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) | extra-widgets: [2.2] Segmented control |
-| 212 | [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259) | extra-widgets: [2.3] Stepper (up and down arrows) |
-| 213 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) | extra-widgets: [2.4] Dial (rotary knob) |
-| 214 | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) | extra-widgets: [2.5] Level indicator (meter) |
-| 215 | [#306](https://github.com/KenSuenobu/rust-pushrod/issues/306) | extra-widgets: [2.10] Range slider (two thumbs) |
-| 216 | [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260) | extra-widgets: [3.1] Calendar (month view) |
-| 217 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) | extra-widgets: [3.2] Date picker |
-| 218 | [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) | extra-widgets: [3.3] Time field and date-time field |
-| 219 | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) | extra-widgets: [3.4] Color well and color picker |
-| 220 | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) | extra-widgets: [3.5] Font chooser |
-| 221 | [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262) | extra-widgets: [3.6] Path field (file or folder with Browse) |
-| 222 | [#307](https://github.com/KenSuenobu/rust-pushrod/issues/307) | extra-widgets: [3.10] Token field (tags in a field) |
-| 223 | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) | extra-widgets: [4.1] Tree view (outline) |
-| 224 | [#263](https://github.com/KenSuenobu/rust-pushrod/issues/263) | extra-widgets: [4.6] Check list |
-| 225 | [#264](https://github.com/KenSuenobu/rust-pushrod/issues/264) | extra-widgets: [4.7] Editable list (add, remove, reorder) |
-| 226 | [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265) | extra-widgets: [5.2] Accordion (one section open at a time) |
-| 227 | [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266) | extra-widgets: [5.3] Sidebar (navigation list) |
-| 228 | [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267) | extra-widgets: [6.1] Input dialog (ask for one value) |
-| 229 | [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268) | extra-widgets: [6.2] Progress dialog |
-| 230 | [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269) | extra-widgets: [6.3] Task dialog (alert with details and options) |
-| 231 | [#309](https://github.com/KenSuenobu/rust-pushrod/issues/309) | extra-widgets: [6.10] Recent files menu |
-| **232** | checkpoint | **pushrod-extra-widgets MVP released** |
-| 233 | [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) | extra-widgets: [2.7] Ruler |
-| 234 | [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) | extra-widgets: [2.8] Shortcut field (key combination recorder) |
-| 235 | [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) | extra-widgets: [3.7] Image well |
-| 236 | [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) | extra-widgets: [3.8] New password (enter, confirm, strength) |
-| 237 | [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) | extra-widgets: [3.9] Character picker |
-| 238 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) | extra-widgets: [4.2] Column browser |
-| 239 | [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275) | extra-widgets: [4.3] Icon grid view |
-| 240 | [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) | extra-widgets: [4.4] Data grid (editable table) |
-| 241 | [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) | extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees) |
-| 242 | [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278) | extra-widgets: [4.8] Dual list (list builder) |
-| 243 | [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) | extra-widgets: [4.11] Rule editor (query builder) |
-| 244 | [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) | extra-widgets: [4.12] Image viewer (zoom and pan) |
-| 245 | [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281) | extra-widgets: [5.4] Document tabs (closable and reorderable) |
-| 246 | [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282) | extra-widgets: [6.4] Wizard (step-by-step assistant) |
-| 247 | [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283) | extra-widgets: [6.5] Settings dialog |
-| 248 | [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) | extra-widgets: [6.6] About dialog |
-| 249 | [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) | extra-widgets: [6.7] Find and replace bar |
-| 250 | [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) | extra-widgets: [6.8] Keyboard shortcuts editor |
-| **251** | checkpoint | **Extra widgets 3 released** |
-| 252 | [#99](https://github.com/KenSuenobu/rust-pushrod/issues/99) | pushrod: [9.7] Callback handles: disconnect, block, and unblock |
-| 253 | [#26](https://github.com/KenSuenobu/rust-pushrod/issues/26) | pushrod: [1.11] Application lifecycle: startup and close-request callbacks |
-| 254 | [#119](https://github.com/KenSuenobu/rust-pushrod/issues/119) | pushrod: [5.8] Grid layout |
-| 255 | [#86](https://github.com/KenSuenobu/rust-pushrod/issues/86) | pushrod: [2.17] Switch (on/off slide toggle) |
-| 256 | [#89](https://github.com/KenSuenobu/rust-pushrod/issues/89) | pushrod: [2.20] Message bar (non-modal inline notice) |
-| 257 | [#128](https://github.com/KenSuenobu/rust-pushrod/issues/128) | pushrod: [4.10] Busy spinner |
-| 258 | [#291](https://github.com/KenSuenobu/rust-pushrod/issues/291) | pushrod: [2.23] Selectable label text |
-| 259 | [#292](https://github.com/KenSuenobu/rust-pushrod/issues/292) | pushrod: [2.24] Count badge on buttons, tabs, and rows |
-| 260 | [#293](https://github.com/KenSuenobu/rust-pushrod/issues/293) | pushrod: [4.11] Empty-state text for list, table, and other views |
-| 261 | [#294](https://github.com/KenSuenobu/rust-pushrod/issues/294) | pushrod: [4.12] Arithmetic in number fields |
-| 262 | [#24](https://github.com/KenSuenobu/rust-pushrod/issues/24) | pushrod: [1.9] Dirty-rectangle redraw |
-| 263 | [#147](https://github.com/KenSuenobu/rust-pushrod/issues/147) | pushrod: [11.6] Chassis: Code editor find |
-| 264 | [#148](https://github.com/KenSuenobu/rust-pushrod/issues/148) | pushrod: [11.7] Chassis: Code editor auto-indent and bracket matching |
-| 265 | [#150](https://github.com/KenSuenobu/rust-pushrod/issues/150) | pushrod: [11.9] Chassis: Code editor documentation, example, and tests |
-| 266 | [#74](https://github.com/KenSuenobu/rust-pushrod/issues/74) | pushrod: [8.1] Theme for colors and metrics (future) |
-| 267 | [#75](https://github.com/KenSuenobu/rust-pushrod/issues/75) | pushrod: [8.2] Skins: image-based widget rendering (future) |
+| 204 | [#322](https://github.com/KenSuenobu/rust-pushrod/issues/322) | chassis: [9.10] Assistant settings: every check is configurable |
+| 205 | [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) | chassis: [9.9] Assistant drawer: chat inside Chassis |
+| **206** | checkpoint | **Chassis v2 released** |
+| 207 | [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) | pushrod: [5.9] Stack layout (one child visible at a time) |
+| 208 | [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) | pushrod: [4.2] Spin box |
+| 209 | [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) | pushrod: [4.6] Combo box |
+| 210 | [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) | extra-widgets: [1.2] Extra widgets gallery example |
+| 211 | [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258) | extra-widgets: [2.1] Menu button and split button |
+| 212 | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) | extra-widgets: [2.2] Segmented control |
+| 213 | [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259) | extra-widgets: [2.3] Stepper (up and down arrows) |
+| 214 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) | extra-widgets: [2.4] Dial (rotary knob) |
+| 215 | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) | extra-widgets: [2.5] Level indicator (meter) |
+| 216 | [#306](https://github.com/KenSuenobu/rust-pushrod/issues/306) | extra-widgets: [2.10] Range slider (two thumbs) |
+| 217 | [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260) | extra-widgets: [3.1] Calendar (month view) |
+| 218 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) | extra-widgets: [3.2] Date picker |
+| 219 | [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) | extra-widgets: [3.3] Time field and date-time field |
+| 220 | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) | extra-widgets: [3.4] Color well and color picker |
+| 221 | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) | extra-widgets: [3.5] Font chooser |
+| 222 | [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262) | extra-widgets: [3.6] Path field (file or folder with Browse) |
+| 223 | [#307](https://github.com/KenSuenobu/rust-pushrod/issues/307) | extra-widgets: [3.10] Token field (tags in a field) |
+| 224 | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) | extra-widgets: [4.1] Tree view (outline) |
+| 225 | [#263](https://github.com/KenSuenobu/rust-pushrod/issues/263) | extra-widgets: [4.6] Check list |
+| 226 | [#264](https://github.com/KenSuenobu/rust-pushrod/issues/264) | extra-widgets: [4.7] Editable list (add, remove, reorder) |
+| 227 | [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265) | extra-widgets: [5.2] Accordion (one section open at a time) |
+| 228 | [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266) | extra-widgets: [5.3] Sidebar (navigation list) |
+| 229 | [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267) | extra-widgets: [6.1] Input dialog (ask for one value) |
+| 230 | [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268) | extra-widgets: [6.2] Progress dialog |
+| 231 | [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269) | extra-widgets: [6.3] Task dialog (alert with details and options) |
+| 232 | [#309](https://github.com/KenSuenobu/rust-pushrod/issues/309) | extra-widgets: [6.10] Recent files menu |
+| **233** | checkpoint | **pushrod-extra-widgets MVP released** |
+| 234 | [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) | extra-widgets: [2.7] Ruler |
+| 235 | [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) | extra-widgets: [2.8] Shortcut field (key combination recorder) |
+| 236 | [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) | extra-widgets: [3.7] Image well |
+| 237 | [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) | extra-widgets: [3.8] New password (enter, confirm, strength) |
+| 238 | [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) | extra-widgets: [3.9] Character picker |
+| 239 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) | extra-widgets: [4.2] Column browser |
+| 240 | [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275) | extra-widgets: [4.3] Icon grid view |
+| 241 | [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) | extra-widgets: [4.4] Data grid (editable table) |
+| 242 | [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) | extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees) |
+| 243 | [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278) | extra-widgets: [4.8] Dual list (list builder) |
+| 244 | [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) | extra-widgets: [4.11] Rule editor (query builder) |
+| 245 | [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) | extra-widgets: [4.12] Image viewer (zoom and pan) |
+| 246 | [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281) | extra-widgets: [5.4] Document tabs (closable and reorderable) |
+| 247 | [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282) | extra-widgets: [6.4] Wizard (step-by-step assistant) |
+| 248 | [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283) | extra-widgets: [6.5] Settings dialog |
+| 249 | [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) | extra-widgets: [6.6] About dialog |
+| 250 | [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) | extra-widgets: [6.7] Find and replace bar |
+| 251 | [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) | extra-widgets: [6.8] Keyboard shortcuts editor |
+| **252** | checkpoint | **Extra widgets 3 released** |
+| 253 | [#99](https://github.com/KenSuenobu/rust-pushrod/issues/99) | pushrod: [9.7] Callback handles: disconnect, block, and unblock |
+| 254 | [#26](https://github.com/KenSuenobu/rust-pushrod/issues/26) | pushrod: [1.11] Application lifecycle: startup and close-request callbacks |
+| 255 | [#119](https://github.com/KenSuenobu/rust-pushrod/issues/119) | pushrod: [5.8] Grid layout |
+| 256 | [#86](https://github.com/KenSuenobu/rust-pushrod/issues/86) | pushrod: [2.17] Switch (on/off slide toggle) |
+| 257 | [#89](https://github.com/KenSuenobu/rust-pushrod/issues/89) | pushrod: [2.20] Message bar (non-modal inline notice) |
+| 258 | [#128](https://github.com/KenSuenobu/rust-pushrod/issues/128) | pushrod: [4.10] Busy spinner |
+| 259 | [#291](https://github.com/KenSuenobu/rust-pushrod/issues/291) | pushrod: [2.23] Selectable label text |
+| 260 | [#292](https://github.com/KenSuenobu/rust-pushrod/issues/292) | pushrod: [2.24] Count badge on buttons, tabs, and rows |
+| 261 | [#293](https://github.com/KenSuenobu/rust-pushrod/issues/293) | pushrod: [4.11] Empty-state text for list, table, and other views |
+| 262 | [#294](https://github.com/KenSuenobu/rust-pushrod/issues/294) | pushrod: [4.12] Arithmetic in number fields |
+| 263 | [#24](https://github.com/KenSuenobu/rust-pushrod/issues/24) | pushrod: [1.9] Dirty-rectangle redraw |
+| 264 | [#147](https://github.com/KenSuenobu/rust-pushrod/issues/147) | pushrod: [11.6] Chassis: Code editor find |
+| 265 | [#148](https://github.com/KenSuenobu/rust-pushrod/issues/148) | pushrod: [11.7] Chassis: Code editor auto-indent and bracket matching |
+| 266 | [#150](https://github.com/KenSuenobu/rust-pushrod/issues/150) | pushrod: [11.9] Chassis: Code editor documentation, example, and tests |
+| 267 | [#74](https://github.com/KenSuenobu/rust-pushrod/issues/74) | pushrod: [8.1] Theme for colors and metrics (future) |
+| 268 | [#75](https://github.com/KenSuenobu/rust-pushrod/issues/75) | pushrod: [8.2] Skins: image-based widget rendering (future) |
 
 ## Part 1: Pushrod v0.1, dialog applications
 
@@ -3240,7 +3241,7 @@ The second release: settings, menu editor, form preview, multi-selection, error 
 
 **Show on video:**
 
-- [ ] Off by default; when on, listens on localhost only and rejects requests without the token
+- [ ] Off by default; with default settings, listens on localhost only and rejects requests without the token
 - [ ] Tool calls run on the UI thread and never block painting
 - [ ] Works with Streamable HTTP and stdio
 - [ ] Turning it off disconnects clients at once
@@ -3319,7 +3320,7 @@ The second release: settings, menu editor, form preview, multi-selection, error 
 - [ ] Indicator visible whenever a client is connected
 - [ ] Every assistant change is listed and individually undoable
 - [ ] Review mode previews, then applies or discards as one step
-- [ ] Stop works mid-turn; destructive actions confirm; nothing outside the project is reachable
+- [ ] Stop works mid-turn; with default settings destructive actions confirm and nothing outside the project is reachable
 
 ### Step 203: Connect dialog and assistant guide
 
@@ -3338,13 +3339,31 @@ The second release: settings, menu editor, form preview, multi-selection, error 
 - [ ] Guide reproduces on the sample project
 - [ ] Privacy statement in the dialog and the guide
 
-### Step 204: Assistant drawer: chat inside Chassis
+### Step 204: Assistant settings: every check is configurable
+
+**Issue:** [#322](https://github.com/KenSuenobu/rust-pushrod/issues/322) `chassis: [9.10] Assistant settings: every check is configurable`
+
+**Delivers:** One settings page where each assistant check, confirmation, and limit can be turned on, off, or adjusted, with safe defaults.
+
+**Builds on:** step 202, step 43.
+
+**Mockups:** [chassis-assistant-5.png](../mockups/chassis-assistant-5.png)
+
+**Show on video:**
+
+- [ ] Every check, confirmation, and limit in 9.2 to 9.7 is read from the policy; none is hard-coded
+- [ ] Defaults are the safe values in the table; Restore defaults works
+- [ ] Lowering a protection is marked and asks, stating the consequence
+- [ ] Project settings can tighten but never loosen the user's settings
+- [ ] Each setting has a test showing the tools obey it
+
+### Step 205: Assistant drawer: chat inside Chassis
 
 **Issue:** [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) `chassis: [9.9] Assistant drawer: chat inside Chassis`
 
 **Delivers:** A chat panel in Chassis that talks to a model directly and uses the same tools, for people who want one window.
 
-**Builds on:** step 202, step 12, step 172, step 179, step 103.
+**Builds on:** step 202, step 204, step 12, step 172, step 179, step 103.
 
 **Mockups:** [chassis-assistant-4.png](../mockups/chassis-assistant-4.png)
 
@@ -3355,7 +3374,7 @@ The second release: settings, menu editor, form preview, multi-selection, error 
 - [ ] Key stored in the system keychain; nothing sent without one
 - [ ] Provider trait with the Claude API implemented
 
-### Step 205: Checkpoint: Chassis v2 released
+### Step 206: Checkpoint: Chassis v2 released
 
 **Video:** Show the v2 features, including an Atari ST build running in an emulator.
 
@@ -3363,7 +3382,7 @@ The second release: settings, menu editor, form preview, multi-selection, error 
 
 The rest of the `pushrod-extra-widgets` crate's first two milestones: the popover and gallery, then everyday controls, pickers, lists, panels, and dialogs. Pushrod work these need comes first.
 
-### Step 206: Stack layout (one child visible at a time)
+### Step 207: Stack layout (one child visible at a time)
 
 **Issue:** [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) `pushrod: [5.9] Stack layout (one child visible at a time)`
 
@@ -3376,7 +3395,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Switching pages hides others and keeps their state
 - [ ] Size policy: largest or current
 
-### Step 207: Spin box
+### Step 208: Spin box
 
 **Issue:** [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) `pushrod: [4.2] Spin box`
 
@@ -3392,7 +3411,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Typed values clamp
 - [ ] Parts are retrievable and modifiable as described
 
-### Step 208: Combo box
+### Step 209: Combo box
 
 **Issue:** [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) `pushrod: [4.6] Combo box`
 
@@ -3407,7 +3426,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Typing filters; arrow opens; choosing fills
 - [ ] Parts are retrievable and modifiable as described
 
-### Step 209: Extra widgets gallery example
+### Step 210: Extra widgets gallery example
 
 **Issue:** [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) `extra-widgets: [1.2] Extra widgets gallery example`
 
@@ -3423,7 +3442,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Golden images captured in CI
 - [ ] Contributing guide says new widgets must be added to the gallery
 
-### Step 210: Menu button and split button
+### Step 211: Menu button and split button
 
 **Issue:** [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258) `extra-widgets: [2.1] Menu button and split button`
 
@@ -3439,7 +3458,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Split button: main part runs the default action, arrow part opens the menu
 - [ ] Menu items are actions with shortcuts and enabled state
 
-### Step 211: Segmented control
+### Step 212: Segmented control
 
 **Issue:** [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) `extra-widgets: [2.2] Segmented control`
 
@@ -3455,7 +3474,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Per-segment disabled state, text, and icons
 - [ ] Keyboard navigation and selection
 
-### Step 212: Stepper (up and down arrows)
+### Step 213: Stepper (up and down arrows)
 
 **Issue:** [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259) `extra-widgets: [2.3] Stepper (up and down arrows)`
 
@@ -3471,7 +3490,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Limits disable the matching arrow unless wrapping
 - [ ] Buddy binding keeps another widget in step
 
-### Step 213: Dial (rotary knob)
+### Step 214: Dial (rotary knob)
 
 **Issue:** [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) `extra-widgets: [2.4] Dial (rotary knob)`
 
@@ -3487,7 +3506,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Wrapping mode for angles
 - [ ] Notches and optional value text
 
-### Step 214: Level indicator (meter)
+### Step 215: Level indicator (meter)
 
 **Issue:** [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) `extra-widgets: [2.5] Level indicator (meter)`
 
@@ -3503,7 +3522,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Warning and critical thresholds visible without color
 - [ ] Optional text and editable mode
 
-### Step 215: Range slider (two thumbs)
+### Step 216: Range slider (two thumbs)
 
 **Issue:** [#306](https://github.com/KenSuenobu/rust-pushrod/issues/306) `extra-widgets: [2.10] Range slider (two thumbs)`
 
@@ -3519,7 +3538,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Dragging the span moves both
 - [ ] Keyboard control of each thumb
 
-### Step 216: Calendar (month view)
+### Step 217: Calendar (month view)
 
 **Issue:** [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260) `extra-widgets: [3.1] Calendar (month view)`
 
@@ -3535,13 +3554,13 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Min/max limits and marked days
 - [ ] Keyboard navigation by day and month
 
-### Step 217: Date picker
+### Step 218: Date picker
 
 **Issue:** [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) `extra-widgets: [3.2] Date picker`
 
 **Delivers:** A date field with a drop-down month calendar.
 
-**Builds on:** step 102, step 216, step 38, step 32.
+**Builds on:** step 102, step 217, step 38, step 32.
 
 **Mockups:** [xw-3.2-1.png](../mockups/xw-3.2-1.png)
 
@@ -3551,13 +3570,13 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Min/max enforced
 - [ ] Up/Down steps the date part under the caret
 
-### Step 218: Time field and date-time field
+### Step 219: Time field and date-time field
 
 **Issue:** [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) `extra-widgets: [3.3] Time field and date-time field`
 
 **Delivers:** A time entry with steppable parts, and a combined date-and-time field.
 
-**Builds on:** step 212, step 217, step 38.
+**Builds on:** step 213, step 218, step 38.
 
 **Mockups:** [xw-3.3-1.png](../mockups/xw-3.3-1.png)
 
@@ -3567,7 +3586,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] 12- and 24-hour formats
 - [ ] Date-time field keeps one combined value
 
-### Step 219: Color well and color picker
+### Step 220: Color well and color picker
 
 **Issue:** [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) `extra-widgets: [3.4] Color well and color picker`
 
@@ -3583,7 +3602,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Popover and inline use
 - [ ] Drag a color between wells
 
-### Step 220: Font chooser
+### Step 221: Font chooser
 
 **Issue:** [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) `extra-widgets: [3.5] Font chooser`
 
@@ -3599,7 +3618,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Preview text editable
 - [ ] Popover and dialog use
 
-### Step 221: Path field (file or folder with Browse)
+### Step 222: Path field (file or folder with Browse)
 
 **Issue:** [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262) `extra-widgets: [3.6] Path field (file or folder with Browse)`
 
@@ -3615,7 +3634,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Typed, browsed, and dropped paths
 - [ ] Missing-path mark when required
 
-### Step 222: Token field (tags in a field)
+### Step 223: Token field (tags in a field)
 
 **Issue:** [#307](https://github.com/KenSuenobu/rust-pushrod/issues/307) `extra-widgets: [3.10] Token field (tags in a field)`
 
@@ -3631,7 +3650,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Wraps to more lines as tokens are added
 - [ ] Suggestions, validation, and uniqueness
 
-### Step 223: Tree view (outline)
+### Step 224: Tree view (outline)
 
 **Issue:** [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) `extra-widgets: [4.1] Tree view (outline)`
 
@@ -3647,7 +3666,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Lazy children from a data source
 - [ ] Optional columns and drag to reparent
 
-### Step 224: Check list
+### Step 225: Check list
 
 **Issue:** [#263](https://github.com/KenSuenobu/rust-pushrod/issues/263) `extra-widgets: [4.6] Check list`
 
@@ -3663,7 +3682,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Space toggles the selected rows
 - [ ] Check-all header with mixed state
 
-### Step 225: Editable list (add, remove, reorder)
+### Step 226: Editable list (add, remove, reorder)
 
 **Issue:** [#264](https://github.com/KenSuenobu/rust-pushrod/issues/264) `extra-widgets: [4.7] Editable list (add, remove, reorder)`
 
@@ -3679,7 +3698,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Validation and uniqueness
 - [ ] Buttons disabled when not applicable
 
-### Step 226: Accordion (one section open at a time)
+### Step 227: Accordion (one section open at a time)
 
 **Issue:** [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265) `extra-widgets: [5.2] Accordion (one section open at a time)`
 
@@ -3695,13 +3714,13 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Open section fills the height
 - [ ] Keyboard navigation between headers
 
-### Step 227: Sidebar (navigation list)
+### Step 228: Sidebar (navigation list)
 
 **Issue:** [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266) `extra-widgets: [5.3] Sidebar (navigation list)`
 
 **Delivers:** A list of sections with icons and headings that switches the page beside it.
 
-**Builds on:** step 101, step 89, step 206.
+**Builds on:** step 101, step 89, step 207.
 
 **Mockups:** [xw-5.3-1.png](../mockups/xw-5.3-1.png)
 
@@ -3711,13 +3730,13 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Bound to a stack layout
 - [ ] Keyboard navigation
 
-### Step 228: Input dialog (ask for one value)
+### Step 229: Input dialog (ask for one value)
 
 **Issue:** [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267) `extra-widgets: [6.1] Input dialog (ask for one value)`
 
 **Delivers:** A one-call modal dialog asking for a single text, number, or choice.
 
-**Builds on:** step 101, step 51, step 38, step 207, step 208.
+**Builds on:** step 101, step 51, step 38, step 208, step 209.
 
 **Mockups:** [xw-6.1-1.png](../mockups/xw-6.1-1.png)
 
@@ -3727,7 +3746,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Validation disables OK
 - [ ] Completion receives None on Cancel
 
-### Step 229: Progress dialog
+### Step 230: Progress dialog
 
 **Issue:** [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268) `extra-widgets: [6.2] Progress dialog`
 
@@ -3743,7 +3762,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Determinate and busy progress
 - [ ] Cancel reported to the task
 
-### Step 230: Task dialog (alert with details and options)
+### Step 231: Task dialog (alert with details and options)
 
 **Issue:** [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269) `extra-widgets: [6.3] Task dialog (alert with details and options)`
 
@@ -3759,7 +3778,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Check box state returned
 - [ ] Command choices with descriptions
 
-### Step 231: Recent files menu
+### Step 232: Recent files menu
 
 **Issue:** [#309](https://github.com/KenSuenobu/rust-pushrod/issues/309) `extra-widgets: [6.10] Recent files menu`
 
@@ -3775,7 +3794,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 - [ ] Numbered items with mnemonics; Clear Menu
 - [ ] Persists across runs; missing files handled
 
-### Step 232: Checkpoint: pushrod-extra-widgets MVP released
+### Step 233: Checkpoint: pushrod-extra-widgets MVP released
 
 **Video:** Publish `pushrod-extra-widgets`; tour the gallery: pickers in popovers, tree and check lists, accordion and sidebar, and the one-call dialogs.
 
@@ -3783,7 +3802,7 @@ The rest of the `pushrod-extra-widgets` crate's first two milestones: the popove
 
 Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these need comes first.
 
-### Step 233: Ruler
+### Step 234: Ruler
 
 **Issue:** [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) `extra-widgets: [2.7] Ruler`
 
@@ -3799,7 +3818,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Follows an attached container's scroll
 - [ ] Pointer tracking line and draggable markers
 
-### Step 234: Shortcut field (key combination recorder)
+### Step 235: Shortcut field (key combination recorder)
 
 **Issue:** [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) `extra-widgets: [2.8] Shortcut field (key combination recorder)`
 
@@ -3815,7 +3834,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Escape cancels, Backspace clears
 - [ ] Conflicts reported inline
 
-### Step 235: Image well
+### Step 236: Image well
 
 **Issue:** [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) `extra-widgets: [3.7] Image well`
 
@@ -3831,13 +3850,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Drop feedback outline
 - [ ] Optional square crop
 
-### Step 236: New password (enter, confirm, strength)
+### Step 237: New password (enter, confirm, strength)
 
 **Issue:** [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) `extra-widgets: [3.8] New password (enter, confirm, strength)`
 
 **Delivers:** Two password fields with a strength meter and a match check.
 
-**Builds on:** step 214, step 38, step 171.
+**Builds on:** step 215, step 38, step 171.
 
 **Mockups:** [xw-3.8-1.png](../mockups/xw-3.8-1.png)
 
@@ -3847,7 +3866,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Match check and show/hide
 - [ ] Acceptable state bindable to OK
 
-### Step 237: Character picker
+### Step 238: Character picker
 
 **Issue:** [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) `extra-widgets: [3.9] Character picker`
 
@@ -3863,7 +3882,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Preview with name and code point
 - [ ] Grid virtualized for large blocks
 
-### Step 238: Column browser
+### Step 239: Column browser
 
 **Issue:** [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) `extra-widgets: [4.2] Column browser`
 
@@ -3879,7 +3898,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Keyboard navigation across columns
 - [ ] Horizontal scrolling keeps the selection visible
 
-### Step 239: Icon grid view
+### Step 240: Icon grid view
 
 **Issue:** [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275) `extra-widgets: [4.3] Icon grid view`
 
@@ -3895,13 +3914,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Rubber-band and keyboard selection, type-to-find
 - [ ] Drag and drop and in-place rename
 
-### Step 240: Data grid (editable table)
+### Step 241: Data grid (editable table)
 
 **Issue:** [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) `extra-widgets: [4.4] Data grid (editable table)`
 
 **Delivers:** A table whose cells edit in place with typed editors, with row add and delete.
 
-**Builds on:** step 217, step 91, step 38, step 34, step 134.
+**Builds on:** step 218, step 91, step 38, step 34, step 134.
 
 **Mockups:** [xw-4.4-1.png](../mockups/xw-4.4-1.png)
 
@@ -3911,13 +3930,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Spreadsheet-style keyboard editing
 - [ ] Add and delete rows through the data source
 
-### Step 241: Filter field (live filter for lists, tables, and trees)
+### Step 242: Filter field (live filter for lists, tables, and trees)
 
 **Issue:** [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) `extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees)`
 
 **Delivers:** A search field bound to a list, table, or tree that hides non-matching rows as you type.
 
-**Builds on:** step 223, step 38, step 89, step 91.
+**Builds on:** step 224, step 38, step 89, step 91.
 
 **Mockups:** [xw-4.10-1.png](../mockups/xw-4.10-1.png)
 
@@ -3927,13 +3946,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Tree filtering keeps ancestors
 - [ ] Custom matching and no-match message
 
-### Step 242: Dual list (list builder)
+### Step 243: Dual list (list builder)
 
 **Issue:** [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278) `extra-widgets: [4.8] Dual list (list builder)`
 
 **Delivers:** Available and chosen lists side by side, with buttons to move items between them and order the chosen list.
 
-**Builds on:** step 241, step 89, step 33, step 86.
+**Builds on:** step 242, step 89, step 33, step 86.
 
 **Mockups:** [xw-4.8-1.png](../mockups/xw-4.8-1.png)
 
@@ -3943,13 +3962,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Order the chosen list
 - [ ] Buttons disabled when not applicable
 
-### Step 243: Rule editor (query builder)
+### Step 244: Rule editor (query builder)
 
 **Issue:** [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) `extra-widgets: [4.11] Rule editor (query builder)`
 
 **Delivers:** Rows of "field, operator, value" with add and remove buttons, joined by All or Any.
 
-**Builds on:** step 217, step 134, step 38, step 32, step 42.
+**Builds on:** step 218, step 134, step 38, step 32, step 42.
 
 **Mockups:** [xw-4.11-1.png](../mockups/xw-4.11-1.png)
 
@@ -3959,7 +3978,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Add, remove, and optional nested groups
 - [ ] Rules returned as plain, serializable data
 
-### Step 244: Image viewer (zoom and pan)
+### Step 245: Image viewer (zoom and pan)
 
 **Issue:** [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) `extra-widgets: [4.12] Image viewer (zoom and pan)`
 
@@ -3975,7 +3994,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Drag to pan
 - [ ] Tiled drawing for large images
 
-### Step 245: Document tabs (closable and reorderable)
+### Step 246: Document tabs (closable and reorderable)
 
 **Issue:** [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281) `extra-widgets: [5.4] Document tabs (closable and reorderable)`
 
@@ -3991,13 +4010,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Drag to reorder and context menu
 - [ ] Overflow arrows and tab list menu
 
-### Step 246: Wizard (step-by-step assistant)
+### Step 247: Wizard (step-by-step assistant)
 
 **Issue:** [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282) `extra-widgets: [6.4] Wizard (step-by-step assistant)`
 
 **Delivers:** Pages shown one at a time with Back, Next, and Finish, and a list of steps.
 
-**Builds on:** step 101, step 206, step 51, step 33.
+**Builds on:** step 101, step 207, step 51, step 33.
 
 **Mockups:** [xw-6.4-1.png](../mockups/xw-6.4-1.png)
 
@@ -4007,13 +4026,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Step list and conditional pages
 - [ ] Summary page optional
 
-### Step 247: Settings dialog
+### Step 248: Settings dialog
 
 **Issue:** [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283) `extra-widgets: [6.5] Settings dialog`
 
 **Delivers:** A sidebar of categories, a page per category, and OK, Cancel, and Apply.
 
-**Builds on:** step 227, step 206, step 43, step 51, step 90.
+**Builds on:** step 228, step 207, step 43, step 51, step 90.
 
 **Mockups:** [xw-6.5-1.png](../mockups/xw-6.5-1.png)
 
@@ -4023,7 +4042,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Apply enabled only on changes; OK applies and closes
 - [ ] Restore Defaults per page and optional search
 
-### Step 248: About dialog
+### Step 249: About dialog
 
 **Issue:** [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) `extra-widgets: [6.6] About dialog`
 
@@ -4039,7 +4058,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Credits and license pages
 - [ ] Values from Cargo metadata
 
-### Step 249: Find and replace bar
+### Step 250: Find and replace bar
 
 **Issue:** [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) `extra-widgets: [6.7] Find and replace bar`
 
@@ -4055,13 +4074,13 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Case, whole word, and regular expression options
 - [ ] Replace and Replace All through the Searchable trait
 
-### Step 250: Keyboard shortcuts editor
+### Step 251: Keyboard shortcuts editor
 
 **Issue:** [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) `extra-widgets: [6.8] Keyboard shortcuts editor`
 
 **Delivers:** A filterable table of actions and their shortcuts, edited with the shortcut field.
 
-**Builds on:** step 234, step 241, step 91, step 85.
+**Builds on:** step 235, step 242, step 91, step 85.
 
 **Mockups:** [xw-6.8-1.png](../mockups/xw-6.8-1.png)
 
@@ -4071,7 +4090,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 - [ ] Conflict detection with reassign
 - [ ] Reset one or all
 
-### Step 251: Checkpoint: Extra widgets 3 released
+### Step 252: Checkpoint: Extra widgets 3 released
 
 **Video:** Tour the specialized widgets: column browser, icon grid, data grid, rule editor, wizard, settings dialog, find bar, and shortcuts editor.
 
@@ -4079,7 +4098,7 @@ Specialized views and assistants in `pushrod-extra-widgets`. Pushrod work these 
 
 Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays last, as the distant future it was planned to be.
 
-### Step 252: Callback handles: disconnect, block, and unblock
+### Step 253: Callback handles: disconnect, block, and unblock
 
 **Issue:** [#99](https://github.com/KenSuenobu/rust-pushrod/issues/99) `pushrod: [9.7] Callback handles: disconnect, block, and unblock`
 
@@ -4092,7 +4111,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Disconnect removes; block suppresses until unblock
 - [ ] Scoped blocking restores state even on early return
 
-### Step 253: Application lifecycle: startup and close-request callbacks
+### Step 254: Application lifecycle: startup and close-request callbacks
 
 **Issue:** [#26](https://github.com/KenSuenobu/rust-pushrod/issues/26) `pushrod: [1.11] Application lifecycle: startup and close-request callbacks`
 
@@ -4106,7 +4125,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] `on_close_request` can veto
 - [ ] Tests via `Engine::dispatch`
 
-### Step 254: Grid layout
+### Step 255: Grid layout
 
 **Issue:** [#119](https://github.com/KenSuenobu/rust-pushrod/issues/119) `pushrod: [5.8] Grid layout`
 
@@ -4121,7 +4140,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Spans, stretch, alignment, spacing
 - [ ] Correct min/preferred sizes from cell hints
 
-### Step 255: Switch (on/off slide toggle)
+### Step 256: Switch (on/off slide toggle)
 
 **Issue:** [#86](https://github.com/KenSuenobu/rust-pushrod/issues/86) `pushrod: [2.17] Switch (on/off slide toggle)`
 
@@ -4135,7 +4154,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 
 - [ ] Click, drag, Space toggle
 
-### Step 256: Message bar (non-modal inline notice)
+### Step 257: Message bar (non-modal inline notice)
 
 **Issue:** [#89](https://github.com/KenSuenobu/rust-pushrod/issues/89) `pushrod: [2.20] Message bar (non-modal inline notice)`
 
@@ -4151,7 +4170,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Action buttons fire callbacks
 - [ ] Parts are retrievable and modifiable as described
 
-### Step 257: Busy spinner
+### Step 258: Busy spinner
 
 **Issue:** [#128](https://github.com/KenSuenobu/rust-pushrod/issues/128) `pushrod: [4.10] Busy spinner`
 
@@ -4167,7 +4186,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Static fallback in outline mode
 - [ ] Fits inline with text and inside buttons
 
-### Step 258: Selectable label text
+### Step 259: Selectable label text
 
 **Issue:** [#291](https://github.com/KenSuenobu/rust-pushrod/issues/291) `pushrod: [2.23] Selectable label text`
 
@@ -4183,7 +4202,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Works across wrapped lines
 - [ ] No caret or editing; off by default
 
-### Step 259: Count badge on buttons, tabs, and rows
+### Step 260: Count badge on buttons, tabs, and rows
 
 **Issue:** [#292](https://github.com/KenSuenobu/rust-pushrod/issues/292) `pushrod: [2.24] Count badge on buttons, tabs, and rows`
 
@@ -4199,7 +4218,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Zero hides it; large counts are capped
 - [ ] Same look everywhere through one paint helper
 
-### Step 260: Empty-state text for list, table, and other views
+### Step 261: Empty-state text for list, table, and other views
 
 **Issue:** [#293](https://github.com/KenSuenobu/rust-pushrod/issues/293) `pushrod: [4.11] Empty-state text for list, table, and other views`
 
@@ -4215,13 +4234,13 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Table headers stay visible
 - [ ] Custom placeholder widget supported
 
-### Step 261: Arithmetic in number fields
+### Step 262: Arithmetic in number fields
 
 **Issue:** [#294](https://github.com/KenSuenobu/rust-pushrod/issues/294) `pushrod: [4.12] Arithmetic in number fields`
 
 **Delivers:** Type a simple calculation into a number field and it is replaced by the result.
 
-**Builds on:** step 38, step 207.
+**Builds on:** step 38, step 208.
 
 **Mockups:** [4.12-1.png](../mockups/4.12-1.png)
 
@@ -4231,7 +4250,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Result clamped and validated like typed numbers
 - [ ] Off by default; invalid expressions marked
 
-### Step 262: Dirty-rectangle redraw
+### Step 263: Dirty-rectangle redraw
 
 **Issue:** [#24](https://github.com/KenSuenobu/rust-pushrod/issues/24) `pushrod: [1.9] Dirty-rectangle redraw`
 
@@ -4245,7 +4264,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Golden tests (7.2) pass
 - [ ] Benchmark in the PR
 
-### Step 263: Chassis: Code editor find
+### Step 264: Chassis: Code editor find
 
 **Issue:** [#147](https://github.com/KenSuenobu/rust-pushrod/issues/147) `pushrod: [11.6] Chassis: Code editor find`
 
@@ -4261,7 +4280,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Stepping wraps around the file
 - [ ] Escape returns focus to the editor at the current match
 
-### Step 264: Chassis: Code editor auto-indent and bracket matching
+### Step 265: Chassis: Code editor auto-indent and bracket matching
 
 **Issue:** [#148](https://github.com/KenSuenobu/rust-pushrod/issues/148) `pushrod: [11.7] Chassis: Code editor auto-indent and bracket matching`
 
@@ -4277,13 +4296,13 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Typing '}' on a blank line outdents it
 - [ ] Matching brackets boxed; brackets in strings ignored
 
-### Step 265: Chassis: Code editor documentation, example, and tests
+### Step 266: Chassis: Code editor documentation, example, and tests
 
 **Issue:** [#150](https://github.com/KenSuenobu/rust-pushrod/issues/150) `pushrod: [11.9] Chassis: Code editor documentation, example, and tests`
 
 **Delivers:** Document the code editor on the site, ship an example editor, and cover it with golden-image tests.
 
-**Builds on:** step 46, step 142, step 263, step 264.
+**Builds on:** step 46, step 142, step 264, step 265.
 
 **Show on video:**
 
@@ -4291,7 +4310,7 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 - [ ] Golden images for each mockup state
 - [ ] Benchmarks in CI
 
-### Step 266: Theme for colors and metrics (future)
+### Step 267: Theme for colors and metrics (future)
 
 **Issue:** [#74](https://github.com/KenSuenobu/rust-pushrod/issues/74) `pushrod: [8.1] Theme for colors and metrics (future)`
 
@@ -4303,13 +4322,13 @@ Pushrod issues not needed by Chassis, in roadmap order. Theming (Epic 8) stays l
 
 - [ ] (Future) classic theme matches goldens
 
-### Step 267: Skins: image-based widget rendering (future)
+### Step 268: Skins: image-based widget rendering (future)
 
 **Issue:** [#75](https://github.com/KenSuenobu/rust-pushrod/issues/75) `pushrod: [8.2] Skins: image-based widget rendering (future)`
 
 **Delivers:** Let a skin replace paint with nine-slice images.
 
-**Builds on:** step 266.
+**Builds on:** step 267.
 
 **Show on video:**
 
