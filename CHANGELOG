@@ -5,3 +5,5 @@
 [#122] Docs site deploys to GitHub Pages with API reference; widget-page and sample checks [kenji]
 [0] macOS uses the OpenGL renderer, fixing the 1-pixel view shift on click [kenji]
 [#93] Event vocabulary: modern Event enum replaces PushrodEvent [kenji]
+[0] Updated build workflow for pushrod-docs so it publishes from secrets data [kenji]
+
