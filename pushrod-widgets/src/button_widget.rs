@@ -25,7 +25,7 @@
 //! button is still selected.
 
 use pushrod::color::{Color, FontStyle};
-use pushrod::event::{Event, EventCtx};
+use pushrod::event::{Event, EventCtx, EventMask};
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle};
 use pushrod::widget::{Widget, WidgetCore};
@@ -179,8 +179,14 @@ impl ButtonWidget {
         msg: String,
         border_width: u8,
     ) -> Self {
+        let mut core = WidgetCore::new(origin, size);
+
+        // A button needs presses and releases to click, and hover to follow the pointer in and
+        // out of its bounds while pressed.
+        core.set_event_mask(EventMask::POINTER_BUTTONS | EventMask::HOVER);
+
         Self {
-            core: WidgetCore::new(origin, size),
+            core,
             style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
             msg,
             border_width,

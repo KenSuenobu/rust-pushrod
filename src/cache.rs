@@ -32,7 +32,7 @@
 //! form to be stored and reloaded by ID.
 
 use crate::backend::sdl2::{Sdl2Painter, to_sdl_rect};
-use crate::event::{Event, EventCtx};
+use crate::event::{EngineEvent, Event, EventCtx, EventMask, MaskScope};
 use crate::font::FontCache;
 use crate::geometry::{Point, make_rect, point};
 use crate::paint::{self, CachePolicy};
@@ -70,6 +70,8 @@ pub struct WidgetCache {
     captured_widget_id: Option<WidgetId>,
     needs_full_redraw: bool,
     cache_policy: CachePolicy,
+    pending_events: Vec<Event>,
+    loop_mask: EventMask,
 }
 
 impl WidgetCache {
@@ -88,6 +90,8 @@ impl WidgetCache {
             captured_widget_id: None,
             needs_full_redraw: true,
             cache_policy: Sdl2Painter::CACHE_POLICY,
+            pending_events: Vec::new(),
+            loop_mask: EventMask::ALL,
         }
     }
 
@@ -385,10 +389,87 @@ impl WidgetCache {
         ROOT_WIDGET_ID
     }
 
-    /// Sends an event to a `Widget`.  Disabled `Widget`s receive nothing.
+    /// Sets a `Widget`'s event mask and queues [`EngineEvent::EventMaskChanged`] when it changed.
+    ///
+    /// Queued events are returned by [`WidgetCache::take_pending_events`]; the `Engine` delivers
+    /// them to the callbacks.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `mask` - The new mask.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` exists and its mask changed.
+    pub fn set_event_mask(&mut self, id: WidgetId, mask: EventMask) -> bool {
+        let Some(widget) = self.get_mut(id) else {
+            return false;
+        };
+        let old = widget.event_mask();
+
+        if old == mask {
+            return false;
+        }
+
+        widget.core_mut().set_event_mask(mask);
+        self.pending_events
+            .push(Event::Engine(EngineEvent::EventMaskChanged {
+                scope: MaskScope::Widget(id),
+                old,
+                new: mask,
+            }));
+
+        true
+    }
+
+    /// Sets the run loop's event mask, which `Widget`s must also pass.  The `Engine` calls this
+    /// whenever its own mask changes.
+    ///
+    /// # Arguments
+    ///
+    /// * `mask` - The run loop's mask.
+    pub(crate) fn set_loop_mask(&mut self, mask: EventMask) {
+        self.loop_mask = mask;
+    }
+
+    /// Queues an engine event for [`WidgetCache::take_pending_events`].
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event to queue.
+    pub(crate) fn queue_event(&mut self, event: Event) {
+        self.pending_events.push(event);
+    }
+
+    /// Removes and returns the engine events queued by the cache itself, in order.
+    ///
+    /// # Returns
+    ///
+    /// The queued events; empty if there are none.
+    pub fn take_pending_events(&mut self) -> Vec<Event> {
+        std::mem::take(&mut self.pending_events)
+    }
+
+    /// Returns whether the next [`draw_loop`](WidgetCache::draw_loop) has anything to do.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a full redraw is pending or any `Widget` is invalidated.
+    pub fn needs_draw(&self) -> bool {
+        self.needs_full_redraw || self.cache.iter().any(|w| w.is_invalidated())
+    }
+
+    /// Sends an event to a `Widget`.  Disabled `Widget`s, and `Widget`s whose event mask excludes
+    /// the event's class, receive nothing.
     fn send(&mut self, id: WidgetId, event: &Event, ctx: &mut EventCtx) {
+        let loop_mask = self.loop_mask;
+
         if let Some(widget) = self.get_mut(id)
             && widget.is_enabled()
+            && event.kind().mask_class().is_none_or(|class| {
+                loop_mask.intersects(class) && widget.event_mask().intersects(class)
+            })
         {
             widget.handle_event(event, ctx);
         }

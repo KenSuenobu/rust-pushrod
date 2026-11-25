@@ -181,7 +181,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 1.2 (#6) | Event masks for the run loop and for widgets | Filter events for the whole run loop and per widget, so only events in the mask are handled. | `core`, `enhancement`, `mvp`, `performance`, `size/M` | N | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs`, `src/widget.rs` |
 | 1.3 (#7) | Broadcast events to all interested widgets | Window-level and application-wide events go to every widget whose mask includes them. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/cache.rs`, `src/engine.rs` |
 | 1.4 (#20) | Keyboard focus, Tab order, and Return/Escape | Focusable widgets take keyboard focus; Tab moves it; Return and Escape trigger the default and cancel buttons. | `chassis`, `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/cache.rs`, `src/engine.rs`, `src/widget.rs` |
 | 1.5 (#21) | Timers and idle callbacks | Repeating/one-shot timers, per-widget ticks for animation, and idle callbacks. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs`, `src/event.rs` |
@@ -285,6 +284,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Close requests are always delivered
 - Idle loop blocks on `wait_event_timeout` (near-zero idle CPU)
 - Widgets never receive events outside their mask; a `BoxWidget` receives nothing while a button still clicks
+
+**Status:** done (#6).
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 9.1 (#93). Blocks 1.3 (#7).
 

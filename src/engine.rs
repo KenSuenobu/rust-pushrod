@@ -64,12 +64,12 @@
 
 use crate::cache::WidgetCache;
 use crate::color::Color;
-use crate::event::Event;
+use crate::event::{EngineEvent, Event, EventMask, MaskScope};
 use crate::font::FontCache;
 use crate::geometry::Size;
 use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
-use sdl2::event::{Event as SdlEvent, WindowEvent};
+use sdl2::event::{Event as SdlEvent, EventType, WindowEvent};
 use sdl2::pixels::Color as SdlColor;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
@@ -77,6 +77,127 @@ use sdl2::{EventPump, Sdl};
 use std::collections::{HashMap, VecDeque};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+
+/// How long an idle loop blocks waiting for an event before checking again, in milliseconds.
+const IDLE_WAIT_MS: u32 = 1000;
+
+/// Returns the mask class an `SDL2` event is filtered by.
+///
+/// # Arguments
+///
+/// * `event` - The raw `SDL2` event.
+///
+/// # Returns
+///
+/// The class, or `None` for events that are never filtered: close requests, and the window
+/// exposed and resized events the engine needs to repaint.
+fn sdl_event_class(event: &SdlEvent) -> Option<EventMask> {
+    match event {
+        SdlEvent::Quit { .. } => None,
+        SdlEvent::Window {
+            win_event: WindowEvent::Exposed | WindowEvent::SizeChanged(..),
+            ..
+        } => None,
+        SdlEvent::MouseButtonDown { .. } | SdlEvent::MouseButtonUp { .. } => {
+            Some(EventMask::POINTER_BUTTONS)
+        }
+        SdlEvent::MouseMotion { .. } => Some(EventMask::POINTER_MOTION | EventMask::HOVER),
+        SdlEvent::MouseWheel { .. } => Some(EventMask::SCROLL),
+        SdlEvent::KeyDown { .. } | SdlEvent::KeyUp { .. } => Some(EventMask::KEYBOARD),
+        SdlEvent::TextInput { .. } | SdlEvent::TextEditing { .. } => Some(EventMask::TEXT),
+        SdlEvent::Window { .. } => Some(EventMask::WINDOW),
+        _ => Some(EventMask::CUSTOM),
+    }
+}
+
+/// Returns the `SDL2` event types that feed only classes outside `mask`, and so can be disabled
+/// in `SDL2` itself.
+///
+/// `Quit` and window events are never disabled: close requests are always delivered, and window
+/// exposure and resizing keep the display up to date.
+///
+/// # Arguments
+///
+/// * `mask` - The run loop's event mask.
+///
+/// # Returns
+///
+/// The event types to disable.
+fn sdl_types_to_disable(mask: EventMask) -> Vec<EventType> {
+    let mut types = Vec::new();
+
+    if !mask.contains(EventMask::POINTER_BUTTONS) {
+        types.extend([EventType::MouseButtonDown, EventType::MouseButtonUp]);
+    }
+
+    // Hover is derived from motion, so motion is needed while either class is wanted.
+    if !mask.intersects(EventMask::POINTER_MOTION | EventMask::HOVER) {
+        types.push(EventType::MouseMotion);
+    }
+
+    if !mask.contains(EventMask::SCROLL) {
+        types.push(EventType::MouseWheel);
+    }
+
+    if !mask.contains(EventMask::KEYBOARD) {
+        types.extend([EventType::KeyDown, EventType::KeyUp]);
+    }
+
+    if !mask.contains(EventMask::TEXT) {
+        types.extend([EventType::TextInput, EventType::TextEditing]);
+    }
+
+    types
+}
+
+/// Stores a new run-loop mask, tells the widget tree, and queues `EventMaskChanged` if it changed.
+///
+/// # Arguments
+///
+/// * `current` - The stored mask.
+/// * `widgets` - The widget tree, which also filters by the run-loop mask.
+/// * `mask` - The new mask.
+fn set_loop_mask(current: &mut EventMask, widgets: &mut WidgetCache, mask: EventMask) {
+    if *current == mask {
+        return;
+    }
+
+    let old = *current;
+
+    *current = mask;
+    widgets.set_loop_mask(mask);
+    widgets.queue_event(Event::Engine(EngineEvent::EventMaskChanged {
+        scope: MaskScope::RunLoop,
+        old,
+        new: mask,
+    }));
+}
+
+/// Disables and re-enables `SDL2` event types so that the pump queues only what `wanted` needs.
+///
+/// # Arguments
+///
+/// * `pump` - The `SDL2` event pump.
+/// * `applied` - The mask `SDL2` is currently configured for; updated to `wanted`.
+/// * `wanted` - The run loop's event mask.
+fn sync_sdl_events(pump: &mut EventPump, applied: &mut EventMask, wanted: EventMask) {
+    if *applied == wanted {
+        return;
+    }
+
+    let before = sdl_types_to_disable(*applied);
+    let after = sdl_types_to_disable(wanted);
+
+    for event_type in before.iter().filter(|t| !after.contains(t)) {
+        pump.enable_event(*event_type);
+    }
+
+    for event_type in after.iter().filter(|t| !before.contains(t)) {
+        pump.disable_event(*event_type);
+    }
+
+    *applied = wanted;
+}
 
 /// A callback that runs when a particular `Widget` is clicked.
 ///
@@ -98,9 +219,29 @@ pub type EventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &Event)>;
 pub struct Ui<'a> {
     widgets: &'a mut WidgetCache,
     running: &'a mut bool,
+    event_mask: &'a mut EventMask,
 }
 
 impl<'a> Ui<'a> {
+    /// Changes the run loop's event mask.  See [`Engine::set_event_mask`].
+    ///
+    /// # Arguments
+    ///
+    /// * `mask` - The new mask; it applies from the next event.
+    pub fn set_event_mask(&mut self, mask: EventMask) {
+        set_loop_mask(self.event_mask, self.widgets, mask);
+    }
+
+    /// Changes a `Widget`'s event mask.  See [`WidgetCache::set_event_mask`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `mask` - The new mask.
+    pub fn set_widget_event_mask(&mut self, id: WidgetId, mask: EventMask) {
+        self.widgets.set_event_mask(id, mask);
+    }
+
     /// Retrieves a `Widget` by ID as its concrete type.
     ///
     /// # Arguments
@@ -159,6 +300,7 @@ pub struct Engine<S = ()> {
     size: Size,
     running: bool,
     widget_cache: WidgetCache,
+    event_mask: EventMask,
     font_cache: FontCache,
     click_callbacks: HashMap<WidgetId, Vec<ClickCallback<S>>>,
     event_callbacks: Vec<EventCallback<S>>,
@@ -187,6 +329,7 @@ impl<S> Engine<S> {
             size,
             running: true,
             widget_cache,
+            event_mask: EventMask::ALL,
             font_cache: FontCache::default(),
             click_callbacks: HashMap::new(),
             event_callbacks: Vec::new(),
@@ -199,6 +342,68 @@ impl<S> Engine<S> {
     /// [`Engine::next_event`] returns `None`.
     pub fn shutdown(&mut self) {
         self.running = false;
+    }
+
+    /// Sets the run loop's event mask.
+    ///
+    /// Events whose class is not in the mask are dropped before routing and callbacks, and the
+    /// `SDL2` event types that feed only masked-out classes are disabled in `SDL2`, so it never
+    /// queues them.  Close requests are always delivered.  The change applies from the next event
+    /// and emits [`EngineEvent::EventMaskChanged`] with [`MaskScope::RunLoop`].
+    ///
+    /// With [`EventMask::TIMER`] left out and nothing to repaint, the loop blocks waiting for
+    /// input instead of polling, so an idle application uses almost no CPU.
+    ///
+    /// # Arguments
+    ///
+    /// * `mask` - The classes of events to handle.  The default is [`EventMask::ALL`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::engine::Engine;
+    /// use pushrod::event::EventMask;
+    /// use pushrod::geometry::size;
+    ///
+    /// let mut engine: Engine = Engine::new(size(320, 200), 60);
+    ///
+    /// // No hover effects: stop pointer motion at the source.
+    /// engine.set_event_mask(EventMask::ALL & !EventMask::POINTER_MOTION & !EventMask::HOVER);
+    ///
+    /// assert!(!engine.event_mask().contains(EventMask::HOVER));
+    /// ```
+    pub fn set_event_mask(&mut self, mask: EventMask) {
+        set_loop_mask(&mut self.event_mask, &mut self.widget_cache, mask);
+    }
+
+    /// Returns the run loop's event mask.
+    ///
+    /// # Returns
+    ///
+    /// The mask set with [`Engine::set_event_mask`]; [`EventMask::ALL`] by default.
+    pub fn event_mask(&self) -> EventMask {
+        self.event_mask
+    }
+
+    /// Returns whether the run loop can block waiting for input: nothing needs repainting and
+    /// timer events are masked out.
+    fn is_idle(&self) -> bool {
+        !self.event_mask.intersects(EventMask::TIMER) && !self.widget_cache.needs_draw()
+    }
+
+    /// Delivers the engine events queued by mask changes to the callbacks.
+    fn flush_pending(&mut self, state: &mut S) {
+        loop {
+            let pending = self.widget_cache.take_pending_events();
+
+            if pending.is_empty() {
+                break;
+            }
+
+            for event in pending {
+                self.fire(&event, state);
+            }
+        }
     }
 
     /// Returns whether the `Engine` is running.
@@ -334,12 +539,20 @@ impl<S> Engine<S> {
         for pushrod_event in self.route(event) {
             self.fire(&pushrod_event, state);
         }
+
+        self.flush_pending(state);
     }
 
     /// Routes a single `SDL2` event to the `Widget`s and returns the `Event`s they
     /// generated, without calling any callbacks.  Window-level events (quit, expose, resize) are
     /// handled here.
     fn route(&mut self, event: SdlEvent) -> Vec<Event> {
+        if let Some(class) = sdl_event_class(&event)
+            && !self.event_mask.intersects(class)
+        {
+            return Vec::new();
+        }
+
         match event {
             SdlEvent::Quit { .. } => {
                 self.running = false;
@@ -363,6 +576,7 @@ impl<S> Engine<S> {
         let mut ui = Ui {
             widgets: &mut self.widget_cache,
             running: &mut self.running,
+            event_mask: &mut self.event_mask,
         };
 
         if let Event::Clicked { id, .. } = event
@@ -409,6 +623,8 @@ impl<S> Engine<S> {
 
         self.widget_cache.invalidate_all();
 
+        let mut applied_mask = EventMask::ALL;
+
         // This is the run loop.  It performs the following tasks in the following order:
         //
         // First, it pulls all of the events that have been generated by the OS, placed into the
@@ -422,6 +638,9 @@ impl<S> Engine<S> {
         // anything changed, every visible Widget is copied to the screen and the canvas is
         // presented.
         //
+        // When the loop is idle it blocks in the wait for the first event instead, and does not
+        // sleep.
+        //
         // Afterward, if the loop was ahead of the frame time, it waits before repeating, making
         // sure the system keeps within the desired FPS of the drawing engine.
         //
@@ -430,7 +649,20 @@ impl<S> Engine<S> {
         loop {
             let start = Instant::now();
 
-            for event in event_pump.poll_iter() {
+            sync_sdl_events(&mut event_pump, &mut applied_mask, self.event_mask);
+            self.flush_pending(&mut state);
+
+            // With no timers wanted and nothing to repaint, wait for input instead of polling.
+            let idle = self.is_idle();
+            let mut batch: Vec<SdlEvent> = Vec::new();
+
+            if idle {
+                batch.extend(event_pump.wait_event_timeout(IDLE_WAIT_MS));
+            }
+
+            batch.extend(event_pump.poll_iter());
+
+            for event in batch {
                 self.dispatch(event, &mut state);
             }
 
@@ -447,7 +679,7 @@ impl<S> Engine<S> {
 
             let elapsed = start.elapsed();
 
-            if elapsed < frame_time {
+            if !idle && elapsed < frame_time {
                 sleep(frame_time - elapsed);
             }
         }
@@ -524,6 +756,7 @@ impl<S> Engine<S> {
             event_pump: sdl.event_pump().unwrap(),
             frame_time: Duration::from_millis((1000.0 / self.frame_rate.max(1) as f64) as u64),
             pending: VecDeque::new(),
+            applied_mask: EventMask::ALL,
         }
     }
 
@@ -544,6 +777,10 @@ impl<S> Engine<S> {
     /// has been called.
     pub fn next_event(&mut self, events: &mut EventLoop) -> Option<Event> {
         loop {
+            events
+                .pending
+                .extend(self.widget_cache.take_pending_events());
+
             if let Some(event) = events.pending.pop_front() {
                 return Some(event);
             }
@@ -559,8 +796,19 @@ impl<S> Engine<S> {
                 events.canvas.present();
             }
 
-            // Wait for one event (at most one frame), then take whatever else is queued.
-            let timeout = events.frame_time.as_millis().max(1) as u32;
+            sync_sdl_events(
+                &mut events.event_pump,
+                &mut events.applied_mask,
+                self.event_mask,
+            );
+
+            // Wait for one event, then take whatever else is queued.  An idle loop waits long;
+            // otherwise it wakes at most once per frame.
+            let timeout = if self.is_idle() {
+                IDLE_WAIT_MS
+            } else {
+                events.frame_time.as_millis().max(1) as u32
+            };
             let mut sdl_events: Vec<SdlEvent> = events
                 .event_pump
                 .wait_event_timeout(timeout)
@@ -588,4 +836,56 @@ pub struct EventLoop {
     event_pump: EventPump,
     frame_time: Duration,
     pending: VecDeque<Event>,
+    applied_mask: EventMask,
+}
+
+#[cfg(test)]
+mod mask_tests {
+    use super::*;
+
+    #[test]
+    fn all_classes_disable_no_sdl_types() {
+        assert!(sdl_types_to_disable(EventMask::ALL).is_empty());
+    }
+
+    #[test]
+    fn hover_keeps_motion_enabled_but_neither_disables_it() {
+        let without_motion = EventMask::ALL & !EventMask::POINTER_MOTION;
+        let without_either = without_motion & !EventMask::HOVER;
+
+        assert!(!sdl_types_to_disable(without_motion).contains(&EventType::MouseMotion));
+        assert!(sdl_types_to_disable(without_either).contains(&EventType::MouseMotion));
+    }
+
+    #[test]
+    fn an_empty_mask_disables_input_but_never_quit_or_window_events() {
+        let types = sdl_types_to_disable(EventMask::NONE);
+
+        for expected in [
+            EventType::MouseButtonDown,
+            EventType::MouseButtonUp,
+            EventType::MouseWheel,
+            EventType::KeyDown,
+            EventType::KeyUp,
+            EventType::TextInput,
+        ] {
+            assert!(types.contains(&expected));
+        }
+
+        assert!(!types.contains(&EventType::Quit));
+        assert!(!types.contains(&EventType::Window));
+    }
+
+    #[test]
+    fn close_and_repaint_events_are_never_filtered() {
+        assert!(sdl_event_class(&SdlEvent::Quit { timestamp: 0 }).is_none());
+        assert!(
+            sdl_event_class(&SdlEvent::Window {
+                timestamp: 0,
+                window_id: 0,
+                win_event: WindowEvent::Exposed,
+            })
+            .is_none()
+        );
+    }
 }

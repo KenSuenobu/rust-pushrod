@@ -9,3 +9,4 @@
 
 [#106] Backend-neutral Painter API with SDL2 backend and headless test painter [kenji]
 [#19] Widget behavior flags and visual states, disabled input routing [kenji]
+[#6] Event masks for the run loop and widgets [kenji]
