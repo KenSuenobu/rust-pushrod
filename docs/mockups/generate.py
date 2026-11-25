@@ -2086,6 +2086,36 @@ def chassis_assistant_chat():
     _assist_panel(c, "Chat", draw)
     return [("Optional chat drawer: the same tools, in one window, with your own API key", c, None)]
 
+@sb("chassis-assistant", 5)
+def chassis_assistant_settings():
+    c = C(760, 560); c.rect(0, 0, 760, 560, fill=PANEL); c.rect(0, 0, 760, 26, fill=WHITE); c.ctext(0, 0, 760, 26, "Settings", BLACK, 13)
+    c.listbox(10, 36, 150, ["General", "Designer", "Code", "Build", "Assistant"], selected={4}, scroll=False)
+    x = 180; c.text(x, 34, "Assistant", BLACK, 17)
+    rows = [("Allow assistants to connect", "check", True, False), ("Review changes before applying", "choice", "On", False),
+            ("Confirm destructive actions", "choice", "Always", False), ("Group each turn as one undo step", "check", True, False),
+            ("Validate against the widget registry", "choice", "Strict", False), ("Folders the tools can reach", "choice", "Project folder", False),
+            ("Commands the build tool may run", "choice", "The project's build", False), ("Listen on", "choice", "This computer only", False),
+            ("Require the token", "check", True, False), ("Show the connected indicator", "check", True, False), ("Keep the activity log", "choice", "This session", False)]
+    y = 70
+    for label, kind, val, _ in rows:
+        c.text(x, y + 2, label, BLACK, 13)
+        if kind == "check": c.checkbox(x + 290, y, "", "on" if val else "off")
+        else: _choice(c, x + 290, y - 1, 200, val)
+        y += 30
+    c.text(x, y + 4, "Tools offered", BLACK, 13)
+    for n, (t, on) in enumerate([("Read", True), ("Edit forms", True), ("Edit resources", True), ("Edit code", False), ("Build", True), ("Picture", True)]):
+        c.checkbox(x + 290 + (n % 2) * 130, y + 2 + (n // 2) * 24, t, "on" if on else "off")
+    y += 84
+    c.line(x, y, 740, y, GRAY)
+    c.text(x, y + 8, "A project's own settings can tighten these, never loosen them.", DARK, 12)
+    c.button(x, 518, 140, 26, "Restore Defaults"); c.button(570, 518, 80, 26, "Cancel"); c.button(660, 518, 80, 26, "OK", default=True)
+    d = C(470, 190); d.rect(0, 0, 470, 190, fill=PANEL); d.rect(0, 0, 470, 26, fill=WHITE); d.ctext(0, 0, 470, 26, "Chassis", BLACK, 13)
+    d.ellipse(18, 42, 32, 32); d.ctext(18, 42, 32, 32, "!", BLACK, 18)
+    d.text(64, 40, "Turn off review?", BLACK, 16)
+    for n, l in enumerate(["The assistant's changes will be applied to your forms", "and code as they arrive. You can still undo each turn."]): d.text(64, 70 + n * 20, l, DARK, 12)
+    d.button(270, 146, 90, 26, "Cancel", default=True); d.button(368, 146, 90, 26, "Turn Off")
+    return [("Every check is a setting, with safe defaults", c, None), ("Lowering a protection asks once and says what changes", d, None)]
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
