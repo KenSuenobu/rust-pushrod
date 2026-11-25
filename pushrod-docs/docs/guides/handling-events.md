@@ -63,16 +63,12 @@ The rest of this page describes the callback style and the event flow common to 
 
 In both styles:
 
-```text
-SDL2 event ──> WidgetCache ──> Widget::handle_event(&mut self, &event, ctx)
-                                      │
-                                ctx.emit(Clicked(..))
-                                      v
-                              event queue (in order)
-                                      │   (no widget is borrowed any more)
-                                      v
-                  your callbacks: on_click(id, ..), on_event(..)
-                     FnMut(&mut AppState, &mut Ui [, &event])
+```mermaid
+flowchart TD
+    A[SDL2 event] --> B[WidgetCache]
+    B --> C["Widget::handle_event(&mut self, &event, ctx)"]
+    C -- "ctx.emit(Clicked(..))" --> D["Event queue (in order)"]
+    D -- "no widget is borrowed any more" --> E["Your callbacks: on_click(id, ..), on_event(..)<br/>FnMut(&mut AppState, &mut Ui [, &event])"]
 ```
 
 1. Pushrod reads events from SDL2 and routes each one to a widget:

@@ -105,14 +105,15 @@ A widget with an empty mask still counts as the target under the pointer, so it 
 
 Changing either mask emits `Event::Engine(EngineEvent::EventMaskChanged { scope, old, new })`, once per real change. `scope` is `MaskScope::RunLoop` or `MaskScope::Widget(id)`. It is delivered to your callbacks (or returned by `next_event`) like any other event.
 
-```text
-SDL2 ──(types disabled at source for masked classes)──> event pump
-                                │
-        run-loop mask ── not in mask: dropped
-                                │
-                      routing to the widget
-                                │
-        widget mask ── not in mask: skipped
-                                │
-   Widget::handle_event -> queue -> callbacks
+```mermaid
+flowchart TD
+    A["SDL2<br/>(types disabled at source for masked classes)"] --> B[Event pump]
+    B --> C{Run-loop mask}
+    C -- not in mask --> D[Dropped]
+    C -- in mask --> E[Routing to the widget]
+    E --> F{Widget mask}
+    F -- not in mask --> G[Skipped]
+    F -- in mask --> H["Widget::handle_event"]
+    H --> I[Event queue]
+    I --> J[Callbacks]
 ```

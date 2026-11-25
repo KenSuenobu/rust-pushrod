@@ -8,15 +8,12 @@ description: How Pushrod tells your application about the internal actions it pe
 
 Pushrod changes things on its own: it changes event masks, adds widgets, and (as the library grows) moves focus, opens dialogs, and switches drawing modes. Every one of these **internal actions** emits an **engine event**, `Event::Engine(EngineEvent)`, so an application can keep a status line, a log, or a custom widget in sync.
 
-```text
-internal action (for example engine.set_event_mask(..))
-        │ completes
-        v
-Engine(EventMaskChanged { scope, old, new })
-        │ broadcast (after the action, never re-entrant)
-        ├──> widgets with ENGINE in their mask (optionally filtered by kind)
-        ├──> engine.on_engine_event(|state, ui, event| ..)
-        └──> engine.on_event(..)
+```mermaid
+flowchart TD
+    A["Internal action<br/>(for example engine.set_event_mask(..))"] -- completes --> B["Engine(EventMaskChanged { scope, old, new })"]
+    B -- "broadcast (after the action, never re-entrant)" --> C["Widgets with ENGINE in their mask<br/>(optionally filtered by kind)"]
+    B --> D["engine.on_engine_event(|state, ui, event| ..)"]
+    B --> E["engine.on_event(..)"]
 ```
 
 ## When they are delivered

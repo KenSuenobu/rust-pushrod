@@ -7,13 +7,15 @@ title: Widget tree and IDs
 
 Every widget in a window lives in one tree, stored as a flat list and addressed by `WidgetId` (a `u32`):
 
-```text
-ID 0  root (RootWidget, the window)
- ├── ID 1  panel                 origins are relative to the parent
- │    ├── ID 2  label
- │    └── ID 3  button           later siblings draw on top
- └── ID 4  box
+```mermaid
+flowchart TD
+    R["ID 0: root (RootWidget, the window)"] --> P["ID 1: panel"]
+    R --> X["ID 4: box"]
+    P --> L["ID 2: label"]
+    P --> B["ID 3: button"]
 ```
+
+Origins are relative to the parent. Later siblings draw on top of earlier ones, so the button (ID 3) draws above the label (ID 2).
 
 - **IDs are stable.** They're assigned in the order widgets are added and never change. Callbacks capture them, and in the future, form files will use them to connect designed forms to code.
 - **Origins are relative to the parent.** `WidgetCache::absolute_origin(id)` gives window coordinates.
