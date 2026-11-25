@@ -1832,6 +1832,171 @@ def example_dice():
     return [("Dice roller: die faces are icon resources; the row grows with the dice count", c, None)]
 
 
+# ---- Text truncation and wrapping, small behaviors (1.26, 1.27, 2.23, 2.24, 4.11, 4.12) ----
+def _fit(c, text, w, size=14, mode="end"):
+    """Returns `text` shortened with an ellipsis so it fits `w` logical pixels."""
+    if c.tw(text, size) <= w: return text
+    for n in range(len(text), 0, -1):
+        if mode == "end": t = text[:n].rstrip() + "…"
+        elif mode == "start": t = "…" + text[-n:].lstrip()
+        else: t = text[:(n + 1) // 2].rstrip() + "…" + text[-(n // 2):] if n > 1 else "…"
+        if c.tw(t, size) <= w: return t
+    return "…"
+
+def _wrap(c, text, w, size=14):
+    lines, cur = [], ""
+    for word in text.split():
+        t = (cur + " " + word).strip()
+        if c.tw(t, size) <= w: cur = t
+        else: lines.append(cur); cur = word
+    return lines + [cur]
+
+@sb("1.26")
+def truncation():
+    out = []; text = "Quarterly report draft.txt"
+    for lab, mode in [("Today: clipped mid-letter", None), ("End", "end"), ("Start", "start"), ("Middle (paths, file names)", "middle")]:
+        c = C(190, 60); c.rect(14, 16, 150, 26, fill=WHITE)
+        if mode is None:
+            c.text(20, 18, text); c.rect(164, 10, 26, 40, fill=PANEL, outline=None); c.line(163, 16, 163, 41)
+        else: c.text(20, 18, _fit(c, text, 138, mode=mode))
+        out.append((lab, c, None))
+    c = C(230, 60); c.button(14, 16, 110, 26, _fit(c, "Save and close all", 98)); c.tooltip(70, 40, "Save and close all"); c.pointer(60, 30)
+    out.append(("Button truncated; tooltip shows the full text", c, "is_truncated() is true"))
+    return out
+
+PARA = "The file could not be saved because the disk is full. Free some space and try again."
+
+@sb("1.27")
+def wrapped_text():
+    out = []
+    for lab, w, maxl, clip in [("Today: one clipped line", 250, 1, True), ("Wrapped at word boundaries", 250, None, False),
+                               ("Narrower: reflowed, taller", 160, None, False), ("max_lines = 2: last line truncated", 160, 2, False)]:
+        c = C(w + 40, 130); lines = _wrap(c, PARA, w - 12, 13)
+        if clip:
+            c.rect(14, 12, w, 24, fill=WHITE); c.text(20, 14, PARA, BLACK, 13); c.rect(14 + w, 8, 60, 34, fill=PANEL, outline=None); c.line(13 + w, 12, 13 + w, 35)
+        else:
+            if maxl and len(lines) > maxl: lines = lines[:maxl - 1] + [_fit(c, " ".join(lines[maxl - 1:]), w - 12, 13)]
+            c.rect(14, 12, w, 20 * len(lines) + 8, fill=WHITE)
+            for n, l in enumerate(lines): c.text(20, 15 + n * 20, l, BLACK, 13)
+        out.append((lab, c, None))
+    return out
+
+@sb("2.23")
+def selectable_label():
+    t = "Error 1042: connection timed out"
+    a = C(300, 60); a.text(14, 18, t)
+    b = C(300, 60); sx = 14 + b.tw("Error "); sw = b.tw("1042")
+    b.text(14, 18, "Error "); b.rect(int(sx), 18, int(sw) + 1, 22, fill=BLACK, outline=None); b.text(sx, 18, "1042", WHITE); b.text(sx + sw, 18, ": connection timed out"); b.ibeam(int(sx + sw) + 2, 20)
+    d = C(300, 60); d.text(14, 18, t); d.rect(14, 18, int(d.tw(t)) + 1, 22, fill=BLACK, outline=None); d.text(14, 18, t, WHITE)
+    return [("1. A selectable label", a, None), ("2. Double-click selects a word", b, "SelectionChanged"), ("3. Ctrl+A, then Ctrl+C", d, "text copied to the clipboard")]
+
+def _badge(c, x, y, text):
+    w = max(16, int(c.tw(text, 11)) + 8); c.rect(x, y, w, 16, fill=BLACK); c.ctext(x, y, w, 16, text, WHITE, 11)
+
+@sb("2.24")
+def badges():
+    a = C(150, 80); a.rect(30, 24, 40, 34, fill=WHITE); a.rect(40, 34, 20, 4, fill=BLACK, outline=None); a.rect(40, 42, 20, 4, fill=BLACK, outline=None); _badge(a, 60, 16, "3")
+    a.rect(90, 24, 40, 34, fill=WHITE); a.ellipse(102, 33, 16, 16); _badge(a, 118, 16, "99+")
+    b = C(260, 80); _tabs(b, 12, 14, 236, 56, ["Inbox", "Drafts", "Sent"], 0); b.rect(113, 18, 7, 7, fill=BLACK)
+    d = C(210, 80); d.listbox(12, 8, 186, ["Inbox", "Updates", "Archive"], selected={1}, scroll=False); _badge(d, 168, 10, "12"); d.rect(168, 30, 24, 16, fill=WHITE); d.ctext(168, 30, 24, 16, "3", BLACK, 11)
+    return [("Counts on image buttons (capped at 99+)", a, None), ("A dot on a tab", b, None), ("Counts on list rows", d, None)]
+
+@sb("4.11")
+def empty_state():
+    a = C(220, 130); a.listbox(14, 12, 190, ["report.txt", "notes.md", "plan.pdf"], scroll=False)
+    b = C(220, 130); b.rect(14, 12, 190, 104, fill=WHITE); b.ctext(14, 12, 190, 104, "No files yet", MID, 13)
+    d = C(300, 130); d.rect(14, 12, 270, 24, fill=WHITE)
+    for n, (t, x) in enumerate([("Name", 20), ("Size", 150), ("Modified", 200)]): d.text(x, 14, t, BLACK, 13)
+    d.rect(14, 35, 270, 81, fill=WHITE); d.ctext(14, 35, 270, 81, "No matches", MID, 13)
+    return [("A list with rows", a, None), ("Empty: the placeholder text", b, None), ("Empty table: headers stay", d, None)]
+
+@sb("4.12")
+def arithmetic():
+    a = C(200, 56); x = a.labeled(12, 16, "Width:", 56); a.field(x, 14, 90, "730/2", caret=5, focused=True)
+    b = C(200, 56); x = b.labeled(12, 16, "Width:", 56); b.field(x, 14, 90, "365")
+    d = C(200, 56); x = d.labeled(12, 16, "Width:", 56); d.field(x, 14, 90, "730/", focused=True); d.rect(x - 1, 13, 92, 24, fill=None, width=2)
+    return [("1. Type a calculation", a, None), ("2. Return: replaced by the result", b, "ValueChanged (365)"), ("Invalid: marked, not applied", d, None)]
+
+
+# ---- Pushrod Showcase (Epic 12) ----
+SHOW_PAGES = [("h", "CORE"), ("i", "Text"), ("i", "Layouts"), ("h", "STANDARD WIDGETS"), ("i", "Button"), ("i", "Check Box"), ("i", "Slider"), ("i", "Text Field"), ("h", "EXTRA WIDGETS"), ("i", "Tree View")]
+
+def _showcase(w, h, sel, search="", pages=None, log=None, props=None):
+    c = C(w, h); c.rect(0, 0, w, 24, fill=WHITE); c.ctext(0, 0, w, 24, "Pushrod Showcase", BLACK, 13)
+    c.rect(0, 23, 170, h - 23, fill=WHITE)
+    c.field(8, 32, 154, search, caret=len(search) if search else None, placeholder="Search widgets")
+    y = 62
+    for kind, t in (pages or SHOW_PAGES):
+        if kind == "h": c.text(10, y + 3, t, DARK, 10); y += 20; continue
+        if t == sel: c.rect(1, y, 168, 21, fill=BLACK, outline=None)
+        c.text(18, y, t, WHITE if t == sel else BLACK, 13); y += 21
+    bottom = h - (86 if log else 0); right = w - (190 if props else 0)
+    c.text(186, 34, sel, BLACK, 17)
+    if props:
+        c.rect(right, 23, 190, bottom - 23, fill=WHITE); c.text(right + 8, 30, "Properties", BLACK, 13)
+        for n, (k, v) in enumerate(props):
+            ry = 56 + n * 26; c.text(right + 8, ry, k, BLACK, 12)
+            if isinstance(v, bool): c.checkbox(right + 84, ry - 2, "", "on" if v else "off")
+            else: c.field(right + 84, ry - 2, 96, v, h=20)
+        c.button(right + 8, bottom - 34, 70, 24, "Reset")
+    if log:
+        c.rect(170, bottom, w - 170, 86, fill=WHITE); c.rect(170, bottom, w - 170, 20, fill=GRAY); c.text(178, bottom + 1, "Events", BLACK, 12)
+        c.text(w - 130, bottom + 1, "Clear    Pause", BLACK, 12)
+        for n, l in enumerate(log): c.text(178, bottom + 22 + n * 19, l, BLACK if n == len(log) - 1 else DARK, 12)
+    return c
+
+@sb("12.1", 1)
+def showcase_shell():
+    c = _showcase(640, 320, "Button"); c.text(186, 62, "A push button that runs an action when clicked.", DARK, 12)
+    c.button(190, 96, 90, 26, "Normal"); c.button(292, 96, 90, 26, "Default", default=True); c.button(394, 96, 90, 26, "Disabled", disabled=True)
+    c.button(190, 140, 90, 26, "Toggle", pressed=True); c.text(292, 144, "Clicked 3 times", BLACK, 13)
+    c.button(540, 30, 80, 24, "Source")
+    return [("One window: every widget and feature in the list, the selected page live on the right", c, None)]
+
+@sb("12.1", 2)
+def showcase_search():
+    c = _showcase(640, 250, "Slider", search="sl", pages=[("h", "STANDARD WIDGETS"), ("i", "Slider"), ("h", "EXTRA WIDGETS"), ("i", "Range Slider")])
+    c.slider(196, 90, 220, 0.4, ticks=10, value=40); c.slider(196, 140, 220, 0.7, disabled=True)
+    return [("Typing 'sl' filters the page list across all groups", c, None)]
+
+@sb("12.2")
+def showcase_page():
+    c = _showcase(640, 300, "Check Box"); c.text(186, 62, "Box with a check mark and label; optional mixed state.", DARK, 12)
+    for n, (lab, kw) in enumerate([("Unchecked", {}), ("Checked", dict(state="on")), ("Mixed", dict(state="mixed")), ("Focused", dict(state="on", focused=True)), ("Disabled", dict(state="on", disabled=True))]):
+        c.checkbox(196, 96 + n * 30, lab, **kw)
+    c.group(380, 90, 230, 110, "Try it"); c.checkbox(396, 118, "Send me the newsletter", "on"); c.checkbox(396, 146, "Remember this choice")
+    return [("The Check Box page: every state side by side, all live", c, "a test fails if a registered widget has no page")]
+
+@sb("12.3")
+def showcase_props():
+    c = _showcase(700, 300, "Button", props=[("text", "Save all"), ("disabled", False), ("default", True), ("toggle", False), ("width", "110")])
+    c.button(230, 110, 110, 28, "Save all", default=True); c.dotted(220, 100, 130, 48); c.pointer(300, 130)
+    return [("Click a widget to select it; edit its properties and it updates at once", c, "properties come from introspection: no per-widget code")]
+
+@sb("12.4")
+def showcase_events():
+    c = _showcase(640, 330, "Check Box", log=["12:01:07  Toggled { id: 14, checked: true }", "12:01:08  FocusChanged { id: 15, focused: true }", "12:01:09  Clicked { id: 21 }"])
+    c.checkbox(196, 80, "Send me the newsletter", "on"); c.checkbox(196, 110, "Remember this choice", focused=True); c.button(196, 150, 90, 26, "Apply", pressed=True); c.pointer(250, 164)
+    return [("Every event the page's widgets emit appears in the log, newest last", c, "engine events can be switched on")]
+
+@sb("12.5")
+def showcase_source():
+    c = _showcase(640, 300, "Button"); c.button(540, 30, 80, 24, "Source", pressed=True); c.button(540, 60, 80, 24, "Copy")
+    c.rect(186, 92, 436, 190, fill=WHITE)
+    for n, l in enumerate(["fn build(ui: &mut Ui) -> WidgetId {", "    let save = ui.add(Button::new(\"Save\").default(true));", "    ui.on_click(save, |state, ui, _| {", "        state.clicks += 1;", "    });", "    save", "}"]):
+        c.text(196, 100 + n * 22, l, BLACK, 12)
+    return [("Source shows the page's real build function, embedded at compile time", c, None)]
+
+@sb("12.6")
+def showcase_layouts():
+    def form(c, x, y, w):
+        for n, (lab, val) in enumerate([("Name:", "Jane Doe"), ("E-mail:", "jane.doe@example.com"), ("Phone:", "555-0100")]):
+            c.text(x, y + n * 32 + 2, lab, BLACK, 13); c.field(x + 62, y + n * 32, w - 62, val)
+        c.button(x + w - 90, y + 104, 90, 26, "OK", default=True)
+    a = _showcase(600, 270, "Layouts"); form(a, 196, 80, 380)
+    b = _showcase(470, 270, "Layouts"); form(b, 196, 80, 250)
+    return [("Form layout page", a, None), ("Window narrowed: the fields shrink, the labels stay aligned", b, None)]
+
 def main():
     for key, fn in SB.items():
         storyboard(fn(), os.path.join(HERE, f"{key}.png"))
