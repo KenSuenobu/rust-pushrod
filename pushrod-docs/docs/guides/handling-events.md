@@ -12,7 +12,7 @@ Pushrod supports two styles. Both route input through the same widgets and produ
 | | Callbacks | Your own event loop |
 |---|---|---|
 | Who runs the loop | Pushrod (`engine.run`) | You (`while let Some(event) = engine.next_event(&mut events)`) |
-| Where your code goes | `on_click`, `on_event` closures | A `match` on each returned `PushrodEvent` |
+| Where your code goes | `on_click`, `on_event` closures | A `match` on each returned `Event` |
 | Application state | Passed to callbacks as `&mut S` | Ordinary local variables |
 | Changing widgets | `ui.get_mut::<T>(id)` | `engine.widgets().get_as_mut::<T>(id)` |
 | Good for | Many independent widgets, Visual Basic-style event procedures | Central dispatch, state machines, porting code written for GEM-style event loops |
@@ -26,7 +26,7 @@ let mut events = engine.event_loop(&sdl, window);
 
 while let Some(event) = engine.next_event(&mut events) {
     match event {
-        PushrodEvent::Clicked(id, _) if id == button => {
+        Event::Clicked { id, .. } if id == button => {
             clicks += 1;
 
             if let Some(text) = engine.widgets().get_as_mut::<TextWidget>(label) {
@@ -60,22 +60,29 @@ SDL2 event ──> WidgetCache ──> Widget::handle_event(&mut self, &event, c
 ```
 
 1. Pushrod reads events from SDL2 and routes each one to a widget:
-   - **Mouse button down** goes to the top-most visible widget under the pointer, which then *captures* the mouse until the button is released.
-   - **Mouse motion** sends `BoundsChange(left, entered)` to the widget the pointer left and the one it entered, then the motion itself to the captured widget (or the one under the pointer).
-   - **Mouse button up** goes to the captured widget, then releases the capture.
+   - **Mouse button down** sends `PointerPressed` to the top-most visible widget under the pointer, which then *captures* the mouse until the button is released.
+   - **Mouse motion** sends `PointerExited` to the widget the pointer left and `PointerEntered` to the one it entered, then `PointerMoved` to the captured widget (or the one under the pointer).
+   - **Mouse button up** sends `PointerReleased` to the captured widget, then releases the capture.
 2. The widget updates itself and may queue events with `ctx.emit(...)`. A button, for example, emits `Clicked` when released while still pressed.
 3. After routing, Pushrod delivers each queued event, in order: to your callbacks (callback style), or as the return value of `next_event` (event-loop style). Because no widget is borrowed at that point, your code can freely change your state and any widget.
 
 ## Events
 
+The pointer events a widget receives, and the most common events it emits, are below. The [Event reference](../events/event-reference.md) lists every event.
+
 | Event | Sent when |
 |---|---|
-| `PushrodEvent::BoundsChange(left, entered)` | The pointer moves from one widget to another (to both widgets). |
-| `PushrodEvent::Clicked(id, clicks)` | A widget was clicked; `clicks` is 1 for a single click, 2 for a double click. Emitted by buttons and by your own widgets. |
-| `PushrodEvent::SystemEvent(id, event)` | A raw SDL2 event routed to widget `id`. |
+| `Event::PointerExited { id }` | The pointer leaves widget `id`. |
+| `Event::PointerEntered { id }` | The pointer enters widget `id`. |
+| `Event::PointerMoved { id, position }` | The pointer moves; sent to the captured widget, or the one under the pointer. |
+| `Event::PointerPressed { id, button, position, count }` | A mouse button goes down over widget `id`. |
+| `Event::PointerReleased { id, button, position, count }` | A mouse button goes up; sent to the widget that captured the press. |
+| `Event::Clicked { id, button, count }` | A widget was clicked; `count` is 1 for a single click, 2 for a double click. Emitted by buttons and by your own widgets. |
+
+Every event has `event.kind()` (an `EventKind`, used by masks and the callback registry) and `event.widget()` (the widget it concerns, if any).
 
 :::note[Planned changes]
-Event names are being modernized (for example `PointerEntered`/`PointerExited` instead of `BoundsChange`), and propagation, keyboard focus, and more callbacks are on the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md). This page will change with them.
+Propagation, keyboard focus, and more callbacks are on the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md). This page will change with them.
 :::
 
 ## Callbacks
@@ -83,7 +90,7 @@ Event names are being modernized (for example `PointerEntered`/`PointerExited` i
 | Method | Runs when | Signature |
 |---|---|---|
 | `engine.on_click(id, f)` | Widget `id` emits `Clicked` | `FnMut(&mut S, &mut Ui)` |
-| `engine.on_event(f)` | Any widget emits any event | `FnMut(&mut S, &mut Ui, &PushrodEvent)` |
+| `engine.on_event(f)` | Any widget emits any event | `FnMut(&mut S, &mut Ui, &Event)` |
 
 Several callbacks can be registered for the same widget; they run in the order they were registered, and `on_event` callbacks run after the widget-specific ones.
 
@@ -105,8 +112,8 @@ engine.on_click(save, move |state, ui| {
 engine.on_click(quit, |_, ui| ui.shutdown());
 
 engine.on_event(|_, _, event| {
-    if let PushrodEvent::Clicked(id, clicks) = event {
-        println!("widget {} clicked ({} click(s))", id, clicks);
+    if let Event::Clicked { id, count, .. } = event {
+        println!("widget {} clicked ({} click(s))", id, count);
     }
 });
 ```

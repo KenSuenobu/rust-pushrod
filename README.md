@@ -79,7 +79,7 @@ Prefer to run the loop yourself? Ask the engine for each event instead of regist
 let mut events = engine.event_loop(&sdl_context, window);
 
 while let Some(event) = engine.next_event(&mut events) {
-    if let PushrodEvent::Clicked(id, _) = event {
+    if let Event::Clicked { id, .. } = event {
         if id == button { /* ... */ }
     }
 }

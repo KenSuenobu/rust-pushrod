@@ -47,7 +47,7 @@
 //! If the compiler is happy, the `Widget` is complete: there are no lists of `Widget` types to
 //! update elsewhere in the library.
 
-use crate::event::{EventCtx, PushrodEvent};
+use crate::event::{Event, EventCtx};
 use crate::font::FontCache;
 use crate::geometry::{Point, Size};
 use crate::texture::TextureStore;
@@ -170,7 +170,7 @@ pub trait Widget: Any {
     /// Handles an event sent to this `Widget`.
     ///
     /// The `WidgetCache` sends mouse events to the `Widget` under the pointer (or the `Widget` that
-    /// captured the mouse), and `BoundsChange` events when the pointer enters or leaves it.  Events
+    /// captured the mouse), and `PointerEntered` and `PointerExited` events when the pointer enters or leaves it.  Events
     /// the `Widget` generates in response, such as `Clicked`, are queued with
     /// [`EventCtx::emit`](crate::event::EventCtx::emit) and delivered to the application after event
     /// processing completes.  The default implementation ignores every event.
@@ -179,7 +179,7 @@ pub trait Widget: Any {
     ///
     /// * `_event` - The event sent to this `Widget`.
     /// * `_ctx` - The context used to queue events the `Widget` generates.
-    fn handle_event(&mut self, _event: &PushrodEvent, _ctx: &mut EventCtx) {}
+    fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) {}
 
     /// Returns the `Widget`'s ID.
     ///

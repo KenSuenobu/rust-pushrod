@@ -65,7 +65,7 @@ Every widget also has the methods of the `Widget` trait: `get_id`, `get_parent`,
 
 | Event | Emitted when | Callback |
 |---|---|---|
-| `PushrodEvent::Clicked(id, clicks)` | The left button is released over the button while it is still pressed. | `engine.on_click(id, ..)` |
+| `Event::Clicked { id, button, count }` | The left button is released over the button while it is still pressed. | `engine.on_click(id, ..)` |
 
 ## Notes
 

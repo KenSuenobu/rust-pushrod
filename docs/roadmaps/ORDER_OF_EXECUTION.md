@@ -37,7 +37,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 1 | [#130](https://github.com/KenSuenobu/rust-pushrod/issues/130) | pushrod: [1.21] Split the standard widgets into the pushrod-widgets crate (done) |
 | ✅ 2 | [#69](https://github.com/KenSuenobu/rust-pushrod/issues/69) | pushrod: [7.1] CI: build, test, clippy, fmt, doc with SDL2 (done) |
 | ✅ 3 | [#122](https://github.com/KenSuenobu/rust-pushrod/issues/122) | pushrod: [7.8] Documentation site: build pushrod-docs in CI and publish it (done) |
-| 4 | [#93](https://github.com/KenSuenobu/rust-pushrod/issues/93) | pushrod: [9.1] Event vocabulary: modern event names and structure |
+| ✅ 4 | [#93](https://github.com/KenSuenobu/rust-pushrod/issues/93) | pushrod: [9.1] Event vocabulary: modern event names and structure (done) |
 | 5 | [#106](https://github.com/KenSuenobu/rust-pushrod/issues/106) | pushrod: [10.2] Backend-neutral paint API (SDL2 backend by default) |
 | 6 | [#19](https://github.com/KenSuenobu/rust-pushrod/issues/19) | pushrod: [1.1] Widget behavior flags and visual states |
 | 7 | [#6](https://github.com/KenSuenobu/rust-pushrod/issues/6) | pushrod: [1.2] Event masks for the run loop and for widgets |
@@ -294,10 +294,12 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] `pushrod::Event` with the variants above; `EventKind`; `widget()`
-- [ ] PR #10 behavior and tests ported to the new names
-- [ ] `ButtonWidget` uses `PointerPressed/Released/Entered/Exited`
-- [ ] Rustdoc lists every event with when it is emitted
+- [x] `pushrod::Event` with the variants above; `EventKind`; `widget()`
+- [x] PR #10 behavior and tests ported to the new names
+- [x] `ButtonWidget` uses `PointerPressed/Released/Entered/Exited`
+- [x] Rustdoc lists every event with when it is emitted
+
+**Status:** done (issue closed). Its video can be a recap of the finished work.
 
 ### Step 5: Backend-neutral paint API (SDL2 backend by default)
 

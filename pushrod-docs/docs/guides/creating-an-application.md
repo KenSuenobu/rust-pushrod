@@ -73,7 +73,7 @@ use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
-use pushrod::event::PushrodEvent;
+use pushrod::event::Event;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::TextJustify;
 use pushrod::widget::Widget;
@@ -121,8 +121,8 @@ fn main() {
 
     // Catch-all callback: sees every event any widget generates.
     engine.on_event(|_, _, event| {
-        if let PushrodEvent::Clicked(id, clicks) = event {
-            println!("widget {} clicked ({} click(s))", id, clicks);
+        if let Event::Clicked { id, count, .. } = event {
+            println!("widget {} clicked ({} click(s))", id, count);
         }
     });
 

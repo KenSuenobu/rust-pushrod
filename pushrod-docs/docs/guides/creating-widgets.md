@@ -23,12 +23,11 @@ This widget switches between two colors each time it is clicked and emits `Click
 
 ```rust
 use pushrod::engine::Engine;
-use pushrod::event::{EventCtx, PushrodEvent};
+use pushrod::event::{Event, EventCtx};
 use pushrod::font::FontCache;
 use pushrod::geometry::{point, size, Point, Size};
 use pushrod::paint;
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
@@ -108,19 +107,20 @@ impl Widget for SwatchWidget {
     ///
     /// * `event` - The event sent to the swatch.
     /// * `ctx` - The context used to emit `Clicked`.
-    fn handle_event(&mut self, event: &PushrodEvent, ctx: &mut EventCtx) {
-        if let PushrodEvent::SystemEvent(
-            _,
-            Event::MouseButtonUp {
-                mouse_btn: MouseButton::Left,
-                clicks,
-                ..
-            },
-        ) = event
+    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) {
+        if let Event::PointerReleased {
+            button: MouseButton::Left,
+            count,
+            ..
+        } = event
         {
             self.current = 1 - self.current;
             self.set_invalidated(true);
-            ctx.emit(PushrodEvent::Clicked(self.get_id(), *clicks));
+            ctx.emit(Event::Clicked {
+                id: self.get_id(),
+                button: MouseButton::Left,
+                count: *count,
+            });
         }
     }
 }
@@ -140,7 +140,7 @@ Pushrod's own widgets are built the same way: a box is `fill` + `border`, a butt
 
 ### Handling events
 
-`handle_event` receives each event routed to the widget (see [Handling events](./handling-events.md)). Change the widget's state, call `set_invalidated(true)` if its look changed, and queue events for the application with `ctx.emit(...)`. Mouse events arrive as `PushrodEvent::SystemEvent(id, sdl_event)`.
+`handle_event` receives each event routed to the widget (see [Handling events](./handling-events.md)). Change the widget's state, call `set_invalidated(true)` if its look changed, and queue events for the application with `ctx.emit(...)`. Mouse events arrive as `Event::PointerPressed`, `Event::PointerReleased`, and `Event::PointerMoved`, plus `Event::PointerEntered` and `Event::PointerExited` when the pointer crosses the widget's edge. See the [Event reference](../events/event-reference.md).
 
 ## Using the widget
 
@@ -176,7 +176,6 @@ fn main() {
 // tests/swatch.rs (SwatchWidget is the widget defined above)
 use pushrod::engine::Engine;
 use pushrod::geometry::{point, size};
-use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
 

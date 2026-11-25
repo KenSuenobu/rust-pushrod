@@ -25,7 +25,7 @@ use sdl2::rect::Rect;
 /// A position in pixels: `x` from left to right, `y` from top to bottom.
 ///
 /// `Widget` origins are `Point`s relative to the parent `Widget`'s upper left-hand corner.
-#[derive(Default, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
 pub struct Point {
     /// Horizontal point from left to right in pixels.
     pub x: i32,
@@ -65,7 +65,7 @@ pub fn point(x: i32, y: i32) -> Point {
 }
 
 /// A width and height in pixels.
-#[derive(Default, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
 pub struct Size {
     /// Width in pixels.
     pub w: u32,
