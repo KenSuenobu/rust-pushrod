@@ -20,4 +20,6 @@ Run the example from the repository root:
 cargo run -p pushrod-widgets --example base
 ```
 
+`--example gallery` shows every widget on a labeled tile.
+
 Each planned widget is specified in [`docs/widgets/`](../docs/widgets/README.md).

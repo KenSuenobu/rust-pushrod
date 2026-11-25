@@ -1824,6 +1824,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Solution / Scope.** `pushrod-widgets/examples/gallery.rs` with labeled tiles; each widget issue adds its tile; README screenshot comes from it. All sample data in the gallery is fictional (CONTRIBUTING.md).
 
+**Status:** done (#71). `cargo run -p pushrod-widgets --example gallery`; `-- --screenshot <file.png>` saves the frame used in the README and docs.
+
 **Acceptance Criteria.**
 
 - Shows every merged widget
