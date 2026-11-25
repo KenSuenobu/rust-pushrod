@@ -8,9 +8,11 @@ title: Drawing
 Pushrod draws everything itself through SDL2 and keeps the work on the GPU:
 
 1. Each widget has its own GPU texture.
-2. When a widget is invalidated, Pushrod calls its `paint` once, drawing into that texture.
+2. When a widget is invalidated, Pushrod calls its `paint` once with a `Painter`, drawing into that texture.
 3. Each frame where something changed, Pushrod clears the screen and copies every visible widget's texture to it in tree order, then presents the frame. Copying cached textures is cheap; repainting only happens for widgets that changed.
 4. If nothing changed, nothing is drawn and the previous frame stays on screen.
+
+Widgets draw only through the `Painter` trait, never an SDL type. SDL2 is the default backend; see [Backend-neutral paint API](../platforms/backend-neutral-paint-api.md).
 
 This is why widgets never draw directly to the screen and why changing a widget only requires marking it invalidated.
 

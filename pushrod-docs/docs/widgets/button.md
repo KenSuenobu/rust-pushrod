@@ -16,8 +16,7 @@ description: A push button with a text label that emits `Clicked`.
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::TextJustify;
-use sdl2::pixels::Color;
-use sdl2::ttf::FontStyle;
+use pushrod::color::{Color, FontStyle};
 
 let button = engine.add_widget(ButtonWidget::new(
     point(20, 70),

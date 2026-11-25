@@ -1,6 +1,7 @@
 // Event dispatch tests.  These exercise the WidgetCache and Engine without opening a window.
 
 use pushrod::cache::WidgetCache;
+use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::{Event, EventKind};
 use pushrod::geometry::{point, size};
@@ -9,8 +10,6 @@ use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use sdl2::event::Event as SdlEvent;
 use sdl2::mouse::{MouseButton, MouseState};
-use sdl2::pixels::Color;
-use sdl2::ttf::FontStyle;
 
 const FONT: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -261,12 +260,7 @@ impl pushrod::widget::Widget for Recorder {
         &mut self.core
     }
 
-    fn paint(
-        &self,
-        _c: &mut sdl2::render::Canvas<sdl2::video::Window>,
-        _fc: &mut pushrod::font::FontCache,
-    ) {
-    }
+    fn paint(&self, _p: &mut dyn pushrod::paint::Painter) {}
 
     fn handle_event(&mut self, event: &Event, ctx: &mut pushrod::event::EventCtx) {
         ctx.emit(event.clone());

@@ -28,7 +28,7 @@ The standard widgets stay simple on purpose. If you want something more graphica
 
 - The `Widget` trait and `WidgetCore` (`pushrod::widget`)
 - Events and the event context (`pushrod::event`)
-- The `paint` helpers and direct SDL2 drawing into the widget's texture
+- The `paint` helpers and the `Painter` trait (no SDL2 types)
 - The font cache (`pushrod::font`)
 
 If a widget library needs something the core doesn't expose, that's a core issue: open one, rather than working around it.

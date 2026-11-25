@@ -24,11 +24,8 @@
 //! the `WidgetCore`, so a new `Widget` only needs to implement three functions:
 //!
 //! ```rust,no_run
-//! use pushrod::font::FontCache;
-//! use pushrod::paint;
+//! use pushrod::paint::{self, Painter};
 //! use pushrod::widget::{Widget, WidgetCore};
-//! use sdl2::render::Canvas;
-//! use sdl2::video::Window;
 //!
 //! pub struct MyWidget {
 //!     core: WidgetCore,
@@ -38,8 +35,8 @@
 //!     fn core(&self) -> &WidgetCore { &self.core }
 //!     fn core_mut(&mut self) -> &mut WidgetCore { &mut self.core }
 //!
-//!     fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
-//!         paint::fill(c, self.get_color());
+//!     fn paint(&self, p: &mut dyn Painter) {
+//!         paint::fill(p, self.get_color());
 //!     }
 //! }
 //! ```
@@ -47,13 +44,11 @@
 //! If the compiler is happy, the `Widget` is complete: there are no lists of `Widget` types to
 //! update elsewhere in the library.
 
+use crate::color::Color;
 use crate::event::{Event, EventCtx};
-use crate::font::FontCache;
 use crate::geometry::{Point, Size};
+use crate::paint::Painter;
 use crate::texture::TextureStore;
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 use std::any::Any;
 
 /// The ID of a `Widget`.
@@ -156,16 +151,16 @@ pub trait Widget: Any {
 
     /// Paints the `Widget` into its own texture.
     ///
-    /// The canvas is already targeting the `Widget`'s texture, so drawing always starts at `(0, 0)`
+    /// The painter is already targeting the `Widget`'s surface, so drawing always starts at `(0, 0)`
     /// and is bounded by [`get_size`](Widget::get_size).  Compose the look of the `Widget` with the
     /// functions in the [`paint`](crate::paint) module (`fill`, `border`, `text`).  The `WidgetCache`
     /// only calls this when the `Widget` is invalidated; between repaints, the texture is reused.
     ///
     /// # Arguments
     ///
-    /// * `c` - The canvas, targeting this `Widget`'s texture.
-    /// * `fc` - The font cache, used to draw text.
-    fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache);
+    /// * `p` - The painter, targeting this `Widget`.  It is a Pushrod [`Painter`], never an `SDL2`
+    ///   type, so the `Widget` works with any backend.
+    fn paint(&self, p: &mut dyn Painter);
 
     /// Handles an event sent to this `Widget`.
     ///

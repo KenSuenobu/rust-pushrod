@@ -20,8 +20,6 @@
 //!
 //! `X` and `Y` positions are from the upper left-hand corner of the widget.
 
-use sdl2::rect::Rect;
-
 /// A position in pixels: `x` from left to right, `y` from top to bottom.
 ///
 /// `Widget` origins are `Point`s relative to the parent `Widget`'s upper left-hand corner.
@@ -113,7 +111,41 @@ pub fn size(w: u32, h: u32) -> Size {
     Size::new(w, h)
 }
 
-/// Creates an `SDL2` rectangle from an origin and a size.
+/// A rectangle: an upper left-hand corner and a size, in pixels.
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
+pub struct Rect {
+    /// Left edge in pixels.
+    pub x: i32,
+
+    /// Top edge in pixels.
+    pub y: i32,
+
+    /// Width in pixels.
+    pub w: u32,
+
+    /// Height in pixels.
+    pub h: u32,
+}
+
+impl Rect {
+    /// Creates a `Rect`.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - The left edge in pixels.
+    /// * `y` - The top edge in pixels.
+    /// * `w` - The width in pixels.
+    /// * `h` - The height in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The new `Rect`.
+    pub fn new(x: i32, y: i32, w: u32, h: u32) -> Self {
+        Self { x, y, w, h }
+    }
+}
+
+/// Creates a rectangle from an origin and a size.
 ///
 /// # Arguments
 ///
@@ -127,7 +159,7 @@ pub fn make_rect(origin: Point, bounds: Size) -> Rect {
     Rect::new(origin.x, origin.y, bounds.w, bounds.h)
 }
 
-/// Creates an `SDL2` rectangle from its position and size.
+/// Creates a rectangle from its position and size.
 ///
 /// # Arguments
 ///
@@ -140,7 +172,7 @@ pub fn make_rect(origin: Point, bounds: Size) -> Rect {
 ///
 /// The rectangle.
 pub fn rect(x: i32, y: i32, w: u32, h: u32) -> Rect {
-    make_rect(point(x, y), size(w, h))
+    Rect::new(x, y, w, h)
 }
 
 /// Returns the point `(0, 0)`.

@@ -18,13 +18,10 @@
 //! This is a simple system `Widget` that fills its background like the `BaseWidget`, and draws a
 //! border of a specific width and color on top of it.
 
-use pushrod::font::FontCache;
+use pushrod::color::Color;
 use pushrod::geometry::{Point, Size};
-use pushrod::paint;
+use pushrod::paint::{self, Painter};
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 
 /// A filled rectangle with a border of any width and color.
 ///
@@ -33,7 +30,7 @@ use sdl2::video::Window;
 /// ```rust
 /// use pushrod::geometry::{point, size};
 /// use pushrod_widgets::box_widget::BoxWidget;
-/// use sdl2::pixels::Color;
+/// use pushrod::color::Color;
 ///
 /// let frame = BoxWidget::new(point(20, 40), size(100, 100), Color::BLUE, 3);
 /// ```
@@ -66,11 +63,10 @@ impl Widget for BoxWidget {
     ///
     /// # Arguments
     ///
-    /// * `c` - The canvas, targeting the box's texture.
-    /// * `_fc` - The font cache (unused).
-    fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
-        paint::fill(c, self.get_color());
-        paint::border(c, self.get_size(), self.border_color, self.border_width);
+    /// * `p` - The painter, targeting the box.
+    fn paint(&self, p: &mut dyn Painter) {
+        paint::fill(p, self.get_color());
+        paint::border(p, self.get_size(), self.border_color, self.border_width);
     }
 }
 

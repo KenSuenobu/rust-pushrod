@@ -15,8 +15,7 @@ description: A single string of text on a filled background.
 ```rust
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use sdl2::pixels::Color;
-use sdl2::ttf::FontStyle;
+use pushrod::color::{Color, FontStyle};
 
 let label = engine.add_widget(TextWidget::new(
     point(20, 20),

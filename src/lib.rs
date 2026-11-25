@@ -22,8 +22,8 @@
 //!
 //! # Core and widgets
 //!
-//! This crate is the core: the engine, the `Widget` trait and widget tree, events, the `paint`
-//! helpers, and texture and font caches.  It contains no widgets except the window's
+//! This crate is the core: the engine, the `Widget` trait and widget tree, events, the backend-neutral
+//! `Painter` API and `paint` helpers, and texture and font caches.  It contains no widgets except the window's
 //! [`RootWidget`](root_widget::RootWidget).  The standard widgets (buttons, text, boxes, and
 //! the rest) live in the `pushrod-widgets` crate.  A different widget library can extend or
 //! replace `pushrod-widgets`, using the same public API.
@@ -43,7 +43,9 @@
 // apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").
 #![warn(missing_docs, clippy::missing_panics_doc, clippy::missing_errors_doc)]
 
+pub mod backend;
 pub mod cache;
+pub mod color;
 pub mod engine;
 pub mod event;
 pub mod font;

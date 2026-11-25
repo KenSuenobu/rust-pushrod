@@ -77,8 +77,7 @@ use pushrod::event::Event;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::TextJustify;
 use pushrod::widget::Widget;
-use sdl2::pixels::Color;
-use sdl2::ttf::FontStyle;
+use pushrod::color::{Color, FontStyle};
 
 const FONT: &str = "assets/OpenSans-Regular.ttf";
 

@@ -16,7 +16,7 @@ description: A rectangle filled with one color. Use it as a background or a pane
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod::geometry::{point, size};
 use pushrod::widget::Widget;
-use sdl2::pixels::Color;
+use pushrod::color::Color;
 
 let mut panel = BaseWidget::new(point(20, 20), size(120, 80));
 panel.set_color(Color::RGB(70, 130, 200));

@@ -11,7 +11,7 @@ A widget is a struct that stores a `WidgetCore` and implements the `Widget` trai
 |---|---|
 | `core(&self) -> &WidgetCore` | Gives Pushrod access to the shared state (ID, origin, size, color, visibility, texture). |
 | `core_mut(&mut self) -> &mut WidgetCore` | Mutable access to the same. |
-| `paint(&self, canvas, font_cache)` | Draws the widget into its own texture, from `(0, 0)` to `get_size()`. |
+| `paint(&self, painter)` | Draws the widget through the backend-neutral [`Painter`](../platforms/backend-neutral-paint-api.md), from `(0, 0)` to `get_size()`. |
 
 Everything else (`get_id`, `get_origin`, `get_size`, `set_color`, `set_size`, `set_hidden`, `set_invalidated`, ...) has a default implementation. Interactive widgets also implement `handle_event`.
 
@@ -24,14 +24,11 @@ This widget switches between two colors each time it is clicked and emits `Click
 ```rust
 use pushrod::engine::Engine;
 use pushrod::event::{Event, EventCtx};
-use pushrod::font::FontCache;
 use pushrod::geometry::{point, size, Point, Size};
-use pushrod::paint;
+use pushrod::paint::{self, Painter};
 use pushrod::widget::{Widget, WidgetCore};
 use sdl2::mouse::MouseButton;
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
+use pushrod::color::Color;
 
 /// A square that switches between two colors each time it is clicked.
 pub struct SwatchWidget {
@@ -94,11 +91,10 @@ impl Widget for SwatchWidget {
     ///
     /// # Arguments
     ///
-    /// * `c` - The canvas, targeting the swatch's texture.
-    /// * `_fc` - The font cache (unused).
-    fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
-        paint::fill(c, self.current_color());
-        paint::border(c, self.get_size(), Color::BLACK, 1);
+    /// * `p` - The painter, targeting the swatch.
+    fn paint(&self, p: &mut dyn Painter) {
+        paint::fill(p, self.current_color());
+        paint::border(p, self.get_size(), Color::BLACK, 1);
     }
 
     /// Switches colors on each left-button release and emits `Clicked`.
@@ -128,13 +124,13 @@ impl Widget for SwatchWidget {
 
 ### Painting
 
-`paint` runs only when the widget is *invalidated* (after creation, or after you call `set_invalidated(true)` or any setter that changes its look). The canvas already targets the widget's own GPU texture, so you always draw from `(0, 0)`. Compose the look from the helpers in `pushrod::paint`:
+`paint` runs only when the widget is *invalidated* (after creation, or after you call `set_invalidated(true)` or any setter that changes its look). The painter already targets the widget's own surface (a GPU texture with the SDL2 backend), so you always draw from `(0, 0)`. Compose the look from the helpers in `pushrod::paint`:
 
 | Helper | Draws |
 |---|---|
-| `paint::fill(canvas, color)` | Fills the whole texture. |
-| `paint::border(canvas, size, color, width)` | A border `width` pixels wide. |
-| `paint::text(canvas, font_cache, bounds, &style, color, text)` | Text in `bounds`, justified by the `TextStyle`, centered vertically when it fits. |
+| `paint::fill(painter, color)` | Fills the whole texture. |
+| `paint::border(painter, size, color, width)` | A border `width` pixels wide. |
+| `paint::text(painter, bounds, &style, color, text)` | Text in `bounds`, justified by the `TextStyle`, centered vertically when it fits. |
 
 Pushrod's own widgets are built the same way: a box is `fill` + `border`, a button is `fill` + `text` + `border`.
 
@@ -177,7 +173,7 @@ fn main() {
 use pushrod::engine::Engine;
 use pushrod::geometry::{point, size};
 use sdl2::mouse::MouseButton;
-use sdl2::pixels::Color;
+use pushrod::color::Color;
 
 fn mouse(down: bool, x: i32, y: i32) -> Event {
     if down {
@@ -206,7 +202,7 @@ fn swatch_toggles_and_reports_clicks() {
 ## Checklist for a new widget
 
 - Store a `WidgetCore`; create it with `WidgetCore::new(origin, size)`.
-- Draw only with `paint` helpers (or SDL2 canvas calls) inside `paint`; never draw elsewhere.
+- Draw only with `paint` helpers (or `Painter` calls) inside `paint`; never draw elsewhere.
 - Call `set_invalidated(true)` whenever the look changes.
 - Emit events with `ctx.emit` rather than calling application code.
 - Add a page for it under **Widgets** in this site (see [Writing documentation](../writing-documentation.md)).

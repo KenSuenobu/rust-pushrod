@@ -28,8 +28,7 @@
 //! use pushrod::geometry::{point, size};
 //! use pushrod_widgets::button_widget::ButtonWidget;
 //! use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-//! use sdl2::pixels::Color;
-//! use sdl2::ttf::FontStyle;
+//! use pushrod::color::{Color, FontStyle};
 //!
 //! #[derive(Default)]
 //! struct AppState {
