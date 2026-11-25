@@ -1750,6 +1750,10 @@ mod window_broadcast_tests {
         ///
         /// * `event` - The event.
         /// * `ctx` - The context.
+        ///
+        /// # Returns
+        ///
+        /// [`Propagation::Continue`].
         fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
             ctx.emit(event.clone());
             Propagation::Stop

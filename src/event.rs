@@ -544,6 +544,10 @@ impl EventKind {
     /// Pointer presses, releases, motion, scrolls, key presses and releases, and text input
     /// propagate.  Hover (`PointerEntered`, `PointerExited`) belongs to one `Widget`, and semantic
     /// events (`Clicked`, `ValueChanged`, ...) go to callbacks, so neither propagates.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the event propagates.
     pub fn propagates(self) -> bool {
         matches!(
             self,

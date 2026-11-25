@@ -1063,6 +1063,10 @@ mod broadcast_tests {
         ///
         /// * `_event` - The event.
         /// * `_ctx` - The context.
+        ///
+        /// # Returns
+        ///
+        /// [`Propagation::Continue`].
         fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) -> Propagation {
             self.log.borrow_mut().push(self.get_id());
             Propagation::Continue
@@ -1217,6 +1221,10 @@ mod broadcast_tests {
         ///
         /// * `_event` - The event.
         /// * `ctx` - The context.
+        ///
+        /// # Returns
+        ///
+        /// [`Propagation::Stop`] in the configured phase, otherwise [`Propagation::Continue`].
         fn handle_event(&mut self, _event: &Event, ctx: &mut EventCtx) -> Propagation {
             self.log.borrow_mut().push((self.name, ctx.phase()));
 

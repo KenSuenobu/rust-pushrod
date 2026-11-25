@@ -25,11 +25,11 @@
 //! button is still selected.
 
 use pushrod::color::{Color, FontStyle};
-use pushrod::event::{Event, EventCtx, EventMask, Propagation};
+use pushrod::controllers::{ClickController, ControllerEvent};
+use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle};
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::mouse::MouseButton;
 
 /// A push button with a text label.
 ///
@@ -41,7 +41,6 @@ pub struct ButtonWidget {
     style: TextStyle,
     msg: String,
     border_width: u8,
-    pressed: bool,
     selected: bool,
 }
 
@@ -95,13 +94,10 @@ impl Widget for ButtonWidget {
         paint::border(p, size, Color::BLACK, 1);
     }
 
-    /// Tracks the left mouse button and emits `Clicked`.
+    /// Feeds the button's [`ClickController`] and re-emits the pointer events.
     ///
-    /// - Left button pressed (`PointerPressed`): the button is pressed and selected.
-    /// - Pointer leaves or re-enters while pressed (`PointerExited`, `PointerEntered`): deselects
-    ///   or reselects it.
-    /// - Left button released (`PointerReleased`): if still selected, emits
-    ///   `Clicked { id, button, count }`; then the button is released and deselected.
+    /// The controller does the press, track, and release tracking and reports through
+    /// [`Widget::on_controller_event`] (see below); the button only reacts to the results.
     ///
     /// # Arguments
     ///
@@ -117,7 +113,7 @@ impl Widget for ButtonWidget {
     /// `PointerEntered` and `PointerExited` so the application's `on_press`, `on_release` and
     /// `on_hover` callbacks run (each is emitted after `Clicked`, when there is one).
     fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
-        self.track(event, ctx);
+        self.feed_controllers(event, ctx);
 
         if matches!(
             event,
@@ -132,48 +128,39 @@ impl Widget for ButtonWidget {
 
         Propagation::Continue
     }
-}
 
-impl ButtonWidget {
-    /// Updates the pressed and selected state for `event`, emitting `Clicked` on a click.
-    fn track(&mut self, event: &Event, ctx: &mut EventCtx) {
+    /// Updates the selected state from the click controller, emitting `Clicked` on a click.
+    ///
+    /// - `ClickPressed`: selects (inverts) the button.
+    /// - `ClickArmed`: selects or deselects it as the pointer re-enters or leaves while pressed.
+    /// - `Clicked`: emits `Clicked { id, button, count }`, then deselects.
+    /// - `ClickCancelled`: deselects.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - What the controller reported.
+    /// * `ctx` - The context used to emit `Clicked`.
+    ///
+    /// # Returns
+    ///
+    /// Always [`Propagation::Continue`]; `handle_event` decides what stops.
+    fn on_controller_event(&mut self, event: &ControllerEvent, ctx: &mut EventCtx) -> Propagation {
         match event {
-            Event::PointerPressed {
-                button: MouseButton::Left,
-                ..
-            } => {
-                self.pressed = true;
-                self.set_selected(true);
-            }
-
-            Event::PointerReleased {
-                button: MouseButton::Left,
-                count,
-                ..
-            } => {
-                if self.pressed && self.selected {
-                    ctx.emit(Event::Clicked {
-                        id: self.get_id(),
-                        button: MouseButton::Left,
-                        count: *count,
-                    });
-                }
-
-                self.pressed = false;
+            ControllerEvent::ClickPressed => self.set_selected(true),
+            ControllerEvent::ClickArmed(armed) => self.set_selected(*armed),
+            ControllerEvent::Clicked { button, count } => {
+                ctx.emit(Event::Clicked {
+                    id: self.get_id(),
+                    button: *button,
+                    count: *count,
+                });
                 self.set_selected(false);
             }
-
-            // While pressed, the button follows the mouse pointer in and out of its bounds.
-            Event::PointerEntered { id } if self.pressed && *id == self.get_id() => {
-                self.set_selected(true);
-            }
-
-            Event::PointerExited { id } if self.pressed && *id == self.get_id() => {
-                self.set_selected(false);
-            }
-
+            ControllerEvent::ClickCancelled => self.set_selected(false),
             _ => {}
         }
+
+        Propagation::Continue
     }
 }
 
@@ -210,16 +197,15 @@ impl ButtonWidget {
     ) -> Self {
         let mut core = WidgetCore::new(origin, size);
 
-        // A button needs presses and releases to click, and hover to follow the pointer in and
-        // out of its bounds while pressed.
-        core.set_event_mask(EventMask::POINTER_BUTTONS | EventMask::HOVER);
+        // The click controller needs presses and releases to click, and hover to follow the
+        // pointer in and out of the button's bounds while pressed.
+        core.add_controller(ClickController::new());
 
         Self {
             core,
             style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
             msg,
             border_width,
-            pressed: false,
             selected: false,
         }
     }
