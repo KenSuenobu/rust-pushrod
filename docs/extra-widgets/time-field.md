@@ -1,6 +1,6 @@
 # Time field and date-time field: widget roadmap
 
-> **Issue:** 3.3 (extra-widgets 3.3) · **Epic 3:** Pickers and special fields · **Milestone:** Extra widgets 2: everyday controls and pickers · **Size:** S
+> **Issue:** [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) (extra-widgets 3.3) · **Epic 3:** Pickers and special fields · **Milestone:** Extra widgets 2: everyday controls and pickers · **Size:** S
 > **Crate:** `pushrod-extra-widgets` · **User docs:** `pushrod-docs/docs/extra-widgets/time-field.md` · **Overview:** [extra widgets roadmap](../ROADMAP_EXTRA_WIDGETS.md) · **Rules:** [design philosophy](../../DESIGN_PHILOSOPHY.md)
 
 This file is the specification for this widget: what it is, what it does, how it looks, and how it responds. To change it, edit this file in a pull request (and its mockup in [`docs/mockups/generate_extra_widgets.py`](../mockups/generate_extra_widgets.py) if the picture changes), then bring the issue in line. If this file and the issue disagree, this file wins.
@@ -56,7 +56,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Depends on
 
-Extra widgets: 2.3, 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode
+Extra widgets: 2.3 ([#259](https://github.com/KenSuenobu/rust-pushrod/issues/259)), 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode
 
 ## Implementation notes
 

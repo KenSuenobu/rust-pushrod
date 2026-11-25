@@ -57,7 +57,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Depends on
 
-Extra widgets: 1.1; Pushrod: Pushrod 1.6 [#22](https://github.com/KenSuenobu/rust-pushrod/issues/22) Callback registry for every widget event, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
+Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 1.6 [#22](https://github.com/KenSuenobu/rust-pushrod/issues/22) Callback registry for every widget event, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
 
 ## Implementation notes
 

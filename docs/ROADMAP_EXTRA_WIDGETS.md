@@ -128,14 +128,14 @@ Each widget below exists, in some form, in at least two of the toolkits reviewed
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
-| 1 | Crate and foundations | The crate, registration, gallery, and the popover every picker uses. | 3 | 3 |
-| 2 | Buttons and value controls | Menu and split buttons, segmented control, stepper, dial, level indicator, tool palette, ruler, shortcut field. | 8 | 6 |
-| 3 | Pickers and special fields | Calendar, date and time pickers, color and font choosers, path field, image well, new-password, character picker. | 9 | 6 |
-| 4 | Data views | Tree view, column browser, icon grid, data grid, property grid, check list, editable list, dual list, breadcrumb bar, filter field, rule editor, image viewer. | 12 | 5 |
-| 5 | Panels and navigation | Drawer, accordion, sidebar, document tabs. | 4 | 3 |
-| 6 | Dialogs and assistants | Input, progress, and task dialogs, wizard, settings and about dialogs, find bar, shortcuts editor. | 8 | 3 |
+| 1 ([#246](https://github.com/KenSuenobu/rust-pushrod/issues/246)) | Crate and foundations | The crate, registration, gallery, and the popover every picker uses. | 3 | 3 |
+| 2 ([#247](https://github.com/KenSuenobu/rust-pushrod/issues/247)) | Buttons and value controls | Menu and split buttons, segmented control, stepper, dial, level indicator, tool palette, ruler, shortcut field. | 8 | 6 |
+| 3 ([#248](https://github.com/KenSuenobu/rust-pushrod/issues/248)) | Pickers and special fields | Calendar, date and time pickers, color and font choosers, path field, image well, new-password, character picker. | 9 | 6 |
+| 4 ([#249](https://github.com/KenSuenobu/rust-pushrod/issues/249)) | Data views | Tree view, column browser, icon grid, data grid, property grid, check list, editable list, dual list, breadcrumb bar, filter field, rule editor, image viewer. | 12 | 5 |
+| 5 ([#250](https://github.com/KenSuenobu/rust-pushrod/issues/250)) | Panels and navigation | Drawer, accordion, sidebar, document tabs. | 4 | 3 |
+| 6 ([#251](https://github.com/KenSuenobu/rust-pushrod/issues/251)) | Dialogs and assistants | Input, progress, and task dialogs, wizard, settings and about dialogs, find bar, shortcuts editor. | 8 | 3 |
 
-## Epic 1: Crate and foundations
+## Epic 1: Crate and foundations ([#246](https://github.com/KenSuenobu/rust-pushrod/issues/246))
 
 The crate, registration, gallery, and the popover every picker uses.
 
@@ -145,13 +145,13 @@ The crate, registration, gallery, and the popover every picker uses.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|---|
-| 1.1 | Create the pushrod-extra-widgets crate | The crate, its registration function, its docs section, and its place in CI. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `size/S`, `widget` | N | Y | X1 | S | `pushrod-extra-widgets/Cargo.toml (new)`, `pushrod-extra-widgets/src/lib.rs (new)`, `Cargo.toml`, `.github/workflows/ci.yml`, `pushrod-docs` |
-| 1.2 | Extra widgets gallery example | A runnable gallery showing every extra widget, used for golden screenshots. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/examples/gallery.rs (new)`, `pushrod-docs` |
-| 1.3 | Popover: a floating panel anchored to a control | A borderless panel that opens next to a control, holds any widgets, and closes on Escape or a click outside. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/popover.rs (new)`, `pushrod-docs` |
+| 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)) | Create the pushrod-extra-widgets crate | The crate, its registration function, its docs section, and its place in CI. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `size/S`, `widget` | N | Y | X1 | S | `pushrod-extra-widgets/Cargo.toml (new)`, `pushrod-extra-widgets/src/lib.rs (new)`, `Cargo.toml`, `.github/workflows/ci.yml`, `pushrod-docs` |
+| 1.2 ([#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)) | Extra widgets gallery example | A runnable gallery showing every extra widget, used for golden screenshots. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/examples/gallery.rs (new)`, `pushrod-docs` |
+| 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)) | Popover: a floating panel anchored to a control | A borderless panel that opens next to a control, holds any widgets, and closes on Escape or a click outside. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/popover.rs (new)`, `pushrod-docs` |
 
 ### 1.1: Create the pushrod-extra-widgets crate
 
-*Extra widgets 1: crate and Chassis widgets*
+*Issue [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)* · *Extra widgets 1: crate and Chassis widgets*
 
 **Widget roadmap:** [`docs/extra-widgets/crate.md`](extra-widgets/crate.md)
 
@@ -185,7 +185,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 1.2: Extra widgets gallery example
 
-*Extra widgets 1: crate and Chassis widgets*
+*Issue [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)* · *Extra widgets 1: crate and Chassis widgets*
 
 **Widget roadmap:** [`docs/extra-widgets/gallery.md`](extra-widgets/gallery.md)
 
@@ -209,7 +209,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Golden images captured in CI
 - Contributing guide says new widgets must be added to the gallery
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 7.2 [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) Golden-image rendering tests, Pushrod 7.3 [#71](https://github.com/KenSuenobu/rust-pushrod/issues/71) Widget gallery example, Pushrod 4.4 [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) Tab view
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 7.2 [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) Golden-image rendering tests, Pushrod 7.3 [#71](https://github.com/KenSuenobu/rust-pushrod/issues/71) Widget gallery example, Pushrod 4.4 [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) Tab view
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -217,7 +217,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 1.3: Popover: a floating panel anchored to a control
 
-*Extra widgets 1: crate and Chassis widgets*
+*Issue [#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)* · *Extra widgets 1: crate and Chassis widgets*
 
 **Widget roadmap:** [`docs/extra-widgets/popover.md`](extra-widgets/popover.md)
 
@@ -243,13 +243,13 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Any widget tree can be the content
 - Modal and modeless modes
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 5.1 [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) Clip children to their parent's bounds, Pushrod 5.2 [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) Composite widgets: build widgets from parts that applications can retrieve and modify, Pushrod 9.2 [#94](https://github.com/KenSuenobu/rust-pushrod/issues/94) Event propagation: capture, target, and bubble phases with handled/ignored, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 5.1 [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) Clip children to their parent's bounds, Pushrod 5.2 [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) Composite widgets: build widgets from parts that applications can retrieve and modify, Pushrod 9.2 [#94](https://github.com/KenSuenobu/rust-pushrod/issues/94) Event propagation: capture, target, and bubble phases with handled/ignored, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
 **Documentation.** `pushrod-docs/docs/extra-widgets/popover.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
 
-## Epic 2: Buttons and value controls
+## Epic 2: Buttons and value controls ([#247](https://github.com/KenSuenobu/rust-pushrod/issues/247))
 
 Menu and split buttons, segmented control, stepper, dial, level indicator, tool palette, ruler, shortcut field.
 
@@ -259,18 +259,18 @@ Menu and split buttons, segmented control, stepper, dial, level indicator, tool 
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|---|
-| 2.1 | Menu button and split button | A button that opens a menu, and a button with a separate arrow part that opens one. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/menu_button.rs (new)`, `pushrod-docs` |
+| 2.1 ([#258](https://github.com/KenSuenobu/rust-pushrod/issues/258)) | Menu button and split button | A button that opens a menu, and a button with a separate arrow part that opens one. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/menu_button.rs (new)`, `pushrod-docs` |
 | 2.2 ([#50](https://github.com/KenSuenobu/rust-pushrod/issues/50)) | Segmented control | A row of joined buttons: pick one, or toggle several. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/segmented_control.rs (new)`, `pushrod-docs` |
-| 2.3 | Stepper (up and down arrows) | A pair of small up/down arrows that step a value, attachable to any field. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/stepper.rs (new)`, `pushrod-docs` |
+| 2.3 ([#259](https://github.com/KenSuenobu/rust-pushrod/issues/259)) | Stepper (up and down arrows) | A pair of small up/down arrows that step a value, attachable to any field. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/stepper.rs (new)`, `pushrod-docs` |
 | 2.4 ([#127](https://github.com/KenSuenobu/rust-pushrod/issues/127)) | Dial (rotary knob) | A round control turned by dragging, the wheel, or the keyboard, for values like volume, pan, or angle. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/dial.rs (new)`, `pushrod-docs` |
 | 2.5 ([#54](https://github.com/KenSuenobu/rust-pushrod/issues/54)) | Level indicator (meter) | A bar showing a level against warning and critical thresholds, continuous or in discrete segments. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/level_indicator.rs (new)`, `pushrod-docs` |
 | 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)) | Tool palette (grid of tool buttons) | A grid of icon buttons with one-of-many selection and optional drag out, for tools, swatches, or components. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/tool_palette.rs (new)`, `pushrod-docs` |
-| 2.7 | Ruler | A horizontal or vertical scale in pixels, points, or units, with markers that can be dragged. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/ruler.rs (new)`, `pushrod-docs` |
-| 2.8 | Shortcut field (key combination recorder) | A field that records the key combination pressed while it has focus. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/shortcut_field.rs (new)`, `pushrod-docs` |
+| 2.7 ([#270](https://github.com/KenSuenobu/rust-pushrod/issues/270)) | Ruler | A horizontal or vertical scale in pixels, points, or units, with markers that can be dragged. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/ruler.rs (new)`, `pushrod-docs` |
+| 2.8 ([#271](https://github.com/KenSuenobu/rust-pushrod/issues/271)) | Shortcut field (key combination recorder) | A field that records the key combination pressed while it has focus. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/shortcut_field.rs (new)`, `pushrod-docs` |
 
 ### 2.1: Menu button and split button
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/menu-button.md`](extra-widgets/menu-button.md)
 
@@ -296,7 +296,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Split button: main part runs the default action, arrow part opens the menu
 - Menu items are actions with shortcuts and enabled state
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 2.11 [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) Menu bar and drop-down menus (drawn by Pushrod), Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 2.11 [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) Menu bar and drop-down menus (drawn by Pushrod), Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -329,7 +329,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Per-segment disabled state, text, and icons
 - Keyboard navigation and selection
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 2.5 [#31](https://github.com/KenSuenobu/rust-pushrod/issues/31) Radio buttons and radio groups, Pushrod 1.17 [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) Per-state appearance: colors, border, and font for each visual state
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 2.5 [#31](https://github.com/KenSuenobu/rust-pushrod/issues/31) Radio buttons and radio groups, Pushrod 1.17 [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) Per-state appearance: colors, border, and font for each visual state
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -337,7 +337,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 2.3: Stepper (up and down arrows)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/stepper.md`](extra-widgets/stepper.md)
 
@@ -361,7 +361,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Limits disable the matching arrow unless wrapping
 - Buddy binding keeps another widget in step
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 1.5 [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) Timers and idle callbacks, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 9.6 [#98](https://github.com/KenSuenobu/rust-pushrod/issues/98) Property bindings: keep two properties in sync
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 1.5 [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) Timers and idle callbacks, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 9.6 [#98](https://github.com/KenSuenobu/rust-pushrod/issues/98) Property bindings: keep two properties in sync
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -394,7 +394,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Wrapping mode for angles
 - Notches and optional value text
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 1.6 [#22](https://github.com/KenSuenobu/rust-pushrod/issues/22) Callback registry for every widget event, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 1.6 [#22](https://github.com/KenSuenobu/rust-pushrod/issues/22) Callback registry for every widget event, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -426,7 +426,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Warning and critical thresholds visible without color
 - Optional text and editable mode
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 1.1 [#19](https://github.com/KenSuenobu/rust-pushrod/issues/19) Widget behavior flags and visual states, Pushrod 1.17 [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) Per-state appearance: colors, border, and font for each visual state, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 1.1 [#19](https://github.com/KenSuenobu/rust-pushrod/issues/19) Widget behavior flags and visual states, Pushrod 1.17 [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) Per-state appearance: colors, border, and font for each visual state, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -460,7 +460,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Grid and List layouts, group header rows, and tooltips
 - Grid reflows with width; keyboard navigation
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.21 [#125](https://github.com/KenSuenobu/rust-pushrod/issues/125) Image button, Pushrod 2.13 [#77](https://github.com/KenSuenobu/rust-pushrod/issues/77) Tooltips, Pushrod 5.10 [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) Flow layout (wrapping rows), Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.21 [#125](https://github.com/KenSuenobu/rust-pushrod/issues/125) Image button, Pushrod 2.13 [#77](https://github.com/KenSuenobu/rust-pushrod/issues/77) Tooltips, Pushrod 5.10 [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) Flow layout (wrapping rows), Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
 
 **Used by Chassis:** Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette.
 
@@ -470,7 +470,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 2.7: Ruler
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/ruler.md`](extra-widgets/ruler.md)
 
@@ -494,7 +494,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Follows an attached container's scroll
 - Pointer tracking line and draggable markers
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.10 [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) Custom paint widget (closure-drawn), Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.10 [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) Custom paint widget (closure-drawn), Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -502,7 +502,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 2.8: Shortcut field (key combination recorder)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/shortcut-field.md`](extra-widgets/shortcut-field.md)
 
@@ -526,13 +526,13 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Escape cancels, Backspace clears
 - Conflicts reported inline
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
 **Documentation.** `pushrod-docs/docs/extra-widgets/shortcut-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
 
-## Epic 3: Pickers and special fields
+## Epic 3: Pickers and special fields ([#248](https://github.com/KenSuenobu/rust-pushrod/issues/248))
 
 Calendar, date and time pickers, color and font choosers, path field, image well, new-password, character picker.
 
@@ -542,19 +542,19 @@ Calendar, date and time pickers, color and font choosers, path field, image well
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|---|
-| 3.1 | Calendar (month view) | A month grid for choosing a day or a range of days, usable on its own or in the date picker. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X2 | M | `pushrod-extra-widgets/src/calendar.rs (new)`, `pushrod-docs` |
+| 3.1 ([#260](https://github.com/KenSuenobu/rust-pushrod/issues/260)) | Calendar (month view) | A month grid for choosing a day or a range of days, usable on its own or in the date picker. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X2 | M | `pushrod-extra-widgets/src/calendar.rs (new)`, `pushrod-docs` |
 | 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)) | Date picker | A date field with a drop-down month calendar. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/date_picker.rs (new)`, `pushrod-docs` |
-| 3.3 | Time field and date-time field | A time entry with steppable parts, and a combined date-and-time field. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/time_field.rs (new)`, `pushrod-docs` |
+| 3.3 ([#261](https://github.com/KenSuenobu/rust-pushrod/issues/261)) | Time field and date-time field | A time entry with steppable parts, and a combined date-and-time field. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/time_field.rs (new)`, `pushrod-docs` |
 | 3.4 ([#46](https://github.com/KenSuenobu/rust-pushrod/issues/46)) | Color well and color picker | A swatch button that opens a color picker with swatches, sliders, and a hex field. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X2 | M | `pushrod-extra-widgets/src/color_picker.rs (new)`, `pushrod-docs` |
 | 3.5 ([#129](https://github.com/KenSuenobu/rust-pushrod/issues/129)) | Font chooser | A font button that opens a chooser with family, style, size, and a preview. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X2 | M | `pushrod-extra-widgets/src/font_chooser.rs (new)`, `pushrod-docs` |
-| 3.6 | Path field (file or folder with Browse) | A text field for a file or folder path, with a Browse button and drop support. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/path_field.rs (new)`, `pushrod-docs` |
-| 3.7 | Image well | A framed area that shows an image and accepts a new one by drop, paste, or Choose. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/image_well.rs (new)`, `pushrod-docs` |
-| 3.8 | New password (enter, confirm, strength) | Two password fields with a strength meter and a match check. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/new_password.rs (new)`, `pushrod-docs` |
-| 3.9 | Character picker | A searchable grid of characters by block, with a preview and code point. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/character_picker.rs (new)`, `pushrod-docs` |
+| 3.6 ([#262](https://github.com/KenSuenobu/rust-pushrod/issues/262)) | Path field (file or folder with Browse) | A text field for a file or folder path, with a Browse button and drop support. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/path_field.rs (new)`, `pushrod-docs` |
+| 3.7 ([#272](https://github.com/KenSuenobu/rust-pushrod/issues/272)) | Image well | A framed area that shows an image and accepts a new one by drop, paste, or Choose. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/image_well.rs (new)`, `pushrod-docs` |
+| 3.8 ([#273](https://github.com/KenSuenobu/rust-pushrod/issues/273)) | New password (enter, confirm, strength) | Two password fields with a strength meter and a match check. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/new_password.rs (new)`, `pushrod-docs` |
+| 3.9 ([#274](https://github.com/KenSuenobu/rust-pushrod/issues/274)) | Character picker | A searchable grid of characters by block, with a preview and code point. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/character_picker.rs (new)`, `pushrod-docs` |
 
 ### 3.1: Calendar (month view)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/calendar.md`](extra-widgets/calendar.md)
 
@@ -579,7 +579,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Min/max limits and marked days
 - Keyboard navigation by day and month
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -611,7 +611,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Min/max enforced
 - Up/Down steps the date part under the caret
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3, 3.1; Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button)
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)), 3.1 ([#260](https://github.com/KenSuenobu/rust-pushrod/issues/260)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button)
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -619,7 +619,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 3.3: Time field and date-time field
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/time-field.md`](extra-widgets/time-field.md)
 
@@ -643,7 +643,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - 12- and 24-hour formats
 - Date-time field keeps one combined value
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 2.3, 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 2.3 ([#259](https://github.com/KenSuenobu/rust-pushrod/issues/259)), 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -675,7 +675,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Popover and inline use
 - Drag a color between wells
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3, 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)); Pushrod: Pushrod 3.2 [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) Slider, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)), 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)); Pushrod: Pushrod 3.2 [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) Slider, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -707,7 +707,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Preview text editable
 - Popover and dialog use
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3; Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 1.24 [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) Fonts: shared font handles and a built-in default font, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 1.24 [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) Fonts: shared font handles and a built-in default font, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -715,7 +715,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 3.6: Path field (file or folder with Browse)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/path-field.md`](extra-widgets/path-field.md)
 
@@ -739,7 +739,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Typed, browsed, and dropped paths
 - Missing-path mark when required
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.12 [#38](https://github.com/KenSuenobu/rust-pushrod/issues/38) File chooser dialog (drawn by Pushrod), Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.12 [#38](https://github.com/KenSuenobu/rust-pushrod/issues/38) File chooser dialog (drawn by Pushrod), Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -747,7 +747,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 3.7: Image well
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/image-well.md`](extra-widgets/image-well.md)
 
@@ -771,7 +771,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Drop feedback outline
 - Optional square crop
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.7 [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) Image widget, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application, Pushrod 2.12 [#38](https://github.com/KenSuenobu/rust-pushrod/issues/38) File chooser dialog (drawn by Pushrod)
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.7 [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) Image widget, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application, Pushrod 2.12 [#38](https://github.com/KenSuenobu/rust-pushrod/issues/38) File chooser dialog (drawn by Pushrod)
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -779,7 +779,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 3.8: New password (enter, confirm, strength)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/new-password.md`](extra-widgets/new-password.md)
 
@@ -811,7 +811,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 3.9: Character picker
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/character-picker.md`](extra-widgets/character-picker.md)
 
@@ -835,13 +835,13 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Preview with name and code point
 - Grid virtualized for large blocks
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 1.18 [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate), Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 3.6 [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) Choice button: pop-up list and click-to-cycle modes
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 1.18 [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate), Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 3.6 [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) Choice button: pop-up list and click-to-cycle modes
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
 **Documentation.** `pushrod-docs/docs/extra-widgets/character-picker.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
 
-## Epic 4: Data views
+## Epic 4: Data views ([#249](https://github.com/KenSuenobu/rust-pushrod/issues/249))
 
 Tree view, column browser, icon grid, data grid, property grid, check list, editable list, dual list, breadcrumb bar, filter field, rule editor, image viewer.
 
@@ -853,16 +853,16 @@ Tree view, column browser, icon grid, data grid, property grid, check list, edit
 |---|---|---|---|---|---|---|---|---|
 | 4.1 ([#55](https://github.com/KenSuenobu/rust-pushrod/issues/55)) | Tree view (outline) | A hierarchical list with expand/collapse triangles, backed by a tree data source. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X2 | M | `pushrod-extra-widgets/src/tree_view.rs (new)`, `pushrod-docs` |
 | 4.2 ([#45](https://github.com/KenSuenobu/rust-pushrod/issues/45)) | Column browser | Columns of lists where selecting an item in one column fills the next, as in NeXTSTEP and the Mac Finder. | `extra-widgets`, `parallelizable`, `size/L`, `widget` | Y | N | X3 | L | `pushrod-extra-widgets/src/column_browser.rs (new)`, `pushrod-docs` |
-| 4.3 | Icon grid view | A scrolling grid of icons with captions, rubber-band selection, and drag and drop. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/icon_grid.rs (new)`, `pushrod-docs` |
-| 4.4 | Data grid (editable table) | A table whose cells edit in place with typed editors, with row add and delete. | `extra-widgets`, `parallelizable`, `size/L`, `widget` | Y | N | X3 | L | `pushrod-extra-widgets/src/data_grid.rs (new)`, `pushrod-docs` |
-| 4.5 | Property grid (name and value inspector) | Categorized name/value rows with an editor per value type. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/property_grid.rs (new)`, `pushrod-docs` |
-| 4.6 | Check list | A list with a check box on every row, separate from the selection. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/check_list.rs (new)`, `pushrod-docs` |
-| 4.7 | Editable list (add, remove, reorder) | A list with + and - buttons underneath, in-place editing, and reordering. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/editable_list.rs (new)`, `pushrod-docs` |
-| 4.8 | Dual list (list builder) | Available and chosen lists side by side, with buttons to move items between them and order the chosen list. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/dual_list.rs (new)`, `pushrod-docs` |
-| 4.9 | Breadcrumb bar (path control) | A row of clickable path segments, with a menu of siblings on each separator. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/src/breadcrumb_bar.rs (new)`, `pushrod-docs` |
-| 4.10 | Filter field (live filter for lists, tables, and trees) | A search field bound to a list, table, or tree that hides non-matching rows as you type. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/filter_field.rs (new)`, `pushrod-docs` |
-| 4.11 | Rule editor (query builder) | Rows of "field, operator, value" with add and remove buttons, joined by All or Any. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/rule_editor.rs (new)`, `pushrod-docs` |
-| 4.12 | Image viewer (zoom and pan) | An image in a scrollable view with zoom to fit, actual size, zoom by wheel, and drag to pan. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/image_viewer.rs (new)`, `pushrod-docs` |
+| 4.3 ([#275](https://github.com/KenSuenobu/rust-pushrod/issues/275)) | Icon grid view | A scrolling grid of icons with captions, rubber-band selection, and drag and drop. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/icon_grid.rs (new)`, `pushrod-docs` |
+| 4.4 ([#276](https://github.com/KenSuenobu/rust-pushrod/issues/276)) | Data grid (editable table) | A table whose cells edit in place with typed editors, with row add and delete. | `extra-widgets`, `parallelizable`, `size/L`, `widget` | Y | N | X3 | L | `pushrod-extra-widgets/src/data_grid.rs (new)`, `pushrod-docs` |
+| 4.5 ([#255](https://github.com/KenSuenobu/rust-pushrod/issues/255)) | Property grid (name and value inspector) | Categorized name/value rows with an editor per value type. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/property_grid.rs (new)`, `pushrod-docs` |
+| 4.6 ([#263](https://github.com/KenSuenobu/rust-pushrod/issues/263)) | Check list | A list with a check box on every row, separate from the selection. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/check_list.rs (new)`, `pushrod-docs` |
+| 4.7 ([#264](https://github.com/KenSuenobu/rust-pushrod/issues/264)) | Editable list (add, remove, reorder) | A list with + and - buttons underneath, in-place editing, and reordering. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/editable_list.rs (new)`, `pushrod-docs` |
+| 4.8 ([#278](https://github.com/KenSuenobu/rust-pushrod/issues/278)) | Dual list (list builder) | Available and chosen lists side by side, with buttons to move items between them and order the chosen list. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/dual_list.rs (new)`, `pushrod-docs` |
+| 4.9 ([#256](https://github.com/KenSuenobu/rust-pushrod/issues/256)) | Breadcrumb bar (path control) | A row of clickable path segments, with a menu of siblings on each separator. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/src/breadcrumb_bar.rs (new)`, `pushrod-docs` |
+| 4.10 ([#277](https://github.com/KenSuenobu/rust-pushrod/issues/277)) | Filter field (live filter for lists, tables, and trees) | A search field bound to a list, table, or tree that hides non-matching rows as you type. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/filter_field.rs (new)`, `pushrod-docs` |
+| 4.11 ([#279](https://github.com/KenSuenobu/rust-pushrod/issues/279)) | Rule editor (query builder) | Rows of "field, operator, value" with add and remove buttons, joined by All or Any. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/rule_editor.rs (new)`, `pushrod-docs` |
+| 4.12 ([#280](https://github.com/KenSuenobu/rust-pushrod/issues/280)) | Image viewer (zoom and pan) | An image in a scrollable view with zoom to fit, actual size, zoom by wheel, and drag to pan. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/image_viewer.rs (new)`, `pushrod-docs` |
 
 ### 4.1: Tree view (outline)
 
@@ -893,7 +893,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Lazy children from a data source
 - Optional columns and drag to reparent
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 4.9 [#92](https://github.com/KenSuenobu/rust-pushrod/issues/92) Table view, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 4.9 [#92](https://github.com/KenSuenobu/rust-pushrod/issues/92) Table view, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -926,7 +926,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Keyboard navigation across columns
 - Horizontal scrolling keeps the selection visible
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 3.1 [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) Scroll bar
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 3.1 [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) Scroll bar
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -934,7 +934,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.3: Icon grid view
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/icon-grid.md`](extra-widgets/icon-grid.md)
 
@@ -960,7 +960,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Rubber-band and keyboard selection, type-to-find
 - Drag and drop and in-place rename
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.8 [#34](https://github.com/KenSuenobu/rust-pushrod/issues/34) Icon widget (picture with caption), Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.8 [#34](https://github.com/KenSuenobu/rust-pushrod/issues/34) Icon widget (picture with caption), Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -968,7 +968,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.4: Data grid (editable table)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/data-grid.md`](extra-widgets/data-grid.md)
 
@@ -1001,7 +1001,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.5: Property grid (name and value inspector)
 
-*Extra widgets 1: crate and Chassis widgets*
+*Issue [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255)* · *Extra widgets 1: crate and Chassis widgets*
 
 **Widget roadmap:** [`docs/extra-widgets/property-grid.md`](extra-widgets/property-grid.md)
 
@@ -1025,7 +1025,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Typed editors and custom editors by kind
 - Works from Pushrod property introspection and from any source
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 3.6 [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) Choice button: pop-up list and click-to-cycle modes, Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section)
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 3.6 [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) Choice button: pop-up list and click-to-cycle modes, Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section)
 
 **Used by Chassis:** Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid.
 
@@ -1035,7 +1035,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.6: Check list
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#263](https://github.com/KenSuenobu/rust-pushrod/issues/263)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/check-list.md`](extra-widgets/check-list.md)
 
@@ -1059,7 +1059,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Space toggles the selected rows
 - Check-all header with mixed state
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1067,7 +1067,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.7: Editable list (add, remove, reorder)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#264](https://github.com/KenSuenobu/rust-pushrod/issues/264)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/editable-list.md`](extra-widgets/editable-list.md)
 
@@ -1091,7 +1091,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Validation and uniqueness
 - Buttons disabled when not applicable
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1099,7 +1099,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.8: Dual list (list builder)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/dual-list.md`](extra-widgets/dual-list.md)
 
@@ -1123,7 +1123,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Order the chosen list
 - Buttons disabled when not applicable
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 4.10; Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 4.10 ([#277](https://github.com/KenSuenobu/rust-pushrod/issues/277)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1131,7 +1131,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.9: Breadcrumb bar (path control)
 
-*Extra widgets 1: crate and Chassis widgets*
+*Issue [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256)* · *Extra widgets 1: crate and Chassis widgets*
 
 **Widget roadmap:** [`docs/extra-widgets/breadcrumb-bar.md`](extra-widgets/breadcrumb-bar.md)
 
@@ -1156,7 +1156,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Overflow collapses into a menu
 - Keyboard navigation
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 2.11 [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) Menu bar and drop-down menus (drawn by Pushrod), Pushrod 1.18 [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate)
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog, Pushrod 2.11 [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) Menu bar and drop-down menus (drawn by Pushrod), Pushrod 1.18 [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate)
 
 **Used by Chassis:** Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer.
 
@@ -1166,7 +1166,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.10: Filter field (live filter for lists, tables, and trees)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/filter-field.md`](extra-widgets/filter-field.md)
 
@@ -1198,7 +1198,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.11: Rule editor (query builder)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/rule-editor.md`](extra-widgets/rule-editor.md)
 
@@ -1230,7 +1230,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 4.12: Image viewer (zoom and pan)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/image-viewer.md`](extra-widgets/image-viewer.md)
 
@@ -1254,13 +1254,13 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Drag to pan
 - Tiled drawing for large images
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.7 [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) Image widget, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 9.9 [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) Pointer cursor per widget
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.7 [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) Image widget, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 9.9 [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) Pointer cursor per widget
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
 **Documentation.** `pushrod-docs/docs/extra-widgets/image-viewer.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
 
-## Epic 5: Panels and navigation
+## Epic 5: Panels and navigation ([#250](https://github.com/KenSuenobu/rust-pushrod/issues/250))
 
 Drawer, accordion, sidebar, document tabs.
 
@@ -1270,14 +1270,14 @@ Drawer, accordion, sidebar, document tabs.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|---|
-| 5.1 | Drawer (collapsible side panel) | A side panel with a title bar that collapses to a thin strip and remembers its width. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/src/drawer.rs (new)`, `pushrod-docs` |
-| 5.2 | Accordion (one section open at a time) | A stack of titled sections where opening one closes the others. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/accordion.rs (new)`, `pushrod-docs` |
-| 5.3 | Sidebar (navigation list) | A list of sections with icons and headings that switches the page beside it. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/sidebar.rs (new)`, `pushrod-docs` |
-| 5.4 | Document tabs (closable and reorderable) | A tab bar for open documents: close buttons, a modified mark, drag to reorder, and overflow. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/document_tabs.rs (new)`, `pushrod-docs` |
+| 5.1 ([#257](https://github.com/KenSuenobu/rust-pushrod/issues/257)) | Drawer (collapsible side panel) | A side panel with a title bar that collapses to a thin strip and remembers its width. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/src/drawer.rs (new)`, `pushrod-docs` |
+| 5.2 ([#265](https://github.com/KenSuenobu/rust-pushrod/issues/265)) | Accordion (one section open at a time) | A stack of titled sections where opening one closes the others. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/accordion.rs (new)`, `pushrod-docs` |
+| 5.3 ([#266](https://github.com/KenSuenobu/rust-pushrod/issues/266)) | Sidebar (navigation list) | A list of sections with icons and headings that switches the page beside it. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/sidebar.rs (new)`, `pushrod-docs` |
+| 5.4 ([#281](https://github.com/KenSuenobu/rust-pushrod/issues/281)) | Document tabs (closable and reorderable) | A tab bar for open documents: close buttons, a modified mark, drag to reorder, and overflow. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/document_tabs.rs (new)`, `pushrod-docs` |
 
 ### 5.1: Drawer (collapsible side panel)
 
-*Extra widgets 1: crate and Chassis widgets*
+*Issue [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257)* · *Extra widgets 1: crate and Chassis widgets*
 
 **Widget roadmap:** [`docs/extra-widgets/drawer.md`](extra-widgets/drawer.md)
 
@@ -1302,7 +1302,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Left, right, and bottom sides
 - Toggle by button and action shortcut
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 3.9 [#47](https://github.com/KenSuenobu/rust-pushrod/issues/47) Split view (panes with draggable dividers), Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 3.9 [#47](https://github.com/KenSuenobu/rust-pushrod/issues/47) Split view (panes with draggable dividers), Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
 
 **Used by Chassis:** Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer.
 
@@ -1312,7 +1312,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 5.2: Accordion (one section open at a time)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/accordion.md`](extra-widgets/accordion.md)
 
@@ -1336,7 +1336,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Open section fills the height
 - Keyboard navigation between headers
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1344,7 +1344,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 5.3: Sidebar (navigation list)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/sidebar.md`](extra-widgets/sidebar.md)
 
@@ -1368,7 +1368,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Bound to a stack layout
 - Keyboard navigation
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 5.9 [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) Stack layout (one child visible at a time)
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view, Pushrod 5.9 [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) Stack layout (one child visible at a time)
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1376,7 +1376,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 5.4: Document tabs (closable and reorderable)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/document-tabs.md`](extra-widgets/document-tabs.md)
 
@@ -1402,13 +1402,13 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Drag to reorder and context menu
 - Overflow arrows and tab list menu
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 4.4 [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) Tab view, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application, Pushrod 2.19 [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) Context menus, Pushrod 2.11 [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) Menu bar and drop-down menus (drawn by Pushrod)
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 4.4 [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) Tab view, Pushrod 9.8 [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) Drag and drop within the application, Pushrod 2.19 [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) Context menus, Pushrod 2.11 [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) Menu bar and drop-down menus (drawn by Pushrod)
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
 **Documentation.** `pushrod-docs/docs/extra-widgets/document-tabs.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
 
-## Epic 6: Dialogs and assistants
+## Epic 6: Dialogs and assistants ([#251](https://github.com/KenSuenobu/rust-pushrod/issues/251))
 
 Input, progress, and task dialogs, wizard, settings and about dialogs, find bar, shortcuts editor.
 
@@ -1418,18 +1418,18 @@ Input, progress, and task dialogs, wizard, settings and about dialogs, find bar,
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|---|
-| 6.1 | Input dialog (ask for one value) | A one-call modal dialog asking for a single text, number, or choice. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/input_dialog.rs (new)`, `pushrod-docs` |
-| 6.2 | Progress dialog | A modal dialog with a message, a progress bar, and Cancel, for long tasks. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/progress_dialog.rs (new)`, `pushrod-docs` |
-| 6.3 | Task dialog (alert with details and options) | An alert with a main instruction, expandable details, a "don't ask again" box, and command choices. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/task_dialog.rs (new)`, `pushrod-docs` |
-| 6.4 | Wizard (step-by-step assistant) | Pages shown one at a time with Back, Next, and Finish, and a list of steps. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/wizard.rs (new)`, `pushrod-docs` |
-| 6.5 | Settings dialog | A sidebar of categories, a page per category, and OK, Cancel, and Apply. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/settings_dialog.rs (new)`, `pushrod-docs` |
-| 6.6 | About dialog | The application's icon, name, version, copyright, website, and credits and license pages. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/about_dialog.rs (new)`, `pushrod-docs` |
-| 6.7 | Find and replace bar | A bar with find and replace fields, match options, a match count, and next and previous. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/find_bar.rs (new)`, `pushrod-docs` |
-| 6.8 | Keyboard shortcuts editor | A filterable table of actions and their shortcuts, edited with the shortcut field. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/shortcuts_editor.rs (new)`, `pushrod-docs` |
+| 6.1 ([#267](https://github.com/KenSuenobu/rust-pushrod/issues/267)) | Input dialog (ask for one value) | A one-call modal dialog asking for a single text, number, or choice. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/input_dialog.rs (new)`, `pushrod-docs` |
+| 6.2 ([#268](https://github.com/KenSuenobu/rust-pushrod/issues/268)) | Progress dialog | A modal dialog with a message, a progress bar, and Cancel, for long tasks. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/progress_dialog.rs (new)`, `pushrod-docs` |
+| 6.3 ([#269](https://github.com/KenSuenobu/rust-pushrod/issues/269)) | Task dialog (alert with details and options) | An alert with a main instruction, expandable details, a "don't ask again" box, and command choices. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/task_dialog.rs (new)`, `pushrod-docs` |
+| 6.4 ([#282](https://github.com/KenSuenobu/rust-pushrod/issues/282)) | Wizard (step-by-step assistant) | Pages shown one at a time with Back, Next, and Finish, and a list of steps. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/wizard.rs (new)`, `pushrod-docs` |
+| 6.5 ([#283](https://github.com/KenSuenobu/rust-pushrod/issues/283)) | Settings dialog | A sidebar of categories, a page per category, and OK, Cancel, and Apply. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/settings_dialog.rs (new)`, `pushrod-docs` |
+| 6.6 ([#284](https://github.com/KenSuenobu/rust-pushrod/issues/284)) | About dialog | The application's icon, name, version, copyright, website, and credits and license pages. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/about_dialog.rs (new)`, `pushrod-docs` |
+| 6.7 ([#285](https://github.com/KenSuenobu/rust-pushrod/issues/285)) | Find and replace bar | A bar with find and replace fields, match options, a match count, and next and previous. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/find_bar.rs (new)`, `pushrod-docs` |
+| 6.8 ([#286](https://github.com/KenSuenobu/rust-pushrod/issues/286)) | Keyboard shortcuts editor | A filterable table of actions and their shortcuts, edited with the shortcut field. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/shortcuts_editor.rs (new)`, `pushrod-docs` |
 
 ### 6.1: Input dialog (ask for one value)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/input-dialog.md`](extra-widgets/input-dialog.md)
 
@@ -1453,7 +1453,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Validation disables OK
 - Completion receives None on Cancel
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 4.2 [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) Spin box, Pushrod 4.6 [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) Combo box
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 4.2 [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) Spin box, Pushrod 4.6 [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) Combo box
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1461,7 +1461,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 6.2: Progress dialog
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/progress-dialog.md`](extra-widgets/progress-dialog.md)
 
@@ -1485,7 +1485,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Determinate and busy progress
 - Cancel reported to the task
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 4.1 [#48](https://github.com/KenSuenobu/rust-pushrod/issues/48) Progress bar, Pushrod 1.5 [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) Timers and idle callbacks
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 4.1 [#48](https://github.com/KenSuenobu/rust-pushrod/issues/48) Progress bar, Pushrod 1.5 [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) Timers and idle callbacks
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1493,7 +1493,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 6.3: Task dialog (alert with details and options)
 
-*Extra widgets 2: everyday controls and pickers*
+*Issue [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269)* · *Extra widgets 2: everyday controls and pickers*
 
 **Widget roadmap:** [`docs/extra-widgets/task-dialog.md`](extra-widgets/task-dialog.md)
 
@@ -1517,7 +1517,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Check box state returned
 - Command choices with descriptions
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.9 [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) Alert dialog, Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 2.18 [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) Multi-line text area, Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.9 [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) Alert dialog, Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 2.18 [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) Multi-line text area, Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1525,7 +1525,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 6.4: Wizard (step-by-step assistant)
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/wizard.md`](extra-widgets/wizard.md)
 
@@ -1550,7 +1550,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Step list and conditional pages
 - Summary page optional
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 5.9 [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) Stack layout (one child visible at a time), Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 5.9 [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) Stack layout (one child visible at a time), Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 2.3 [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1558,7 +1558,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 6.5: Settings dialog
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/settings-dialog.md`](extra-widgets/settings-dialog.md)
 
@@ -1583,7 +1583,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Apply enabled only on changes; OK applies and closes
 - Restore Defaults per page and optional search
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 5.3; Pushrod: Pushrod 5.9 [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) Stack layout (one child visible at a time), Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows, Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 4.4 [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) Tab view
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 5.3 ([#266](https://github.com/KenSuenobu/rust-pushrod/issues/266)); Pushrod: Pushrod 5.9 [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) Stack layout (one child visible at a time), Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows, Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 4.4 [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) Tab view
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1591,7 +1591,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 6.6: About dialog
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/about-dialog.md`](extra-widgets/about-dialog.md)
 
@@ -1615,7 +1615,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Credits and license pages
 - Values from Cargo metadata
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 2.7 [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) Image widget, Pushrod 2.22 [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) Link label, Pushrod 2.18 [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) Multi-line text area
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 6.7 [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) Modal dialogs: run a form until a dismissing control is chosen, Pushrod 2.7 [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) Image widget, Pushrod 2.22 [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) Link label, Pushrod 2.18 [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) Multi-line text area
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1623,7 +1623,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 6.7: Find and replace bar
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/find-bar.md`](extra-widgets/find-bar.md)
 
@@ -1648,7 +1648,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Case, whole word, and regular expression options
 - Replace and Replace All through the Searchable trait
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1; Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 2.18 [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) Multi-line text area, Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 2.2 [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) Glyph button (small single-character button), Pushrod 2.18 [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) Multi-line text area, Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1656,7 +1656,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 ### 6.8: Keyboard shortcuts editor
 
-*Extra widgets 3: specialized views and assistants*
+*Issue [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286)* · *Extra widgets 3: specialized views and assistants*
 
 **Widget roadmap:** [`docs/extra-widgets/shortcuts-editor.md`](extra-widgets/shortcuts-editor.md)
 
@@ -1680,7 +1680,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 - Conflict detection with reassign
 - Reset one or all
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 2.8, 4.10; Pushrod: Pushrod 4.9 [#92](https://github.com/KenSuenobu/rust-pushrod/issues/92) Table view, Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 2.8 ([#271](https://github.com/KenSuenobu/rust-pushrod/issues/271)), 4.10 ([#277](https://github.com/KenSuenobu/rust-pushrod/issues/277)); Pushrod: Pushrod 4.9 [#92](https://github.com/KenSuenobu/rust-pushrod/issues/92) Table view, Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
@@ -1702,60 +1702,60 @@ flowchart LR
 
 The crate, its gallery, the popover, and the generic widgets the Chassis MVP uses: tool palette, property grid, breadcrumb bar, and drawer.
 
-1. 1.1 Create the pushrod-extra-widgets crate — needed by the Chassis MVP
-2. 1.2 Extra widgets gallery example
-3. 1.3 Popover: a floating panel anchored to a control
+1. 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)) Create the pushrod-extra-widgets crate — needed by the Chassis MVP
+2. 1.2 ([#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)) Extra widgets gallery example
+3. 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)) Popover: a floating panel anchored to a control
 4. 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)) Tool palette (grid of tool buttons) — needed by the Chassis MVP
-5. 4.5 Property grid (name and value inspector) — needed by the Chassis MVP
-6. 4.9 Breadcrumb bar (path control) — needed by the Chassis MVP
-7. 5.1 Drawer (collapsible side panel) — needed by the Chassis MVP
+5. 4.5 ([#255](https://github.com/KenSuenobu/rust-pushrod/issues/255)) Property grid (name and value inspector) — needed by the Chassis MVP
+6. 4.9 ([#256](https://github.com/KenSuenobu/rust-pushrod/issues/256)) Breadcrumb bar (path control) — needed by the Chassis MVP
+7. 5.1 ([#257](https://github.com/KenSuenobu/rust-pushrod/issues/257)) Drawer (collapsible side panel) — needed by the Chassis MVP
 
 **Extra widgets 2: everyday controls and pickers** (MVP)
 
 Controls and pickers most applications reach for: menu and split buttons, segmented control, stepper, dial, level indicator, calendar, date and time pickers, color and font choosers, path field, tree view, check and editable lists, accordion, sidebar, and the common dialogs.
 
-1. 2.1 Menu button and split button
+1. 2.1 ([#258](https://github.com/KenSuenobu/rust-pushrod/issues/258)) Menu button and split button
 2. 2.2 ([#50](https://github.com/KenSuenobu/rust-pushrod/issues/50)) Segmented control
-3. 2.3 Stepper (up and down arrows)
+3. 2.3 ([#259](https://github.com/KenSuenobu/rust-pushrod/issues/259)) Stepper (up and down arrows)
 4. 2.4 ([#127](https://github.com/KenSuenobu/rust-pushrod/issues/127)) Dial (rotary knob)
 5. 2.5 ([#54](https://github.com/KenSuenobu/rust-pushrod/issues/54)) Level indicator (meter)
-6. 3.1 Calendar (month view)
+6. 3.1 ([#260](https://github.com/KenSuenobu/rust-pushrod/issues/260)) Calendar (month view)
 7. 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)) Date picker
-8. 3.3 Time field and date-time field
+8. 3.3 ([#261](https://github.com/KenSuenobu/rust-pushrod/issues/261)) Time field and date-time field
 9. 3.4 ([#46](https://github.com/KenSuenobu/rust-pushrod/issues/46)) Color well and color picker
 10. 3.5 ([#129](https://github.com/KenSuenobu/rust-pushrod/issues/129)) Font chooser
-11. 3.6 Path field (file or folder with Browse)
+11. 3.6 ([#262](https://github.com/KenSuenobu/rust-pushrod/issues/262)) Path field (file or folder with Browse)
 12. 4.1 ([#55](https://github.com/KenSuenobu/rust-pushrod/issues/55)) Tree view (outline)
-13. 4.6 Check list
-14. 4.7 Editable list (add, remove, reorder)
-15. 5.2 Accordion (one section open at a time)
-16. 5.3 Sidebar (navigation list)
-17. 6.1 Input dialog (ask for one value)
-18. 6.2 Progress dialog
-19. 6.3 Task dialog (alert with details and options)
+13. 4.6 ([#263](https://github.com/KenSuenobu/rust-pushrod/issues/263)) Check list
+14. 4.7 ([#264](https://github.com/KenSuenobu/rust-pushrod/issues/264)) Editable list (add, remove, reorder)
+15. 5.2 ([#265](https://github.com/KenSuenobu/rust-pushrod/issues/265)) Accordion (one section open at a time)
+16. 5.3 ([#266](https://github.com/KenSuenobu/rust-pushrod/issues/266)) Sidebar (navigation list)
+17. 6.1 ([#267](https://github.com/KenSuenobu/rust-pushrod/issues/267)) Input dialog (ask for one value)
+18. 6.2 ([#268](https://github.com/KenSuenobu/rust-pushrod/issues/268)) Progress dialog
+19. 6.3 ([#269](https://github.com/KenSuenobu/rust-pushrod/issues/269)) Task dialog (alert with details and options)
 
 **Extra widgets 3: specialized views and assistants**
 
 Specialized views and assistants: ruler, shortcut field, image well, new-password, character picker, column browser, icon grid, data grid, dual list, filter field, rule editor, image viewer, document tabs, wizard, settings and about dialogs, find bar, and shortcuts editor.
 
-1. 2.7 Ruler
-2. 2.8 Shortcut field (key combination recorder)
-3. 3.7 Image well
-4. 3.8 New password (enter, confirm, strength)
-5. 3.9 Character picker
+1. 2.7 ([#270](https://github.com/KenSuenobu/rust-pushrod/issues/270)) Ruler
+2. 2.8 ([#271](https://github.com/KenSuenobu/rust-pushrod/issues/271)) Shortcut field (key combination recorder)
+3. 3.7 ([#272](https://github.com/KenSuenobu/rust-pushrod/issues/272)) Image well
+4. 3.8 ([#273](https://github.com/KenSuenobu/rust-pushrod/issues/273)) New password (enter, confirm, strength)
+5. 3.9 ([#274](https://github.com/KenSuenobu/rust-pushrod/issues/274)) Character picker
 6. 4.2 ([#45](https://github.com/KenSuenobu/rust-pushrod/issues/45)) Column browser
-7. 4.3 Icon grid view
-8. 4.4 Data grid (editable table)
-9. 4.10 Filter field (live filter for lists, tables, and trees)
-10. 4.8 Dual list (list builder)
-11. 4.11 Rule editor (query builder)
-12. 4.12 Image viewer (zoom and pan)
-13. 5.4 Document tabs (closable and reorderable)
-14. 6.4 Wizard (step-by-step assistant)
-15. 6.5 Settings dialog
-16. 6.6 About dialog
-17. 6.7 Find and replace bar
-18. 6.8 Keyboard shortcuts editor
+7. 4.3 ([#275](https://github.com/KenSuenobu/rust-pushrod/issues/275)) Icon grid view
+8. 4.4 ([#276](https://github.com/KenSuenobu/rust-pushrod/issues/276)) Data grid (editable table)
+9. 4.10 ([#277](https://github.com/KenSuenobu/rust-pushrod/issues/277)) Filter field (live filter for lists, tables, and trees)
+10. 4.8 ([#278](https://github.com/KenSuenobu/rust-pushrod/issues/278)) Dual list (list builder)
+11. 4.11 ([#279](https://github.com/KenSuenobu/rust-pushrod/issues/279)) Rule editor (query builder)
+12. 4.12 ([#280](https://github.com/KenSuenobu/rust-pushrod/issues/280)) Image viewer (zoom and pan)
+13. 5.4 ([#281](https://github.com/KenSuenobu/rust-pushrod/issues/281)) Document tabs (closable and reorderable)
+14. 6.4 ([#282](https://github.com/KenSuenobu/rust-pushrod/issues/282)) Wizard (step-by-step assistant)
+15. 6.5 ([#283](https://github.com/KenSuenobu/rust-pushrod/issues/283)) Settings dialog
+16. 6.6 ([#284](https://github.com/KenSuenobu/rust-pushrod/issues/284)) About dialog
+17. 6.7 ([#285](https://github.com/KenSuenobu/rust-pushrod/issues/285)) Find and replace bar
+18. 6.8 ([#286](https://github.com/KenSuenobu/rust-pushrod/issues/286)) Keyboard shortcuts editor
 
 ## Chassis
 
@@ -1763,11 +1763,11 @@ The Chassis MVP uses these extra widgets; the Chassis issues list them as requir
 
 | Extra widget | Chassis issues |
 |---|---|
-| 1.1 Create the pushrod-extra-widgets crate | Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette, Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer, Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid |
+| 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)) Create the pushrod-extra-widgets crate | Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette, Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer, Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid |
 | 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)) Tool palette (grid of tool buttons) | Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette |
-| 4.5 Property grid (name and value inspector) | Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid |
-| 4.9 Breadcrumb bar (path control) | Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer |
-| 5.1 Drawer (collapsible side panel) | Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer |
+| 4.5 ([#255](https://github.com/KenSuenobu/rust-pushrod/issues/255)) Property grid (name and value inspector) | Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid |
+| 4.9 ([#256](https://github.com/KenSuenobu/rust-pushrod/issues/256)) Breadcrumb bar (path control) | Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer |
+| 5.1 ([#257](https://github.com/KenSuenobu/rust-pushrod/issues/257)) Drawer (collapsible side panel) | Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer |
 
 ## Sources
 

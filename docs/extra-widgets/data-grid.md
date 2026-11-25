@@ -1,6 +1,6 @@
 # Data grid (editable table): widget roadmap
 
-> **Issue:** 4.4 (extra-widgets 4.4) · **Epic 4:** Data views · **Milestone:** Extra widgets 3: specialized views and assistants · **Size:** L
+> **Issue:** [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) (extra-widgets 4.4) · **Epic 4:** Data views · **Milestone:** Extra widgets 3: specialized views and assistants · **Size:** L
 > **Crate:** `pushrod-extra-widgets` · **User docs:** `pushrod-docs/docs/extra-widgets/data-grid.md` · **Overview:** [extra widgets roadmap](../ROADMAP_EXTRA_WIDGETS.md) · **Rules:** [design philosophy](../../DESIGN_PHILOSOPHY.md)
 
 This file is the specification for this widget: what it is, what it does, how it looks, and how it responds. To change it, edit this file in a pull request (and its mockup in [`docs/mockups/generate_extra_widgets.py`](../mockups/generate_extra_widgets.py) if the picture changes), then bring the issue in line. If this file and the issue disagree, this file wins.

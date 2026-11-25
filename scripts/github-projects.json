@@ -617,16 +617,19 @@
   {
    "title": "Chassis MVP",
    "description": "The Chassis MVP (phases M1 to M5) and the post-MVP Pushrod work it depends on.",
-   "readme": "Builds on the Pushrod Core MVP project. Each \"Pushrod for Mx\" phase holds the post-MVP Pushrod issues that Chassis phase Mx needs (directly or indirectly); they come before it in **Order**. Roadmap: docs/ROADMAP_CHASSIS.md (Action Plan).",
+   "readme": "Builds on the Pushrod Core MVP project. Each \"Pushrod for Mx\" phase holds the post-MVP Pushrod issues that Chassis phase Mx needs (directly or indirectly), and each \"Extra widgets for Mx\" phase the pushrod-extra-widgets issues it needs; they come before it in **Order**. Roadmap: docs/ROADMAP_CHASSIS.md (Action Plan).",
    "phases": [
     "Epics",
     "Pushrod for M1",
     "M1: core without UI",
     "Pushrod for M2",
+    "Extra widgets for M2",
     "M2: shell and project",
     "Pushrod for M3",
+    "Extra widgets for M3",
     "M3: form designer",
     "Pushrod for M4",
+    "Extra widgets for M4",
     "M4: inspector / events and code",
     "M5: build / run and release (MVP)"
    ],
@@ -856,12 +859,36 @@
      "order": 28
     },
     {
+     "number": 131,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/131",
+     "title": "pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 29
+    },
+    {
+     "number": 252,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/252",
+     "title": "extra-widgets: [1.1] Create the pushrod-extra-widgets crate",
+     "phase": "Extra widgets for M2",
+     "kind": "Extra widgets",
+     "order": 30
+    },
+    {
+     "number": 257,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/257",
+     "title": "extra-widgets: [5.1] Drawer (collapsible side panel)",
+     "phase": "Extra widgets for M2",
+     "kind": "Extra widgets",
+     "order": 31
+    },
+    {
      "number": 168,
      "url": "https://github.com/KenSuenobu/rust-pushrod/issues/168",
      "title": "chassis: [1.1] Chassis crate and main window",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 29
+     "order": 32
     },
     {
      "number": 169,
@@ -869,7 +896,7 @@
      "title": "chassis: [1.2] Three-pane workspace",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 30
+     "order": 33
     },
     {
      "number": 170,
@@ -877,7 +904,7 @@
      "title": "chassis: [1.4] Commands, menus, and shortcuts",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 31
+     "order": 34
     },
     {
      "number": 171,
@@ -885,7 +912,7 @@
      "title": "chassis: [1.3] Designer and Code tabs",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 32
+     "order": 35
     },
     {
      "number": 172,
@@ -893,7 +920,7 @@
      "title": "chassis: [2.2] New, open, and save",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 33
+     "order": 36
     },
     {
      "number": 173,
@@ -901,7 +928,7 @@
      "title": "chassis: [2.3] Project drawer",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 34
+     "order": 37
     },
     {
      "number": 174,
@@ -909,7 +936,7 @@
      "title": "chassis: [2.4] Manage resources and IDs",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 35
+     "order": 38
     },
     {
      "number": 175,
@@ -917,7 +944,7 @@
      "title": "chassis: [2.5] String table editor",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 36
+     "order": 39
     },
     {
      "number": 176,
@@ -925,7 +952,7 @@
      "title": "chassis: [2.6] Images and icons",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 37
+     "order": 40
     },
     {
      "number": 177,
@@ -933,7 +960,7 @@
      "title": "chassis: [2.8] Files",
      "phase": "M2: shell and project",
      "kind": "Chassis",
-     "order": 38
+     "order": 41
     },
     {
      "number": 95,
@@ -941,7 +968,7 @@
      "title": "pushrod: [9.3] Event filters: observe or intercept another widget's events",
      "phase": "Pushrod for M3",
      "kind": "Pushrod",
-     "order": 39
+     "order": 42
     },
     {
      "number": 105,
@@ -949,7 +976,23 @@
      "title": "pushrod: [10.1] Drawing modes: live or outline feedback while moving and resizing",
      "phase": "Pushrod for M3",
      "kind": "Pushrod",
-     "order": 40
+     "order": 43
+    },
+    {
+     "number": 121,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/121",
+     "title": "pushrod: [5.10] Flow layout (wrapping rows)",
+     "phase": "Pushrod for M3",
+     "kind": "Pushrod",
+     "order": 44
+    },
+    {
+     "number": 77,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/77",
+     "title": "pushrod: [2.13] Tooltips",
+     "phase": "Pushrod for M3",
+     "kind": "Pushrod",
+     "order": 45
     },
     {
      "number": 68,
@@ -957,15 +1000,23 @@
      "title": "pushrod: [6.9] Design-mode hooks for Chassis",
      "phase": "Pushrod for M3",
      "kind": "Pushrod",
-     "order": 41
+     "order": 46
     },
     {
-     "number": 131,
-     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/131",
-     "title": "pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets",
-     "phase": "Pushrod for M3",
-     "kind": "Pushrod",
-     "order": 42
+     "number": 42,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/42",
+     "title": "extra-widgets: [2.6] Tool palette (grid of tool buttons)",
+     "phase": "Extra widgets for M3",
+     "kind": "Extra widgets",
+     "order": 47
+    },
+    {
+     "number": 256,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/256",
+     "title": "extra-widgets: [4.9] Breadcrumb bar (path control)",
+     "phase": "Extra widgets for M3",
+     "kind": "Extra widgets",
+     "order": 48
     },
     {
      "number": 178,
@@ -973,7 +1024,7 @@
      "title": "chassis: [3.1] Design surface",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 43
+     "order": 49
     },
     {
      "number": 179,
@@ -981,7 +1032,7 @@
      "title": "chassis: [3.2] Widget palette",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 44
+     "order": 50
     },
     {
      "number": 180,
@@ -989,7 +1040,7 @@
      "title": "chassis: [3.4] Selection, move, and resize",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 45
+     "order": 51
     },
     {
      "number": 181,
@@ -997,7 +1048,7 @@
      "title": "chassis: [3.3] Drag and drop placement",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 46
+     "order": 52
     },
     {
      "number": 182,
@@ -1005,7 +1056,7 @@
      "title": "chassis: [3.5] Snapping and alignment",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 47
+     "order": 53
     },
     {
      "number": 183,
@@ -1013,7 +1064,7 @@
      "title": "chassis: [3.7] Clipboard and undo",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 48
+     "order": 54
     },
     {
      "number": 184,
@@ -1021,7 +1072,7 @@
      "title": "chassis: [3.6] Containers, z-order, and tab order",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 49
+     "order": 55
     },
     {
      "number": 185,
@@ -1029,7 +1080,7 @@
      "title": "chassis: [3.8] Layout managers in the designer",
      "phase": "M3: form designer",
      "kind": "Chassis",
-     "order": 50
+     "order": 56
     },
     {
      "number": 44,
@@ -1037,7 +1088,7 @@
      "title": "pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 51
+     "order": 57
     },
     {
      "number": 88,
@@ -1045,7 +1096,7 @@
      "title": "pushrod: [2.19] Context menus",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 52
+     "order": 58
     },
     {
      "number": 113,
@@ -1053,7 +1104,7 @@
      "title": "pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 53
+     "order": 59
     },
     {
      "number": 142,
@@ -1061,7 +1112,7 @@
      "title": "pushrod: [11.1] Chassis: Code editor crate and editing core",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 54
+     "order": 60
     },
     {
      "number": 143,
@@ -1069,7 +1120,7 @@
      "title": "pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 55
+     "order": 61
     },
     {
      "number": 144,
@@ -1077,7 +1128,7 @@
      "title": "pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 56
+     "order": 62
     },
     {
      "number": 145,
@@ -1085,7 +1136,7 @@
      "title": "pushrod: [11.4] Chassis: Code editor undo and redo",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 57
+     "order": 63
     },
     {
      "number": 146,
@@ -1093,7 +1144,7 @@
      "title": "pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 58
+     "order": 64
     },
     {
      "number": 149,
@@ -1101,7 +1152,15 @@
      "title": "pushrod: [11.8] Chassis: Code editor API for the Chassis designer",
      "phase": "Pushrod for M4",
      "kind": "Pushrod",
-     "order": 59
+     "order": 65
+    },
+    {
+     "number": 255,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/255",
+     "title": "extra-widgets: [4.5] Property grid (name and value inspector)",
+     "phase": "Extra widgets for M4",
+     "kind": "Extra widgets",
+     "order": 66
     },
     {
      "number": 186,
@@ -1109,7 +1168,7 @@
      "title": "chassis: [4.1] Inspector drawer",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 60
+     "order": 67
     },
     {
      "number": 187,
@@ -1117,7 +1176,7 @@
      "title": "chassis: [4.2] Property grid",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 61
+     "order": 68
     },
     {
      "number": 188,
@@ -1125,7 +1184,7 @@
      "title": "chassis: [4.3] Typed property editors",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 62
+     "order": 69
     },
     {
      "number": 189,
@@ -1133,7 +1192,7 @@
      "title": "chassis: [5.4] Code view",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 63
+     "order": 70
     },
     {
      "number": 190,
@@ -1141,7 +1200,7 @@
      "title": "chassis: [5.3] Create and open handlers",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 64
+     "order": 71
     },
     {
      "number": 191,
@@ -1149,7 +1208,7 @@
      "title": "chassis: [4.4] Names and IDs",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 65
+     "order": 72
     },
     {
      "number": 192,
@@ -1157,7 +1216,7 @@
      "title": "chassis: [5.1] Events context menu",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 66
+     "order": 73
     },
     {
      "number": 193,
@@ -1165,7 +1224,7 @@
      "title": "chassis: [5.2] Inspector Events tab",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 67
+     "order": 74
     },
     {
      "number": 194,
@@ -1173,7 +1232,7 @@
      "title": "chassis: [5.5] Code indicator on the design surface",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 68
+     "order": 75
     },
     {
      "number": 195,
@@ -1181,7 +1240,7 @@
      "title": "chassis: [5.6] Keep handlers in sync",
      "phase": "M4: inspector / events and code",
      "kind": "Chassis",
-     "order": 69
+     "order": 76
     },
     {
      "number": 196,
@@ -1189,7 +1248,7 @@
      "title": "chassis: [6.2] Build and run",
      "phase": "M5: build / run and release (MVP)",
      "kind": "Chassis",
-     "order": 70
+     "order": 77
     },
     {
      "number": 197,
@@ -1197,7 +1256,7 @@
      "title": "chassis: [7.1] CI and golden screenshots",
      "phase": "M5: build / run and release (MVP)",
      "kind": "Chassis",
-     "order": 71
+     "order": 78
     },
     {
      "number": 198,
@@ -1205,7 +1264,7 @@
      "title": "chassis: [7.2] Chassis documentation",
      "phase": "M5: build / run and release (MVP)",
      "kind": "Chassis",
-     "order": 72
+     "order": 79
     },
     {
      "number": 199,
@@ -1213,7 +1272,7 @@
      "title": "chassis: [7.3] Sample project",
      "phase": "M5: build / run and release (MVP)",
      "kind": "Chassis",
-     "order": 73
+     "order": 80
     }
    ]
   },
@@ -1401,6 +1460,428 @@
      "phase": "Chassis v2",
      "kind": "Chassis",
      "order": 22
+    }
+   ]
+  },
+  {
+   "title": "Extra Widgets",
+   "description": "The pushrod-extra-widgets crate: larger and compound widgets outside the Pushrod MVP.",
+   "readme": "Everything in pushrod-extra-widgets not already in the Chassis MVP project (the crate, tool palette, property grid, breadcrumb bar, and drawer are there), with the post-MVP Pushrod work it needs first. Milestones 1 and 2 are the extra-widgets MVP. Roadmap: docs/ROADMAP_EXTRA_WIDGETS.md.",
+   "phases": [
+    "Epics",
+    "Pushrod prerequisites",
+    "Extra widgets 1 - crate and Chassis widgets",
+    "Extra widgets 2 - everyday controls and pickers",
+    "Extra widgets 3 - specialized views and assistants"
+   ],
+   "items": [
+    {
+     "number": 246,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/246",
+     "title": "extra-widgets: [1] Epic: Crate and foundations",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 1
+    },
+    {
+     "number": 247,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/247",
+     "title": "extra-widgets: [2] Epic: Buttons and value controls",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 2
+    },
+    {
+     "number": 248,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/248",
+     "title": "extra-widgets: [3] Epic: Pickers and special fields",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 3
+    },
+    {
+     "number": 249,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/249",
+     "title": "extra-widgets: [4] Epic: Data views",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 4
+    },
+    {
+     "number": 250,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/250",
+     "title": "extra-widgets: [5] Epic: Panels and navigation",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 5
+    },
+    {
+     "number": 251,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/251",
+     "title": "extra-widgets: [6] Epic: Dialogs and assistants",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 6
+    },
+    {
+     "number": 101,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/101",
+     "title": "pushrod: [9.9] Pointer cursor per widget",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 7
+    },
+    {
+     "number": 120,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/120",
+     "title": "pushrod: [5.9] Stack layout (one child visible at a time)",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 8
+    },
+    {
+     "number": 49,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/49",
+     "title": "pushrod: [4.2] Spin box",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 9
+    },
+    {
+     "number": 53,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/53",
+     "title": "pushrod: [4.6] Combo box",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 10
+    },
+    {
+     "number": 87,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/87",
+     "title": "pushrod: [2.18] Multi-line text area",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 11
+    },
+    {
+     "number": 126,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/126",
+     "title": "pushrod: [2.22] Link label",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 12
+    },
+    {
+     "number": 253,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/253",
+     "title": "extra-widgets: [1.2] Extra widgets gallery example",
+     "phase": "Extra widgets 1 - crate and Chassis widgets",
+     "kind": "Extra widgets",
+     "order": 13
+    },
+    {
+     "number": 254,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/254",
+     "title": "extra-widgets: [1.3] Popover: a floating panel anchored to a control",
+     "phase": "Extra widgets 1 - crate and Chassis widgets",
+     "kind": "Extra widgets",
+     "order": 14
+    },
+    {
+     "number": 258,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/258",
+     "title": "extra-widgets: [2.1] Menu button and split button",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 15
+    },
+    {
+     "number": 50,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/50",
+     "title": "extra-widgets: [2.2] Segmented control",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 16
+    },
+    {
+     "number": 259,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/259",
+     "title": "extra-widgets: [2.3] Stepper (up and down arrows)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 17
+    },
+    {
+     "number": 127,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/127",
+     "title": "extra-widgets: [2.4] Dial (rotary knob)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 18
+    },
+    {
+     "number": 54,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/54",
+     "title": "extra-widgets: [2.5] Level indicator (meter)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 19
+    },
+    {
+     "number": 260,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/260",
+     "title": "extra-widgets: [3.1] Calendar (month view)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 20
+    },
+    {
+     "number": 91,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/91",
+     "title": "extra-widgets: [3.2] Date picker",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 21
+    },
+    {
+     "number": 261,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/261",
+     "title": "extra-widgets: [3.3] Time field and date-time field",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 22
+    },
+    {
+     "number": 46,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/46",
+     "title": "extra-widgets: [3.4] Color well and color picker",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 23
+    },
+    {
+     "number": 129,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/129",
+     "title": "extra-widgets: [3.5] Font chooser",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 24
+    },
+    {
+     "number": 262,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/262",
+     "title": "extra-widgets: [3.6] Path field (file or folder with Browse)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 25
+    },
+    {
+     "number": 55,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/55",
+     "title": "extra-widgets: [4.1] Tree view (outline)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 26
+    },
+    {
+     "number": 263,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/263",
+     "title": "extra-widgets: [4.6] Check list",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 27
+    },
+    {
+     "number": 264,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/264",
+     "title": "extra-widgets: [4.7] Editable list (add, remove, reorder)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 28
+    },
+    {
+     "number": 265,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/265",
+     "title": "extra-widgets: [5.2] Accordion (one section open at a time)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 29
+    },
+    {
+     "number": 266,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/266",
+     "title": "extra-widgets: [5.3] Sidebar (navigation list)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 30
+    },
+    {
+     "number": 267,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/267",
+     "title": "extra-widgets: [6.1] Input dialog (ask for one value)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 31
+    },
+    {
+     "number": 268,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/268",
+     "title": "extra-widgets: [6.2] Progress dialog",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 32
+    },
+    {
+     "number": 269,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/269",
+     "title": "extra-widgets: [6.3] Task dialog (alert with details and options)",
+     "phase": "Extra widgets 2 - everyday controls and pickers",
+     "kind": "Extra widgets",
+     "order": 33
+    },
+    {
+     "number": 270,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/270",
+     "title": "extra-widgets: [2.7] Ruler",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 34
+    },
+    {
+     "number": 271,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/271",
+     "title": "extra-widgets: [2.8] Shortcut field (key combination recorder)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 35
+    },
+    {
+     "number": 272,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/272",
+     "title": "extra-widgets: [3.7] Image well",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 36
+    },
+    {
+     "number": 273,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/273",
+     "title": "extra-widgets: [3.8] New password (enter, confirm, strength)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 37
+    },
+    {
+     "number": 274,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/274",
+     "title": "extra-widgets: [3.9] Character picker",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 38
+    },
+    {
+     "number": 45,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/45",
+     "title": "extra-widgets: [4.2] Column browser",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 39
+    },
+    {
+     "number": 275,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/275",
+     "title": "extra-widgets: [4.3] Icon grid view",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 40
+    },
+    {
+     "number": 276,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/276",
+     "title": "extra-widgets: [4.4] Data grid (editable table)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 41
+    },
+    {
+     "number": 277,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/277",
+     "title": "extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 42
+    },
+    {
+     "number": 278,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/278",
+     "title": "extra-widgets: [4.8] Dual list (list builder)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 43
+    },
+    {
+     "number": 279,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/279",
+     "title": "extra-widgets: [4.11] Rule editor (query builder)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 44
+    },
+    {
+     "number": 280,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/280",
+     "title": "extra-widgets: [4.12] Image viewer (zoom and pan)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 45
+    },
+    {
+     "number": 281,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/281",
+     "title": "extra-widgets: [5.4] Document tabs (closable and reorderable)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 46
+    },
+    {
+     "number": 282,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/282",
+     "title": "extra-widgets: [6.4] Wizard (step-by-step assistant)",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 47
+    },
+    {
+     "number": 283,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/283",
+     "title": "extra-widgets: [6.5] Settings dialog",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 48
+    },
+    {
+     "number": 284,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/284",
+     "title": "extra-widgets: [6.6] About dialog",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 49
+    },
+    {
+     "number": 285,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/285",
+     "title": "extra-widgets: [6.7] Find and replace bar",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 50
+    },
+    {
+     "number": 286,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/286",
+     "title": "extra-widgets: [6.8] Keyboard shortcuts editor",
+     "phase": "Extra widgets 3 - specialized views and assistants",
+     "kind": "Extra widgets",
+     "order": 51
     }
    ]
   },

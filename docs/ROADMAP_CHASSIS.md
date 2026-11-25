@@ -536,7 +536,7 @@ Project model, open and save, the project drawer, and editors for forms, strings
 - Double-click opens the right editor
 - Selection follows the open form
 
-**Parallelism / Dependencies.** Parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)), 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view; Extra widgets: extra-widgets 5.1 Drawer (collapsible side panel)
+**Parallelism / Dependencies.** Parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)), 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 3.10 [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) Expander (collapsible section), Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view; Extra widgets: extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -875,7 +875,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 - Reordering by drag, and undo, work inside layouts
 - Breadcrumb and Escape select parents
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 3.3 ([#181](https://github.com/KenSuenobu/rust-pushrod/issues/181)), 3.4 ([#180](https://github.com/KenSuenobu/rust-pushrod/issues/180)); Pushrod: Pushrod 5.5 [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) Layout manager foundation: Layout trait, size hints, measure and arrange, Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows; Extra widgets: extra-widgets 4.9 Breadcrumb bar (path control)
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 3.3 ([#181](https://github.com/KenSuenobu/rust-pushrod/issues/181)), 3.4 ([#180](https://github.com/KenSuenobu/rust-pushrod/issues/180)); Pushrod: Pushrod 5.5 [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) Layout manager foundation: Layout trait, size hints, measure and arrange, Pushrod 5.6 [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) Row and column layouts, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows; Extra widgets: extra-widgets 4.9 [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) Breadcrumb bar (path control)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -972,7 +972,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 - Follows the selection in the designer and the caret's handler in the code view
 - Collapses and restores
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)); Extra widgets: extra-widgets 5.1 Drawer (collapsible side panel)
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 1.2 ([#169](https://github.com/KenSuenobu/rust-pushrod/issues/169)); Extra widgets: extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -996,7 +996,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 - Changes show in the designer immediately and undo
 - Layout settings for the selection's parent layout appear in an "In <layout>" section
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 4.1 ([#186](https://github.com/KenSuenobu/rust-pushrod/issues/186)); Pushrod: Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows; Extra widgets: extra-widgets 4.5 Property grid (name and value inspector)
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 4.1 ([#186](https://github.com/KenSuenobu/rust-pushrod/issues/186)); Pushrod: Pushrod 6.2 [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) Property introspection: list, get, and set widget properties by name, Pushrod 5.7 [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) Form layout: aligned label and field rows; Extra widgets: extra-widgets 4.5 [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) Property grid (name and value inspector)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -1940,11 +1940,11 @@ Generic widgets that any application can use live in the `pushrod-extra-widgets`
 
 | Extra widget | Needed by |
 |---|---|
-| extra-widgets 1.1 Create the pushrod-extra-widgets crate | 2.3, 3.2, 3.8, 4.1, 4.2 |
+| extra-widgets 1.1 [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) Create the pushrod-extra-widgets crate | 2.3, 3.2, 3.8, 4.1, 4.2 |
 | extra-widgets 2.6 [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) Tool palette (grid of tool buttons) | 3.2 |
-| extra-widgets 4.5 Property grid (name and value inspector) | 4.2 |
-| extra-widgets 4.9 Breadcrumb bar (path control) | 3.8 |
-| extra-widgets 5.1 Drawer (collapsible side panel) | 2.3, 4.1 |
+| extra-widgets 4.5 [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) Property grid (name and value inspector) | 4.2 |
+| extra-widgets 4.9 [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) Breadcrumb bar (path control) | 3.8 |
+| extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel) | 2.3, 4.1 |
 
 ### Parallel tracks
 
