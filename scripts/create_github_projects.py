@@ -22,6 +22,11 @@ import json
 import pathlib
 import subprocess
 import sys
+import time
+
+# Error text that means GitHub had a temporary problem and the same command is worth trying again.
+TRANSIENT = ("502", "503", "504", "Bad Gateway", "Service Unavailable", "Gateway Timeout", "timeout", "connection reset", "EOF")
+RETRIES = 5
 
 DEFINITIONS = pathlib.Path(__file__).with_name("github-projects.json")
 
@@ -52,14 +57,27 @@ class Gh:
 
         # Errors
 
-        Exits the program with the command's error output if `gh` fails.
+        Exits the program with the command's error output if `gh` fails.  Temporary GitHub errors
+        (502, 503, 504, timeouts) are retried up to `RETRIES` times with a growing pause first.
+        Commands that create something (`project create`, `field-create`) are never retried,
+        because a failed reply does not prove nothing was created; re-run the script instead,
+        which finds what already exists.
         """
         if self.dry_run:
             print("gh " + " ".join(f'"{a}"' if " " in a else a for a in args))
             return None
-        result = subprocess.run(["gh"] + args, capture_output=True, text=True)
-        if result.returncode != 0:
-            sys.exit(f"gh {' '.join(args)} failed:\n{result.stderr.strip()}")
+        retryable = not any(a in ("create", "field-create") for a in args[:2])
+        for attempt in range(1, RETRIES + 1):
+            result = subprocess.run(["gh"] + args, capture_output=True, text=True)
+            if result.returncode == 0:
+                break
+            transient = any(t in result.stderr for t in TRANSIENT)
+            if not (retryable and transient) or attempt == RETRIES:
+                hint = "\nThis looks temporary; run the script again (it skips what is already done)." if transient else ""
+                sys.exit(f"gh {' '.join(args)} failed:\n{result.stderr.strip()}{hint}")
+            pause = 2 ** attempt
+            print(f"  GitHub returned a temporary error; retrying in {pause}s ({attempt}/{RETRIES - 1})")
+            time.sleep(pause)
         if not parse_json:
             return result.stdout
         return json.loads(result.stdout) if result.stdout.strip() else {}
