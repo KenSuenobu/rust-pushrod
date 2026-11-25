@@ -66,6 +66,8 @@ In both styles:
 ```mermaid
 flowchart TD
     A[SDL2 event] --> B[WidgetCache]
+    A -- "window focus / resize" --> W["WidgetCache::broadcast<br/>(every interested widget, draw order)"]
+    W --> C
     B --> C["Widget::handle_event(&mut self, &event, ctx)"]
     C -- "ctx.emit(Clicked(..))" --> D["Event queue (in order)"]
     D -- "no widget is borrowed any more" --> E["Your callbacks: on_click(id, ..), on_event(..)<br/>FnMut(&mut AppState, &mut Ui [, &event])"]
@@ -75,6 +77,7 @@ flowchart TD
    - **Mouse button down** sends `PointerPressed` to the top-most visible widget under the pointer, which then *captures* the mouse until the button is released.
    - **Mouse motion** sends `PointerExited` to the widget the pointer left and `PointerEntered` to the one it entered, then `PointerMoved` to the captured widget (or the one under the pointer).
    - **Mouse button up** sends `PointerReleased` to the captured widget, then releases the capture.
+   - **Window focus gained or lost, and window resize** are [broadcast](../concepts/broadcast-events-to-all-interested-widgets.md) as `WindowFocusChanged` and `WindowResized` to every visible, enabled widget whose mask includes `WINDOW`, in draw order.
 2. The widget updates itself and may queue events with `ctx.emit(...)`. A button, for example, emits `Clicked` when released while still pressed.
 3. After routing, Pushrod delivers each queued event, in order: to your callbacks (callback style), or as the return value of `next_event` (event-loop style). Because no widget is borrowed at that point, your code can freely change your state and any widget.
 

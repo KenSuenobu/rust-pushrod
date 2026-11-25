@@ -249,6 +249,8 @@ pub enum EngineEventKind {
     EventMaskChanged,
     /// See [`EngineEvent::WidgetAdded`].
     WidgetAdded,
+    /// See [`EngineEvent::EventBroadcast`].
+    EventBroadcast,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -278,6 +280,13 @@ pub enum EngineEvent {
         /// The mask after the change.
         new: EventMask,
     },
+    /// An event was broadcast to every interested `Widget`.
+    EventBroadcast {
+        /// The kind of the broadcast event.
+        kind: EventKind,
+        /// How many `Widget`s received it.
+        recipients: usize,
+    },
 }
 
 impl EngineEvent {
@@ -290,6 +299,7 @@ impl EngineEvent {
         match self {
             EngineEvent::EventMaskChanged { .. } => EngineEventKind::EventMaskChanged,
             EngineEvent::WidgetAdded { .. } => EngineEventKind::WidgetAdded,
+            EngineEvent::EventBroadcast { .. } => EngineEventKind::EventBroadcast,
         }
     }
 }

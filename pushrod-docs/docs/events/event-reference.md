@@ -84,10 +84,12 @@ Positions are `Point`s in window coordinates.
 
 ## Window, time, engine, and extension
 
+Window events are [broadcast](../concepts/broadcast-events-to-all-interested-widgets.md) rather than sent to one widget.
+
 | Event | Emitted when |
 |---|---|
-| `WindowResized { size }` | The window changes size. |
-| `WindowFocusChanged { focused }` | The window gains or loses focus. |
+| `WindowResized { size }` | The window changes size. Broadcast to widgets with `WINDOW` in their mask. |
+| `WindowFocusChanged { focused }` | The window gains or loses focus. Broadcast to widgets with `WINDOW` in their mask. |
 | `CloseRequested` | The user asks to close the window. |
 | `Tick { elapsed }` | A frame passes while a widget animates. |
 | `Engine(EngineEvent)` | Pushrod performs an internal action. |

@@ -13,3 +13,4 @@
 [0] Additional updates to AGENTS.md to indicate any new behavior must be part of an executable test [kenji]
 
 [#124] Event-loop parity: next_event_with runs callbacks; same order as run [kenji]
+[#7] Broadcast window focus and resize events to every interested widget [kenji]

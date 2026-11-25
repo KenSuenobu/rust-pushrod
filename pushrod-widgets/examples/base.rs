@@ -178,20 +178,37 @@ pub fn main() {
         });
     });
 
-    // Only mask changes; the text of the status line shows the latest one.
-    engine.on_engine_event_filtered(
-        &[EngineEventKind::EventMaskChanged],
-        move |_state, ui, event| {
-            if let EngineEvent::EventMaskChanged { scope, new, .. } = event {
-                let who = match scope {
-                    MaskScope::RunLoop => String::from("window"),
-                    MaskScope::Widget(id) => format!("widget {}", id),
-                };
+    // The status line asks for window events, so focus and resize broadcasts reach it: click
+    // outside the window and back, or resize the window, to see `EventBroadcast`.
+    engine
+        .widgets()
+        .set_event_mask(engine_status_id, EventMask::WINDOW);
 
-                ui.get_mut::<TextWidget>(engine_status_id)
-                    .unwrap()
-                    .set_text(format!("{} mask is now {:?}", who, new));
-            }
+    // Mask changes and broadcasts; the text of the status line shows the latest one.
+    engine.on_engine_event_filtered(
+        &[
+            EngineEventKind::EventMaskChanged,
+            EngineEventKind::EventBroadcast,
+        ],
+        move |_state, ui, event| {
+            let text = match event {
+                EngineEvent::EventMaskChanged { scope, new, .. } => {
+                    let who = match scope {
+                        MaskScope::RunLoop => String::from("window"),
+                        MaskScope::Widget(id) => format!("widget {}", id),
+                    };
+
+                    format!("{} mask is now {:?}", who, new)
+                }
+                EngineEvent::EventBroadcast { kind, recipients } => {
+                    format!("{:?} broadcast to {} widget(s)", kind, recipients)
+                }
+                _ => return,
+            };
+
+            ui.get_mut::<TextWidget>(engine_status_id)
+                .unwrap()
+                .set_text(text);
         },
     );
 

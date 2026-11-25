@@ -308,6 +308,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Window focus and resize events reach widgets with `WINDOW` in their mask
 - Order is deterministic (draw order) and tested
 
+**Status:** done (#7).
+
 **Parallelism / Dependencies.** Parallelizable. Requires 1.2 (#6).
 
 **Technical Stack.** Rust

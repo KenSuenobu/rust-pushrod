@@ -68,7 +68,7 @@ use crate::event::{
     EngineEvent, EngineEventKind, Event, EventMask, MaskScope, engine_filter_accepts,
 };
 use crate::font::FontCache;
-use crate::geometry::Size;
+use crate::geometry::{Size, size};
 use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
 use sdl2::event::{Event as SdlEvent, EventType, WindowEvent};
@@ -640,8 +640,32 @@ impl<S> Engine<S> {
                 ..
             } => {
                 self.widget_cache.invalidate_all();
-                Vec::new()
+
+                // Only a resize is broadcast; exposure just repaints.
+                match event {
+                    SdlEvent::Window {
+                        win_event: WindowEvent::SizeChanged(w, h),
+                        ..
+                    } => self.widget_cache.broadcast(&Event::WindowResized {
+                        size: size(w.max(0) as u32, h.max(0) as u32),
+                    }),
+                    _ => Vec::new(),
+                }
             }
+
+            SdlEvent::Window {
+                win_event: WindowEvent::FocusGained,
+                ..
+            } => self
+                .widget_cache
+                .broadcast(&Event::WindowFocusChanged { focused: true }),
+
+            SdlEvent::Window {
+                win_event: WindowEvent::FocusLost,
+                ..
+            } => self
+                .widget_cache
+                .broadcast(&Event::WindowFocusChanged { focused: false }),
 
             remaining_event => self.widget_cache.handle_event(remaining_event),
         }
@@ -1126,6 +1150,119 @@ mod parity_tests {
         engine.set_event_mask(EventMask::NONE);
 
         assert!(engine.next_queued(&mut queue).is_some());
+        assert!(log.borrow().is_empty());
+    }
+}
+
+#[cfg(test)]
+mod window_broadcast_tests {
+    use super::*;
+    use crate::event::EventCtx;
+    use crate::geometry::{point, size};
+    use crate::widget::{Widget, WidgetCore};
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    /// A `Widget` that wants window events and re-emits what it receives.
+    struct Echo {
+        core: WidgetCore,
+    }
+
+    impl Widget for Echo {
+        /// Returns the shared state.
+        ///
+        /// # Returns
+        ///
+        /// The `WidgetCore`.
+        fn core(&self) -> &WidgetCore {
+            &self.core
+        }
+
+        /// Returns the shared state for modification.
+        ///
+        /// # Returns
+        ///
+        /// The `WidgetCore`.
+        fn core_mut(&mut self) -> &mut WidgetCore {
+            &mut self.core
+        }
+
+        /// Draws nothing.
+        ///
+        /// # Arguments
+        ///
+        /// * `_p` - The painter.
+        fn paint(&self, _p: &mut dyn crate::paint::Painter) {}
+
+        /// Re-emits the event.
+        ///
+        /// # Arguments
+        ///
+        /// * `event` - The event.
+        /// * `ctx` - The context.
+        fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) {
+            ctx.emit(event.clone());
+        }
+    }
+
+    /// Creates an engine with an `Echo` `Widget` whose mask is `mask`, and a log of the
+    /// window events the application sees.
+    fn engine(mask: EventMask) -> (Engine<()>, Rc<RefCell<Vec<String>>>) {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let sink = log.clone();
+        let mut engine: Engine<()> = Engine::new(size(100, 100), 30);
+        let mut core = WidgetCore::new(point(0, 0), size(10, 10));
+
+        core.set_event_mask(mask);
+        engine.widgets().add(Box::new(Echo { core }));
+        engine.on_event(move |_, _, event| match event {
+            Event::WindowResized { .. } | Event::WindowFocusChanged { .. } => {
+                sink.borrow_mut().push(format!("{event:?}"));
+            }
+            _ => {}
+        });
+
+        (engine, log)
+    }
+
+    fn window(win_event: WindowEvent) -> SdlEvent {
+        SdlEvent::Window {
+            timestamp: 0,
+            window_id: 0,
+            win_event,
+        }
+    }
+
+    #[test]
+    fn focus_and_resize_reach_widgets_with_window_in_their_mask() {
+        let (mut engine, log) = engine(EventMask::WINDOW);
+
+        engine.dispatch(window(WindowEvent::FocusGained), &mut ());
+        engine.dispatch(window(WindowEvent::FocusLost), &mut ());
+        engine.dispatch(window(WindowEvent::SizeChanged(640, 480)), &mut ());
+
+        assert_eq!(log.borrow().len(), 3);
+        assert!(log.borrow()[0].contains("focused: true"));
+        assert!(log.borrow()[1].contains("focused: false"));
+        assert!(log.borrow()[2].contains("640"));
+    }
+
+    #[test]
+    fn widgets_without_window_in_their_mask_receive_nothing() {
+        let (mut engine, log) = engine(EventMask::POINTER_BUTTONS);
+
+        engine.dispatch(window(WindowEvent::FocusGained), &mut ());
+        engine.dispatch(window(WindowEvent::SizeChanged(640, 480)), &mut ());
+
+        assert!(log.borrow().is_empty());
+    }
+
+    #[test]
+    fn exposure_repaints_but_is_not_broadcast() {
+        let (mut engine, log) = engine(EventMask::WINDOW);
+
+        engine.dispatch(window(WindowEvent::Exposed), &mut ());
+
         assert!(log.borrow().is_empty());
     }
 }

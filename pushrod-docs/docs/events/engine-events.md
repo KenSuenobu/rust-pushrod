@@ -28,6 +28,7 @@ flowchart TD
 |---|---|
 | `EventMaskChanged { scope, old, new }` | The run-loop mask or a widget's mask changes to a different value. `scope` is `MaskScope::RunLoop` or `MaskScope::Widget(id)`. |
 | `WidgetAdded { id, parent }` | A widget is added to the window. Not sent for the root widget the engine creates. |
+| `EventBroadcast { kind, recipients }` | An event was [broadcast](../concepts/broadcast-events-to-all-interested-widgets.md) to every interested widget. `recipients` is how many received it. |
 
 More variants are added by the features that need them (focus, dialogs, menus, timers, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
 
