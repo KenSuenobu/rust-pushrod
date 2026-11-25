@@ -32,7 +32,9 @@
 //! form to be stored and reloaded by ID.
 
 use crate::backend::sdl2::{Sdl2Painter, to_sdl_rect};
-use crate::event::{EngineEvent, Event, EventCtx, EventMask, MaskScope};
+use crate::event::{
+    EngineEvent, EngineEventKind, Event, EventCtx, EventMask, MaskScope, engine_filter_accepts,
+};
 use crate::font::FontCache;
 use crate::geometry::{Point, make_rect, point};
 use crate::paint::{self, CachePolicy};
@@ -42,6 +44,7 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::any::Any;
+use std::collections::HashMap;
 
 /// The tree of `Widget`s in a window.
 ///
@@ -72,6 +75,7 @@ pub struct WidgetCache {
     cache_policy: CachePolicy,
     pending_events: Vec<Event>,
     loop_mask: EventMask,
+    engine_filters: HashMap<WidgetId, Vec<EngineEventKind>>,
 }
 
 impl WidgetCache {
@@ -92,6 +96,7 @@ impl WidgetCache {
             cache_policy: Sdl2Painter::CACHE_POLICY,
             pending_events: Vec::new(),
             loop_mask: EventMask::ALL,
+            engine_filters: HashMap::new(),
         }
     }
 
@@ -175,6 +180,11 @@ impl WidgetCache {
         }
 
         self.needs_full_redraw = true;
+
+        if parent != id {
+            self.pending_events
+                .push(Event::Engine(EngineEvent::WidgetAdded { id, parent }));
+        }
 
         id
     }
@@ -421,6 +431,60 @@ impl WidgetCache {
             }));
 
         true
+    }
+
+    /// Limits the engine events a `Widget` receives to the listed kinds.
+    ///
+    /// The `Widget` still needs [`EventMask::ENGINE`] in its mask.  Without a filter it receives
+    /// every kind.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `kinds` - The accepted kinds, or `None` to remove the filter.
+    pub fn set_engine_filter(&mut self, id: WidgetId, kinds: Option<Vec<EngineEventKind>>) {
+        match kinds {
+            Some(kinds) => {
+                self.engine_filters.insert(id, kinds);
+            }
+            None => {
+                self.engine_filters.remove(&id);
+            }
+        }
+    }
+
+    /// Broadcasts a completed engine event to the `Widget`s that want it.
+    ///
+    /// A `Widget` receives it when it is enabled, the run loop's mask and its own mask include
+    /// [`EventMask::ENGINE`], and its kind filter (if any) accepts the event.  Anything the
+    /// `Widget`s generate in response is returned and is never broadcast again, so engine events
+    /// cannot loop.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The engine event.
+    ///
+    /// # Returns
+    ///
+    /// The events the `Widget`s generated while handling it.
+    pub fn broadcast_engine_event(&mut self, event: &EngineEvent) -> Vec<Event> {
+        let mut ctx = EventCtx::default();
+        let wrapped = Event::Engine(event.clone());
+
+        if self.loop_mask.intersects(EventMask::ENGINE) {
+            for (index, widget) in self.cache.iter_mut().enumerate() {
+                let filter = self.engine_filters.get(&(index as WidgetId));
+
+                if widget.is_enabled()
+                    && widget.event_mask().intersects(EventMask::ENGINE)
+                    && engine_filter_accepts(filter.map(|k| k.as_slice()), event)
+                {
+                    widget.handle_event(&wrapped, &mut ctx);
+                }
+            }
+        }
+
+        ctx.into_events()
     }
 
     /// Sets the run loop's event mask, which `Widget`s must also pass.  The `Engine` calls this

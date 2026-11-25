@@ -3,7 +3,7 @@
 use pushrod::cache::WidgetCache;
 use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
-use pushrod::event::{EngineEvent, Event, EventKind, EventMask, MaskScope};
+use pushrod::event::{EngineEvent, EngineEventKind, Event, EventKind, EventMask, MaskScope};
 use pushrod::geometry::{point, size};
 use pushrod::widget::{Behavior, VisualState, Widget};
 use pushrod_widgets::base_widget::BaseWidget;
@@ -212,7 +212,11 @@ fn engine_runs_click_callbacks_with_state_and_widget_access() {
             .unwrap()
             .set_text(format!("{}", state.clicks));
     });
-    engine.on_event(|state, _ui, _event| state.events += 1);
+    engine.on_event(|state, _ui, event| {
+        if !matches!(event, Event::Engine(_)) {
+            state.events += 1;
+        }
+    });
 
     let mut state = State::default();
 
@@ -504,8 +508,15 @@ fn the_run_loop_mask_filters_before_widgets_and_close_is_always_delivered() {
     engine.dispatch(down(20, 15), &mut seen);
     engine.dispatch(motion(20, 15), &mut seen);
 
-    // The mask change event, then hover only: PointerMoved and presses are filtered.
-    assert_eq!(seen, vec![EventKind::Engine, EventKind::PointerEntered]);
+    // The widget-added and mask-change events, then hover only: PointerMoved and presses are filtered.
+    assert_eq!(
+        seen,
+        vec![
+            EventKind::Engine,
+            EventKind::Engine,
+            EventKind::PointerEntered
+        ]
+    );
 
     engine.set_event_mask(EventMask::NONE);
     engine.dispatch(SdlEvent::Quit { timestamp: 0 }, &mut seen);
@@ -567,5 +578,117 @@ fn callbacks_can_change_the_run_loop_mask() {
     engine.dispatch(up(20, 15), &mut count);
 
     assert_eq!(engine.event_mask(), EventMask::NONE);
-    assert_eq!(count, 1);
+    // `WidgetAdded` and the mask change.
+    assert_eq!(count, 2);
+}
+
+/// Records every engine event, filtered by kind, and the engine events it received as a widget.
+fn engine_listener(mask: EventMask) -> Recorder {
+    let mut core = pushrod::widget::WidgetCore::new(point(10, 10), size(20, 20));
+
+    core.set_event_mask(mask);
+
+    Recorder { core }
+}
+
+#[test]
+fn adding_a_widget_emits_widget_added_but_the_root_does_not() {
+    let mut engine: Engine<Vec<EngineEvent>> = Engine::new(size(400, 300), 30);
+    let id = engine.add_widget(button(10, 10));
+
+    engine.on_engine_event(|seen, _ui, event| seen.push(event.clone()));
+
+    let mut seen = Vec::new();
+
+    engine.dispatch(motion(500, 500), &mut seen);
+
+    assert_eq!(
+        seen,
+        vec![EngineEvent::WidgetAdded {
+            id,
+            parent: pushrod::widget::ROOT_WIDGET_ID
+        }]
+    );
+}
+
+#[test]
+fn engine_callbacks_can_filter_by_kind() {
+    let mut engine: Engine<Vec<EngineEventKind>> = Engine::new(size(400, 300), 30);
+
+    engine.add_widget(button(10, 10));
+    engine.set_event_mask(EventMask::ALL & !EventMask::HOVER);
+    engine.on_engine_event_filtered(&[EngineEventKind::EventMaskChanged], |seen, _ui, event| {
+        seen.push(event.kind())
+    });
+
+    let mut seen = Vec::new();
+
+    engine.dispatch(motion(500, 500), &mut seen);
+
+    assert_eq!(seen, vec![EngineEventKind::EventMaskChanged]);
+}
+
+#[test]
+fn widgets_receive_engine_events_only_with_the_engine_mask_and_filter() {
+    let mut cache = WidgetCache::new();
+
+    cache.add(Box::new(pushrod::root_widget::RootWidget::new(size(
+        100, 100,
+    ))));
+
+    let all = cache.add(Box::new(engine_listener(EventMask::ENGINE)));
+    let none = cache.add(Box::new(engine_listener(EventMask::KEYBOARD)));
+    let filtered = cache.add(Box::new(engine_listener(EventMask::ENGINE)));
+
+    cache.set_engine_filter(filtered, Some(vec![EngineEventKind::EventMaskChanged]));
+    cache.take_pending_events();
+
+    let echoed = cache.broadcast_engine_event(&EngineEvent::WidgetAdded { id: 9, parent: 0 });
+
+    // One echo only: the `ENGINE` widget without a filter.
+    assert_eq!(echoed.len(), 1);
+    assert_ne!(all, none);
+
+    cache.set_engine_filter(filtered, None);
+
+    let echoed = cache.broadcast_engine_event(&EngineEvent::WidgetAdded { id: 9, parent: 0 });
+
+    assert_eq!(echoed.len(), 2);
+}
+
+#[test]
+fn the_run_loop_mask_can_silence_widget_engine_events() {
+    let mut engine: Engine<usize> = Engine::new(size(400, 300), 30);
+
+    engine.add_widget(engine_listener(EventMask::ENGINE));
+    engine.set_event_mask(EventMask::ALL & !EventMask::ENGINE);
+    engine.on_event(|count: &mut usize, _ui, event| {
+        if matches!(event, Event::Engine(_)) {
+            *count += 1;
+        }
+    });
+
+    let mut count = 0;
+
+    engine.dispatch(motion(500, 500), &mut count);
+
+    // `EventMaskChanged` and `WidgetAdded` reach the callback once each; the widget echoes nothing.
+    assert_eq!(count, 2);
+}
+
+#[test]
+fn engine_events_do_not_loop_when_widgets_respond_to_them() {
+    let mut engine: Engine<usize> = Engine::new(size(400, 300), 30);
+
+    engine.add_widget(engine_listener(EventMask::ENGINE));
+    engine.on_engine_event(|count: &mut usize, _ui, _event| *count += 1);
+
+    let mut count = 0;
+
+    engine.dispatch(motion(500, 500), &mut count);
+    engine.dispatch(motion(500, 500), &mut count);
+
+    // `WidgetAdded`, plus the copy this test widget emits in response.  The copy is not broadcast
+    // again, and the second dispatch adds nothing, so there is no loop.
+    assert_eq!(count, 2);
 }

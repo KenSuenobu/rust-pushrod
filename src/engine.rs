@@ -64,7 +64,9 @@
 
 use crate::cache::WidgetCache;
 use crate::color::Color;
-use crate::event::{EngineEvent, Event, EventMask, MaskScope};
+use crate::event::{
+    EngineEvent, EngineEventKind, Event, EventMask, MaskScope, engine_filter_accepts,
+};
 use crate::font::FontCache;
 use crate::geometry::Size;
 use crate::root_widget::RootWidget;
@@ -211,6 +213,12 @@ pub type ClickCallback<S> = Box<dyn FnMut(&mut S, &mut Ui)>;
 /// Register one with [`Engine::on_event`].
 pub type EventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &Event)>;
 
+/// A callback that receives the engine events Pushrod emits after its internal actions.
+///
+/// It receives the application state, a [`Ui`] handle, and the engine event.  Register one with
+/// [`Engine::on_engine_event`] or [`Engine::on_engine_event_filtered`].
+pub type EngineEventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &EngineEvent)>;
+
 /// The handle passed to callbacks.
 ///
 /// It gives callbacks access to the `Widget`s in the window, by ID and concrete type, and lets
@@ -304,6 +312,7 @@ pub struct Engine<S = ()> {
     font_cache: FontCache,
     click_callbacks: HashMap<WidgetId, Vec<ClickCallback<S>>>,
     event_callbacks: Vec<EventCallback<S>>,
+    engine_callbacks: Vec<(Option<Vec<EngineEventKind>>, EngineEventCallback<S>)>,
 }
 
 impl<S> Engine<S> {
@@ -333,6 +342,7 @@ impl<S> Engine<S> {
             font_cache: FontCache::default(),
             click_callbacks: HashMap::new(),
             event_callbacks: Vec::new(),
+            engine_callbacks: Vec::new(),
         }
     }
 
@@ -391,10 +401,34 @@ impl<S> Engine<S> {
         !self.event_mask.intersects(EventMask::TIMER) && !self.widget_cache.needs_draw()
     }
 
-    /// Delivers the engine events queued by mask changes to the callbacks.
+    /// Takes the engine events queued by internal actions and broadcasts each to the `Widget`s
+    /// that want it.
+    ///
+    /// # Returns
+    ///
+    /// Each engine event followed by the events the `Widget`s generated in response, in order.
+    fn drain_pending(&mut self) -> Vec<Event> {
+        let mut drained = Vec::new();
+
+        for event in self.widget_cache.take_pending_events() {
+            let generated = match &event {
+                Event::Engine(engine_event) => {
+                    self.widget_cache.broadcast_engine_event(engine_event)
+                }
+                _ => Vec::new(),
+            };
+
+            drained.push(event);
+            drained.extend(generated);
+        }
+
+        drained
+    }
+
+    /// Delivers the engine events queued by internal actions to the `Widget`s and callbacks.
     fn flush_pending(&mut self, state: &mut S) {
         loop {
-            let pending = self.widget_cache.take_pending_events();
+            let pending = self.drain_pending();
 
             if pending.is_empty() {
                 break;
@@ -503,6 +537,48 @@ impl<S> Engine<S> {
         self.event_callbacks.push(Box::new(callback));
     }
 
+    /// Registers a callback that receives every [`EngineEvent`].
+    ///
+    /// Engine events are emitted after an internal action completes (an event mask change, a
+    /// `Widget` added, ...).  They run before [`on_event`](Engine::on_event) callbacks.  Engine
+    /// events never trigger further internal actions by themselves.
+    ///
+    /// # Arguments
+    ///
+    /// * `callback` - Called with the application state, a [`Ui`] handle, and the engine event.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::engine::Engine;
+    /// use pushrod::event::EngineEvent;
+    /// use pushrod::geometry::size;
+    ///
+    /// let mut engine: Engine<Vec<String>> = Engine::new(size(320, 200), 30);
+    ///
+    /// engine.on_engine_event(|log, _ui, event| log.push(format!("{:?}", event)));
+    /// ```
+    pub fn on_engine_event<F>(&mut self, callback: F)
+    where
+        F: FnMut(&mut S, &mut Ui, &EngineEvent) + 'static,
+    {
+        self.engine_callbacks.push((None, Box::new(callback)));
+    }
+
+    /// Registers a callback that receives only the listed kinds of [`EngineEvent`].
+    ///
+    /// # Arguments
+    ///
+    /// * `kinds` - The kinds of engine event to receive.
+    /// * `callback` - Called with the application state, a [`Ui`] handle, and the engine event.
+    pub fn on_engine_event_filtered<F>(&mut self, kinds: &[EngineEventKind], callback: F)
+    where
+        F: FnMut(&mut S, &mut Ui, &EngineEvent) + 'static,
+    {
+        self.engine_callbacks
+            .push((Some(kinds.to_vec()), Box::new(callback)));
+    }
+
     /// Sets the window's background color.
     ///
     /// This is the color of the [`RootWidget`] (ID `0`), which fills the window behind every other
@@ -584,6 +660,14 @@ impl<S> Engine<S> {
         {
             for callback in callbacks.iter_mut() {
                 callback(state, &mut ui);
+            }
+        }
+
+        if let Event::Engine(engine_event) = event {
+            for (filter, callback) in self.engine_callbacks.iter_mut() {
+                if engine_filter_accepts(filter.as_deref(), engine_event) {
+                    callback(state, &mut ui, engine_event);
+                }
             }
         }
 
@@ -777,9 +861,9 @@ impl<S> Engine<S> {
     /// has been called.
     pub fn next_event(&mut self, events: &mut EventLoop) -> Option<Event> {
         loop {
-            events
-                .pending
-                .extend(self.widget_cache.take_pending_events());
+            let drained = self.drain_pending();
+
+            events.pending.extend(drained);
 
             if let Some(event) = events.pending.pop_front() {
                 return Some(event);

@@ -98,9 +98,11 @@ A disabled widget (`set_enabled(false)`) receives no mouse events, so it never e
 | Method | Runs when | Signature |
 |---|---|---|
 | `engine.on_click(id, f)` | Widget `id` emits `Clicked` | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_engine_event(f)` | Pushrod completes an internal action | `FnMut(&mut S, &mut Ui, &EngineEvent)` |
+| `engine.on_engine_event_filtered(&kinds, f)` | Same, for the listed kinds only | `FnMut(&mut S, &mut Ui, &EngineEvent)` |
 | `engine.on_event(f)` | Any widget emits any event | `FnMut(&mut S, &mut Ui, &Event)` |
 
-Several callbacks can be registered for the same widget; they run in the order they were registered, and `on_event` callbacks run after the widget-specific ones.
+Several callbacks can be registered for the same widget; they run in the order they were registered, and `on_event` callbacks run after the widget-specific ones and the engine-event ones. Pushrod's own actions (such as a mask change or a widget being added) arrive as [engine events](../events/engine-events.md).
 
 ## The `Ui` handle
 

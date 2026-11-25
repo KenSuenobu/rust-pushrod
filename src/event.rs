@@ -143,8 +143,10 @@ impl EventMask {
     pub const TIMER: EventMask = EventMask(1 << 9);
     /// Custom and unmapped events ([`Event::Custom`], [`Event::Raw`]).
     pub const CUSTOM: EventMask = EventMask(1 << 10);
+    /// Engine events ([`Event::Engine`]).  A `Widget` receives them only with this class in its mask.
+    pub const ENGINE: EventMask = EventMask(1 << 11);
     /// Every class.
-    pub const ALL: EventMask = EventMask((1 << 11) - 1);
+    pub const ALL: EventMask = EventMask((1 << 12) - 1);
 
     /// Returns whether every class in `other` is in this mask.
     ///
@@ -238,12 +240,35 @@ pub enum MaskScope {
     Widget(WidgetId),
 }
 
+/// The kind of an [`EngineEvent`], without its data.  Used to filter which engine events a
+/// `Widget` or callback receives.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
+pub enum EngineEventKind {
+    /// See [`EngineEvent::EventMaskChanged`].
+    EventMaskChanged,
+    /// See [`EngineEvent::WidgetAdded`].
+    WidgetAdded,
+}
+
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
 ///
-/// More actions are added as the engine gains them.
+/// Engine events are broadcast after the action has completed, to `Widget`s whose mask includes
+/// [`EventMask::ENGINE`], then to `Engine::on_engine_event` callbacks and `Engine::on_event`
+/// callbacks.  They never cause further internal actions by themselves, so they cannot loop.
+///
+/// **Rule for contributors:** any change that adds an internal action must add a variant here and
+/// emit it.  More variants are added as the engine gains the actions.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum EngineEvent {
+    /// A `Widget` was added to the window.  Not emitted for the root `Widget`.
+    WidgetAdded {
+        /// The ID of the new `Widget`.
+        id: WidgetId,
+        /// The ID of its parent.
+        parent: WidgetId,
+    },
     /// An event mask changed.
     EventMaskChanged {
         /// Whose mask changed.
@@ -253,6 +278,34 @@ pub enum EngineEvent {
         /// The mask after the change.
         new: EventMask,
     },
+}
+
+impl EngineEvent {
+    /// Returns the kind of this engine event, for filtering.
+    ///
+    /// # Returns
+    ///
+    /// The [`EngineEventKind`] matching the variant.
+    pub fn kind(&self) -> EngineEventKind {
+        match self {
+            EngineEvent::EventMaskChanged { .. } => EngineEventKind::EventMaskChanged,
+            EngineEvent::WidgetAdded { .. } => EngineEventKind::WidgetAdded,
+        }
+    }
+}
+
+/// Returns whether an engine event passes an optional kind filter.
+///
+/// # Arguments
+///
+/// * `filter` - The accepted kinds, or `None` to accept every kind.
+/// * `event` - The engine event.
+///
+/// # Returns
+///
+/// `true` if there is no filter or the filter lists the event's kind.
+pub fn engine_filter_accepts(filter: Option<&[EngineEventKind]>, event: &EngineEvent) -> bool {
+    filter.is_none_or(|kinds| kinds.contains(&event.kind()))
 }
 
 /// The kind of an [`Event`], without its data.  Used by masks and the callback registry.
@@ -813,5 +866,27 @@ mod mask_tests {
         assert_eq!(EventKind::CloseRequested.mask_class(), None);
         assert_eq!(EventKind::Engine.mask_class(), None);
         assert_eq!(EventKind::Clicked.mask_class(), None);
+    }
+
+    #[test]
+    fn engine_class_is_part_of_all() {
+        assert!(EventMask::ALL.contains(EventMask::ENGINE));
+        assert!(!(EventMask::ALL & !EventMask::ENGINE).intersects(EventMask::ENGINE));
+    }
+
+    #[test]
+    fn engine_events_report_kind_and_filter() {
+        let added = EngineEvent::WidgetAdded { id: 1, parent: 0 };
+
+        assert_eq!(added.kind(), EngineEventKind::WidgetAdded);
+        assert!(engine_filter_accepts(None, &added));
+        assert!(engine_filter_accepts(
+            Some(&[EngineEventKind::WidgetAdded]),
+            &added
+        ));
+        assert!(!engine_filter_accepts(
+            Some(&[EngineEventKind::EventMaskChanged]),
+            &added
+        ));
     }
 }
