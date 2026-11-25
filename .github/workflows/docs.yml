@@ -1,8 +1,8 @@
 name: Documentation site
 
 # Builds the Docusaurus site and the rustdoc API reference together, and publishes them as the
-# `pushrod-docs` Docker image from main.  Pull requests build only (the build fails on broken
-# links).  Needs the repository secrets DOCKER_REPOSITORY (the registry namespace the image is
+# `pushrod-docs` Docker image.  Every run publishes, tagged with its commit; only main also moves
+# `latest`.  A broken link fails the build.  Needs the repository secrets DOCKER_REPOSITORY (the registry namespace the image is
 # pushed under), DOCKER_USERNAME, and DOCKER_PASSWORD.
 on:
   push:
