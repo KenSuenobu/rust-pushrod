@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Sidebar or tabs layout
 - [ ] Apply enabled only on changes; OK applies and closes
 - [ ] Restore Defaults per page and optional search
-- [ ] Registered as `extra.settings_dialog` and shown in the gallery (1.2)
+- [ ] Registered as `extra.settings_dialog` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

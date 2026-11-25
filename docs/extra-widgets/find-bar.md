@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Find, next, previous, and match count
 - [ ] Case, whole word, and regular expression options
 - [ ] Replace and Replace All through the Searchable trait
-- [ ] Registered as `extra.find_bar` and shown in the gallery (1.2)
+- [ ] Registered as `extra.find_bar` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

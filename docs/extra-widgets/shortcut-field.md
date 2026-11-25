@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Records combinations with modifiers
 - [ ] Escape cancels, Backspace clears
 - [ ] Conflicts reported inline
-- [ ] Registered as `extra.shortcut_field` and shown in the gallery (1.2)
+- [ ] Registered as `extra.shortcut_field` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

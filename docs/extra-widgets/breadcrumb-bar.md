@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Clickable segments and sibling menus
 - [ ] Overflow collapses into a menu
 - [ ] Keyboard navigation
-- [ ] Registered as `extra.breadcrumb_bar` and shown in the gallery (1.2)
+- [ ] Registered as `extra.breadcrumb_bar` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

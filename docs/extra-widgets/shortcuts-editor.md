@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Filter by name or key combination
 - [ ] Conflict detection with reassign
 - [ ] Reset one or all
-- [ ] Registered as `extra.shortcuts_editor` and shown in the gallery (1.2)
+- [ ] Registered as `extra.shortcuts_editor` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Opening one closes the others (or multiple mode)
 - [ ] Open section fills the height
 - [ ] Keyboard navigation between headers
-- [ ] Registered as `extra.accordion` and shown in the gallery (1.2)
+- [ ] Registered as `extra.accordion` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

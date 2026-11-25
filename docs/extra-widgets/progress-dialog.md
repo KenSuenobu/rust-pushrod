@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Delayed appearance for quick tasks
 - [ ] Determinate and busy progress
 - [ ] Cancel reported to the task
-- [ ] Registered as `extra.progress_dialog` and shown in the gallery (1.2)
+- [ ] Registered as `extra.progress_dialog` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

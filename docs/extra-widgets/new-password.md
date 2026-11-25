@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Strength meter and rule messages
 - [ ] Match check and show/hide
 - [ ] Acceptable state bindable to OK
-- [ ] Registered as `extra.new_password` and shown in the gallery (1.2)
+- [ ] Registered as `extra.new_password` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

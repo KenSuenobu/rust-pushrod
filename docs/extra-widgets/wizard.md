@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Back, Next, Finish, and Cancel with page validation
 - [ ] Step list and conditional pages
 - [ ] Summary page optional
-- [ ] Registered as `extra.wizard` and shown in the gallery (1.2)
+- [ ] Registered as `extra.wizard` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

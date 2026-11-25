@@ -34,12 +34,14 @@ flowchart BT
 
 ## Planned widgets
 
+Every widget will have a live page in the Pushrod Showcase, the interactive demo of everything Pushrod provides.
+
 ### Crate and foundations
 
 | Widget | What it is | Release |
 |---|---|---|
 | [Create the pushrod-extra-widgets crate](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/crate.md) | The crate, its registration function, its docs section, and its place in CI. | first release |
-| [Extra widgets gallery example](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/gallery.md) | A runnable gallery showing every extra widget, used for golden screenshots. | first release |
+| [Extra widgets in the Pushrod Showcase](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/gallery.md) | Every extra widget gets its page in the Pushrod Showcase, with the property panel, event log, and source view. | first release |
 | [Popover: a floating panel anchored to a control](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/popover.md) | A borderless panel that opens next to a control, holds any widgets, and closes on Escape or a click outside. | first release |
 
 ### Buttons and value controls
@@ -54,6 +56,8 @@ flowchart BT
 | [Tool palette (grid of tool buttons)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/tool-palette.md) | A grid of icon buttons with one-of-many selection and optional drag out, for tools, swatches, or components. | first release |
 | [Ruler](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/ruler.md) | A horizontal or vertical scale in pixels, points, or units, with markers that can be dragged. | later |
 | [Shortcut field (key combination recorder)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/shortcut-field.md) | A field that records the key combination pressed while it has focus. | later |
+| [Drag value (numeric scrubber)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/drag-value.md) | A compact number that changes as you drag it sideways, and becomes a text field when clicked. | first release |
+| [Range slider (two thumbs)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/range-slider.md) | A slider with two thumbs selecting a lower and an upper value. | first release |
 
 ### Pickers and special fields
 
@@ -68,6 +72,7 @@ flowchart BT
 | [Image well](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/image-well.md) | A framed area that shows an image and accepts a new one by drop, paste, or Choose. | later |
 | [New password (enter, confirm, strength)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/new-password.md) | Two password fields with a strength meter and a match check. | later |
 | [Character picker](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/character-picker.md) | A searchable grid of characters by block, with a preview and code point. | later |
+| [Token field (tags in a field)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/token-field.md) | A text field whose entries become removable tokens, with optional suggestions. | first release |
 
 ### Data views
 
@@ -85,6 +90,9 @@ flowchart BT
 | [Filter field (live filter for lists, tables, and trees)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/filter-field.md) | A search field bound to a list, table, or tree that hides non-matching rows as you type. | later |
 | [Rule editor (query builder)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/rule-editor.md) | Rows of "field, operator, value" with add and remove buttons, joined by All or Any. | later |
 | [Image viewer (zoom and pan)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/image-viewer.md) | An image in a scrollable view with zoom to fit, actual size, zoom by wheel, and drag to pan. | later |
+| [Log view (append-only output)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/log-view.md) | A read-only, scrolling view of lines that follows the newest line, for build output and logs. | first release |
+| [Canvas view (zoomable surface of items)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/canvas-view.md) | A scrollable, zoomable surface holding positioned items, with selection, rubber band, and moving. | first release |
+| [Rich text view (formatted, read-only)](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/rich-text-view.md) | Read-only formatted text: headings, bold and italic, lists, code, and links, from Markdown or styled spans. | first release |
 
 ### Panels and navigation
 
@@ -107,3 +115,5 @@ flowchart BT
 | [About dialog](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/about-dialog.md) | The application's icon, name, version, copyright, website, and credits and license pages. | later |
 | [Find and replace bar](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/find-bar.md) | A bar with find and replace fields, match options, a match count, and next and previous. | later |
 | [Keyboard shortcuts editor](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/shortcuts-editor.md) | A filterable table of actions and their shortcuts, edited with the shortcut field. | later |
+| [Command palette](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/command-palette.md) | A pop-up search box listing every command; type a few letters, press Return, and it runs. | first release |
+| [Recent files menu](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/extra-widgets/recent-files-menu.md) | An Open Recent submenu that remembers the last files, with Clear and missing-file handling. | first release |

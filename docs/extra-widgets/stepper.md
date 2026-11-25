@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Click steps; holding repeats with a delay
 - [ ] Limits disable the matching arrow unless wrapping
 - [ ] Buddy binding keeps another widget in step
-- [ ] Registered as `extra.stepper` and shown in the gallery (1.2)
+- [ ] Registered as `extra.stepper` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

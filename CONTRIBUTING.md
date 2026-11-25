@@ -22,6 +22,9 @@ Components built for the Chassis designer (label `chassis`) are specified the sa
   (pickers, tree view, property grid, panels, dialogs). Same flat look; public APIs of `pushrod` and
   `pushrod-widgets` only. A widget that is not one control with one job belongs here, not in the
   standard set ([roadmap](docs/ROADMAP_EXTRA_WIDGETS.md)).
+- **`pushrod-showcase` (planned, `pushrod-showcase/`):** the interactive demo of every widget and core
+  feature. **Every pull request that adds a widget, standard or extra, adds its Showcase page**; a test
+  fails when a registered widget has none ([roadmap, Epic 12](docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md)).
 
 ## Documentation is part of every contribution
 

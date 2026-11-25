@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Move items by buttons, double-click, and drag
 - [ ] Order the chosen list
 - [ ] Buttons disabled when not applicable
-- [ ] Registered as `extra.dual_list` and shown in the gallery (1.2)
+- [ ] Registered as `extra.dual_list` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

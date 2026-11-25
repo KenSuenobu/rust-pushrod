@@ -17,7 +17,7 @@ Sample data must be fictional: no real names, e-mail addresses, places, or paths
 import math
 import os
 
-from generate import (C, storyboard, _picture, _icon, _choice, _tabs, _browser, _dial,
+from generate import (C, storyboard, _picture, _icon, _choice, _tabs, _browser, _dial, _showcase, _fit,
                       PANEL, BLACK, WHITE, GRAY, MID, DARK, HERE)
 
 XW = {}
@@ -169,13 +169,12 @@ def crate():
 
 @xw("1.2")
 def gallery():
-    c = C(560, 240); x, y = window(c, 0, 0, 560, 240, "Extra widgets gallery")
-    _tabs(c, 10, y + 8, 540, 170, ["Buttons", "Pickers", "Data views", "Panels", "Dialogs"], 1)
-    c.text(26, y + 46, "Date:", BLACK, 13); c.field(80, y + 44, 110, "11/24/2026"); c.glyph(190, y + 44, 22, "down")
-    c.text(26, y + 84, "Color:", BLACK, 13); c.rect(80, y + 80, 44, 26, fill=WHITE); c.rect(84, y + 84, 36, 18, fill=(70, 120, 70), outline=None)
-    c.text(26, y + 122, "Path:", BLACK, 13); c.field(80, y + 120, 200, "/home/user/notes"); c.button(282, y + 120, 30, 22, "…")
-    c.rect(0, 216, 560, 24, fill=WHITE); c.text(8, 218, "Last event: ColorChanged { id: 12 }", DARK, 12)
-    return [("Gallery: one tab per epic, events logged at the bottom", c, "golden screenshots per tab")]
+    pages = [("h", "STANDARD WIDGETS"), ("i", "Button"), ("i", "Slider"), ("h", "EXTRA WIDGETS"), ("i", "Calendar"), ("i", "Color Picker"), ("i", "Date Picker"), ("i", "Dial"), ("i", "Tree View")]
+    c = _showcase(640, 300, "Date Picker", pages=pages, log=["12:04:31  PopoverOpened { id: 31 }", "12:04:33  ValueChanged { id: 30, date: 2026-11-30 }"])
+    c.text(186, 62, "A date field with a drop-down month calendar.", DARK, 12)
+    c.text(196, 100, "Due:", BLACK, 13); c.field(236, 98, 110, "11/30/2026"); c.glyph(346, 98, 22, "down")
+    c.text(196, 140, "Range:", BLACK, 13); c.field(250, 138, 110, "11/01/2026", disabled=True); c.glyph(360, 138, 22, "down", disabled=True)
+    return [("Extra widgets are a group in the Pushrod Showcase, with the same event log, properties, and source", c, "the completeness test covers extra. types")]
 
 
 @xw("1.3")
@@ -1003,6 +1002,190 @@ def shortcuts_editor():
     c.text(170, 170, "Used by Save As…", DARK, 11); c.button(326, 140, 96, 24, "Reassign")
     c.button(12, 196, 80, 26, "Reset"); c.button(100, 196, 90, 26, "Reset All")
     return [("Filtered table; shortcut field reports a conflict", c, "ShortcutsChanged on Reassign")]
+
+
+# ============================================================================
+# Second pass: popular in modern toolkits
+# ============================================================================
+def _dragval(c, x, y, w, label, val, hot=False, edit=False):
+    if edit:
+        c.field(x, y, w, val, caret=len(val), focused=True, h=24); return
+    c.rect(x, y, w, 24, fill=BLACK if hot else WHITE)
+    c.text(x + 6, y + 2, label, MID if not hot else GRAY, 13); c.text(x + w - 8 - c.tw(val, 13), y + 2, val, WHITE if hot else BLACK, 13)
+
+
+def _hresize(c, x, y):
+    c.line(x - 8, y, x + 8, y, BLACK, 2); c.tri(x - 12, y - 4, 8, "left"); c.tri(x + 5, y - 4, 8, "right")
+
+
+@xw("2.9")
+def drag_value():
+    a = C(230, 70); _dragval(a, 14, 14, 90, "X", "120"); _dragval(a, 112, 14, 90, "Y", "48")
+    b = C(230, 70); _dragval(b, 14, 14, 90, "X", "137", hot=True); _dragval(b, 112, 14, 90, "Y", "48"); _hresize(b, 80, 50)
+    d = C(230, 70); _dragval(d, 14, 14, 90, "X", "137"); _dragval(d, 112, 14, 90, "Y", "48")
+    e = C(230, 70); _dragval(e, 14, 14, 90, "X", "200", edit=True); _dragval(e, 112, 14, 90, "Y", "48")
+    f = C(270, 70); _dragval(f, 14, 14, 116, "Opacity", "50 %"); _dragval(f, 138, 14, 110, "Angle", "90°")
+    return [("1. Idle", a, None), ("2. Dragging right: the value follows", b, "ValueChanged (continuous)"), ("3. Released", d, "EditingFinished"),
+            ("4. Click without dragging: type a value", e, "Return commits, Escape cancels"), ("Prefix and suffix", f, None)]
+
+
+def _range(c, x, y, w, lo, hi, hot=None, labels=True):
+    c.line(x, y + 10, x + w, y + 10, BLACK, 2)
+    lx, hx = x + int(w * lo), x + int(w * hi)
+    c.rect(lx, y + 6, hx - lx, 9, fill=BLACK, outline=None)
+    for n, kx in enumerate((lx, hx)):
+        c.rect(kx - 6, y + 1, 12, 18, fill=DARK if hot == n else WHITE)
+    if labels: c.text(x + w + 12, y, f"{int(lo * 100)} to {int(hi * 100)}", BLACK, 13)
+
+
+@xw("2.10")
+def range_slider():
+    a = C(300, 56); _range(a, 16, 16, 180, 0.2, 0.7)
+    b = C(300, 56); _range(b, 16, 16, 180, 0.2, 0.55, hot=1); b.pointer(118, 30)
+    d = C(300, 56); _range(d, 16, 16, 180, 0.4, 0.75); d.pointer(120, 30)
+    e = C(300, 56); _range(e, 16, 16, 180, 0.5, 0.55, hot=0); e.pointer(108, 30)
+    return [("1. Low 20, high 70", a, None), ("2. Dragging the upper thumb", b, "RangeChanged(20, 55)"), ("3. Dragging the span moves both", d, "RangeChanged(40, 75)"),
+            ("Thumbs cannot cross (min_gap)", e, None)]
+
+
+def _tokens(c, x, y, w, toks, typing="", sel=None, h=28):
+    c.rect(x, y, w, h, fill=WHITE); cx, cy = x + 4, y + 3
+    for n, t in enumerate(toks):
+        tw = int(c.tw(t, 13)) + 26
+        if cx + tw > x + w - 4: cx = x + 4; cy += 26
+        c.rect(cx, cy, tw, 22, fill=BLACK if n == sel else PANEL); col = WHITE if n == sel else BLACK
+        c.text(cx + 5, cy + 1, t, col, 13); c.line(cx + tw - 14, cy + 7, cx + tw - 7, cy + 14, col); c.line(cx + tw - 7, cy + 7, cx + tw - 14, cy + 14, col)
+        cx += tw + 4
+    if typing is not None:
+        c.text(cx + 2, cy + 1, typing, BLACK, 13); tx = cx + 2 + c.tw(typing, 13); c.line(tx, cy + 3, tx, cy + 19)
+    return cx, cy
+
+
+@xw("3.10")
+def token_field():
+    a = C(330, 110); a.text(12, 16, "Tags:", BLACK, 13); _tokens(a, 60, 12, 250, ["rust", "gui"], "sd")
+    b = C(330, 110); b.text(12, 16, "Tags:", BLACK, 13); cx, cy = _tokens(b, 60, 12, 250, ["rust", "gui"], "sd"); b.listbox(cx, 42, 110, ["sdl2", "sdl3"], selected={0}, scroll=False)
+    d = C(330, 110); d.text(12, 16, "Tags:", BLACK, 13); _tokens(d, 60, 12, 250, ["rust", "gui", "sdl2"], "")
+    e = C(330, 110); e.text(12, 16, "Tags:", BLACK, 13); _tokens(e, 60, 12, 250, ["rust", "gui", "sdl2"], None, sel=2)
+    f = C(330, 110); f.text(12, 16, "Tags:", BLACK, 13); _tokens(f, 60, 12, 250, ["rust", "gui", "sdl2", "widgets", "desktop"], "", h=54)
+    return [("1. Typing after two tokens", a, None), ("2. Suggestions while typing", b, None), ("3. Return or comma: a new token", d, "TokensChanged"),
+            ("4. Backspace selects the last token; again removes it", e, None), ("Wraps onto a second line", f, None)]
+
+
+LOG = [("", "   Compiling contact-dialog v0.1.0"), ("w", "warning: unused variable `count`"), ("", "  --> src/forms/main.rs:14:9"), ("e", "error: mismatched types"), ("", "  --> src/forms/main.rs:22:18"), ("", "error: could not compile `contact-dialog`")]
+
+
+def _log(c, x, y, w, lines, sel=None, jump=False, pos=1.0):
+    h = 20 * 5 + 2; c.rect(x, y, w, h, fill=WHITE)
+    for n, (lvl, t) in enumerate(lines[-5:]):
+        ry = y + 1 + n * 20
+        if n == sel: c.rect(x + 1, ry, w - 18, 20, fill=BLACK, outline=None)
+        col = WHITE if n == sel else BLACK
+        if lvl == "w": c.poly([(x + 5, ry + 15), (x + 15, ry + 15), (x + 10, ry + 5)], fill=None, outline=col)
+        if lvl == "e": c.rect(x + 5, ry + 5, 10, 10, fill=col, outline=None)
+        c.text(x + 22, ry, t, col, 12)
+        if lvl: c.text(x + 22.5, ry, t, col, 12)
+    c.scrollbar(x + w - 16, y, h, True, pos, 0.3)
+    if jump: c.glyph(x + w - 44, y + h - 26, 22, "down")
+
+
+@xw("4.13")
+def log_view():
+    a = C(420, 126); _log(a, 12, 12, 396, LOG[:5])
+    b = C(420, 126); _log(b, 12, 12, 396, LOG)
+    d = C(420, 126); _log(d, 12, 12, 396, LOG[:5], jump=True, pos=0.3); d.pointer(396, 50)
+    e = C(420, 126); _log(e, 12, 12, 396, LOG, sel=3); e.pointer(120, 84)
+    return [("1. Lines appended; warnings and errors marked", a, None), ("2. New line: the view follows the tail", b, None),
+            ("3. Scrolled up: stops following, Jump to end appears", d, None), ("4. Double-click a line", e, "Activated (jump to main.rs:22)")]
+
+
+def _canvas(c, x, y, w, h, items, sel=(), band=None, grid=True, links=(), zoom=1.0):
+    c.rect(x, y, w, h, fill=WHITE)
+    if grid:
+        step = int(20 * zoom)
+        for gy in range(y + step, y + h, step):
+            for gx in range(x + step, x + w, step): c.rect(gx, gy, 1, 1, fill=MID, outline=None)
+    pos = {}
+    for n, (ix, iy, t) in enumerate(items):
+        bw, bh = int(84 * zoom), int(34 * zoom); px, py = x + int(ix * zoom), y + int(iy * zoom); pos[n] = (px, py, bw, bh)
+    for a, b in links:
+        ax, ay, aw, ah = pos[a]; bx, by, bw, bh = pos[b]; mx = (ax + aw + bx) // 2
+        c.line(ax + aw, ay + ah // 2, mx, ay + ah // 2); c.line(mx, ay + ah // 2, mx, by + bh // 2); c.line(mx, by + bh // 2, bx, by + bh // 2)
+    for n, (ix, iy, t) in enumerate(items):
+        px, py, bw, bh = pos[n]; c.rect(px, py, bw, bh, fill=PANEL); c.ctext(px, py, bw, bh, t, BLACK, int(12 * zoom))
+        if n in sel:
+            for hx, hy in [(px, py), (px + bw, py), (px, py + bh), (px + bw, py + bh)]: c.rect(hx - 3, hy - 3, 6, 6, fill=BLACK)
+    if band: c.dotted(*band)
+
+
+ITEMS = [(20, 20, "Load"), (150, 20, "Filter"), (150, 90, "Sort"), (290, 56, "Save")]
+
+
+@xw("4.14")
+def canvas_view():
+    a = C(420, 170); _canvas(a, 10, 10, 400, 150, ITEMS, links=[(0, 1), (0, 2), (1, 3), (2, 3)])
+    b = C(420, 170); _canvas(b, 10, 10, 400, 150, ITEMS, sel={1, 2}, band=(150, 20, 110, 130), links=[(0, 1), (0, 2), (1, 3), (2, 3)]); b.pointer(258, 148)
+    it = list(ITEMS); it[1] = (170, 10, "Filter"); it[2] = (170, 80, "Sort")
+    d = C(420, 170); _canvas(d, 10, 10, 400, 150, it, sel={1, 2}, links=[(0, 1), (0, 2), (1, 3), (2, 3)]); d.pointer(230, 40)
+    e = C(420, 170); _canvas(e, 10, 10, 400, 150, [(10, 10, "Load"), (140, 10, "Filter"), (140, 80, "Sort")], zoom=1.6, links=[(0, 1), (0, 2)])
+    e.rect(10, 10, 400, 150, fill=None); e.rect(410, 0, 10, 170, fill=PANEL, outline=None); e.rect(0, 160, 420, 10, fill=PANEL, outline=None); e.rect(10, 10, 400, 150, fill=None); e.pointer(200, 80)
+    return [("1. Items on a grid, joined by connectors", a, None), ("2. Rubber band selects two", b, "SelectionChanged"),
+            ("3. Dragging the selection: snaps to the grid", d, "ItemsMoved"), ("4. Ctrl+wheel zooms around the pointer", e, "ViewChanged(zoom 1.6)")]
+
+
+@xw("4.15")
+def rich_text_view():
+    c = C(420, 250); c.rect(10, 10, 400, 230, fill=WHITE); x = 22
+    c.text(x, 16, "Release notes", BLACK, 19); c.text(x + 0.6, 16, "Release notes", BLACK, 19)
+    c.text(x, 50, "Version 1.2 adds", BLACK, 13); bx = x + c.tw("Version 1.2 adds ", 13); c.text(bx, 50, "wrapped labels", BLACK, 13); c.text(bx + 0.6, 50, "wrapped labels", BLACK, 13)
+    c.text(bx + c.tw("wrapped labels ", 13), 50, "and fixes:", BLACK, 13)
+    for n, t in enumerate(["Text no longer overflows buttons", "Faster list scrolling"]):
+        c.ellipse(x + 6, 82 + n * 22, 5, 5, fill=BLACK, outline=None); c.text(x + 20, 74 + n * 22, t, BLACK, 13)
+    c.rect(x, 126, 376, 46, fill=PANEL, outline=GRAY); c.text(x + 8, 130, "[dependencies]", BLACK, 12); c.text(x + 8, 148, "pushrod = \"1.2\"", BLACK, 12)
+    c.text(x, 184, "See the", BLACK, 13); lx = x + c.tw("See the ", 13); lw = c.tw("upgrade guide", 13)
+    c.text(lx, 184, "upgrade guide", (50, 80, 160), 13); c.line(lx, 202, lx + lw, 202, (50, 80, 160)); c.text(lx + lw, 184, " for details.", BLACK, 13); c.pointer(int(lx + 40), 192)
+    c.scrollbar(394, 10, 230, True, 0.0, 0.7)
+    return [("Markdown rendered flat: heading, bold, list, code block, link", c, "LinkActivated(url)")]
+
+
+def _palette_panel(c, text, rows, sel=0):
+    c.rect(0, 0, c.w, c.h, fill=PANEL); c.rect(0, 0, c.w, 22, fill=WHITE)
+    for n, m in enumerate(["File", "Edit", "View", "Run"]): c.text(10 + n * 48, 2, m, BLACK, 13)
+    c.rect(20, 34, c.w - 40, c.h - 46, fill=WHITE); c.ctext(20, 34, c.w - 40, c.h - 46, "Work area", MID, 13)
+    px, pw = (c.w - 380) // 2, 380
+    c.rect(px, 22, pw, 40 + 24 * len(rows), fill=WHITE, width=2)
+    c.field(px + 8, 30, pw - 16, text, caret=len(text), focused=True)
+    for n, (cat, name, bold, sc, dis) in enumerate(rows):
+        ry = 60 + n * 24
+        if n == sel: c.rect(px + 2, ry, pw - 4, 24, fill=BLACK, outline=None)
+        col = WHITE if n == sel else (MID if dis else BLACK)
+        c.text(px + 12, ry + 2, cat, col if n == sel else MID, 12); tx = px + 70
+        for ch_i, ch in enumerate(name):
+            c.text(tx, ry + 2, ch, col, 13)
+            if ch_i in bold: c.text(tx + 0.6, ry + 2, ch, col, 13); c.line(tx, ry + 20, tx + c.tw(ch, 13), ry + 20, col)
+            tx += c.tw(ch, 13)
+        if sc: c.text(px + pw - 12 - c.tw(sc, 12), ry + 3, sc, col, 12)
+
+
+@xw("6.9")
+def command_palette():
+    a = C(520, 220); _palette_panel(a, "", [("File", "Save All", (), "Ctrl+Shift+S", False), ("Run", "Build and Run", (), "F5", False), ("View", "Toggle Inspector", (), "F4", False), ("Edit", "Bring to Front", (), "", True)])
+    b = C(520, 220); _palette_panel(b, "sa", [("File", "Save All", (0, 1), "Ctrl+Shift+S", False), ("File", "Save As…", (0, 1), "", False), ("Edit", "Select All", (0, 7), "Ctrl+A", False)])
+    d = C(520, 220); _palette_panel(d, "sa", [("File", "Save All", (0, 1), "Ctrl+Shift+S", False), ("File", "Save As…", (0, 1), "", False), ("Edit", "Select All", (0, 7), "Ctrl+A", False)], sel=1)
+    return [("1. Ctrl+Shift+P: recent commands first; disabled ones dimmed", a, None), ("2. Typing 'sa': fuzzy matches, matched letters marked", b, None),
+            ("3. Down, then Return runs Save As… and closes", d, "CommandRun(action)")]
+
+
+@xw("6.10")
+def recent_files_menu():
+    a = C(430, 190); a.rect(0, 0, 430, 22, fill=WHITE)
+    for n, m in enumerate(["File", "Edit", "View"]):
+        if n == 0: a.rect(4, 0, 40, 22, fill=BLACK, outline=None)
+        a.text(10 + n * 48, 2, m, WHITE if n == 0 else BLACK, 13)
+    a.menu(4, 22, 150, [("New", "Ctrl+N", ""), ("Open…", "Ctrl+O", ""), ("Open Recent", "", "sub"), ("", "", "sep"), ("Save", "Ctrl+S", "")], hover=2)
+    items = [("1  contacts.prsc", "", ""), ("2  " + _fit(a, "/home/user/projects/…/settings.prsc", 190, 13, "middle"), "", ""), ("3  old-demo.prsc", "", "disabled"), ("", "", "sep"), ("Clear Menu", "", "")]
+    a.menu(153, 66, 250, items, hover=0)
+    return [("Open Recent: numbered files, long paths shortened in the middle, a missing file dimmed, Clear Menu", a, "RecentChosen(path)")]
 
 
 def main():

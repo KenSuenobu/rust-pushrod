@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Selecting fills the next column
 - [ ] Keyboard navigation across columns
 - [ ] Horizontal scrolling keeps the selection visible
-- [ ] Registered as `extra.column_browser` and shown in the gallery (1.2)
+- [ ] Registered as `extra.column_browser` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

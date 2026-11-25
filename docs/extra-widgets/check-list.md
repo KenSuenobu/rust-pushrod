@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Check state independent of selection
 - [ ] Space toggles the selected rows
 - [ ] Check-all header with mixed state
-- [ ] Registered as `extra.check_list` and shown in the gallery (1.2)
+- [ ] Registered as `extra.check_list` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

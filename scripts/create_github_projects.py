@@ -22,6 +22,11 @@ import json
 import pathlib
 import subprocess
 import sys
+import time
+
+# Error text that means GitHub had a temporary problem and the same command is worth trying again.
+TRANSIENT = ("502", "503", "504", "Bad Gateway", "Service Unavailable", "Gateway Timeout", "timeout", "connection reset", "EOF")
+RETRIES = 5
 
 DEFINITIONS = pathlib.Path(__file__).with_name("github-projects.json")
 
@@ -52,14 +57,27 @@ class Gh:
 
         # Errors
 
-        Exits the program with the command's error output if `gh` fails.
+        Exits the program with the command's error output if `gh` fails.  Temporary GitHub errors
+        (502, 503, 504, timeouts) are retried up to `RETRIES` times with a growing pause first.
+        Commands that create something (`project create`, `field-create`) are never retried,
+        because a failed reply does not prove nothing was created; re-run the script instead,
+        which finds what already exists.
         """
         if self.dry_run:
             print("gh " + " ".join(f'"{a}"' if " " in a else a for a in args))
             return None
-        result = subprocess.run(["gh"] + args, capture_output=True, text=True)
-        if result.returncode != 0:
-            sys.exit(f"gh {' '.join(args)} failed:\n{result.stderr.strip()}")
+        retryable = not any(a in ("create", "field-create") for a in args[:2])
+        for attempt in range(1, RETRIES + 1):
+            result = subprocess.run(["gh"] + args, capture_output=True, text=True)
+            if result.returncode == 0:
+                break
+            transient = any(t in result.stderr for t in TRANSIENT)
+            if not (retryable and transient) or attempt == RETRIES:
+                hint = "\nThis looks temporary; run the script again (it skips what is already done)." if transient else ""
+                sys.exit(f"gh {' '.join(args)} failed:\n{result.stderr.strip()}{hint}")
+            pause = 2 ** attempt
+            print(f"  GitHub returned a temporary error; retrying in {pause}s ({attempt}/{RETRIES - 1})")
+            time.sleep(pause)
         if not parse_json:
             return result.stdout
         return json.loads(result.stdout) if result.stdout.strip() else {}
@@ -111,7 +129,11 @@ def ensure_project(gh, owner, repo, spec):
 
 
 def ensure_fields(gh, owner, number, phases):
-    """Creates the Phase and Order fields when missing.
+    """Creates the Phase and Order fields when missing, and rebuilds Phase when its options changed.
+
+    The GitHub CLI cannot add options to an existing single-select field.  When the project's Phase
+    field lacks an option the definitions now need, the field is deleted and created again with the
+    full list; the values it held are set again for every item by `add_items`.
 
     # Arguments
 
@@ -141,7 +163,15 @@ def ensure_fields(gh, owner, number, phases):
     options = {o["name"]: o["id"] for o in phase.get("options", [])}
     missing = [p for p in phases if p not in options]
     if missing:
-        sys.exit(f"Project {number}: Phase field lacks options {missing}; add them in the project settings and re-run.")
+        print(f"  Phase field lacks {missing}; rebuilding it with all {len(phases)} options")
+        gh.run(["project", "field-delete", "--id", phase["id"], "--format", "json"])
+        gh.run(["project", "field-create", number, "--owner", owner, "--name", "Phase",
+                "--data-type", "SINGLE_SELECT", "--single-select-options", ",".join(phases), "--format", "json"])
+        phase = {f["name"]: f for f in field_list().get("fields", [])}["Phase"]
+        options = {o["name"]: o["id"] for o in phase.get("options", [])}
+        missing = [p for p in phases if p not in options]
+        if missing:
+            sys.exit(f"Project {number}: could not create Phase options {missing}; add them in the project settings and re-run.")
     return (phase["id"], options, fields["Order"]["id"])
 
 

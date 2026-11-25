@@ -1,18 +1,19 @@
 # GitHub projects
 
-The work is organized in five GitHub projects. This file lists what each contains; `scripts/github-projects.json` holds the same data, and `scripts/create_github_projects.py` creates or updates the projects from it.
+The work is organized in six GitHub projects. This file lists what each contains; `scripts/github-projects.json` holds the same data, and `scripts/create_github_projects.py` creates or updates the projects from it.
 
 | Project | Contains | Items |
 |---|---|---|
-| **Pushrod Core MVP** | Pushrod's MVP: v0.1 (dialog applications) and v0.2 (forms and resources). | 75 |
-| **Chassis MVP** | The Chassis MVP (phases M1 to M5) and the post-MVP Pushrod work it depends on. | 80 |
+| **Pushrod Core MVP** | Pushrod's MVP: v0.1 (dialog applications) and v0.2 (forms and resources). | 77 |
+| **Pushrod Showcase** | The interactive demo of every widget and core feature, built right after the Pushrod MVP. | 8 |
+| **Chassis MVP** | The Chassis MVP (phases M1 to M5) and the post-MVP Pushrod work it depends on. | 86 |
 | **Chassis v2** | Chassis v2 and the additional Pushrod work it needs. | 22 |
-| **Extra Widgets** | The pushrod-extra-widgets crate: larger and compound widgets outside the Pushrod MVP. | 51 |
+| **Extra Widgets** | The pushrod-extra-widgets crate: larger and compound widgets outside the Pushrod MVP. | 53 |
 | **Chassis Examples** | Example projects built with Chassis once it reaches the MVP; open for anyone to pick up. | 9 |
 
-For the exact step-by-step order across all five projects, see [`roadmaps/ORDER_OF_EXECUTION.md`](roadmaps/ORDER_OF_EXECUTION.md).
+For the exact step-by-step order across all six projects, see [`roadmaps/ORDER_OF_EXECUTION.md`](roadmaps/ORDER_OF_EXECUTION.md).
 
-Order of work: **Pushrod Core MVP** first; then **Chassis MVP**, whose "Pushrod for Mx" phases are the post-MVP Pushrod issues each Chassis phase needs; then **Chassis Examples** and **Chassis v2**; then **Extra Widgets**.
+Order of work: **Pushrod Core MVP** first; then **Pushrod Showcase**; then **Chassis MVP**, whose "Pushrod for Mx" phases are the post-MVP Pushrod issues each Chassis phase needs; then **Chassis Examples** and **Chassis v2**; then **Extra Widgets**.
 
 ## Creating the projects
 
@@ -21,7 +22,7 @@ GitHub projects belong to your account, so they are created from your machine wi
 ```bash
 gh auth refresh -s project            # once: allow the CLI to manage projects
 python3 scripts/create_github_projects.py --dry-run   # show what would happen
-python3 scripts/create_github_projects.py             # create or update the five projects
+python3 scripts/create_github_projects.py             # create or update the six projects
 ```
 
 The script is safe to re-run: it reuses projects with the same title, skips items already added, and updates each item's **Phase** and **Order** fields.
@@ -44,7 +45,7 @@ Every issue in Pushrod's MVP, in work order. Group by **Phase** (v0.1, v0.2) and
 | 8 | [#79](https://github.com/KenSuenobu/rust-pushrod/issues/79) | pushrod: [9] Epic: Event model and callbacks |
 | 9 | [#103](https://github.com/KenSuenobu/rust-pushrod/issues/103) | pushrod: [10] Epic: Rendering backends, drawing modes, and vintage hardware |
 
-### v0.1: dialog applications (53)
+### v0.1: dialog applications (55)
 
 | Order | Issue | Title |
 |---|---|---|
@@ -67,40 +68,42 @@ Every issue in Pushrod's MVP, in work order. Group by **Phase** (v0.1, v0.2) and
 | 27 | [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) | pushrod: [9.4] Reusable input controllers: click, drag, scroll, hover, long-press, key |
 | 28 | [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) | pushrod: [1.4] Keyboard focus, Tab order, and Return/Escape |
 | 30 | [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) | pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state |
-| 32 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks |
-| 33 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
-| 34 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking |
-| 35 | [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) | pushrod: [1.24] Fonts: shared font handles and a built-in default font |
-| 36 | [#136](https://github.com/KenSuenobu/rust-pushrod/issues/136) | pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability |
-| 37 | [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) | pushrod: [2.10] Custom paint widget (closure-drawn) |
-| 38 | [#27](https://github.com/KenSuenobu/rust-pushrod/issues/27) | pushrod: [2.1] Boxed label widget |
-| 39 | [#83](https://github.com/KenSuenobu/rust-pushrod/issues/83) | pushrod: [2.14] Separator line |
-| 40 | [#41](https://github.com/KenSuenobu/rust-pushrod/issues/41) | pushrod: [3.3] Group box (titled frame) |
-| 41 | [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) | pushrod: [2.7] Image widget |
-| 42 | [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) | pushrod: [2.2] Glyph button (small single-character button) |
-| 43 | [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) | pushrod: [2.3] Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog |
-| 44 | [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) | pushrod: [2.4] Check box with indeterminate state |
-| 45 | [#31](https://github.com/KenSuenobu/rust-pushrod/issues/31) | pushrod: [2.5] Radio buttons and radio groups |
-| 46 | [#48](https://github.com/KenSuenobu/rust-pushrod/issues/48) | pushrod: [4.1] Progress bar |
-| 47 | [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) | pushrod: [3.2] Slider |
-| 48 | [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) | pushrod: [2.6] Text field: single-line entry with input masks, validation, and numeric mode |
-| 49 | [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) | pushrod: [5.1] Clip children to their parent's bounds |
-| 50 | [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) | pushrod: [5.2] Composite widgets: build widgets from parts that applications can retrieve and modify |
-| 51 | [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) | pushrod: [5.5] Layout manager foundation: Layout trait, size hints, measure and arrange |
-| 52 | [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) | pushrod: [5.6] Row and column layouts |
-| 53 | [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) | pushrod: [5.7] Form layout: aligned label and field rows |
-| 54 | [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) | pushrod: [3.1] Scroll bar |
-| 55 | [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) | pushrod: [5.3] Container: a scrollable viewport onto fixed-size content |
-| 56 | [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) | pushrod: [7.2] Golden-image rendering tests |
-| 57 | [#115](https://github.com/KenSuenobu/rust-pushrod/issues/115) | pushrod: [7.7] Performance benchmarks and budgets |
-| 58 | [#25](https://github.com/KenSuenobu/rust-pushrod/issues/25) | pushrod: [1.10] High-DPI rendering and window resize |
-| 59 | [#139](https://github.com/KenSuenobu/rust-pushrod/issues/139) | pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides |
-| 70 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder |
-| 71 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen |
-| 72 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog |
-| 73 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod |
-| 74 | [#72](https://github.com/KenSuenobu/rust-pushrod/issues/72) | pushrod: [7.4] Guide: writing widgets and composites |
-| 75 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release |
+| 31 | [#289](https://github.com/KenSuenobu/rust-pushrod/issues/289) | pushrod: [1.26] Text truncation: shorten text that doesn't fit with an ellipsis |
+| 32 | [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) | pushrod: [1.27] Wrapped text: multi-line labels that reflow |
+| 34 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks |
+| 35 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
+| 36 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking |
+| 37 | [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) | pushrod: [1.24] Fonts: shared font handles and a built-in default font |
+| 38 | [#136](https://github.com/KenSuenobu/rust-pushrod/issues/136) | pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability |
+| 39 | [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) | pushrod: [2.10] Custom paint widget (closure-drawn) |
+| 40 | [#27](https://github.com/KenSuenobu/rust-pushrod/issues/27) | pushrod: [2.1] Boxed label widget |
+| 41 | [#83](https://github.com/KenSuenobu/rust-pushrod/issues/83) | pushrod: [2.14] Separator line |
+| 42 | [#41](https://github.com/KenSuenobu/rust-pushrod/issues/41) | pushrod: [3.3] Group box (titled frame) |
+| 43 | [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) | pushrod: [2.7] Image widget |
+| 44 | [#28](https://github.com/KenSuenobu/rust-pushrod/issues/28) | pushrod: [2.2] Glyph button (small single-character button) |
+| 45 | [#29](https://github.com/KenSuenobu/rust-pushrod/issues/29) | pushrod: [2.3] Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog |
+| 46 | [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) | pushrod: [2.4] Check box with indeterminate state |
+| 47 | [#31](https://github.com/KenSuenobu/rust-pushrod/issues/31) | pushrod: [2.5] Radio buttons and radio groups |
+| 48 | [#48](https://github.com/KenSuenobu/rust-pushrod/issues/48) | pushrod: [4.1] Progress bar |
+| 49 | [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) | pushrod: [3.2] Slider |
+| 50 | [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) | pushrod: [2.6] Text field: single-line entry with input masks, validation, and numeric mode |
+| 51 | [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) | pushrod: [5.1] Clip children to their parent's bounds |
+| 52 | [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) | pushrod: [5.2] Composite widgets: build widgets from parts that applications can retrieve and modify |
+| 53 | [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) | pushrod: [5.5] Layout manager foundation: Layout trait, size hints, measure and arrange |
+| 54 | [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) | pushrod: [5.6] Row and column layouts |
+| 55 | [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) | pushrod: [5.7] Form layout: aligned label and field rows |
+| 56 | [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) | pushrod: [3.1] Scroll bar |
+| 57 | [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) | pushrod: [5.3] Container: a scrollable viewport onto fixed-size content |
+| 58 | [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) | pushrod: [7.2] Golden-image rendering tests |
+| 59 | [#115](https://github.com/KenSuenobu/rust-pushrod/issues/115) | pushrod: [7.7] Performance benchmarks and budgets |
+| 60 | [#25](https://github.com/KenSuenobu/rust-pushrod/issues/25) | pushrod: [1.10] High-DPI rendering and window resize |
+| 61 | [#139](https://github.com/KenSuenobu/rust-pushrod/issues/139) | pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides |
+| 72 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder |
+| 73 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen |
+| 74 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog |
+| 75 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod |
+| 76 | [#72](https://github.com/KenSuenobu/rust-pushrod/issues/72) | pushrod: [7.4] Guide: writing widgets and composites |
+| 77 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release |
 
 ### v0.2: forms (MVP complete) (13)
 
@@ -108,17 +111,39 @@ Every issue in Pushrod's MVP, in work order. Group by **Phase** (v0.1, v0.2) and
 |---|---|---|
 | 25 | [#114](https://github.com/KenSuenobu/rust-pushrod/issues/114) | pushrod: [7.6] Module boundaries and written specs with conformance tests |
 | 29 | [#112](https://github.com/KenSuenobu/rust-pushrod/issues/112) | pushrod: [1.19] Input method (IME) support: composition text and candidate window |
-| 31 | [#76](https://github.com/KenSuenobu/rust-pushrod/issues/76) | pushrod: [1.12] Keyboard mnemonics: underlined shortcut letters |
-| 60 | [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) | pushrod: [6.1] Widget registry and factory |
-| 61 | [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) | pushrod: [6.2] Property introspection: list, get, and set widget properties by name |
-| 62 | [#80](https://github.com/KenSuenobu/rust-pushrod/issues/80) | pushrod: [1.14] Accessibility: expose widgets to screen readers |
-| 63 | [#62](https://github.com/KenSuenobu/rust-pushrod/issues/62) | pushrod: [6.3] Form file format (binary, versioned) |
-| 64 | [#63](https://github.com/KenSuenobu/rust-pushrod/issues/63) | pushrod: [6.4] Form loader: build a form from a file with stable IDs |
-| 65 | [#64](https://github.com/KenSuenobu/rust-pushrod/issues/64) | pushrod: [6.5] Form writer: save a widget subtree to a file |
-| 66 | [#65](https://github.com/KenSuenobu/rust-pushrod/issues/65) | pushrod: [6.6] Generate ID constants from a form file |
-| 67 | [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) | pushrod: [6.11] Resource kinds: strings, images, icons, files, menus, and alerts |
-| 68 | [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) | pushrod: [6.12] Typed resource IDs: generated constants per resource kind |
-| 69 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
+| 33 | [#76](https://github.com/KenSuenobu/rust-pushrod/issues/76) | pushrod: [1.12] Keyboard mnemonics: underlined shortcut letters |
+| 62 | [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) | pushrod: [6.1] Widget registry and factory |
+| 63 | [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) | pushrod: [6.2] Property introspection: list, get, and set widget properties by name |
+| 64 | [#80](https://github.com/KenSuenobu/rust-pushrod/issues/80) | pushrod: [1.14] Accessibility: expose widgets to screen readers |
+| 65 | [#62](https://github.com/KenSuenobu/rust-pushrod/issues/62) | pushrod: [6.3] Form file format (binary, versioned) |
+| 66 | [#63](https://github.com/KenSuenobu/rust-pushrod/issues/63) | pushrod: [6.4] Form loader: build a form from a file with stable IDs |
+| 67 | [#64](https://github.com/KenSuenobu/rust-pushrod/issues/64) | pushrod: [6.5] Form writer: save a widget subtree to a file |
+| 68 | [#65](https://github.com/KenSuenobu/rust-pushrod/issues/65) | pushrod: [6.6] Generate ID constants from a form file |
+| 69 | [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) | pushrod: [6.11] Resource kinds: strings, images, icons, files, menus, and alerts |
+| 70 | [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) | pushrod: [6.12] Typed resource IDs: generated constants per resource kind |
+| 71 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
+
+## Pushrod Showcase
+
+One application showing every widget live, with a property panel, event log, and source view. Needs only MVP features. Every later widget adds its page. Roadmap: docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md, Epic 12.
+
+### Epics (1)
+
+| Order | Issue | Title |
+|---|---|---|
+| 1 | [#288](https://github.com/KenSuenobu/rust-pushrod/issues/288) | pushrod: [12] Epic: Pushrod Showcase: an interactive demo of every widget |
+
+### Showcase (7)
+
+| Order | Issue | Title |
+|---|---|---|
+| 2 | [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) | pushrod: [12.1] Showcase application shell |
+| 3 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
+| 4 | [#297](https://github.com/KenSuenobu/rust-pushrod/issues/297) | pushrod: [12.3] Showcase property panel: change any property live |
+| 5 | [#298](https://github.com/KenSuenobu/rust-pushrod/issues/298) | pushrod: [12.4] Showcase event log |
+| 6 | [#299](https://github.com/KenSuenobu/rust-pushrod/issues/299) | pushrod: [12.5] Showcase source view: the code for each page |
+| 7 | [#300](https://github.com/KenSuenobu/rust-pushrod/issues/300) | pushrod: [12.6] Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources |
+| 8 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
 
 ## Chassis MVP
 
@@ -173,101 +198,112 @@ Builds on the Pushrod Core MVP project. Each "Pushrod for Mx" phase holds the po
 | 28 | [#47](https://github.com/KenSuenobu/rust-pushrod/issues/47) | pushrod: [3.9] Split view (panes with draggable dividers) |
 | 29 | [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) | pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets |
 
-### Extra widgets for M2 (2)
+### Extra widgets for M2 (4)
 
 | Order | Issue | Title |
 |---|---|---|
 | 30 | [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) | extra-widgets: [1.1] Create the pushrod-extra-widgets crate |
-| 31 | [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) | extra-widgets: [5.1] Drawer (collapsible side panel) |
+| 31 | [#254](https://github.com/KenSuenobu/rust-pushrod/issues/254) | extra-widgets: [1.3] Popover: a floating panel anchored to a control |
+| 32 | [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) | extra-widgets: [5.1] Drawer (collapsible side panel) |
+| 33 | [#305](https://github.com/KenSuenobu/rust-pushrod/issues/305) | extra-widgets: [6.9] Command palette |
 
 ### M2: shell and project (10)
 
 | Order | Issue | Title |
 |---|---|---|
-| 32 | [#168](https://github.com/KenSuenobu/rust-pushrod/issues/168) | chassis: [1.1] Chassis crate and main window |
-| 33 | [#169](https://github.com/KenSuenobu/rust-pushrod/issues/169) | chassis: [1.2] Three-pane workspace |
-| 34 | [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) | chassis: [1.4] Commands, menus, and shortcuts |
-| 35 | [#171](https://github.com/KenSuenobu/rust-pushrod/issues/171) | chassis: [1.3] Designer and Code tabs |
-| 36 | [#172](https://github.com/KenSuenobu/rust-pushrod/issues/172) | chassis: [2.2] New, open, and save |
-| 37 | [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) | chassis: [2.3] Project drawer |
-| 38 | [#174](https://github.com/KenSuenobu/rust-pushrod/issues/174) | chassis: [2.4] Manage resources and IDs |
-| 39 | [#175](https://github.com/KenSuenobu/rust-pushrod/issues/175) | chassis: [2.5] String table editor |
-| 40 | [#176](https://github.com/KenSuenobu/rust-pushrod/issues/176) | chassis: [2.6] Images and icons |
-| 41 | [#177](https://github.com/KenSuenobu/rust-pushrod/issues/177) | chassis: [2.8] Files |
+| 34 | [#168](https://github.com/KenSuenobu/rust-pushrod/issues/168) | chassis: [1.1] Chassis crate and main window |
+| 35 | [#169](https://github.com/KenSuenobu/rust-pushrod/issues/169) | chassis: [1.2] Three-pane workspace |
+| 36 | [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) | chassis: [1.4] Commands, menus, and shortcuts |
+| 37 | [#171](https://github.com/KenSuenobu/rust-pushrod/issues/171) | chassis: [1.3] Designer and Code tabs |
+| 38 | [#172](https://github.com/KenSuenobu/rust-pushrod/issues/172) | chassis: [2.2] New, open, and save |
+| 39 | [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) | chassis: [2.3] Project drawer |
+| 40 | [#174](https://github.com/KenSuenobu/rust-pushrod/issues/174) | chassis: [2.4] Manage resources and IDs |
+| 41 | [#175](https://github.com/KenSuenobu/rust-pushrod/issues/175) | chassis: [2.5] String table editor |
+| 42 | [#176](https://github.com/KenSuenobu/rust-pushrod/issues/176) | chassis: [2.6] Images and icons |
+| 43 | [#177](https://github.com/KenSuenobu/rust-pushrod/issues/177) | chassis: [2.8] Files |
 
 ### Pushrod for M3 (5)
 
 | Order | Issue | Title |
 |---|---|---|
-| 42 | [#95](https://github.com/KenSuenobu/rust-pushrod/issues/95) | pushrod: [9.3] Event filters: observe or intercept another widget's events |
-| 43 | [#105](https://github.com/KenSuenobu/rust-pushrod/issues/105) | pushrod: [10.1] Drawing modes: live or outline feedback while moving and resizing |
-| 44 | [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) | pushrod: [5.10] Flow layout (wrapping rows) |
-| 45 | [#77](https://github.com/KenSuenobu/rust-pushrod/issues/77) | pushrod: [2.13] Tooltips |
-| 46 | [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) | pushrod: [6.9] Design-mode hooks for Chassis |
+| 44 | [#95](https://github.com/KenSuenobu/rust-pushrod/issues/95) | pushrod: [9.3] Event filters: observe or intercept another widget's events |
+| 45 | [#105](https://github.com/KenSuenobu/rust-pushrod/issues/105) | pushrod: [10.1] Drawing modes: live or outline feedback while moving and resizing |
+| 46 | [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) | pushrod: [5.10] Flow layout (wrapping rows) |
+| 47 | [#77](https://github.com/KenSuenobu/rust-pushrod/issues/77) | pushrod: [2.13] Tooltips |
+| 48 | [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) | pushrod: [6.9] Design-mode hooks for Chassis |
 
-### Extra widgets for M3 (2)
+### Extra widgets for M3 (3)
 
 | Order | Issue | Title |
 |---|---|---|
-| 47 | [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) | extra-widgets: [2.6] Tool palette (grid of tool buttons) |
-| 48 | [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) | extra-widgets: [4.9] Breadcrumb bar (path control) |
+| 49 | [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) | extra-widgets: [2.6] Tool palette (grid of tool buttons) |
+| 50 | [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) | extra-widgets: [4.9] Breadcrumb bar (path control) |
+| 51 | [#304](https://github.com/KenSuenobu/rust-pushrod/issues/304) | extra-widgets: [4.14] Canvas view (zoomable surface of items) |
 
 ### M3: form designer (8)
 
 | Order | Issue | Title |
 |---|---|---|
-| 49 | [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) | chassis: [3.1] Design surface |
-| 50 | [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) | chassis: [3.2] Widget palette |
-| 51 | [#180](https://github.com/KenSuenobu/rust-pushrod/issues/180) | chassis: [3.4] Selection, move, and resize |
-| 52 | [#181](https://github.com/KenSuenobu/rust-pushrod/issues/181) | chassis: [3.3] Drag and drop placement |
-| 53 | [#182](https://github.com/KenSuenobu/rust-pushrod/issues/182) | chassis: [3.5] Snapping and alignment |
-| 54 | [#183](https://github.com/KenSuenobu/rust-pushrod/issues/183) | chassis: [3.7] Clipboard and undo |
-| 55 | [#184](https://github.com/KenSuenobu/rust-pushrod/issues/184) | chassis: [3.6] Containers, z-order, and tab order |
-| 56 | [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) | chassis: [3.8] Layout managers in the designer |
+| 52 | [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) | chassis: [3.1] Design surface |
+| 53 | [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) | chassis: [3.2] Widget palette |
+| 54 | [#180](https://github.com/KenSuenobu/rust-pushrod/issues/180) | chassis: [3.4] Selection, move, and resize |
+| 55 | [#181](https://github.com/KenSuenobu/rust-pushrod/issues/181) | chassis: [3.3] Drag and drop placement |
+| 56 | [#182](https://github.com/KenSuenobu/rust-pushrod/issues/182) | chassis: [3.5] Snapping and alignment |
+| 57 | [#183](https://github.com/KenSuenobu/rust-pushrod/issues/183) | chassis: [3.7] Clipboard and undo |
+| 58 | [#184](https://github.com/KenSuenobu/rust-pushrod/issues/184) | chassis: [3.6] Containers, z-order, and tab order |
+| 59 | [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) | chassis: [3.8] Layout managers in the designer |
 
-### Pushrod for M4 (9)
-
-| Order | Issue | Title |
-|---|---|---|
-| 57 | [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) | pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes |
-| 58 | [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) | pushrod: [2.19] Context menus |
-| 59 | [#113](https://github.com/KenSuenobu/rust-pushrod/issues/113) | pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline |
-| 60 | [#142](https://github.com/KenSuenobu/rust-pushrod/issues/142) | pushrod: [11.1] Chassis: Code editor crate and editing core |
-| 61 | [#143](https://github.com/KenSuenobu/rust-pushrod/issues/143) | pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret |
-| 62 | [#144](https://github.com/KenSuenobu/rust-pushrod/issues/144) | pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods |
-| 63 | [#145](https://github.com/KenSuenobu/rust-pushrod/issues/145) | pushrod: [11.4] Chassis: Code editor undo and redo |
-| 64 | [#146](https://github.com/KenSuenobu/rust-pushrod/issues/146) | pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter |
-| 65 | [#149](https://github.com/KenSuenobu/rust-pushrod/issues/149) | pushrod: [11.8] Chassis: Code editor API for the Chassis designer |
-
-### Extra widgets for M4 (1)
+### Pushrod for M4 (10)
 
 | Order | Issue | Title |
 |---|---|---|
-| 66 | [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) | extra-widgets: [4.5] Property grid (name and value inspector) |
+| 60 | [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) | pushrod: [9.9] Pointer cursor per widget |
+| 61 | [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) | pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes |
+| 62 | [#88](https://github.com/KenSuenobu/rust-pushrod/issues/88) | pushrod: [2.19] Context menus |
+| 63 | [#113](https://github.com/KenSuenobu/rust-pushrod/issues/113) | pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline |
+| 64 | [#142](https://github.com/KenSuenobu/rust-pushrod/issues/142) | pushrod: [11.1] Chassis: Code editor crate and editing core |
+| 65 | [#143](https://github.com/KenSuenobu/rust-pushrod/issues/143) | pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret |
+| 66 | [#144](https://github.com/KenSuenobu/rust-pushrod/issues/144) | pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods |
+| 67 | [#145](https://github.com/KenSuenobu/rust-pushrod/issues/145) | pushrod: [11.4] Chassis: Code editor undo and redo |
+| 68 | [#146](https://github.com/KenSuenobu/rust-pushrod/issues/146) | pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter |
+| 69 | [#149](https://github.com/KenSuenobu/rust-pushrod/issues/149) | pushrod: [11.8] Chassis: Code editor API for the Chassis designer |
+
+### Extra widgets for M4 (2)
+
+| Order | Issue | Title |
+|---|---|---|
+| 70 | [#302](https://github.com/KenSuenobu/rust-pushrod/issues/302) | extra-widgets: [2.9] Drag value (numeric scrubber) |
+| 71 | [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) | extra-widgets: [4.5] Property grid (name and value inspector) |
 
 ### M4: inspector / events and code (10)
 
 | Order | Issue | Title |
 |---|---|---|
-| 67 | [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) | chassis: [4.1] Inspector drawer |
-| 68 | [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) | chassis: [4.2] Property grid |
-| 69 | [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) | chassis: [4.3] Typed property editors |
-| 70 | [#189](https://github.com/KenSuenobu/rust-pushrod/issues/189) | chassis: [5.4] Code view |
-| 71 | [#190](https://github.com/KenSuenobu/rust-pushrod/issues/190) | chassis: [5.3] Create and open handlers |
-| 72 | [#191](https://github.com/KenSuenobu/rust-pushrod/issues/191) | chassis: [4.4] Names and IDs |
-| 73 | [#192](https://github.com/KenSuenobu/rust-pushrod/issues/192) | chassis: [5.1] Events context menu |
-| 74 | [#193](https://github.com/KenSuenobu/rust-pushrod/issues/193) | chassis: [5.2] Inspector Events tab |
-| 75 | [#194](https://github.com/KenSuenobu/rust-pushrod/issues/194) | chassis: [5.5] Code indicator on the design surface |
-| 76 | [#195](https://github.com/KenSuenobu/rust-pushrod/issues/195) | chassis: [5.6] Keep handlers in sync |
+| 72 | [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) | chassis: [4.1] Inspector drawer |
+| 73 | [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) | chassis: [4.2] Property grid |
+| 74 | [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) | chassis: [4.3] Typed property editors |
+| 75 | [#189](https://github.com/KenSuenobu/rust-pushrod/issues/189) | chassis: [5.4] Code view |
+| 76 | [#190](https://github.com/KenSuenobu/rust-pushrod/issues/190) | chassis: [5.3] Create and open handlers |
+| 77 | [#191](https://github.com/KenSuenobu/rust-pushrod/issues/191) | chassis: [4.4] Names and IDs |
+| 78 | [#192](https://github.com/KenSuenobu/rust-pushrod/issues/192) | chassis: [5.1] Events context menu |
+| 79 | [#193](https://github.com/KenSuenobu/rust-pushrod/issues/193) | chassis: [5.2] Inspector Events tab |
+| 80 | [#194](https://github.com/KenSuenobu/rust-pushrod/issues/194) | chassis: [5.5] Code indicator on the design surface |
+| 81 | [#195](https://github.com/KenSuenobu/rust-pushrod/issues/195) | chassis: [5.6] Keep handlers in sync |
+
+### Extra widgets for M5 (1)
+
+| Order | Issue | Title |
+|---|---|---|
+| 82 | [#303](https://github.com/KenSuenobu/rust-pushrod/issues/303) | extra-widgets: [4.13] Log view (append-only output) |
 
 ### M5: build / run and release (MVP) (4)
 
 | Order | Issue | Title |
 |---|---|---|
-| 77 | [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) | chassis: [6.2] Build and run |
-| 78 | [#197](https://github.com/KenSuenobu/rust-pushrod/issues/197) | chassis: [7.1] CI and golden screenshots |
-| 79 | [#198](https://github.com/KenSuenobu/rust-pushrod/issues/198) | chassis: [7.2] Chassis documentation |
-| 80 | [#199](https://github.com/KenSuenobu/rust-pushrod/issues/199) | chassis: [7.3] Sample project |
+| 83 | [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) | chassis: [6.2] Build and run |
+| 84 | [#197](https://github.com/KenSuenobu/rust-pushrod/issues/197) | chassis: [7.1] CI and golden screenshots |
+| 85 | [#198](https://github.com/KenSuenobu/rust-pushrod/issues/198) | chassis: [7.2] Chassis documentation |
+| 86 | [#199](https://github.com/KenSuenobu/rust-pushrod/issues/199) | chassis: [7.3] Sample project |
 
 ## Chassis v2
 
@@ -320,70 +356,72 @@ Everything in pushrod-extra-widgets not already in the Chassis MVP project (the 
 | 5 | [#250](https://github.com/KenSuenobu/rust-pushrod/issues/250) | extra-widgets: [5] Epic: Panels and navigation |
 | 6 | [#251](https://github.com/KenSuenobu/rust-pushrod/issues/251) | extra-widgets: [6] Epic: Dialogs and assistants |
 
-### Pushrod prerequisites (6)
+### Pushrod prerequisites (5)
 
 | Order | Issue | Title |
 |---|---|---|
-| 7 | [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) | pushrod: [9.9] Pointer cursor per widget |
-| 8 | [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) | pushrod: [5.9] Stack layout (one child visible at a time) |
-| 9 | [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) | pushrod: [4.2] Spin box |
-| 10 | [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) | pushrod: [4.6] Combo box |
-| 11 | [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) | pushrod: [2.18] Multi-line text area |
-| 12 | [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) | pushrod: [2.22] Link label |
+| 7 | [#120](https://github.com/KenSuenobu/rust-pushrod/issues/120) | pushrod: [5.9] Stack layout (one child visible at a time) |
+| 8 | [#49](https://github.com/KenSuenobu/rust-pushrod/issues/49) | pushrod: [4.2] Spin box |
+| 9 | [#53](https://github.com/KenSuenobu/rust-pushrod/issues/53) | pushrod: [4.6] Combo box |
+| 10 | [#87](https://github.com/KenSuenobu/rust-pushrod/issues/87) | pushrod: [2.18] Multi-line text area |
+| 11 | [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) | pushrod: [2.22] Link label |
 
-### Extra widgets 1 - crate and Chassis widgets (2)
-
-| Order | Issue | Title |
-|---|---|---|
-| 13 | [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) | extra-widgets: [1.2] Extra widgets gallery example |
-| 14 | [#254](https://github.com/KenSuenobu/rust-pushrod/issues/254) | extra-widgets: [1.3] Popover: a floating panel anchored to a control |
-
-### Extra widgets 2 - everyday controls and pickers (19)
+### Extra widgets 1 - crate and Chassis widgets (1)
 
 | Order | Issue | Title |
 |---|---|---|
-| 15 | [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258) | extra-widgets: [2.1] Menu button and split button |
-| 16 | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) | extra-widgets: [2.2] Segmented control |
-| 17 | [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259) | extra-widgets: [2.3] Stepper (up and down arrows) |
-| 18 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) | extra-widgets: [2.4] Dial (rotary knob) |
-| 19 | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) | extra-widgets: [2.5] Level indicator (meter) |
-| 20 | [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260) | extra-widgets: [3.1] Calendar (month view) |
-| 21 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) | extra-widgets: [3.2] Date picker |
-| 22 | [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) | extra-widgets: [3.3] Time field and date-time field |
-| 23 | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) | extra-widgets: [3.4] Color well and color picker |
-| 24 | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) | extra-widgets: [3.5] Font chooser |
-| 25 | [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262) | extra-widgets: [3.6] Path field (file or folder with Browse) |
+| 12 | [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) | extra-widgets: [1.2] Extra widgets in the Pushrod Showcase |
+
+### Extra widgets 2 - everyday controls and pickers (23)
+
+| Order | Issue | Title |
+|---|---|---|
+| 13 | [#258](https://github.com/KenSuenobu/rust-pushrod/issues/258) | extra-widgets: [2.1] Menu button and split button |
+| 14 | [#50](https://github.com/KenSuenobu/rust-pushrod/issues/50) | extra-widgets: [2.2] Segmented control |
+| 15 | [#259](https://github.com/KenSuenobu/rust-pushrod/issues/259) | extra-widgets: [2.3] Stepper (up and down arrows) |
+| 16 | [#127](https://github.com/KenSuenobu/rust-pushrod/issues/127) | extra-widgets: [2.4] Dial (rotary knob) |
+| 17 | [#54](https://github.com/KenSuenobu/rust-pushrod/issues/54) | extra-widgets: [2.5] Level indicator (meter) |
+| 18 | [#306](https://github.com/KenSuenobu/rust-pushrod/issues/306) | extra-widgets: [2.10] Range slider (two thumbs) |
+| 19 | [#260](https://github.com/KenSuenobu/rust-pushrod/issues/260) | extra-widgets: [3.1] Calendar (month view) |
+| 20 | [#91](https://github.com/KenSuenobu/rust-pushrod/issues/91) | extra-widgets: [3.2] Date picker |
+| 21 | [#261](https://github.com/KenSuenobu/rust-pushrod/issues/261) | extra-widgets: [3.3] Time field and date-time field |
+| 22 | [#46](https://github.com/KenSuenobu/rust-pushrod/issues/46) | extra-widgets: [3.4] Color well and color picker |
+| 23 | [#129](https://github.com/KenSuenobu/rust-pushrod/issues/129) | extra-widgets: [3.5] Font chooser |
+| 24 | [#262](https://github.com/KenSuenobu/rust-pushrod/issues/262) | extra-widgets: [3.6] Path field (file or folder with Browse) |
+| 25 | [#307](https://github.com/KenSuenobu/rust-pushrod/issues/307) | extra-widgets: [3.10] Token field (tags in a field) |
 | 26 | [#55](https://github.com/KenSuenobu/rust-pushrod/issues/55) | extra-widgets: [4.1] Tree view (outline) |
 | 27 | [#263](https://github.com/KenSuenobu/rust-pushrod/issues/263) | extra-widgets: [4.6] Check list |
 | 28 | [#264](https://github.com/KenSuenobu/rust-pushrod/issues/264) | extra-widgets: [4.7] Editable list (add, remove, reorder) |
-| 29 | [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265) | extra-widgets: [5.2] Accordion (one section open at a time) |
-| 30 | [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266) | extra-widgets: [5.3] Sidebar (navigation list) |
-| 31 | [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267) | extra-widgets: [6.1] Input dialog (ask for one value) |
-| 32 | [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268) | extra-widgets: [6.2] Progress dialog |
-| 33 | [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269) | extra-widgets: [6.3] Task dialog (alert with details and options) |
+| 29 | [#308](https://github.com/KenSuenobu/rust-pushrod/issues/308) | extra-widgets: [4.15] Rich text view (formatted, read-only) |
+| 30 | [#265](https://github.com/KenSuenobu/rust-pushrod/issues/265) | extra-widgets: [5.2] Accordion (one section open at a time) |
+| 31 | [#266](https://github.com/KenSuenobu/rust-pushrod/issues/266) | extra-widgets: [5.3] Sidebar (navigation list) |
+| 32 | [#267](https://github.com/KenSuenobu/rust-pushrod/issues/267) | extra-widgets: [6.1] Input dialog (ask for one value) |
+| 33 | [#268](https://github.com/KenSuenobu/rust-pushrod/issues/268) | extra-widgets: [6.2] Progress dialog |
+| 34 | [#269](https://github.com/KenSuenobu/rust-pushrod/issues/269) | extra-widgets: [6.3] Task dialog (alert with details and options) |
+| 35 | [#309](https://github.com/KenSuenobu/rust-pushrod/issues/309) | extra-widgets: [6.10] Recent files menu |
 
 ### Extra widgets 3 - specialized views and assistants (18)
 
 | Order | Issue | Title |
 |---|---|---|
-| 34 | [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) | extra-widgets: [2.7] Ruler |
-| 35 | [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) | extra-widgets: [2.8] Shortcut field (key combination recorder) |
-| 36 | [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) | extra-widgets: [3.7] Image well |
-| 37 | [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) | extra-widgets: [3.8] New password (enter, confirm, strength) |
-| 38 | [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) | extra-widgets: [3.9] Character picker |
-| 39 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) | extra-widgets: [4.2] Column browser |
-| 40 | [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275) | extra-widgets: [4.3] Icon grid view |
-| 41 | [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) | extra-widgets: [4.4] Data grid (editable table) |
-| 42 | [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) | extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees) |
-| 43 | [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278) | extra-widgets: [4.8] Dual list (list builder) |
-| 44 | [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) | extra-widgets: [4.11] Rule editor (query builder) |
-| 45 | [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) | extra-widgets: [4.12] Image viewer (zoom and pan) |
-| 46 | [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281) | extra-widgets: [5.4] Document tabs (closable and reorderable) |
-| 47 | [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282) | extra-widgets: [6.4] Wizard (step-by-step assistant) |
-| 48 | [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283) | extra-widgets: [6.5] Settings dialog |
-| 49 | [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) | extra-widgets: [6.6] About dialog |
-| 50 | [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) | extra-widgets: [6.7] Find and replace bar |
-| 51 | [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) | extra-widgets: [6.8] Keyboard shortcuts editor |
+| 36 | [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) | extra-widgets: [2.7] Ruler |
+| 37 | [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) | extra-widgets: [2.8] Shortcut field (key combination recorder) |
+| 38 | [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) | extra-widgets: [3.7] Image well |
+| 39 | [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) | extra-widgets: [3.8] New password (enter, confirm, strength) |
+| 40 | [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) | extra-widgets: [3.9] Character picker |
+| 41 | [#45](https://github.com/KenSuenobu/rust-pushrod/issues/45) | extra-widgets: [4.2] Column browser |
+| 42 | [#275](https://github.com/KenSuenobu/rust-pushrod/issues/275) | extra-widgets: [4.3] Icon grid view |
+| 43 | [#276](https://github.com/KenSuenobu/rust-pushrod/issues/276) | extra-widgets: [4.4] Data grid (editable table) |
+| 44 | [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) | extra-widgets: [4.10] Filter field (live filter for lists, tables, and trees) |
+| 45 | [#278](https://github.com/KenSuenobu/rust-pushrod/issues/278) | extra-widgets: [4.8] Dual list (list builder) |
+| 46 | [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) | extra-widgets: [4.11] Rule editor (query builder) |
+| 47 | [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) | extra-widgets: [4.12] Image viewer (zoom and pan) |
+| 48 | [#281](https://github.com/KenSuenobu/rust-pushrod/issues/281) | extra-widgets: [5.4] Document tabs (closable and reorderable) |
+| 49 | [#282](https://github.com/KenSuenobu/rust-pushrod/issues/282) | extra-widgets: [6.4] Wizard (step-by-step assistant) |
+| 50 | [#283](https://github.com/KenSuenobu/rust-pushrod/issues/283) | extra-widgets: [6.5] Settings dialog |
+| 51 | [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) | extra-widgets: [6.6] About dialog |
+| 52 | [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) | extra-widgets: [6.7] Find and replace bar |
+| 53 | [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) | extra-widgets: [6.8] Keyboard shortcuts editor |
 
 ## Chassis Examples
 

@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Categories, divider, and changed-from-default marking
 - [ ] Typed editors and custom editors by kind
 - [ ] Works from Pushrod property introspection and from any source
-- [ ] Registered as `extra.property_grid` and shown in the gallery (1.2)
+- [ ] Registered as `extra.property_grid` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

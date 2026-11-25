@@ -54,7 +54,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Menu button opens its menu by click, Space, and Alt+Down
 - [ ] Split button: main part runs the default action, arrow part opens the menu
 - [ ] Menu items are actions with shortcuts and enabled state
-- [ ] Registered as `extra.menu_button` and shown in the gallery (1.2)
+- [ ] Registered as `extra.menu_button` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

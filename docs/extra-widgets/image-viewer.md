@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Fit, fill, 100%, and zoom around the pointer
 - [ ] Drag to pan
 - [ ] Tiled drawing for large images
-- [ ] Registered as `extra.image_viewer` and shown in the gallery (1.2)
+- [ ] Registered as `extra.image_viewer` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

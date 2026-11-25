@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Typed and chosen dates stay in step
 - [ ] Min/max enforced
 - [ ] Up/Down steps the date part under the caret
-- [ ] Registered as `extra.date_picker` and shown in the gallery (1.2)
+- [ ] Registered as `extra.date_picker` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

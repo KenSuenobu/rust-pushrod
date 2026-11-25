@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Icon, name, version, copyright, and website
 - [ ] Credits and license pages
 - [ ] Values from Cargo metadata
-- [ ] Registered as `extra.about_dialog` and shown in the gallery (1.2)
+- [ ] Registered as `extra.about_dialog` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] One and Many modes
 - [ ] Per-segment disabled state, text, and icons
 - [ ] Keyboard navigation and selection
-- [ ] Registered as `extra.segmented_control` and shown in the gallery (1.2)
+- [ ] Registered as `extra.segmented_control` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

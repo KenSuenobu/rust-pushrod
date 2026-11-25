@@ -7,7 +7,7 @@ One roadmap per widget in the `pushrod-extra-widgets` crate: what it is, what it
 | Widget | What it is | Issue | Milestone |
 |---|---|---|---|
 | [Create the pushrod-extra-widgets crate](crate.md) | The crate, its registration function, its docs section, and its place in CI. | [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) | X1 (MVP) |
-| [Extra widgets gallery example](gallery.md) | A runnable gallery showing every extra widget, used for golden screenshots. | [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) | X1 (MVP) |
+| [Extra widgets in the Pushrod Showcase](gallery.md) | Every extra widget gets its page in the Pushrod Showcase, with the property panel, event log, and source view. | [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253) | X1 (MVP) |
 | [Popover: a floating panel anchored to a control](popover.md) | A borderless panel that opens next to a control, holds any widgets, and closes on Escape or a click outside. | [#254](https://github.com/KenSuenobu/rust-pushrod/issues/254) | X1 (MVP) |
 
 ## Buttons and value controls
@@ -22,6 +22,8 @@ One roadmap per widget in the `pushrod-extra-widgets` crate: what it is, what it
 | [Tool palette (grid of tool buttons)](tool-palette.md) | A grid of icon buttons with one-of-many selection and optional drag out, for tools, swatches, or components. | [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) | X1 (MVP) |
 | [Ruler](ruler.md) | A horizontal or vertical scale in pixels, points, or units, with markers that can be dragged. | [#270](https://github.com/KenSuenobu/rust-pushrod/issues/270) | X3 |
 | [Shortcut field (key combination recorder)](shortcut-field.md) | A field that records the key combination pressed while it has focus. | [#271](https://github.com/KenSuenobu/rust-pushrod/issues/271) | X3 |
+| [Drag value (numeric scrubber)](drag-value.md) | A compact number that changes as you drag it sideways, and becomes a text field when clicked. | [#302](https://github.com/KenSuenobu/rust-pushrod/issues/302) | X1 (MVP) |
+| [Range slider (two thumbs)](range-slider.md) | A slider with two thumbs selecting a lower and an upper value. | [#306](https://github.com/KenSuenobu/rust-pushrod/issues/306) | X2 (MVP) |
 
 ## Pickers and special fields
 
@@ -36,6 +38,7 @@ One roadmap per widget in the `pushrod-extra-widgets` crate: what it is, what it
 | [Image well](image-well.md) | A framed area that shows an image and accepts a new one by drop, paste, or Choose. | [#272](https://github.com/KenSuenobu/rust-pushrod/issues/272) | X3 |
 | [New password (enter, confirm, strength)](new-password.md) | Two password fields with a strength meter and a match check. | [#273](https://github.com/KenSuenobu/rust-pushrod/issues/273) | X3 |
 | [Character picker](character-picker.md) | A searchable grid of characters by block, with a preview and code point. | [#274](https://github.com/KenSuenobu/rust-pushrod/issues/274) | X3 |
+| [Token field (tags in a field)](token-field.md) | A text field whose entries become removable tokens, with optional suggestions. | [#307](https://github.com/KenSuenobu/rust-pushrod/issues/307) | X2 (MVP) |
 
 ## Data views
 
@@ -53,6 +56,9 @@ One roadmap per widget in the `pushrod-extra-widgets` crate: what it is, what it
 | [Filter field (live filter for lists, tables, and trees)](filter-field.md) | A search field bound to a list, table, or tree that hides non-matching rows as you type. | [#277](https://github.com/KenSuenobu/rust-pushrod/issues/277) | X3 |
 | [Rule editor (query builder)](rule-editor.md) | Rows of "field, operator, value" with add and remove buttons, joined by All or Any. | [#279](https://github.com/KenSuenobu/rust-pushrod/issues/279) | X3 |
 | [Image viewer (zoom and pan)](image-viewer.md) | An image in a scrollable view with zoom to fit, actual size, zoom by wheel, and drag to pan. | [#280](https://github.com/KenSuenobu/rust-pushrod/issues/280) | X3 |
+| [Log view (append-only output)](log-view.md) | A read-only, scrolling view of lines that follows the newest line, for build output and logs. | [#303](https://github.com/KenSuenobu/rust-pushrod/issues/303) | X1 (MVP) |
+| [Canvas view (zoomable surface of items)](canvas-view.md) | A scrollable, zoomable surface holding positioned items, with selection, rubber band, and moving. | [#304](https://github.com/KenSuenobu/rust-pushrod/issues/304) | X1 (MVP) |
+| [Rich text view (formatted, read-only)](rich-text-view.md) | Read-only formatted text: headings, bold and italic, lists, code, and links, from Markdown or styled spans. | [#308](https://github.com/KenSuenobu/rust-pushrod/issues/308) | X2 (MVP) |
 
 ## Panels and navigation
 
@@ -75,4 +81,6 @@ One roadmap per widget in the `pushrod-extra-widgets` crate: what it is, what it
 | [About dialog](about-dialog.md) | The application's icon, name, version, copyright, website, and credits and license pages. | [#284](https://github.com/KenSuenobu/rust-pushrod/issues/284) | X3 |
 | [Find and replace bar](find-bar.md) | A bar with find and replace fields, match options, a match count, and next and previous. | [#285](https://github.com/KenSuenobu/rust-pushrod/issues/285) | X3 |
 | [Keyboard shortcuts editor](shortcuts-editor.md) | A filterable table of actions and their shortcuts, edited with the shortcut field. | [#286](https://github.com/KenSuenobu/rust-pushrod/issues/286) | X3 |
+| [Command palette](command-palette.md) | A pop-up search box listing every command; type a few letters, press Return, and it runs. | [#305](https://github.com/KenSuenobu/rust-pushrod/issues/305) | X1 (MVP) |
+| [Recent files menu](recent-files-menu.md) | An Open Recent submenu that remembers the last files, with Clear and missing-file handling. | [#309](https://github.com/KenSuenobu/rust-pushrod/issues/309) | X2 (MVP) |
 

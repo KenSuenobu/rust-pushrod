@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Continuous and discrete styles
 - [ ] Warning and critical thresholds visible without color
 - [ ] Optional text and editable mode
-- [ ] Registered as `extra.level_indicator` and shown in the gallery (1.2)
+- [ ] Registered as `extra.level_indicator` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

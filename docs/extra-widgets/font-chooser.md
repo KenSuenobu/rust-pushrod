@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Family, style, and size lists with filtering
 - [ ] Preview text editable
 - [ ] Popover and dialog use
-- [ ] Registered as `extra.font_chooser` and shown in the gallery (1.2)
+- [ ] Registered as `extra.font_chooser` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 
