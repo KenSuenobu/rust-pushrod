@@ -35,7 +35,7 @@ use crate::backend::sdl2::{Sdl2Painter, to_sdl_rect};
 use crate::event::{Event, EventCtx};
 use crate::font::FontCache;
 use crate::geometry::{Point, make_rect, point};
-use crate::paint::CachePolicy;
+use crate::paint::{self, CachePolicy};
 use crate::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
 use sdl2::event::Event as SdlEvent;
 use sdl2::pixels::Color;
@@ -385,9 +385,11 @@ impl WidgetCache {
         ROOT_WIDGET_ID
     }
 
-    /// Sends an event to a `Widget`.
+    /// Sends an event to a `Widget`.  Disabled `Widget`s receive nothing.
     fn send(&mut self, id: WidgetId, event: &Event, ctx: &mut EventCtx) {
-        if let Some(widget) = self.get_mut(id) {
+        if let Some(widget) = self.get_mut(id)
+            && widget.is_enabled()
+        {
             widget.handle_event(event, ctx);
         }
     }
@@ -402,6 +404,7 @@ impl WidgetCache {
     /// - A mouse button release sends `PointerReleased` to the capturing `Widget`, then ends the
     ///   capture.
     /// - Other events are ignored.
+    /// - Disabled `Widget`s receive none of these events, but still block the `Widget`s beneath them.
     ///
     /// # Arguments
     ///
@@ -523,7 +526,10 @@ impl WidgetCache {
         let painter: &dyn Widget = widget.as_ref();
 
         c.with_texture_canvas(&mut texture, |texture_canvas| {
-            painter.paint(&mut Sdl2Painter::new(texture_canvas, fc));
+            let mut sdl_painter = Sdl2Painter::new(texture_canvas, fc);
+
+            painter.paint(&mut sdl_painter);
+            paint::state_overlay(&mut sdl_painter, size, painter.state());
         })
         .unwrap();
 

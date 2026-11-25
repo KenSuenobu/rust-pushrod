@@ -2,7 +2,7 @@ use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::Event;
 use pushrod::geometry::{point, size};
-use pushrod::widget::Widget;
+use pushrod::widget::{Behavior, Widget};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
@@ -89,6 +89,21 @@ pub fn main() {
     status.set_color(Color::RGBA(127, 127, 127, 255));
     let status_id = engine.add_child_widget(panel_id, status);
 
+    // A disabled button is drawn dimmed and receives no input.
+    let mut disabled = ButtonWidget::new(
+        point(20, 240),
+        size(120, 20),
+        String::from(FONT),
+        FontStyle::NORMAL,
+        14,
+        Color::BLACK,
+        TextJustify::Center,
+        String::from("Disabled"),
+        2,
+    );
+    disabled.set_enabled(false);
+    engine.add_child_widget(panel_id, disabled);
+
     let quit_id = engine.add_child_widget(
         panel_id,
         ButtonWidget::new(
@@ -103,6 +118,13 @@ pub fn main() {
             2,
         ),
     );
+
+    // Behavior flags are stored on the widget; Return activation is added with focus support.
+    engine
+        .widgets()
+        .get_mut(quit_id)
+        .unwrap()
+        .set_behavior(Behavior::FOCUSABLE | Behavior::CANCEL_ACTION);
 
     // Visual Basic-style event procedures: each callback gets the application state, and a
     // `Ui` handle to find and change any widget by its ID.

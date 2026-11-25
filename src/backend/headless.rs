@@ -49,6 +49,8 @@ pub enum PaintCall {
     Image(String, Rect),
     /// `dither(bounds, first, second)`
     Dither(Rect, Color, Color),
+    /// `dither_overlay(bounds, color)`
+    DitherOverlay(Rect, Color),
     /// `clip(bounds)`
     Clip(Option<Rect>),
 }
@@ -160,6 +162,16 @@ impl Painter for RecordingPainter {
     /// * `second` - The other color.
     fn dither(&mut self, bounds: Rect, first: Color, second: Color) {
         self.calls.push(PaintCall::Dither(bounds, first, second));
+    }
+
+    /// Records a dither overlay.
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle.
+    /// * `color` - The color to blend.
+    fn dither_overlay(&mut self, bounds: Rect, color: Color) {
+        self.calls.push(PaintCall::DitherOverlay(bounds, color));
     }
 
     /// Records a clip change.

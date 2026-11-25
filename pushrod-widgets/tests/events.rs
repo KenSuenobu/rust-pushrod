@@ -5,6 +5,7 @@ use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::{Event, EventKind};
 use pushrod::geometry::{point, size};
+use pushrod::widget::{Behavior, VisualState};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
@@ -337,4 +338,102 @@ fn clicked_carries_button_and_count() {
         events.as_slice(),
         [Event::Clicked { id, button: MouseButton::Left, count: 1 }] if *id == button
     ));
+}
+
+#[test]
+fn new_widgets_have_no_behavior_flags_and_a_normal_state() {
+    let (cache, _, button) = cache_with_button();
+    let widget = cache.get(button).unwrap();
+
+    assert_eq!(widget.behavior(), Behavior::empty());
+    assert_eq!(widget.state(), VisualState::empty());
+    assert!(widget.is_enabled());
+    assert!(!widget.is_hidden());
+}
+
+#[test]
+fn set_hidden_is_backed_by_the_hidden_behavior_flag() {
+    let (mut cache, _, button) = cache_with_button();
+    let widget = cache.get_mut(button).unwrap();
+
+    widget.set_behavior(Behavior::FOCUSABLE);
+    widget.set_hidden(true);
+    assert_eq!(widget.behavior(), Behavior::FOCUSABLE | Behavior::HIDDEN);
+    assert!(widget.is_hidden());
+
+    widget.set_behavior(Behavior::FOCUSABLE);
+    assert!(!widget.is_hidden(), "clearing the flag shows the widget");
+
+    widget.set_behavior(Behavior::HIDDEN);
+    assert!(widget.is_hidden(), "setting the flag hides the widget");
+}
+
+#[test]
+fn set_state_invalidates_only_when_the_state_changes() {
+    let (mut cache, _, button) = cache_with_button();
+    let widget = cache.get_mut(button).unwrap();
+
+    widget.set_invalidated(false);
+    widget.set_state(VisualState::empty());
+    assert!(!widget.is_invalidated());
+
+    widget.set_state(VisualState::CHECKED | VisualState::HOVERED);
+    assert!(widget.is_invalidated());
+    assert_eq!(widget.state(), VisualState::CHECKED | VisualState::HOVERED);
+}
+
+#[test]
+fn set_enabled_toggles_the_disabled_state_and_keeps_other_flags() {
+    let (mut cache, _, button) = cache_with_button();
+    let widget = cache.get_mut(button).unwrap();
+
+    widget.set_state(VisualState::CHECKED);
+    widget.set_enabled(false);
+    assert!(!widget.is_enabled());
+    assert_eq!(widget.state(), VisualState::CHECKED | VisualState::DISABLED);
+
+    widget.set_enabled(true);
+    assert!(widget.is_enabled());
+    assert_eq!(widget.state(), VisualState::CHECKED);
+}
+
+#[test]
+fn only_enabled_visible_focusable_widgets_can_take_focus() {
+    let (mut cache, _, button) = cache_with_button();
+    let widget = cache.get_mut(button).unwrap();
+
+    assert!(!widget.is_focusable(), "not FOCUSABLE yet");
+
+    widget.set_behavior(Behavior::FOCUSABLE);
+    assert!(widget.is_focusable());
+
+    widget.set_enabled(false);
+    assert!(
+        !widget.is_focusable(),
+        "disabled widgets are skipped by focus"
+    );
+
+    widget.set_enabled(true);
+    widget.set_hidden(true);
+    assert!(
+        !widget.is_focusable(),
+        "hidden widgets are skipped by focus"
+    );
+}
+
+#[test]
+fn disabled_widgets_receive_no_input_and_block_widgets_beneath_them() {
+    let (mut cache, panel, button) = cache_with_button();
+
+    cache.get_mut(button).unwrap().set_enabled(false);
+
+    assert_eq!(cache.widget_at(40, 40), button, "still hit-tested");
+    assert!(clicks(&cache.handle_event(down(40, 40))).is_empty());
+    assert!(clicks(&cache.handle_event(up(40, 40))).is_empty());
+    assert!(!cache.get_as::<ButtonWidget>(button).unwrap().is_selected());
+    assert!(cache.get(panel).is_some());
+
+    cache.get_mut(button).unwrap().set_enabled(true);
+    cache.handle_event(down(40, 40));
+    assert_eq!(clicks(&cache.handle_event(up(40, 40))), vec![button]);
 }

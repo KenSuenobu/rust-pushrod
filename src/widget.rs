@@ -49,6 +49,7 @@ use crate::event::{Event, EventCtx};
 use crate::geometry::{Point, Size};
 use crate::paint::Painter;
 use crate::texture::TextureStore;
+use bitflags::bitflags;
 use std::any::Any;
 
 /// The ID of a `Widget`.
@@ -65,12 +66,81 @@ pub type WidgetId = u32;
 /// the window, and is the ancestor of every other `Widget`.  It is its own parent.
 pub const ROOT_WIDGET_ID: WidgetId = 0;
 
+bitflags! {
+    /// What a `Widget` can do, stored on its [`WidgetCore`].
+    ///
+    /// Behavior flags describe the `Widget`'s role rather than how it looks right now (that is
+    /// [`VisualState`]), so they work the same for every widget and can be saved in a form file.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::widget::Behavior;
+    ///
+    /// let ok_button = Behavior::FOCUSABLE | Behavior::DEFAULT_ACTION | Behavior::DISMISSES_DIALOG;
+    ///
+    /// assert!(ok_button.contains(Behavior::DEFAULT_ACTION));
+    /// ```
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    pub struct Behavior: u16 {
+        /// The `Widget` can receive keyboard focus.
+        const FOCUSABLE = 1 << 0;
+        /// The `Widget` stays pressed after a click, until it is clicked again.
+        const TOGGLE = 1 << 1;
+        /// The `Widget` is activated by the Return key.
+        const DEFAULT_ACTION = 1 << 2;
+        /// The `Widget` is activated by the Escape key.
+        const CANCEL_ACTION = 1 << 3;
+        /// Activating the `Widget` closes the enclosing modal dialog and reports itself.
+        const DISMISSES_DIALOG = 1 << 4;
+        /// The `Widget` fires when the mouse button is pressed, not when it is released.
+        const ACTIVATE_ON_PRESS = 1 << 5;
+        /// Only one sibling with this flag is checked at a time (a radio group).
+        const EXCLUSIVE = 1 << 6;
+        /// The `Widget` and its children are not drawn and do not receive input.
+        const HIDDEN = 1 << 7;
+    }
+}
+
+bitflags! {
+    /// How a `Widget` currently looks, stored on its [`WidgetCore`].
+    ///
+    /// A `Widget` with no flags set is in its normal state.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::widget::VisualState;
+    ///
+    /// let state = VisualState::CHECKED | VisualState::HOVERED;
+    ///
+    /// assert!(!state.contains(VisualState::DISABLED));
+    /// ```
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    pub struct VisualState: u16 {
+        /// The mouse button is held down on the `Widget`.
+        const PRESSED = 1 << 0;
+        /// The `Widget` is checked or selected.
+        const CHECKED = 1 << 1;
+        /// The `Widget` is in a mixed (tri-state) condition.
+        const INDETERMINATE = 1 << 2;
+        /// The `Widget` is disabled: it is drawn dimmed and receives no input.
+        const DISABLED = 1 << 3;
+        /// The `Widget` has keyboard focus.
+        const FOCUSED = 1 << 4;
+        /// The pointer is inside the `Widget`.
+        const HOVERED = 1 << 5;
+        /// A drag is currently over the `Widget`.
+        const DRAG_OVER = 1 << 6;
+    }
+}
+
 /// The state that every `Widget` shares.
 ///
 /// Store one `WidgetCore` in each `Widget` structure and return it from [`Widget::core`] and
 /// [`Widget::core_mut`]; every getter and setter on the `Widget` trait works against it.  It holds
 /// the `Widget`'s ID and parent ID (assigned by the `WidgetCache`), its origin relative to its
-/// parent, its size, its background color, whether it is hidden, whether it needs repainting, and
+/// parent, its size, its background color, its [`Behavior`] flags (including hidden) and [`VisualState`] flags, whether it needs repainting, and
 /// the GPU texture it paints into.
 ///
 /// # Examples
@@ -89,7 +159,8 @@ pub struct WidgetCore {
     origin: Point,
     size: Size,
     color: Color,
-    hidden: bool,
+    behavior: Behavior,
+    state: VisualState,
     invalidated: bool,
     /// The GPU texture the `Widget` paints into, created and resized by the `WidgetCache`.
     pub(crate) texture: TextureStore,
@@ -117,7 +188,8 @@ impl WidgetCore {
             origin,
             size,
             color: Color::RGBA(255, 255, 255, 0),
-            hidden: false,
+            behavior: Behavior::empty(),
+            state: VisualState::empty(),
             invalidated: true,
             texture: TextureStore::default(),
         }
@@ -262,7 +334,7 @@ pub trait Widget: Any {
     ///
     /// `true` if the `Widget` is hidden, `false` if it is shown.
     fn is_hidden(&self) -> bool {
-        self.core().hidden
+        self.core().behavior.contains(Behavior::HIDDEN)
     }
 
     /// Hides or shows the `Widget` and all of its children, and invalidates it.
@@ -271,8 +343,83 @@ pub trait Widget: Any {
     ///
     /// * `state` - `true` to hide the `Widget`, `false` to show it.
     fn set_hidden(&mut self, state: bool) {
-        self.core_mut().hidden = state;
+        self.core_mut().behavior.set(Behavior::HIDDEN, state);
         self.set_invalidated(true);
+    }
+
+    /// Returns what the `Widget` can do.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget`'s [`Behavior`] flags; none are set on a new `Widget`.
+    fn behavior(&self) -> Behavior {
+        self.core().behavior
+    }
+
+    /// Replaces the `Widget`'s behavior flags, and invalidates it.
+    ///
+    /// Setting or clearing [`Behavior::HIDDEN`] hides or shows the `Widget`, the same as
+    /// [`set_hidden`](Widget::set_hidden).
+    ///
+    /// # Arguments
+    ///
+    /// * `behavior` - The new flags.
+    fn set_behavior(&mut self, behavior: Behavior) {
+        self.core_mut().behavior = behavior;
+        self.set_invalidated(true);
+    }
+
+    /// Returns how the `Widget` currently looks.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget`'s [`VisualState`] flags; none are set (the normal state) on a new `Widget`.
+    fn state(&self) -> VisualState {
+        self.core().state
+    }
+
+    /// Replaces the `Widget`'s visual state flags, and invalidates it only if they changed.
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The new flags.
+    fn set_state(&mut self, state: VisualState) {
+        if self.core().state != state {
+            self.core_mut().state = state;
+            self.set_invalidated(true);
+        }
+    }
+
+    /// Returns whether the `Widget` is enabled.
+    ///
+    /// Disabled `Widget`s ([`VisualState::DISABLED`]) receive no input and cannot take focus.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` is enabled, `false` if it is disabled.
+    fn is_enabled(&self) -> bool {
+        !self.core().state.contains(VisualState::DISABLED)
+    }
+
+    /// Enables or disables the `Widget`, and invalidates it if that changed it.
+    ///
+    /// # Arguments
+    ///
+    /// * `enabled` - `true` to enable the `Widget`, `false` to disable it.
+    fn set_enabled(&mut self, enabled: bool) {
+        let mut state = self.core().state;
+
+        state.set(VisualState::DISABLED, !enabled);
+        self.set_state(state);
+    }
+
+    /// Returns whether the `Widget` can take keyboard focus.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` is [`Behavior::FOCUSABLE`], enabled, and not hidden.
+    fn is_focusable(&self) -> bool {
+        self.behavior().contains(Behavior::FOCUSABLE) && self.is_enabled() && !self.is_hidden()
     }
 
     /// Returns whether the `Widget` needs to be repainted.

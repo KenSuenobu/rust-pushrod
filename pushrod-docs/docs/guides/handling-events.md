@@ -85,6 +85,10 @@ Every event has `event.kind()` (an `EventKind`, used by masks and the callback r
 Propagation, keyboard focus, and more callbacks are on the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md). This page will change with them.
 :::
 
+## Disabled widgets
+
+A disabled widget (`set_enabled(false)`) receives no mouse events, so it never emits `Clicked` and your callbacks don't fire. See [Widget behavior flags and visual states](../concepts/widget-behavior-flags-and-visual-states.md).
+
 ## Callbacks
 
 | Method | Runs when | Signature |

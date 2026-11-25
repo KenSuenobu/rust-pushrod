@@ -8,3 +8,4 @@
 [0] Updated build workflow for pushrod-docs so it publishes from secrets data [kenji]
 
 [#106] Backend-neutral Painter API with SDL2 backend and headless test painter [kenji]
+[#19] Widget behavior flags and visual states, disabled input routing [kenji]

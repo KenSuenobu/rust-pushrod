@@ -39,7 +39,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 3 | [#122](https://github.com/KenSuenobu/rust-pushrod/issues/122) | pushrod: [7.8] Documentation site: build pushrod-docs in CI and publish it (done) |
 | ✅ 4 | [#93](https://github.com/KenSuenobu/rust-pushrod/issues/93) | pushrod: [9.1] Event vocabulary: modern event names and structure (done) |
 | ✅ 5 | [#106](https://github.com/KenSuenobu/rust-pushrod/issues/106) | pushrod: [10.2] Backend-neutral paint API (SDL2 backend by default) (done) |
-| 6 | [#19](https://github.com/KenSuenobu/rust-pushrod/issues/19) | pushrod: [1.1] Widget behavior flags and visual states |
+| ✅ 6 | [#19](https://github.com/KenSuenobu/rust-pushrod/issues/19) | pushrod: [1.1] Widget behavior flags and visual states (done) |
 | 7 | [#6](https://github.com/KenSuenobu/rust-pushrod/issues/6) | pushrod: [1.2] Event masks for the run loop and for widgets |
 | 8 | [#109](https://github.com/KenSuenobu/rust-pushrod/issues/109) | pushrod: [9.10] Engine events: every internal action Pushrod performs emits an event |
 | 9 | [#124](https://github.com/KenSuenobu/rust-pushrod/issues/124) | pushrod: [9.11] Event-loop style: keep parity with callbacks |
@@ -330,11 +330,13 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] `Behavior` and `VisualState` exist on `WidgetCore` with default trait accessors
-- [ ] `set_hidden`/`is_hidden` are implemented on `HIDDEN` (no API break)
-- [ ] Disabled widgets are skipped by input routing and focus
-- [ ] `paint::state_overlay` draws DISABLED, FOCUSED, and INDETERMINATE after `paint()`, using a cached GPU dither texture
-- [ ] Tests for flags, states, and disabled routing
+- [x] `Behavior` and `VisualState` exist on `WidgetCore` with default trait accessors
+- [x] `set_hidden`/`is_hidden` are implemented on `HIDDEN` (no API break)
+- [x] Disabled widgets are skipped by input routing and focus
+- [x] `paint::state_overlay` draws DISABLED, FOCUSED, and INDETERMINATE after `paint()`, using a cached GPU dither texture
+- [x] Tests for flags, states, and disabled routing
+
+**Status:** done (issue closed). Its video can be a recap of the finished work.
 
 ### Step 7: Event masks for the run loop and for widgets
 
