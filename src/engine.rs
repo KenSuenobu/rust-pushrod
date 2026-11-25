@@ -65,26 +65,96 @@
 use crate::cache::WidgetCache;
 use crate::color::Color;
 use crate::event::{
-    EngineEvent, EngineEventKind, Event, EventKind, EventMask, MaskScope, engine_filter_accepts,
+    CustomEvent, EngineEvent, EngineEventKind, Event, EventKind, EventMask, EventTarget, MaskScope,
+    engine_filter_accepts,
 };
 use crate::font::FontCache;
 use crate::geometry::{Point, Size, size};
 use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
+use sdl2::event::EventSender;
 use sdl2::event::{Event as SdlEvent, EventType, WindowEvent};
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::pixels::Color as SdlColor;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::{EventPump, Sdl};
+use std::any::Any;
 use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 /// How long an idle loop blocks waiting for an event before checking again, in milliseconds.
 const IDLE_WAIT_MS: u32 = 1000;
+
+/// The most custom events delivered in one frame; the rest are discarded, which stops callbacks
+/// that post a custom event in response to a custom event forever.
+pub const MAX_CUSTOM_EVENTS_PER_FRAME: usize = 1000;
+
+/// The SDL2 user event the run loop wakes on when another thread posts; it carries no data.
+struct Wake;
+
+/// A posted payload waiting for the UI thread: the target and the `Send` data.
+type Posted = (EventTarget, Box<dyn Any + Send>);
+
+/// The mailbox shared by an [`Engine`] and its [`Sender`]s.
+#[derive(Default)]
+struct Mailbox {
+    queue: Mutex<Vec<Posted>>,
+    wake: Mutex<Option<EventSender>>,
+}
+
+/// A handle other threads use to post custom events to the UI thread.
+///
+/// Get one with [`Engine::sender`]; clone it freely and move it into threads.  Posting is
+/// thread-safe: the payload is queued and the run loop is woken, then delivers it on the UI thread
+/// as an [`Event::Custom`] with no source.
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::engine::Engine;
+/// use pushrod::event::EventTarget;
+/// use pushrod::geometry::size;
+///
+/// struct Progress(u8);
+///
+/// let engine: Engine = Engine::new(size(320, 200), 30);
+/// let sender = engine.sender();
+///
+/// std::thread::spawn(move || sender.post(EventTarget::ApplicationOnly, Progress(40)))
+///     .join()
+///     .unwrap();
+/// ```
+#[derive(Clone)]
+pub struct Sender {
+    mailbox: Arc<Mailbox>,
+}
+
+impl Sender {
+    /// Posts a custom event from any thread.
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - Which `Widget`s receive the event.
+    /// * `payload` - The data; it must be `Send` because it crosses threads.
+    pub fn post<T: Any + Send>(&self, target: EventTarget, payload: T) {
+        if let Ok(mut queue) = self.mailbox.queue.lock() {
+            queue.push((target, Box::new(payload)));
+        }
+
+        // Wake the run loop so it does not wait for the next input event.  A failure to push is
+        // harmless: the mailbox is also drained every frame.
+        if let Ok(wake) = self.mailbox.wake.lock()
+            && let Some(sender) = wake.as_ref()
+        {
+            let _ = sender.push_custom_event(Wake);
+        }
+    }
+}
 
 /// Returns the mask class an `SDL2` event is filtered by.
 ///
@@ -228,6 +298,9 @@ pub type EventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &Event)>;
 /// [`Engine::on_engine_event`] or [`Engine::on_engine_event_filtered`].
 pub type EngineEventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &EngineEvent)>;
 
+/// A callback for custom events carrying one payload type; see [`Engine::on_custom`].
+type CustomCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &CustomEvent)>;
+
 /// The handle passed to callbacks.
 ///
 /// It gives callbacks access to the `Widget`s in the window, by ID and concrete type, and lets
@@ -237,9 +310,28 @@ pub struct Ui<'a> {
     widgets: &'a mut WidgetCache,
     running: &'a mut bool,
     event_mask: &'a mut EventMask,
+    posted: &'a mut Vec<Event>,
 }
 
 impl<'a> Ui<'a> {
+    /// Posts a custom event, to be delivered after the callbacks currently running.
+    ///
+    /// The event is queued, never delivered from inside this call.  Posting from a custom-event
+    /// callback is allowed; at most [`MAX_CUSTOM_EVENTS_PER_FRAME`] custom events are delivered per
+    /// frame, and the rest are discarded with an [`EngineEvent::CustomEventDropped`].
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - Which `Widget`s receive the event.
+    /// * `payload` - The application's data; receivers read it with [`Event::payload`].
+    pub fn post<T: Any>(&mut self, target: EventTarget, payload: T) {
+        self.posted.push(Event::Custom(CustomEvent {
+            source: None,
+            target,
+            payload: Rc::new(payload),
+        }));
+    }
+
     /// Changes the run loop's event mask.  See [`Engine::set_event_mask`].
     ///
     /// # Arguments
@@ -323,6 +415,10 @@ pub struct Engine<S = ()> {
     next_callback_id: u64,
     event_callbacks: Vec<EventCallback<S>>,
     engine_callbacks: Vec<(Option<Vec<EngineEventKind>>, EngineEventCallback<S>)>,
+    custom_callbacks: Vec<CustomCallback<S>>,
+    posted: Vec<Event>,
+    mailbox: Arc<Mailbox>,
+    custom_budget: usize,
 }
 
 impl<S> Engine<S> {
@@ -354,6 +450,10 @@ impl<S> Engine<S> {
             next_callback_id: 0,
             event_callbacks: Vec::new(),
             engine_callbacks: Vec::new(),
+            custom_callbacks: Vec::new(),
+            posted: Vec::new(),
+            mailbox: Arc::new(Mailbox::default()),
+            custom_budget: MAX_CUSTOM_EVENTS_PER_FRAME,
         }
     }
 
@@ -420,6 +520,21 @@ impl<S> Engine<S> {
     /// Each engine event followed by the events the `Widget`s generated in response, in order.
     fn drain_pending(&mut self) -> Vec<Event> {
         let mut drained = Vec::new();
+        let mut posted = std::mem::take(&mut self.posted);
+
+        if let Ok(mut queue) = self.mailbox.queue.lock() {
+            posted.extend(queue.drain(..).map(|(target, payload)| {
+                let payload: Rc<dyn Any + Send> = Rc::from(payload);
+
+                Event::Custom(CustomEvent {
+                    source: None,
+                    target,
+                    payload,
+                })
+            }));
+        }
+
+        drained.extend(self.expand_custom(posted));
 
         for event in self.widget_cache.take_pending_events() {
             let generated = match &event {
@@ -430,10 +545,50 @@ impl<S> Engine<S> {
             };
 
             drained.push(event);
-            drained.extend(generated);
+            drained.extend(self.expand_custom(generated));
         }
 
         drained
+    }
+
+    /// Delivers every custom event in `events` to its target `Widget`s, in order.
+    ///
+    /// Each custom event is followed in the result by nothing of its own; the events the `Widget`s
+    /// generate while handling it join the back of the queue, so custom events posted during
+    /// delivery are delivered after the ones already waiting.  Once the frame's budget of
+    /// [`MAX_CUSTOM_EVENTS_PER_FRAME`] is spent, further custom events are dropped and an
+    /// [`EngineEvent::CustomEventDropped`] is returned in place of each.
+    ///
+    /// # Arguments
+    ///
+    /// * `events` - The events to expand; other kinds pass through unchanged.
+    ///
+    /// # Returns
+    ///
+    /// The events to give the callbacks, in delivery order.
+    fn expand_custom(&mut self, events: Vec<Event>) -> Vec<Event> {
+        let mut out = Vec::with_capacity(events.len());
+        let mut queue: VecDeque<Event> = events.into();
+
+        while let Some(event) = queue.pop_front() {
+            let Event::Custom(custom) = &event else {
+                out.push(event);
+                continue;
+            };
+
+            if self.custom_budget == 0 {
+                out.push(Event::Engine(EngineEvent::CustomEventDropped {
+                    target: custom.target,
+                }));
+                continue;
+            }
+
+            self.custom_budget -= 1;
+            queue.extend(self.widget_cache.deliver_custom(custom));
+            out.push(event);
+        }
+
+        out
     }
 
     /// Delivers the engine events queued by internal actions to the `Widget`s and callbacks.
@@ -903,6 +1058,67 @@ impl<S> Engine<S> {
             .push((Some(kinds.to_vec()), Box::new(callback)));
     }
 
+    /// Registers a callback for custom events whose payload is a `T`.
+    ///
+    /// Custom events are delivered to the targeted `Widget`s first, then to these callbacks, then
+    /// to [`on_event`](Engine::on_event).  Events carrying any other payload type are ignored by
+    /// this callback.
+    ///
+    /// # Arguments
+    ///
+    /// * `callback` - Called with the application state, a [`Ui`] handle, the posting `Widget`
+    ///   (`None` if the application or another thread posted), and the payload.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::engine::Engine;
+    /// use pushrod::geometry::size;
+    ///
+    /// struct DocumentSaved;
+    ///
+    /// let mut engine: Engine<u32> = Engine::new(size(320, 200), 30);
+    ///
+    /// engine.on_custom::<DocumentSaved, _>(|saves, _ui, _source, _payload| *saves += 1);
+    /// ```
+    pub fn on_custom<T, F>(&mut self, mut callback: F)
+    where
+        T: Any,
+        F: FnMut(&mut S, &mut Ui, Option<WidgetId>, &T) + 'static,
+    {
+        self.custom_callbacks
+            .push(Box::new(move |state, ui, custom| {
+                if let Some(payload) = custom.payload::<T>() {
+                    callback(state, ui, custom.source, payload);
+                }
+            }));
+    }
+
+    /// Returns a handle other threads use to post custom events to this `Engine`.
+    ///
+    /// # Returns
+    ///
+    /// A [`Sender`]; every call returns a handle to the same queue.
+    pub fn sender(&self) -> Sender {
+        Sender {
+            mailbox: self.mailbox.clone(),
+        }
+    }
+
+    /// Lets [`Sender`]s wake the run loop with an SDL2 user event.
+    ///
+    /// # Arguments
+    ///
+    /// * `sdl` - The initialized `SDL2` context.
+    fn connect_sender(&self, sdl: &Sdl) {
+        if let Ok(events) = sdl.event()
+            && events.register_custom_event::<Wake>().is_ok()
+            && let Ok(mut wake) = self.mailbox.wake.lock()
+        {
+            *wake = Some(events.event_sender());
+        }
+    }
+
     /// Sets the window's background color.
     ///
     /// This is the color of the [`RootWidget`] (ID `0`), which fills the window behind every other
@@ -936,7 +1152,11 @@ impl<S> Engine<S> {
     /// * `event` - The raw `SDL2` event.
     /// * `state` - The application state passed to the callbacks.
     pub fn dispatch(&mut self, event: SdlEvent, state: &mut S) {
-        for pushrod_event in self.route(event) {
+        self.custom_budget = MAX_CUSTOM_EVENTS_PER_FRAME;
+
+        let routed = self.route(event);
+
+        for pushrod_event in self.expand_custom(routed) {
             self.fire(&pushrod_event, state);
         }
 
@@ -1001,7 +1221,14 @@ impl<S> Engine<S> {
             widgets: &mut self.widget_cache,
             running: &mut self.running,
             event_mask: &mut self.event_mask,
+            posted: &mut self.posted,
         };
+
+        if let Event::Custom(custom) = event {
+            for callback in self.custom_callbacks.iter_mut() {
+                callback(state, &mut ui, custom);
+            }
+        }
 
         if let Some(id) = event.widget_id()
             && let Some(callbacks) = self.registry.get_mut(&(id, event.kind()))
@@ -1048,6 +1275,8 @@ impl<S> Engine<S> {
         // used, specifying hardware acceleration.
         let mut canvas = Self::create_canvas(window);
 
+        self.connect_sender(&sdl);
+
         // Attaches to the `SDL` library event pump, against which all windowed events are
         // sent.  Also determines the amount of time to wait between frames.
         let mut event_pump = sdl.event_pump().unwrap();
@@ -1082,6 +1311,7 @@ impl<S> Engine<S> {
             let start = Instant::now();
 
             sync_sdl_events(&mut event_pump, &mut applied_mask, self.event_mask);
+            self.custom_budget = MAX_CUSTOM_EVENTS_PER_FRAME;
             self.flush_pending(&mut state);
 
             // With no timers wanted and nothing to repaint, wait for input instead of polling.
@@ -1182,6 +1412,7 @@ impl<S> Engine<S> {
     /// ```
     pub fn event_loop(&mut self, sdl: &Sdl, window: Window) -> EventLoop {
         self.widget_cache.invalidate_all();
+        self.connect_sender(sdl);
 
         EventLoop {
             canvas: Self::create_canvas(window),
@@ -1319,7 +1550,11 @@ impl<S> Engine<S> {
 
             let raw = queue.raw.pop_front()?;
 
-            queue.pending.extend(self.route(raw));
+            self.custom_budget = MAX_CUSTOM_EVENTS_PER_FRAME;
+
+            let routed = self.route(raw);
+
+            queue.pending.extend(self.expand_custom(routed));
         }
     }
 }

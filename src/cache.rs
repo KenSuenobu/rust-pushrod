@@ -33,7 +33,8 @@
 
 use crate::backend::sdl2::{Sdl2Painter, to_sdl_rect};
 use crate::event::{
-    EngineEvent, EngineEventKind, Event, EventCtx, EventMask, MaskScope, engine_filter_accepts,
+    CustomEvent, EngineEvent, EngineEventKind, Event, EventCtx, EventMask, EventTarget, MaskScope,
+    engine_filter_accepts,
 };
 use crate::font::FontCache;
 use crate::geometry::{Point, make_rect, point};
@@ -479,6 +480,7 @@ impl WidgetCache {
                     && widget.event_mask().intersects(EventMask::ENGINE)
                     && engine_filter_accepts(filter.map(|k| k.as_slice()), event)
                 {
+                    ctx.set_source(Some(index as WidgetId));
                     widget.handle_event(&wrapped, &mut ctx);
                 }
             }
@@ -519,6 +521,7 @@ impl WidgetCache {
                 if widget.is_enabled()
                     && class.is_none_or(|class| widget.event_mask().intersects(class))
                 {
+                    ctx.set_source(Some(id));
                     widget.handle_event(event, &mut ctx);
                     recipients += 1;
                 }
@@ -582,8 +585,64 @@ impl WidgetCache {
                 loop_mask.intersects(class) && widget.event_mask().intersects(class)
             })
         {
+            ctx.set_source(Some(id));
             widget.handle_event(event, ctx);
         }
+    }
+
+    /// Delivers a custom event to the `Widget`s its target names.
+    ///
+    /// A `Widget` receives it when [`EventMask::CUSTOM`] is in both the run loop's mask and its
+    /// own mask.  Custom events are not input, so disabled `Widget`s still receive them; a
+    /// [`Broadcast`](EventTarget::Broadcast) reaches only visible `Widget`s.  Delivery is in
+    /// drawing order, parents before children.  The core takes no other action: no focus, mouse
+    /// capture, selection, or redraw changes.
+    ///
+    /// # Arguments
+    ///
+    /// * `custom` - The custom event.
+    ///
+    /// # Returns
+    ///
+    /// The events the `Widget`s generated while handling it, in the order emitted (including any
+    /// custom events they posted, which the caller queues).
+    pub fn deliver_custom(&mut self, custom: &CustomEvent) -> Vec<Event> {
+        let mut ctx = EventCtx::default();
+
+        if !self.loop_mask.intersects(EventMask::CUSTOM) {
+            return ctx.into_events();
+        }
+
+        let recipients = match custom.target {
+            EventTarget::ApplicationOnly => Vec::new(),
+            EventTarget::Widget(id) => vec![id],
+            EventTarget::Broadcast => self.draw_order(),
+            EventTarget::Subtree(root) => {
+                let mut ids = Vec::new();
+                let mut stack = vec![root];
+
+                while let Some(id) = stack.pop() {
+                    if (id as usize) < self.cache.len() {
+                        ids.push(id);
+                        stack.extend(self.children[id as usize].iter().rev());
+                    }
+                }
+
+                ids
+            }
+        };
+        let event = Event::Custom(custom.clone());
+
+        for id in recipients {
+            if let Some(widget) = self.cache.get_mut(id as usize)
+                && widget.event_mask().intersects(EventMask::CUSTOM)
+            {
+                ctx.set_source(Some(id));
+                widget.handle_event(&event, &mut ctx);
+            }
+        }
+
+        ctx.into_events()
     }
 
     /// Routes a raw input event to the `Widget`s.

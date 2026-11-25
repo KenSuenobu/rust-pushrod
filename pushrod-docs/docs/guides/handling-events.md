@@ -159,6 +159,10 @@ engine.on_event(|_, _, event| {
 
 Inside `handle_event`, call `ctx.emit(...)` to queue an event for the callbacks. See [Creating widgets](./creating-widgets.md).
 
+## Custom events
+
+Post your own typed events with `ui.post(target, payload)` (callbacks), `ctx.post(target, payload)` (widgets), or `engine.sender()` (other threads), and receive them with `engine.on_custom::<T, _>(|state, ui, source, payload| ..)`. See [Custom Events](../events/custom-events.md).
+
 ## Testing without a window
 
 `Engine::dispatch(event, &mut state)` processes one SDL2 event exactly as the run loop would, including callbacks, so you can test event handling without opening a window. See [Testing a widget](./creating-widgets.md#testing-a-widget).

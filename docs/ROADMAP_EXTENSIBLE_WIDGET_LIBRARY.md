@@ -565,6 +565,8 @@ Like every widget, it can also receive application-defined custom events in `han
 - Runaway re-posting is capped
 - Tests for each target and cross-thread posting
 
+**Status:** done (#78).
+
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93) and 1.2 (#6).
 
 **Technical Stack.** Rust (`std::any`, `Rc`), SDL2 user events

@@ -93,7 +93,7 @@ Window events are [broadcast](../concepts/broadcast-events-to-all-interested-wid
 | `CloseRequested` | The user asks to close the window. |
 | `Tick { elapsed }` | A frame passes while a widget animates. |
 | `Engine(EngineEvent)` | Pushrod performs an internal action. |
-| `Custom(CustomEvent)` | An application or library defines its own event. |
+| `Custom(CustomEvent)` | An application or library defines its own event. See [Custom Events](./custom-events.md). |
 | `Raw(sdl2::event::Event)` | An SDL2 event Pushrod has not mapped yet. |
 
 :::note[What emits what today]
