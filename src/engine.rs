@@ -73,7 +73,7 @@ use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
 use sdl2::event::EventSender;
 use sdl2::event::{Event as SdlEvent, EventType, WindowEvent};
-use sdl2::keyboard::{Keycode, Mod};
+use sdl2::keyboard::{Keycode, Mod, TextInputUtil};
 use sdl2::pixels::Color as SdlColor;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
@@ -388,6 +388,28 @@ impl<'a> Ui<'a> {
         self.widgets
     }
 
+    /// Gives the keyboard focus to a `Widget`.  See [`WidgetCache::set_focus`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` has focus afterward; `false` if it cannot take focus.
+    pub fn set_focus(&mut self, id: WidgetId) -> bool {
+        self.widgets.set_focus(id)
+    }
+
+    /// Returns the `Widget` that has the keyboard focus.
+    ///
+    /// # Returns
+    ///
+    /// The ID of the focused `Widget`, or `None` if nothing has focus.
+    pub fn focused(&self) -> Option<WidgetId> {
+        self.widgets.focused()
+    }
+
     /// Stops the `Engine`.
     ///
     /// The run loop finishes the current batch of events, then returns the application state from
@@ -417,6 +439,8 @@ pub struct Engine<S = ()> {
     posted: Vec<Event>,
     mailbox: Arc<Mailbox>,
     custom_budget: usize,
+    text_input: Option<TextInputUtil>,
+    text_input_active: bool,
 }
 
 impl<S> Engine<S> {
@@ -451,6 +475,8 @@ impl<S> Engine<S> {
             posted: Vec::new(),
             mailbox: Arc::new(Mailbox::default()),
             custom_budget: MAX_CUSTOM_EVENTS_PER_FRAME,
+            text_input: None,
+            text_input_active: false,
         }
     }
 
@@ -516,6 +542,8 @@ impl<S> Engine<S> {
     ///
     /// Each engine event followed by the events the `Widget`s generated in response, in order.
     fn drain_pending(&mut self) -> Vec<Event> {
+        self.sync_text_input();
+
         let mut drained = Vec::new();
         let mut posted = std::mem::take(&mut self.posted);
 
@@ -546,6 +574,26 @@ impl<S> Engine<S> {
         }
 
         drained
+    }
+
+    /// Starts or stops `SDL2` text input to match the focused `Widget`: on while a text editor
+    /// has focus, off otherwise.  Does nothing without a window, so tests can run headless.
+    fn sync_text_input(&mut self) {
+        let wanted = self.widget_cache.text_input_wanted();
+
+        if wanted == self.text_input_active {
+            return;
+        }
+
+        if let Some(util) = &self.text_input {
+            if wanted {
+                util.start();
+            } else {
+                util.stop();
+            }
+
+            self.text_input_active = wanted;
+        }
     }
 
     /// Delivers every custom event in `events` to its target `Widget`s, in order.
@@ -1102,12 +1150,15 @@ impl<S> Engine<S> {
         }
     }
 
-    /// Lets [`Sender`]s wake the run loop with an SDL2 user event.
+    /// Lets [`Sender`]s wake the run loop with an SDL2 user event, and keeps the handle used to
+    /// start and stop text input as focus moves.
     ///
     /// # Arguments
     ///
     /// * `sdl` - The initialized `SDL2` context.
-    fn connect_sender(&self, sdl: &Sdl) {
+    fn connect_sender(&mut self, sdl: &Sdl) {
+        self.text_input = sdl.video().ok().map(|video| video.text_input());
+
         if let Ok(events) = sdl.event()
             && events.register_custom_event::<Wake>().is_ok()
             && let Ok(mut wake) = self.mailbox.wake.lock()

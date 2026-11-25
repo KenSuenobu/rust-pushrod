@@ -32,8 +32,10 @@ flowchart TD
 | `CustomEventDropped { target }` | A [custom event](./custom-events.md) was discarded because the per-frame limit was reached. |
 | `FontLoaded { font_name, font_size }` | A font was loaded from disk, the first time text was drawn with it. See [GPU text](../concepts/gpu-text.md). |
 | `GlyphAtlasPageAdded { pages }` | A glyph atlas texture was created. `pages` is how many exist now. |
+| `FocusChanged { old, new }` | The keyboard focus moved, by click, Tab, arrow key, or `set_focus`. `old` and `new` are widget IDs, or `None`. See [Keyboard and focus](../guides/keyboard-and-focus.md). |
+| `ActionTriggered { id, cancel }` | Return or Escape activated a form's default (`cancel` is `false`) or cancel (`true`) widget. |
 
-More variants are added by the features that need them (focus, dialogs, menus, timers, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
+More variants are added by the features that need them (dialogs, menus, timers, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
 
 ## Receiving engine events
 

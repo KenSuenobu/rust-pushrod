@@ -47,6 +47,8 @@ use sdl2::video::Window;
 use std::any::Any;
 use std::collections::HashMap;
 
+mod focus;
+
 /// The tree of `Widget`s in a window.
 ///
 /// `Widget`s are stored in a flat list, addressed by ID, with each `Widget`'s children kept in
@@ -78,6 +80,8 @@ pub struct WidgetCache {
     loop_mask: EventMask,
     engine_filters: HashMap<WidgetId, Vec<EngineEventKind>>,
     fonts: FontCache,
+    focused_widget_id: Option<WidgetId>,
+    text_input_wanted: bool,
 }
 
 impl WidgetCache {
@@ -100,6 +104,8 @@ impl WidgetCache {
             loop_mask: EventMask::ALL,
             engine_filters: HashMap::new(),
             fonts: FontCache::new(),
+            focused_widget_id: None,
+            text_input_wanted: false,
         }
     }
 
@@ -775,6 +781,12 @@ impl WidgetCache {
     ///   capture.
     /// - Presses, releases, and motion travel through the capture, target, and bubble phases (see
     ///   [`WidgetCache::propagate_with`]); hover events go to one `Widget`.
+    /// - A mouse button press first focuses the nearest focusable `Widget` at or above the one
+    ///   pressed.
+    /// - Key presses and releases go to the focused `Widget` (or the root with no focus), then
+    ///   Tab, the arrow keys, Return, and Escape act as described in [`WidgetCache::focus_next`],
+    ///   [`WidgetCache::focus_in_group`], and [`WidgetCache::set_focus`].  Typed text goes to the
+    ///   focused `Widget`.
     /// - Other events are ignored.
     /// - Disabled `Widget`s receive none of these events, but still block the `Widget`s beneath them.
     ///
@@ -805,6 +817,7 @@ impl WidgetCache {
                 let target = self.current_widget_id;
 
                 self.captured_widget_id = Some(target);
+                self.focus_for_click(target);
                 self.propagate_with(
                     target,
                     &Event::PointerPressed {
@@ -877,6 +890,37 @@ impl WidgetCache {
                     },
                     &mut ctx,
                 );
+            }
+
+            SdlEvent::KeyDown {
+                keycode: Some(key),
+                keymod,
+                repeat,
+                ..
+            } => self.handle_key_down(key, keymod, repeat, &mut ctx),
+
+            SdlEvent::KeyUp {
+                keycode: Some(key),
+                keymod,
+                ..
+            } => {
+                let target = self.key_target();
+
+                self.propagate_with(
+                    target,
+                    &Event::KeyReleased {
+                        id: target,
+                        key,
+                        modifiers: keymod,
+                    },
+                    &mut ctx,
+                );
+            }
+
+            SdlEvent::TextInput { text, .. } => {
+                if let Some(target) = self.focused_widget_id {
+                    self.propagate_with(target, &Event::TextEntered { id: target, text }, &mut ctx);
+                }
             }
 
             _ => {}

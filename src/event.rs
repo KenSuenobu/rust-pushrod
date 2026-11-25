@@ -332,6 +332,10 @@ pub enum EngineEventKind {
     FontLoaded,
     /// See [`EngineEvent::GlyphAtlasPageAdded`].
     GlyphAtlasPageAdded,
+    /// See [`EngineEvent::FocusChanged`].
+    FocusChanged,
+    /// See [`EngineEvent::ActionTriggered`].
+    ActionTriggered,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -387,6 +391,20 @@ pub enum EngineEvent {
         /// How many atlas textures exist now.
         pages: usize,
     },
+    /// The keyboard focus moved, by a click, Tab, an arrow key, or `set_focus`.
+    FocusChanged {
+        /// The `Widget` that had focus, if any.
+        old: Option<WidgetId>,
+        /// The `Widget` that has focus now, if any.
+        new: Option<WidgetId>,
+    },
+    /// Return or Escape activated a form's default or cancel `Widget`.
+    ActionTriggered {
+        /// The `Widget` that was activated.
+        id: WidgetId,
+        /// `false` for the default action (Return), `true` for the cancel action (Escape).
+        cancel: bool,
+    },
 }
 
 impl EngineEvent {
@@ -403,6 +421,8 @@ impl EngineEvent {
             EngineEvent::CustomEventDropped { .. } => EngineEventKind::CustomEventDropped,
             EngineEvent::FontLoaded { .. } => EngineEventKind::FontLoaded,
             EngineEvent::GlyphAtlasPageAdded { .. } => EngineEventKind::GlyphAtlasPageAdded,
+            EngineEvent::FocusChanged { .. } => EngineEventKind::FocusChanged,
+            EngineEvent::ActionTriggered { .. } => EngineEventKind::ActionTriggered,
         }
     }
 }
