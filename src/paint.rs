@@ -15,8 +15,10 @@
 
 //! # Paint
 //!
-//! Reusable drawing building blocks.  `Widget`s are composed by calling these functions in
-//! order from their `paint` function, all drawing into the `Widget`'s single texture:
+//! The backend-neutral drawing API.  A [`Widget`](crate::widget::Widget) draws by calling the
+//! [`Painter`] it is handed, never an `SDL2` type, so widgets (and widget libraries) work with any
+//! backend.  Reusable building blocks compose a `Widget`'s `paint`, all drawing into the `Widget`'s
+//! own surface:
 //!
 //! ```text
 //!   RootWidget   = fill
@@ -26,16 +28,13 @@
 //!   ButtonWidget = fill + text + border   (+ pressed state)
 //! ```
 //!
-//! This replaces composing `Widget`s out of other `Widget`s, which required every sub-`Widget` to
-//! keep its own texture, size, and invalidation state in sync with its parent.
+//! The default backend is [`Sdl2Painter`](crate::backend::sdl2::Sdl2Painter): each `Widget` paints
+//! into its own GPU texture only when invalidated, and frames are blits of cached textures.  A
+//! backend declares its [`CachePolicy`].  The [`RecordingPainter`](crate::backend::headless::RecordingPainter)
+//! records calls for unit tests, without a window.
 
-use crate::font::FontCache;
-use crate::geometry::Size;
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
-use sdl2::render::Canvas;
-use sdl2::ttf::FontStyle;
-use sdl2::video::Window;
+use crate::color::{Color, FontStyle};
+use crate::geometry::{Point, Rect, Size};
 
 /// Horizontal alignment of text within its bounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -46,6 +45,20 @@ pub enum TextJustify {
     Center,
     /// Aligned to the right edge.
     Right,
+}
+
+/// How a backend keeps painted `Widget`s between frames.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CachePolicy {
+    /// Each `Widget` paints into its own cached surface (a GPU texture) when invalidated, and frames
+    /// are blits of those surfaces.  Used by GPU backends such as `SDL2`.
+    #[default]
+    TextureCache,
+
+    /// Invalidated `Widget`s are painted straight to the screen with clipping, with no per-widget
+    /// surface.  For memory-poor systems.  Declared by backends that need it; the `SDL2` backend
+    /// never uses it.
+    DirectDraw,
 }
 
 /// The font and alignment used to draw text with [`text`].
@@ -98,49 +111,133 @@ impl TextStyle {
     }
 }
 
-/// Fills the whole texture with a color.
+/// The drawing operations a `Widget`'s `paint` can use.  Kept small: only what the helpers in this
+/// module need.
+///
+/// Coordinates are relative to the `Widget`'s own upper left-hand corner.  A backend decides where
+/// the pixels go (a GPU texture, a memory buffer, the screen with clipping).
+pub trait Painter {
+    /// Returns how this backend caches painted `Widget`s.
+    ///
+    /// # Returns
+    ///
+    /// The backend's [`CachePolicy`].
+    fn cache_policy(&self) -> CachePolicy;
+
+    /// Fills the whole drawing surface with a color.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The fill color.
+    fn fill(&mut self, color: Color);
+
+    /// Fills a rectangle with a color.
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle to fill.
+    /// * `color` - The fill color.
+    fn fill_rect(&mut self, bounds: Rect, color: Color);
+
+    /// Draws a one-pixel rectangle outline.
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle to outline.
+    /// * `color` - The line color.
+    fn rect(&mut self, bounds: Rect, color: Color);
+
+    /// Draws a one-pixel line.
+    ///
+    /// # Arguments
+    ///
+    /// * `from` - The start point.
+    /// * `to` - The end point.
+    /// * `color` - The line color.
+    fn line(&mut self, from: Point, to: Point, color: Color);
+
+    /// Draws text within a rectangle, aligned by `style`, wrapped at the rectangle's width, and
+    /// centered vertically when it fits (top-aligned when it doesn't).
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle to draw within.
+    /// * `style` - The font and alignment.
+    /// * `color` - The text color (overrides `style.font_color`).
+    /// * `msg` - The text to draw.
+    ///
+    /// # Returns
+    ///
+    /// The size of the text drawn; `0` by `0` if nothing was drawn.
+    fn text(&mut self, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size;
+
+    /// Draws an image file, scaled to a rectangle.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the image file.
+    /// * `bounds` - The rectangle to draw into.
+    ///
+    /// # Returns
+    ///
+    /// `Ok(())` once the image is drawn.
+    ///
+    /// # Errors
+    ///
+    /// Returns a message if the image cannot be loaded or drawn.
+    fn image(&mut self, path: &str, bounds: Rect) -> Result<(), String>;
+
+    /// Fills a rectangle with a 50% checkerboard of two colors, for backends and displays with few
+    /// colors.  The pixel at the rectangle's upper left-hand corner is `first`.
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle to fill.
+    /// * `first` - The color of the corner pixel.
+    /// * `second` - The other color.
+    fn dither(&mut self, bounds: Rect, first: Color, second: Color);
+
+    /// Limits later drawing to a rectangle, or removes the limit.
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle to draw within, or `None` for no limit.
+    fn clip(&mut self, bounds: Option<Rect>);
+}
+
+/// Fills the whole drawing surface with a color.
 ///
 /// This is the background of most `Widget`s, and usually the first thing their `paint` draws.
 ///
 /// # Arguments
 ///
-/// * `c` - The canvas, targeting the `Widget`'s texture.
+/// * `p` - The painter, targeting the `Widget`.
 /// * `color` - The fill color.
-pub fn fill(c: &mut Canvas<Window>, color: Color) {
-    c.set_draw_color(color);
-    c.clear();
+pub fn fill(p: &mut dyn Painter, color: Color) {
+    p.fill(color);
 }
 
-/// Draws a border inside the edges of the texture.
+/// Draws a border inside the edges of the surface.
 ///
 /// The border is `width` one-pixel rectangles, each inset one pixel further.  A `width` of `0`
-/// draws nothing, and drawing stops early if the border would cover the whole texture.
+/// draws nothing, and drawing stops early if the border would cover the whole surface.
 ///
 /// # Arguments
 ///
-/// * `c` - The canvas, targeting the `Widget`'s texture.
-/// * `size` - The size of the texture (the `Widget`'s size).
+/// * `p` - The painter, targeting the `Widget`.
+/// * `size` - The size of the surface (the `Widget`'s size).
 /// * `color` - The border color.
 /// * `width` - The border width in pixels.
-///
-/// # Panics
-///
-/// Panics if `SDL2` fails to draw a rectangle.
-pub fn border(c: &mut Canvas<Window>, size: Size, color: Color, width: u8) {
-    c.set_draw_color(color);
-
+pub fn border(p: &mut dyn Painter, size: Size, color: Color, width: u8) {
     for i in 0..width as u32 {
         if i * 2 >= size.w || i * 2 >= size.h {
             break;
         }
 
-        c.draw_rect(Rect::new(
-            i as i32,
-            i as i32,
-            size.w - i * 2,
-            size.h - i * 2,
-        ))
-        .unwrap();
+        p.rect(
+            Rect::new(i as i32, i as i32, size.w - i * 2, size.h - i * 2),
+            color,
+        );
     }
 }
 
@@ -152,61 +249,163 @@ pub fn border(c: &mut Canvas<Window>, size: Size, color: Color, width: u8) {
 ///
 /// # Arguments
 ///
-/// * `c` - The canvas, targeting the `Widget`'s texture.
-/// * `fc` - The font cache used to render the text.
-/// * `bounds` - The rectangle to draw within, in texture coordinates.
+/// * `p` - The painter, targeting the `Widget`.
+/// * `bounds` - The rectangle to draw within, in `Widget` coordinates.
 /// * `style` - The font and alignment.
 /// * `color` - The text color (overrides `style.font_color`, so a `Widget` can invert it).
 /// * `msg` - The text to draw.
 ///
-/// # Panics
+/// # Returns
 ///
-/// Panics if the font cannot be loaded or `SDL2` fails to render or copy the text.
-pub fn text(
-    c: &mut Canvas<Window>,
-    fc: &mut FontCache,
-    bounds: Rect,
-    style: &TextStyle,
-    color: Color,
-    msg: &str,
-) {
-    if msg.is_empty() || bounds.width() == 0 {
-        return;
+/// The size of the text drawn; `0` by `0` if nothing was drawn.
+pub fn text(p: &mut dyn Painter, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size {
+    if msg.is_empty() || bounds.w == 0 {
+        return Size::new(0, 0);
     }
 
-    let (font_texture, font_width, font_height) = fc.render_text(
-        c,
-        &style.font_name,
-        style.font_size,
-        style.font_style,
-        color,
-        msg,
-        bounds.width(),
-    );
+    p.text(bounds, style, color, msg)
+}
 
-    let bounds_width = bounds.width() as i32;
-    let text_x = bounds.x()
-        + match style.justification {
+/// Computes where text of a given size is drawn within a rectangle.
+///
+/// Backends use this so every backend aligns text the same way: horizontally by `justification`,
+/// and vertically centered when the text fits (top-aligned when it doesn't).
+///
+/// # Arguments
+///
+/// * `bounds` - The rectangle to draw within.
+/// * `text_size` - The size of the rendered text.
+/// * `justification` - The horizontal alignment.
+///
+/// # Returns
+///
+/// The rectangle the text occupies.
+pub fn align_text(bounds: Rect, text_size: Size, justification: TextJustify) -> Rect {
+    let bounds_width = bounds.w as i32;
+    let x = bounds.x
+        + match justification {
             TextJustify::Left => 0,
-            TextJustify::Right => bounds_width - font_width as i32,
-            TextJustify::Center => (bounds_width - font_width as i32) / 2,
+            TextJustify::Right => bounds_width - text_size.w as i32,
+            TextJustify::Center => (bounds_width - text_size.w as i32) / 2,
         };
-
-    // Text that fits is centered vertically; text taller than the bounds is top-aligned.
-    let text_y = if font_height < bounds.height() {
-        bounds.y() + (bounds.height() - font_height) as i32 / 2
+    let y = if text_size.h < bounds.h {
+        bounds.y + (bounds.h - text_size.h) as i32 / 2
     } else {
-        bounds.y()
+        bounds.y
     };
 
-    c.copy(
-        &font_texture,
-        None,
-        Rect::new(text_x, text_y, font_width, font_height),
-    )
-    .unwrap();
+    Rect::new(x, y, text_size.w, text_size.h)
+}
 
-    // With `unsafe_textures`, textures must be explicitly destroyed, otherwise every repaint of
-    // text leaks a GPU texture.
-    unsafe { font_texture.destroy() };
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::backend::headless::{PaintCall, RecordingPainter};
+
+    fn style(justification: TextJustify) -> TextStyle {
+        TextStyle::new(
+            String::from("font.ttf"),
+            FontStyle::NORMAL,
+            10,
+            Color::BLACK,
+            justification,
+        )
+    }
+
+    #[test]
+    fn fill_records_one_call() {
+        let mut p = RecordingPainter::default();
+        fill(&mut p, Color::RED);
+        assert_eq!(p.calls, vec![PaintCall::Fill(Color::RED)]);
+    }
+
+    #[test]
+    fn border_insets_each_ring() {
+        let mut p = RecordingPainter::default();
+        border(&mut p, Size::new(10, 10), Color::BLUE, 2);
+        assert_eq!(
+            p.calls,
+            vec![
+                PaintCall::Rect(Rect::new(0, 0, 10, 10), Color::BLUE),
+                PaintCall::Rect(Rect::new(1, 1, 8, 8), Color::BLUE),
+            ]
+        );
+    }
+
+    #[test]
+    fn border_zero_width_draws_nothing() {
+        let mut p = RecordingPainter::default();
+        border(&mut p, Size::new(10, 10), Color::BLUE, 0);
+        assert!(p.calls.is_empty());
+    }
+
+    #[test]
+    fn border_stops_when_it_covers_the_surface() {
+        let mut p = RecordingPainter::default();
+        border(&mut p, Size::new(4, 10), Color::BLUE, 9);
+        assert_eq!(p.calls.len(), 2);
+    }
+
+    #[test]
+    fn empty_text_or_zero_width_draws_nothing() {
+        let mut p = RecordingPainter::default();
+        let s = style(TextJustify::Left);
+        assert_eq!(
+            text(&mut p, Rect::new(0, 0, 50, 20), &s, Color::BLACK, ""),
+            Size::new(0, 0)
+        );
+        assert_eq!(
+            text(&mut p, Rect::new(0, 0, 0, 20), &s, Color::BLACK, "hi"),
+            Size::new(0, 0)
+        );
+        assert!(p.calls.is_empty());
+    }
+
+    #[test]
+    fn text_is_recorded() {
+        let mut p = RecordingPainter::default();
+        let s = style(TextJustify::Left);
+        let drawn = text(&mut p, Rect::new(0, 0, 100, 20), &s, Color::WHITE, "hi");
+        assert_ne!(drawn, Size::new(0, 0));
+        assert_eq!(
+            p.calls,
+            vec![PaintCall::Text(
+                Rect::new(0, 0, 100, 20),
+                String::from("hi"),
+                Color::WHITE
+            )]
+        );
+    }
+
+    #[test]
+    fn align_text_justifies_and_centers() {
+        let bounds = Rect::new(10, 20, 100, 40);
+        let t = Size::new(30, 10);
+        assert_eq!(
+            align_text(bounds, t, TextJustify::Left),
+            Rect::new(10, 35, 30, 10)
+        );
+        assert_eq!(
+            align_text(bounds, t, TextJustify::Right),
+            Rect::new(80, 35, 30, 10)
+        );
+        assert_eq!(
+            align_text(bounds, t, TextJustify::Center),
+            Rect::new(45, 35, 30, 10)
+        );
+    }
+
+    #[test]
+    fn align_text_top_aligns_when_too_tall() {
+        let bounds = Rect::new(0, 5, 100, 10);
+        assert_eq!(
+            align_text(bounds, Size::new(20, 30), TextJustify::Left),
+            Rect::new(0, 5, 20, 30)
+        );
+    }
+
+    #[test]
+    fn cache_policy_defaults_to_texture_cache() {
+        assert_eq!(CachePolicy::default(), CachePolicy::TextureCache);
+    }
 }

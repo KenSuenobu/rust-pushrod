@@ -31,9 +31,11 @@
 //! A flat list addressed by ID avoids reference-counted parent pointers entirely, and allows a
 //! form to be stored and reloaded by ID.
 
+use crate::backend::sdl2::{Sdl2Painter, to_sdl_rect};
 use crate::event::{Event, EventCtx};
 use crate::font::FontCache;
 use crate::geometry::{Point, make_rect, point};
+use crate::paint::CachePolicy;
 use crate::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
 use sdl2::event::Event as SdlEvent;
 use sdl2::pixels::Color;
@@ -67,6 +69,7 @@ pub struct WidgetCache {
     current_widget_id: WidgetId,
     captured_widget_id: Option<WidgetId>,
     needs_full_redraw: bool,
+    cache_policy: CachePolicy,
 }
 
 impl WidgetCache {
@@ -84,7 +87,30 @@ impl WidgetCache {
             current_widget_id: ROOT_WIDGET_ID,
             captured_widget_id: None,
             needs_full_redraw: true,
+            cache_policy: Sdl2Painter::CACHE_POLICY,
         }
+    }
+
+    /// Returns the cache policy of the backend the cache paints with.
+    ///
+    /// Defaults to the `SDL2` backend's [`CachePolicy::TextureCache`].  `draw_loop` implements
+    /// `TextureCache` only; [`CachePolicy::DirectDraw`] is declared for backends that paint
+    /// straight to the screen with clipping, and is not rendered by the `SDL2` path.
+    ///
+    /// # Returns
+    ///
+    /// The [`CachePolicy`].
+    pub fn cache_policy(&self) -> CachePolicy {
+        self.cache_policy
+    }
+
+    /// Sets the cache policy, as declared by the backend.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy` - The backend's [`CachePolicy`].
+    pub fn set_cache_policy(&mut self, policy: CachePolicy) {
+        self.cache_policy = policy;
     }
 
     /// Adds a `Widget` as a child of the root `Widget`.
@@ -497,7 +523,7 @@ impl WidgetCache {
         let painter: &dyn Widget = widget.as_ref();
 
         c.with_texture_canvas(&mut texture, |texture_canvas| {
-            painter.paint(texture_canvas, fc);
+            painter.paint(&mut Sdl2Painter::new(texture_canvas, fc));
         })
         .unwrap();
 
@@ -557,7 +583,8 @@ impl WidgetCache {
             let size = widget.get_size();
 
             if let Some(texture) = widget.core_mut().texture.get_optional_ref() {
-                c.copy(texture, None, make_rect(origin, size)).unwrap();
+                c.copy(texture, None, to_sdl_rect(make_rect(origin, size)))
+                    .unwrap();
             }
         }
 

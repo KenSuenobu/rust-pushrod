@@ -18,15 +18,10 @@
 //! This is a simple system `Widget` that fills its background like the `BaseWidget`, and draws a
 //! text message with a given font name, style, color, and message on top of it.
 
-use pushrod::font::FontCache;
-use pushrod::geometry::{Point, Size};
-use pushrod::paint::{self, TextStyle};
+use pushrod::color::{Color, FontStyle};
+use pushrod::geometry::{Point, Rect, Size};
+use pushrod::paint::{self, Painter, TextStyle};
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
-use sdl2::render::Canvas;
-use sdl2::ttf::FontStyle;
-use sdl2::video::Window;
 
 pub use pushrod::paint::TextJustify;
 
@@ -63,15 +58,13 @@ impl Widget for TextWidget {
     ///
     /// # Arguments
     ///
-    /// * `c` - The canvas, targeting the widget's texture.
-    /// * `fc` - The font cache used to render the text.
-    fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache) {
+    /// * `p` - The painter, targeting the widget.
+    fn paint(&self, p: &mut dyn Painter) {
         let size = self.get_size();
 
-        paint::fill(c, self.get_color());
+        paint::fill(p, self.get_color());
         paint::text(
-            c,
-            fc,
+            p,
             Rect::new(0, 0, size.w, size.h),
             &self.style,
             self.style.font_color,

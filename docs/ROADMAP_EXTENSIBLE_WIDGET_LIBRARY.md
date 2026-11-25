@@ -2315,7 +2315,6 @@ Backend crates (SDL2 now, SDL3 later) with no SDL in the core, a backend-neutral
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 10.1 (#105) | Drawing modes: live or outline feedback while moving and resizing | Live mode redraws content as things move; outline mode shows only a dotted rectangle until the move ends. Switchable at run time, with a system-wide event. | `chassis`, `core`, `enhancement`, `parallelizable`, `performance`, `portability`, `size/M` | Y | N | M | `src/engine.rs`, `src/cache.rs`, `src/controllers.rs` |
-| 10.2 (#106) | Backend-neutral paint API (SDL2 backend by default) | Widgets paint through a small Painter trait instead of an SDL2 canvas, so other backends become possible without touching widgets. | `core`, `enhancement`, `mvp`, `portability`, `size/M` | N | v0.1 | M | `src/paint.rs`, `src/widget.rs`, `src/cache.rs`, `src/texture.rs`, `backend/sdl2.rs (new)` |
 | 10.3 (#107) | no_std + alloc core crate | Split the widget tree, events, and widgets into a core crate that builds without the standard library. | `core`, `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `src/lib.rs`, `Cargo.toml`, `pushrod-widgets/Cargo.toml` |
 | 10.4 (#108) | Experimental: Atari ST / TOS backend | Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing. | `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-tos (new crate)` |
 | 10.6 (#134) | Backend crates: keep SDL out of the core and the widgets | Move everything SDL-specific into a `pushrod-sdl2` backend crate, so `pushrod` and `pushrod-widgets` have no SDL dependency and a future SDL3 backend is a drop-in swap. | `architecture`, `chassis`, `enhancement`, `mvp`, `parallelizable`, `rendering`, `size/L` | Y | v0.1 | L | `src/backend.rs (new)`, `src/engine.rs`, `src/event.rs`, `src/geometry.rs`, `pushrod-sdl2/ (new crate)`, `pushrod-widgets (all widgets)` |
@@ -2364,6 +2363,8 @@ Like every widget, it can also receive application-defined custom events in `han
 **Documentation.** Docusaurus page: `pushrod-docs/docs/platforms/drawing-modes.md` ("Drawing modes", Platforms, new). Guides: 'Slow hardware' section. Rustdoc: `DrawingMode`. Examples: Example toggles the mode at run time. Screenshots: n/a.
 
 ### 10.2 (#106): Backend-neutral paint API (SDL2 backend by default)
+
+**Status:** done (#106).
 
 **Problem Statement.** `Widget::paint` takes `&mut sdl2::render::Canvas<Window>`, so every widget depends on SDL2. Changing that signature after dozens of widgets exist would be expensive, and it is the main obstacle to software rendering and vintage targets.
 

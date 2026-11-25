@@ -1,10 +1,10 @@
 //! Core tests that need no widget library: the engine creates its own root widget.
 
+use pushrod::color::Color;
 use pushrod::engine::Engine;
 use pushrod::geometry::size;
 use pushrod::root_widget::RootWidget;
 use pushrod::widget::{ROOT_WIDGET_ID, Widget};
-use sdl2::pixels::Color;
 
 #[test]
 fn engine_creates_a_white_root_widget_without_any_widget_library() {
@@ -52,4 +52,16 @@ fn engines_can_be_created_and_dropped_on_many_threads() {
     for thread in threads {
         thread.join().unwrap();
     }
+}
+
+#[test]
+fn widget_cache_uses_the_backend_cache_policy() {
+    use pushrod::cache::WidgetCache;
+    use pushrod::paint::CachePolicy;
+
+    let mut cache = WidgetCache::new();
+    assert_eq!(cache.cache_policy(), CachePolicy::TextureCache);
+
+    cache.set_cache_policy(CachePolicy::DirectDraw);
+    assert_eq!(cache.cache_policy(), CachePolicy::DirectDraw);
 }

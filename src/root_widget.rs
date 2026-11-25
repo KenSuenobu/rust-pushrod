@@ -21,13 +21,10 @@
 //! background with `ui.get_mut::<RootWidget>(ROOT_WIDGET_ID).unwrap().set_color(..)`, or
 //! [`Engine::set_background`](crate::engine::Engine::set_background).
 
-use crate::font::FontCache;
+use crate::color::Color;
 use crate::geometry::{Point, Size};
-use crate::paint;
+use crate::paint::{self, Painter};
 use crate::widget::{Widget, WidgetCore};
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 
 /// The window's root `Widget`: a flat fill of its color.
 ///
@@ -60,10 +57,9 @@ impl Widget for RootWidget {
     ///
     /// # Arguments
     ///
-    /// * `c` - The canvas, targeting the root `Widget`'s texture.
-    /// * `_fc` - The font cache (unused).
-    fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
-        paint::fill(c, self.get_color());
+    /// * `p` - The painter, targeting the root `Widget`.
+    fn paint(&self, p: &mut dyn Painter) {
+        paint::fill(p, self.get_color());
     }
 }
 

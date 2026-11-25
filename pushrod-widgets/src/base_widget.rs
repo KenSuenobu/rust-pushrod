@@ -18,12 +18,9 @@
 //! This is a default widget that can be used as a top-level canvas.  It is a basic `Widget`
 //! implementation that fills its background with the desired color.
 
-use pushrod::font::FontCache;
 use pushrod::geometry::{Point, Size};
-use pushrod::paint;
+use pushrod::paint::{self, Painter};
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 
 /// A rectangle filled with one color.
 ///
@@ -36,7 +33,7 @@ use sdl2::video::Window;
 /// use pushrod::geometry::{point, size};
 /// use pushrod::widget::Widget;
 /// use pushrod_widgets::base_widget::BaseWidget;
-/// use sdl2::pixels::Color;
+/// use pushrod::color::Color;
 ///
 /// let mut panel = BaseWidget::new(point(10, 10), size(200, 100));
 /// panel.set_color(Color::RGB(220, 220, 220));
@@ -68,10 +65,9 @@ impl Widget for BaseWidget {
     ///
     /// # Arguments
     ///
-    /// * `c` - The canvas, targeting the panel's texture.
-    /// * `_fc` - The font cache (unused).
-    fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
-        paint::fill(c, self.get_color());
+    /// * `p` - The painter, targeting the panel.
+    fn paint(&self, p: &mut dyn Painter) {
+        paint::fill(p, self.get_color());
     }
 }
 

@@ -35,8 +35,7 @@
 //! use pushrod::geometry::{point, size};
 //! use pushrod_widgets::button_widget::ButtonWidget;
 //! use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-//! use sdl2::pixels::Color;
-//! use sdl2::ttf::FontStyle;
+//! use pushrod::color::{Color, FontStyle};
 //!
 //! #[derive(Default)]
 //! struct AppState {
@@ -64,13 +63,14 @@
 //! ```
 
 use crate::cache::WidgetCache;
+use crate::color::Color;
 use crate::event::Event;
 use crate::font::FontCache;
 use crate::geometry::Size;
 use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
 use sdl2::event::{Event as SdlEvent, WindowEvent};
-use sdl2::pixels::Color;
+use sdl2::pixels::Color as SdlColor;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::{EventPump, Sdl};
@@ -475,7 +475,7 @@ impl<S> Engine<S> {
             .build()
             .unwrap();
 
-        canvas.set_draw_color(Color::RGBA(255, 255, 255, 255));
+        canvas.set_draw_color(SdlColor::RGBA(255, 255, 255, 255));
         canvas.clear();
         canvas.present();
 

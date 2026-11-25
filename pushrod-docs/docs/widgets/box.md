@@ -16,7 +16,7 @@ description: A filled rectangle with a border of any width and color.
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod::geometry::{point, size};
 use pushrod::widget::Widget;
-use sdl2::pixels::Color;
+use pushrod::color::Color;
 
 let mut frame = BoxWidget::new(point(20, 20), size(120, 80), Color::BLACK, 3);
 frame.set_color(Color::WHITE);

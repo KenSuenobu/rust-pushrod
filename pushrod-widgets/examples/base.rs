@@ -1,3 +1,4 @@
+use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::Event;
 use pushrod::geometry::{point, size};
@@ -6,8 +7,6 @@ use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use sdl2::pixels::Color;
-use sdl2::ttf::FontStyle;
 
 const FONT: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),

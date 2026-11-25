@@ -103,9 +103,9 @@ impl Widget for PanelWidget {
     fn core(&self) -> &WidgetCore { &self.core }
     fn core_mut(&mut self) -> &mut WidgetCore { &mut self.core }
 
-    fn paint(&self, c: &mut Canvas<Window>, _fc: &mut FontCache) {
-        paint::fill(c, self.get_color());
-        paint::border(c, self.get_size(), Color::BLACK, 1);
+    fn paint(&self, p: &mut dyn Painter) {
+        paint::fill(p, self.get_color());
+        paint::border(p, self.get_size(), Color::BLACK, 1);
     }
 }
 ```

@@ -24,17 +24,12 @@
 //! selects it again.  `Clicked` is only generated if the mouse button is released while the
 //! button is still selected.
 
+use pushrod::color::{Color, FontStyle};
 use pushrod::event::{Event, EventCtx};
-use pushrod::font::FontCache;
-use pushrod::geometry::{Point, Size};
-use pushrod::paint::{self, TextJustify, TextStyle};
+use pushrod::geometry::{Point, Rect, Size};
+use pushrod::paint::{self, Painter, TextJustify, TextStyle};
 use pushrod::widget::{Widget, WidgetCore};
 use sdl2::mouse::MouseButton;
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
-use sdl2::render::Canvas;
-use sdl2::ttf::FontStyle;
-use sdl2::video::Window;
 
 /// A push button with a text label.
 ///
@@ -75,9 +70,8 @@ impl Widget for ButtonWidget {
     ///
     /// # Arguments
     ///
-    /// * `c` - The canvas, targeting the button's texture.
-    /// * `fc` - The font cache used to render the label.
-    fn paint(&self, c: &mut Canvas<Window>, fc: &mut FontCache) {
+    /// * `p` - The painter, targeting the button.
+    fn paint(&self, p: &mut dyn Painter) {
         let size = self.get_size();
         let (background, foreground) = if self.selected {
             (Color::BLACK, Color::WHITE)
@@ -86,12 +80,11 @@ impl Widget for ButtonWidget {
         };
         let inset = self.border_width as u32 + 1;
 
-        paint::fill(c, background);
+        paint::fill(p, background);
 
         if size.w > inset * 2 {
             paint::text(
-                c,
-                fc,
+                p,
                 Rect::new(inset as i32, 0, size.w - inset * 2, size.h),
                 &self.style,
                 foreground,
@@ -99,7 +92,7 @@ impl Widget for ButtonWidget {
             );
         }
 
-        paint::border(c, size, Color::BLACK, 1);
+        paint::border(p, size, Color::BLACK, 1);
     }
 
     /// Tracks the left mouse button and emits `Clicked`.
