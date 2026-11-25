@@ -1758,7 +1758,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 7.1 (#69) | CI: build, test, clippy, fmt, doc with SDL2 | Every PR is built and tested on Linux and macOS. | `ci`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `.github/workflows/ci.yml (new)` |
 | 7.2 (#70) | Golden-image rendering tests | Render each widget and state and compare with reference PNGs. | `chassis`, `ci`, `enhancement`, `mvp`, `size/M` | N | v0.1 | M | `tests/visual.rs (new)`, `tests/golden/ (new)` |
 | 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-widgets/examples/gallery.rs (new)` |
 | 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
@@ -1770,6 +1769,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | 7.10 (#140) | Reference application: a real app built only with Pushrod | A small but complete application, maintained in the repository, that exercises the MVP together and surfaces API problems early. | `example`, `mvp`, `parallelizable`, `quality`, `size/M`, `usability` | Y | v0.1 | M | `pushrod-widgets/examples/contacts/ (new)` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
+
+**Status:** done (#69).
 
 **Problem Statement.** There is no CI.
 
