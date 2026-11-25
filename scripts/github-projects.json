@@ -1,0 +1,1491 @@
+{
+ "owner": "KenSuenobu",
+ "repo": "KenSuenobu/rust-pushrod",
+ "projects": [
+  {
+   "title": "Pushrod Core MVP",
+   "description": "Pushrod's MVP: v0.1 (dialog applications) and v0.2 (forms and resources).",
+   "readme": "Every issue in Pushrod's MVP, in work order. Group by **Phase** (v0.1, v0.2) and sort by **Order**. Roadmap: docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md.",
+   "phases": [
+    "Epics",
+    "v0.1: dialog applications",
+    "v0.2: forms (MVP complete)"
+   ],
+   "items": [
+    {
+     "number": 11,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/11",
+     "title": "pushrod: [1] Epic: Core: behavior flags, focus, timing, and performance",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 1
+    },
+    {
+     "number": 12,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/12",
+     "title": "pushrod: [2] Epic: Core dialog widgets",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 2
+    },
+    {
+     "number": 13,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/13",
+     "title": "pushrod: [3] Epic: Value and choice controls",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 3
+    },
+    {
+     "number": 14,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/14",
+     "title": "pushrod: [4] Epic: Lists, tables, progress, spin boxes, and tabs",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 4
+    },
+    {
+     "number": 15,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/15",
+     "title": "pushrod: [5] Epic: Composition, clipping, and layout managers",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 5
+    },
+    {
+     "number": 16,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/16",
+     "title": "pushrod: [6] Epic: Forms and form files (foundation for Chassis)",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 6
+    },
+    {
+     "number": 17,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/17",
+     "title": "pushrod: [7] Epic: Quality, documentation, and release",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 7
+    },
+    {
+     "number": 79,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/79",
+     "title": "pushrod: [9] Epic: Event model and callbacks",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 8
+    },
+    {
+     "number": 103,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/103",
+     "title": "pushrod: [10] Epic: Rendering backends, drawing modes, and vintage hardware",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 9
+    },
+    {
+     "number": 130,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/130",
+     "title": "pushrod: [1.21] Split the standard widgets into the pushrod-widgets crate",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 10
+    },
+    {
+     "number": 69,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/69",
+     "title": "pushrod: [7.1] CI: build, test, clippy, fmt, doc with SDL2",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 11
+    },
+    {
+     "number": 122,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/122",
+     "title": "pushrod: [7.8] Documentation site: build pushrod-docs in CI and publish it",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 12
+    },
+    {
+     "number": 93,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/93",
+     "title": "pushrod: [9.1] Event vocabulary: modern event names and structure",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 13
+    },
+    {
+     "number": 106,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/106",
+     "title": "pushrod: [10.2] Backend-neutral paint API (SDL2 backend by default)",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 14
+    },
+    {
+     "number": 19,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/19",
+     "title": "pushrod: [1.1] Widget behavior flags and visual states",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 15
+    },
+    {
+     "number": 6,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/6",
+     "title": "pushrod: [1.2] Event masks for the run loop and for widgets",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 16
+    },
+    {
+     "number": 109,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/109",
+     "title": "pushrod: [9.10] Engine events: every internal action Pushrod performs emits an event",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 17
+    },
+    {
+     "number": 124,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/124",
+     "title": "pushrod: [9.11] Event-loop style: keep parity with callbacks",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 18
+    },
+    {
+     "number": 7,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/7",
+     "title": "pushrod: [1.3] Broadcast events to all interested widgets",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 19
+    },
+    {
+     "number": 22,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/22",
+     "title": "pushrod: [1.6] Callback registry for every widget event",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 20
+    },
+    {
+     "number": 78,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/78",
+     "title": "pushrod: [1.13] Custom application events with payloads",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 21
+    },
+    {
+     "number": 111,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/111",
+     "title": "pushrod: [1.18] Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate)",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 22
+    },
+    {
+     "number": 3,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/3",
+     "title": "pushrod: [1.7] GPU text: font cache with a glyph atlas texture",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 23
+    },
+    {
+     "number": 71,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/71",
+     "title": "pushrod: [7.3] Widget gallery example",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 24
+    },
+    {
+     "number": 114,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/114",
+     "title": "pushrod: [7.6] Module boundaries and written specs with conformance tests",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 25
+    },
+    {
+     "number": 94,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/94",
+     "title": "pushrod: [9.2] Event propagation: capture, target, and bubble phases with handled/ignored",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 26
+    },
+    {
+     "number": 96,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/96",
+     "title": "pushrod: [9.4] Reusable input controllers: click, drag, scroll, hover, long-press, key",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 27
+    },
+    {
+     "number": 20,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/20",
+     "title": "pushrod: [1.4] Keyboard focus, Tab order, and Return/Escape",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 28
+    },
+    {
+     "number": 112,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/112",
+     "title": "pushrod: [1.19] Input method (IME) support: composition text and candidate window",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 29
+    },
+    {
+     "number": 104,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/104",
+     "title": "pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 30
+    },
+    {
+     "number": 76,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/76",
+     "title": "pushrod: [1.12] Keyboard mnemonics: underlined shortcut letters",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 31
+    },
+    {
+     "number": 21,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/21",
+     "title": "pushrod: [1.5] Timers and idle callbacks",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 32
+    },
+    {
+     "number": 134,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/134",
+     "title": "pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 33
+    },
+    {
+     "number": 138,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/138",
+     "title": "pushrod: [1.25] Errors: return Result instead of panicking",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 34
+    },
+    {
+     "number": 137,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/137",
+     "title": "pushrod: [1.24] Fonts: shared font handles and a built-in default font",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 35
+    },
+    {
+     "number": 136,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/136",
+     "title": "pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 36
+    },
+    {
+     "number": 36,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/36",
+     "title": "pushrod: [2.10] Custom paint widget (closure-drawn)",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 37
+    },
+    {
+     "number": 27,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/27",
+     "title": "pushrod: [2.1] Boxed label widget",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 38
+    },
+    {
+     "number": 83,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/83",
+     "title": "pushrod: [2.14] Separator line",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 39
+    },
+    {
+     "number": 41,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/41",
+     "title": "pushrod: [3.3] Group box (titled frame)",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 40
+    },
+    {
+     "number": 33,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/33",
+     "title": "pushrod: [2.7] Image widget",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 41
+    },
+    {
+     "number": 28,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/28",
+     "title": "pushrod: [2.2] Glyph button (small single-character button)",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 42
+    },
+    {
+     "number": 29,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/29",
+     "title": "pushrod: [2.3] Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 43
+    },
+    {
+     "number": 30,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/30",
+     "title": "pushrod: [2.4] Check box with indeterminate state",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 44
+    },
+    {
+     "number": 31,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/31",
+     "title": "pushrod: [2.5] Radio buttons and radio groups",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 45
+    },
+    {
+     "number": 48,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/48",
+     "title": "pushrod: [4.1] Progress bar",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 46
+    },
+    {
+     "number": 40,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/40",
+     "title": "pushrod: [3.2] Slider",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 47
+    },
+    {
+     "number": 32,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/32",
+     "title": "pushrod: [2.6] Text field: single-line entry with input masks, validation, and numeric mode",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 48
+    },
+    {
+     "number": 56,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/56",
+     "title": "pushrod: [5.1] Clip children to their parent's bounds",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 49
+    },
+    {
+     "number": 57,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/57",
+     "title": "pushrod: [5.2] Composite widgets: build widgets from parts that applications can retrieve and modify",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 50
+    },
+    {
+     "number": 116,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/116",
+     "title": "pushrod: [5.5] Layout manager foundation: Layout trait, size hints, measure and arrange",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 51
+    },
+    {
+     "number": 117,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/117",
+     "title": "pushrod: [5.6] Row and column layouts",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 52
+    },
+    {
+     "number": 118,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/118",
+     "title": "pushrod: [5.7] Form layout: aligned label and field rows",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 53
+    },
+    {
+     "number": 39,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/39",
+     "title": "pushrod: [3.1] Scroll bar",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 54
+    },
+    {
+     "number": 58,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/58",
+     "title": "pushrod: [5.3] Container: a scrollable viewport onto fixed-size content",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 55
+    },
+    {
+     "number": 70,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/70",
+     "title": "pushrod: [7.2] Golden-image rendering tests",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 56
+    },
+    {
+     "number": 115,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/115",
+     "title": "pushrod: [7.7] Performance benchmarks and budgets",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 57
+    },
+    {
+     "number": 25,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/25",
+     "title": "pushrod: [1.10] High-DPI rendering and window resize",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 58
+    },
+    {
+     "number": 139,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/139",
+     "title": "pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 59
+    },
+    {
+     "number": 60,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/60",
+     "title": "pushrod: [6.1] Widget registry and factory",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 60
+    },
+    {
+     "number": 61,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/61",
+     "title": "pushrod: [6.2] Property introspection: list, get, and set widget properties by name",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 61
+    },
+    {
+     "number": 80,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/80",
+     "title": "pushrod: [1.14] Accessibility: expose widgets to screen readers",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 62
+    },
+    {
+     "number": 62,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/62",
+     "title": "pushrod: [6.3] Form file format (binary, versioned)",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 63
+    },
+    {
+     "number": 63,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/63",
+     "title": "pushrod: [6.4] Form loader: build a form from a file with stable IDs",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 64
+    },
+    {
+     "number": 64,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/64",
+     "title": "pushrod: [6.5] Form writer: save a widget subtree to a file",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 65
+    },
+    {
+     "number": 65,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/65",
+     "title": "pushrod: [6.6] Generate ID constants from a form file",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 66
+    },
+    {
+     "number": 154,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/154",
+     "title": "pushrod: [6.11] Resource kinds: strings, images, icons, files, menus, and alerts",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 67
+    },
+    {
+     "number": 155,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/155",
+     "title": "pushrod: [6.12] Typed resource IDs: generated constants per resource kind",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 68
+    },
+    {
+     "number": 153,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/153",
+     "title": "pushrod: [6.10] Resource manager: load resource sets and get resources by ID",
+     "phase": "v0.2: forms (MVP complete)",
+     "kind": "Pushrod",
+     "order": 69
+    },
+    {
+     "number": 23,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/23",
+     "title": "pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 70
+    },
+    {
+     "number": 66,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/66",
+     "title": "pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 71
+    },
+    {
+     "number": 35,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/35",
+     "title": "pushrod: [2.9] Alert dialog",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 72
+    },
+    {
+     "number": 140,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/140",
+     "title": "pushrod: [7.10] Reference application: a real app built only with Pushrod",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 73
+    },
+    {
+     "number": 72,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/72",
+     "title": "pushrod: [7.4] Guide: writing widgets and composites",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 74
+    },
+    {
+     "number": 73,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/73",
+     "title": "pushrod: [7.5] Changelog, Cargo metadata, and crates.io release",
+     "phase": "v0.1: dialog applications",
+     "kind": "Pushrod",
+     "order": 75
+    }
+   ]
+  },
+  {
+   "title": "Chassis MVP",
+   "description": "The Chassis MVP (phases M1 to M5) and the post-MVP Pushrod work it depends on.",
+   "readme": "Builds on the Pushrod Core MVP project. Each \"Pushrod for Mx\" phase holds the post-MVP Pushrod issues that Chassis phase Mx needs (directly or indirectly); they come before it in **Order**. Roadmap: docs/ROADMAP_CHASSIS.md (Action Plan).",
+   "phases": [
+    "Epics",
+    "Pushrod for M1",
+    "M1: core without UI",
+    "Pushrod for M2",
+    "M2: shell and project",
+    "Pushrod for M3",
+    "M3: form designer",
+    "Pushrod for M4",
+    "M4: inspector / events and code",
+    "M5: build / run and release (MVP)"
+   ],
+   "items": [
+    {
+     "number": 157,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/157",
+     "title": "chassis: [1] Epic: Application shell",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 1
+    },
+    {
+     "number": 158,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/158",
+     "title": "chassis: [2] Epic: Project and resource file",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 2
+    },
+    {
+     "number": 159,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/159",
+     "title": "chassis: [3] Epic: Form designer",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 3
+    },
+    {
+     "number": 160,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/160",
+     "title": "chassis: [4] Epic: Inspector",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 4
+    },
+    {
+     "number": 161,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/161",
+     "title": "chassis: [5] Epic: Events and code",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 5
+    },
+    {
+     "number": 162,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/162",
+     "title": "chassis: [6] Epic: Build and run",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 6
+    },
+    {
+     "number": 163,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/163",
+     "title": "chassis: [7] Epic: Quality, documentation, and release",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 7
+    },
+    {
+     "number": 141,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/141",
+     "title": "pushrod: [11] Epic: Chassis: code editor (chassis-code-editor)",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 8
+    },
+    {
+     "number": 156,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/156",
+     "title": "pushrod: [6.13] Event metadata in the widget registry",
+     "phase": "Pushrod for M1",
+     "kind": "Pushrod",
+     "order": 9
+    },
+    {
+     "number": 164,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/164",
+     "title": "chassis: [2.1] Project model",
+     "phase": "M1: core without UI",
+     "kind": "Chassis",
+     "order": 10
+    },
+    {
+     "number": 165,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/165",
+     "title": "chassis: [6.1] Code generation rules",
+     "phase": "M1: core without UI",
+     "kind": "Chassis",
+     "order": 11
+    },
+    {
+     "number": 166,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/166",
+     "title": "chassis: [5.7] Event wiring generation",
+     "phase": "M1: core without UI",
+     "kind": "Chassis",
+     "order": 12
+    },
+    {
+     "number": 167,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/167",
+     "title": "chassis: [6.5] Command-line generator",
+     "phase": "M1: core without UI",
+     "kind": "Chassis",
+     "order": 13
+    },
+    {
+     "number": 97,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/97",
+     "title": "pushrod: [9.5] Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 14
+    },
+    {
+     "number": 100,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/100",
+     "title": "pushrod: [9.8] Drag and drop within the application",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 15
+    },
+    {
+     "number": 81,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/81",
+     "title": "pushrod: [1.15] Undo and redo command stack",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 16
+    },
+    {
+     "number": 59,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/59",
+     "title": "pushrod: [5.4] Autoresizing (keep margins or stretch on resize)",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 17
+    },
+    {
+     "number": 52,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/52",
+     "title": "pushrod: [4.5] List view",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 18
+    },
+    {
+     "number": 51,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/51",
+     "title": "pushrod: [4.4] Tab view",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 19
+    },
+    {
+     "number": 92,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/92",
+     "title": "pushrod: [4.9] Table view",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 20
+    },
+    {
+     "number": 90,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/90",
+     "title": "pushrod: [3.10] Expander (collapsible section)",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 21
+    },
+    {
+     "number": 37,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/37",
+     "title": "pushrod: [2.11] Menu bar and drop-down menus (drawn by Pushrod)",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 22
+    },
+    {
+     "number": 125,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/125",
+     "title": "pushrod: [2.21] Image button",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 23
+    },
+    {
+     "number": 84,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/84",
+     "title": "pushrod: [2.15] Toolbar",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 24
+    },
+    {
+     "number": 85,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/85",
+     "title": "pushrod: [2.16] Status bar",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 25
+    },
+    {
+     "number": 34,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/34",
+     "title": "pushrod: [2.8] Icon widget (picture with caption)",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 26
+    },
+    {
+     "number": 38,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/38",
+     "title": "pushrod: [2.12] File chooser dialog (drawn by Pushrod)",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 27
+    },
+    {
+     "number": 47,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/47",
+     "title": "pushrod: [3.9] Split view (panes with draggable dividers)",
+     "phase": "Pushrod for M2",
+     "kind": "Pushrod",
+     "order": 28
+    },
+    {
+     "number": 168,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/168",
+     "title": "chassis: [1.1] Chassis crate and main window",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 29
+    },
+    {
+     "number": 169,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/169",
+     "title": "chassis: [1.2] Three-pane workspace",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 30
+    },
+    {
+     "number": 170,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/170",
+     "title": "chassis: [1.4] Commands, menus, and shortcuts",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 31
+    },
+    {
+     "number": 171,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/171",
+     "title": "chassis: [1.3] Designer and Code tabs",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 32
+    },
+    {
+     "number": 172,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/172",
+     "title": "chassis: [2.2] New, open, and save",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 33
+    },
+    {
+     "number": 173,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/173",
+     "title": "chassis: [2.3] Project drawer",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 34
+    },
+    {
+     "number": 174,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/174",
+     "title": "chassis: [2.4] Manage resources and IDs",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 35
+    },
+    {
+     "number": 175,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/175",
+     "title": "chassis: [2.5] String table editor",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 36
+    },
+    {
+     "number": 176,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/176",
+     "title": "chassis: [2.6] Images and icons",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 37
+    },
+    {
+     "number": 177,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/177",
+     "title": "chassis: [2.8] Files",
+     "phase": "M2: shell and project",
+     "kind": "Chassis",
+     "order": 38
+    },
+    {
+     "number": 95,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/95",
+     "title": "pushrod: [9.3] Event filters: observe or intercept another widget's events",
+     "phase": "Pushrod for M3",
+     "kind": "Pushrod",
+     "order": 39
+    },
+    {
+     "number": 105,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/105",
+     "title": "pushrod: [10.1] Drawing modes: live or outline feedback while moving and resizing",
+     "phase": "Pushrod for M3",
+     "kind": "Pushrod",
+     "order": 40
+    },
+    {
+     "number": 68,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/68",
+     "title": "pushrod: [6.9] Design-mode hooks for Chassis",
+     "phase": "Pushrod for M3",
+     "kind": "Pushrod",
+     "order": 41
+    },
+    {
+     "number": 131,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/131",
+     "title": "pushrod: [1.22] Widget libraries: extend or replace pushrod-widgets",
+     "phase": "Pushrod for M3",
+     "kind": "Pushrod",
+     "order": 42
+    },
+    {
+     "number": 178,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/178",
+     "title": "chassis: [3.1] Design surface",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 43
+    },
+    {
+     "number": 179,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/179",
+     "title": "chassis: [3.2] Widget palette",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 44
+    },
+    {
+     "number": 180,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/180",
+     "title": "chassis: [3.4] Selection, move, and resize",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 45
+    },
+    {
+     "number": 181,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/181",
+     "title": "chassis: [3.3] Drag and drop placement",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 46
+    },
+    {
+     "number": 182,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/182",
+     "title": "chassis: [3.5] Snapping and alignment",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 47
+    },
+    {
+     "number": 183,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/183",
+     "title": "chassis: [3.7] Clipboard and undo",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 48
+    },
+    {
+     "number": 184,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/184",
+     "title": "chassis: [3.6] Containers, z-order, and tab order",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 49
+    },
+    {
+     "number": 185,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/185",
+     "title": "chassis: [3.8] Layout managers in the designer",
+     "phase": "M3: form designer",
+     "kind": "Chassis",
+     "order": 50
+    },
+    {
+     "number": 44,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/44",
+     "title": "pushrod: [3.6] Choice button: pop-up list and click-to-cycle modes",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 51
+    },
+    {
+     "number": 88,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/88",
+     "title": "pushrod: [2.19] Context menus",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 52
+    },
+    {
+     "number": 113,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/113",
+     "title": "pushrod: [1.20] Layers and invalidation: cache hints, texture memory budget, incremental pipeline",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 53
+    },
+    {
+     "number": 142,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/142",
+     "title": "pushrod: [11.1] Chassis: Code editor crate and editing core",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 54
+    },
+    {
+     "number": 143,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/143",
+     "title": "pushrod: [11.2] Chassis: Code editor view: gutter, visible-line rendering, caret",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 55
+    },
+    {
+     "number": 144,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/144",
+     "title": "pushrod: [11.3] Chassis: Code editor input: keyboard, mouse selection, clipboard, input methods",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 56
+    },
+    {
+     "number": 145,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/145",
+     "title": "pushrod: [11.4] Chassis: Code editor undo and redo",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 57
+    },
+    {
+     "number": 146,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/146",
+     "title": "pushrod: [11.5] Chassis: Code editor syntax highlighting with tree-sitter",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 58
+    },
+    {
+     "number": 149,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/149",
+     "title": "pushrod: [11.8] Chassis: Code editor API for the Chassis designer",
+     "phase": "Pushrod for M4",
+     "kind": "Pushrod",
+     "order": 59
+    },
+    {
+     "number": 186,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/186",
+     "title": "chassis: [4.1] Inspector drawer",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 60
+    },
+    {
+     "number": 187,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/187",
+     "title": "chassis: [4.2] Property grid",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 61
+    },
+    {
+     "number": 188,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/188",
+     "title": "chassis: [4.3] Typed property editors",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 62
+    },
+    {
+     "number": 189,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/189",
+     "title": "chassis: [5.4] Code view",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 63
+    },
+    {
+     "number": 190,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/190",
+     "title": "chassis: [5.3] Create and open handlers",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 64
+    },
+    {
+     "number": 191,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/191",
+     "title": "chassis: [4.4] Names and IDs",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 65
+    },
+    {
+     "number": 192,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/192",
+     "title": "chassis: [5.1] Events context menu",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 66
+    },
+    {
+     "number": 193,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/193",
+     "title": "chassis: [5.2] Inspector Events tab",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 67
+    },
+    {
+     "number": 194,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/194",
+     "title": "chassis: [5.5] Code indicator on the design surface",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 68
+    },
+    {
+     "number": 195,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/195",
+     "title": "chassis: [5.6] Keep handlers in sync",
+     "phase": "M4: inspector / events and code",
+     "kind": "Chassis",
+     "order": 69
+    },
+    {
+     "number": 196,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/196",
+     "title": "chassis: [6.2] Build and run",
+     "phase": "M5: build / run and release (MVP)",
+     "kind": "Chassis",
+     "order": 70
+    },
+    {
+     "number": 197,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/197",
+     "title": "chassis: [7.1] CI and golden screenshots",
+     "phase": "M5: build / run and release (MVP)",
+     "kind": "Chassis",
+     "order": 71
+    },
+    {
+     "number": 198,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/198",
+     "title": "chassis: [7.2] Chassis documentation",
+     "phase": "M5: build / run and release (MVP)",
+     "kind": "Chassis",
+     "order": 72
+    },
+    {
+     "number": 199,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/199",
+     "title": "chassis: [7.3] Sample project",
+     "phase": "M5: build / run and release (MVP)",
+     "kind": "Chassis",
+     "order": 73
+    }
+   ]
+  },
+  {
+   "title": "Chassis v2",
+   "description": "Chassis v2 and the additional Pushrod work it needs.",
+   "readme": "After the Chassis MVP. Pushrod prerequisites first, then the v2 issues. Roadmap: docs/ROADMAP_CHASSIS.md.",
+   "phases": [
+    "Pushrod prerequisites",
+    "Chassis v2"
+   ],
+   "items": [
+    {
+     "number": 98,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/98",
+     "title": "pushrod: [9.6] Property bindings: keep two properties in sync",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 1
+    },
+    {
+     "number": 82,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/82",
+     "title": "pushrod: [1.16] Multiple windows: separate OS windows, each with its own engine",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 2
+    },
+    {
+     "number": 67,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/67",
+     "title": "pushrod: [6.8] Bind actions by name from form files",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 3
+    },
+    {
+     "number": 107,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/107",
+     "title": "pushrod: [10.3] no_std + alloc core crate",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 4
+    },
+    {
+     "number": 108,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/108",
+     "title": "pushrod: [10.4] Experimental: Atari ST / TOS backend",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 5
+    },
+    {
+     "number": 135,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/135",
+     "title": "pushrod: [10.5] SDL3 backend (pushrod-sdl3)",
+     "phase": "Pushrod prerequisites",
+     "kind": "Pushrod",
+     "order": 6
+    },
+    {
+     "number": 200,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/200",
+     "title": "chassis: [1.5] Workspace settings",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 7
+    },
+    {
+     "number": 201,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/201",
+     "title": "chassis: [2.7] Menu editor",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 8
+    },
+    {
+     "number": 202,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/202",
+     "title": "chassis: [3.9] Form preview",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 9
+    },
+    {
+     "number": 203,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/203",
+     "title": "chassis: [4.5] Multiple selection editing",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 10
+    },
+    {
+     "number": 204,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/204",
+     "title": "chassis: [6.3] Error list",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 11
+    },
+    {
+     "number": 205,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/205",
+     "title": "chassis: [6.4] Project templates",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 12
+    },
+    {
+     "number": 206,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/206",
+     "title": "chassis: [7.4] Packaging and releases",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 13
+    },
+    {
+     "number": 216,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/216",
+     "title": "chassis: [1.6] Find in project",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 14
+    },
+    {
+     "number": 217,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/217",
+     "title": "chassis: [1.7] Multiple windows per project",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 15
+    },
+    {
+     "number": 218,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/218",
+     "title": "chassis: [2.9] Localization",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 16
+    },
+    {
+     "number": 219,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/219",
+     "title": "chassis: [2.10] Source control status",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 17
+    },
+    {
+     "number": 220,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/220",
+     "title": "chassis: [3.10] Visual form inheritance",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 18
+    },
+    {
+     "number": 221,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/221",
+     "title": "chassis: [3.11] Accessibility and usability checks",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 19
+    },
+    {
+     "number": 222,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/222",
+     "title": "chassis: [4.6] Data bindings in the inspector",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 20
+    },
+    {
+     "number": 223,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/223",
+     "title": "chassis: [5.8] Code intelligence with rust-analyzer",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 21
+    },
+    {
+     "number": 224,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/224",
+     "title": "chassis: [6.6] Build targets, including the Atari ST",
+     "phase": "Chassis v2",
+     "kind": "Chassis",
+     "order": 22
+    }
+   ]
+  },
+  {
+   "title": "Chassis Examples",
+   "description": "Example projects built with Chassis once it reaches the MVP; open for anyone to pick up.",
+   "readme": "Small, complete applications built with Chassis, each with a mockup and a CI test, labeled help wanted. Roadmap: docs/ROADMAP_CHASSIS.md, Epic 8.",
+   "phases": [
+    "Epics",
+    "Examples"
+   ],
+   "items": [
+    {
+     "number": 207,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/207",
+     "title": "chassis: [8] Epic: Example projects",
+     "phase": "Epics",
+     "kind": "Epic",
+     "order": 1
+    },
+    {
+     "number": 208,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/208",
+     "title": "chassis: [8.1] Hello, Chassis",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 2
+    },
+    {
+     "number": 209,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/209",
+     "title": "chassis: [8.2] Temperature converter",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 3
+    },
+    {
+     "number": 210,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/210",
+     "title": "chassis: [8.3] Tip calculator",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 4
+    },
+    {
+     "number": 211,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/211",
+     "title": "chassis: [8.4] Settings dialog",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 5
+    },
+    {
+     "number": 212,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/212",
+     "title": "chassis: [8.5] Image viewer",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 6
+    },
+    {
+     "number": 213,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/213",
+     "title": "chassis: [8.6] Stopwatch",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 7
+    },
+    {
+     "number": 214,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/214",
+     "title": "chassis: [8.7] Quiz",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 8
+    },
+    {
+     "number": 215,
+     "url": "https://github.com/KenSuenobu/rust-pushrod/issues/215",
+     "title": "chassis: [8.8] Dice roller",
+     "phase": "Examples",
+     "kind": "Chassis",
+     "order": 9
+    }
+   ]
+  }
+ ]
+}
