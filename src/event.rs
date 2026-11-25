@@ -88,13 +88,88 @@ use crate::widget::WidgetId;
 use sdl2::event::Event as SdlEvent;
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::mouse::MouseButton;
+use std::any::Any;
+use std::fmt;
+use std::rc::Rc;
 use std::time::Duration;
 
+/// Where a [`CustomEvent`] is delivered.
+///
+/// Whatever the target, the application's `on_custom` and `on_event` callbacks always receive the
+/// event; the target only chooses which `Widget`s see it in `handle_event`.  A `Widget` receives it
+/// only if [`EventMask::CUSTOM`] is in its mask (and in the run loop's mask).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum EventTarget {
+    /// One `Widget`.
+    Widget(WidgetId),
+    /// A `Widget` and all of its descendants, parents before children.
+    Subtree(WidgetId),
+    /// Every visible `Widget`, in drawing order.
+    Broadcast,
+    /// No `Widget`: only the application's callbacks receive it.
+    ApplicationOnly,
+}
+
 /// An application- or library-defined event, carried by [`Event::Custom`].
-#[derive(Debug, Clone, PartialEq, Eq)]
+///
+/// The payload is any `'static` value; receivers read it back with [`CustomEvent::payload`], which
+/// returns `None` for any other type.  Pushrod never looks inside a custom event, and it has no
+/// side effects on focus, mouse capture, selection, or redrawing.
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::event::{CustomEvent, EventTarget};
+/// use std::rc::Rc;
+///
+/// struct Saved(u32);
+///
+/// let event = CustomEvent {
+///     source: None,
+///     target: EventTarget::Broadcast,
+///     payload: Rc::new(Saved(3)),
+/// };
+///
+/// assert_eq!(event.payload::<Saved>().unwrap().0, 3);
+/// assert!(event.payload::<String>().is_none());
+/// ```
+#[derive(Clone)]
 pub struct CustomEvent {
-    /// The name that identifies the kind of custom event.
-    pub name: String,
+    /// The `Widget` that posted the event, or `None` if the application or another thread did.
+    pub source: Option<WidgetId>,
+    /// Which `Widget`s receive the event.
+    pub target: EventTarget,
+    /// The application's data.
+    pub payload: Rc<dyn Any>,
+}
+
+impl CustomEvent {
+    /// Reads the payload as a `T`.
+    ///
+    /// # Returns
+    ///
+    /// The payload, or `None` if it is not a `T`.
+    pub fn payload<T: Any>(&self) -> Option<&T> {
+        self.payload.downcast_ref::<T>()
+    }
+}
+
+impl fmt::Debug for CustomEvent {
+    /// Formats the source and target; the payload is opaque, so it is not shown.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CustomEvent")
+            .field("source", &self.source)
+            .field("target", &self.target)
+            .finish_non_exhaustive()
+    }
 }
 
 /// A set of event classes, used to filter events for the run loop and for each `Widget`.
@@ -251,6 +326,8 @@ pub enum EngineEventKind {
     WidgetAdded,
     /// See [`EngineEvent::EventBroadcast`].
     EventBroadcast,
+    /// See [`EngineEvent::CustomEventDropped`].
+    CustomEventDropped,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -287,6 +364,12 @@ pub enum EngineEvent {
         /// How many `Widget`s received it.
         recipients: usize,
     },
+    /// A custom event was discarded because the per-frame limit on custom events was reached,
+    /// which stops callbacks that re-post forever.
+    CustomEventDropped {
+        /// The target of the discarded event.
+        target: EventTarget,
+    },
 }
 
 impl EngineEvent {
@@ -300,6 +383,7 @@ impl EngineEvent {
             EngineEvent::EventMaskChanged { .. } => EngineEventKind::EventMaskChanged,
             EngineEvent::WidgetAdded { .. } => EngineEventKind::WidgetAdded,
             EngineEvent::EventBroadcast { .. } => EngineEventKind::EventBroadcast,
+            EngineEvent::CustomEventDropped { .. } => EngineEventKind::CustomEventDropped,
         }
     }
 }
@@ -664,6 +748,18 @@ pub enum Event {
 }
 
 impl Event {
+    /// Reads the payload of a custom event as a `T`.
+    ///
+    /// # Returns
+    ///
+    /// The payload, or `None` if this is not [`Event::Custom`] or the payload is not a `T`.
+    pub fn payload<T: Any>(&self) -> Option<&T> {
+        match self {
+            Event::Custom(custom) => custom.payload::<T>(),
+            _ => None,
+        }
+    }
+
     /// The widget a widget-addressed event is for.
     ///
     /// # Returns
@@ -787,6 +883,14 @@ mod tests {
     use super::*;
     use crate::geometry::point;
 
+    fn sample_custom() -> CustomEvent {
+        CustomEvent {
+            source: None,
+            target: EventTarget::ApplicationOnly,
+            payload: Rc::new(7_u32),
+        }
+    }
+
     #[test]
     fn kind_matches_variant() {
         assert_eq!(
@@ -794,10 +898,7 @@ mod tests {
             EventKind::PointerEntered
         );
         assert_eq!(Event::CloseRequested.kind(), EventKind::CloseRequested);
-        assert_eq!(
-            Event::Custom(CustomEvent { name: "x".into() }).kind(),
-            EventKind::Custom
-        );
+        assert_eq!(Event::Custom(sample_custom()).kind(), EventKind::Custom);
         assert_eq!(
             Event::Tick {
                 elapsed: Duration::from_millis(16)
@@ -823,10 +924,7 @@ mod tests {
         assert_eq!(moved.widget(), Some(3));
         assert_eq!(Event::CloseRequested.widget(), None);
         assert_eq!(Event::WindowFocusChanged { focused: true }.widget(), None);
-        assert_eq!(
-            Event::Custom(CustomEvent { name: "x".into() }).widget(),
-            None
-        );
+        assert_eq!(Event::Custom(sample_custom()).widget(), None);
     }
 
     #[test]
@@ -850,6 +948,7 @@ mod tests {
 #[derive(Default)]
 pub struct EventCtx {
     events: Vec<Event>,
+    source: Option<WidgetId>,
 }
 
 impl EventCtx {
@@ -862,6 +961,32 @@ impl EventCtx {
     /// * `event` - The event to queue, such as `Event::Clicked { id, button, count }`.
     pub fn emit(&mut self, event: Event) {
         self.events.push(event);
+    }
+
+    /// Posts a custom event, with the `Widget` currently handling an event as its source.
+    ///
+    /// The event is queued behind the events already waiting and delivered later, in order, never
+    /// from inside this call.  See [`CustomEvent`].
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - Which `Widget`s receive the event.
+    /// * `payload` - The application's data; receivers read it with [`Event::payload`].
+    pub fn post<T: Any>(&mut self, target: EventTarget, payload: T) {
+        self.events.push(Event::Custom(CustomEvent {
+            source: self.source,
+            target,
+            payload: Rc::new(payload),
+        }));
+    }
+
+    /// Records which `Widget` is handling an event, so [`EventCtx::post`] can name it as the source.
+    ///
+    /// # Arguments
+    ///
+    /// * `source` - The `Widget` about to receive an event.
+    pub(crate) fn set_source(&mut self, source: Option<WidgetId>) {
+        self.source = source;
     }
 
     /// Consumes the context and returns the queued events.

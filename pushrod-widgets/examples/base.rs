@@ -1,6 +1,6 @@
 use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
-use pushrod::event::{EngineEvent, EngineEventKind, Event, EventMask, MaskScope};
+use pushrod::event::{EngineEvent, EngineEventKind, Event, EventMask, EventTarget, MaskScope};
 use pushrod::geometry::{point, size};
 use pushrod::widget::{Behavior, Widget};
 use pushrod_widgets::base_widget::BaseWidget;
@@ -12,6 +12,11 @@ const FONT: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../assets/OpenSans-Regular.ttf"
 );
+
+/// A custom event posted by the background thread below: how far along the "download" is.
+struct DownloadProgress {
+    percent: u8,
+}
 
 /// Application state, passed mutably to every callback.
 #[derive(Default)]
@@ -149,6 +154,35 @@ pub fn main() {
             2,
         ),
     );
+
+    // Custom events: a background thread posts progress, and the UI thread shows it.
+    let mut task_status = TextWidget::new(
+        point(160, 241),
+        size(560, 18),
+        String::from(FONT),
+        FontStyle::NORMAL,
+        14,
+        Color::WHITE,
+        TextJustify::Left,
+        String::from("Background task: starting..."),
+    );
+    task_status.set_color(Color::RGBA(127, 127, 127, 255));
+    let task_status_id = engine.add_child_widget(panel_id, task_status);
+
+    engine.on_custom::<DownloadProgress, _>(move |_state, ui, _source, progress| {
+        ui.get_mut::<TextWidget>(task_status_id)
+            .unwrap()
+            .set_text(format!("Background task: {}% done", progress.percent));
+    });
+
+    let sender = engine.sender();
+
+    std::thread::spawn(move || {
+        for percent in (0..=100).step_by(10) {
+            sender.post(EventTarget::ApplicationOnly, DownloadProgress { percent });
+            std::thread::sleep(std::time::Duration::from_millis(500));
+        }
+    });
 
     // Behavior flags are stored on the widget; Return activation is added with focus support.
     engine
