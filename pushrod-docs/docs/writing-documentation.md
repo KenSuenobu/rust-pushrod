@@ -31,7 +31,7 @@ Two workflows keep the site honest. Both run on every pull request:
 | **Widget pages** (`ci.yml`) | A `pushrod-widgets/src/<name>_widget.rs` with no `docs/widgets/<name>.md` (the missing pages are listed) | `python3 scripts/check_widget_pages.py` |
 | **Checked samples** (`ci.yml`) | A `rust checked` code sample that no longer compiles | `cargo test -p pushrod-doc-samples` |
 
-On every run, `docs.yml` builds the site and the rustdoc API reference (served at `/rust-pushrod/api/`, the **API reference** link in the navbar) into the `pushrod-docs` Docker image (an nginx image serving the site at `/rust-pushrod/`) and pushes it as `<DOCKER_REPOSITORY>/pushrod-docs` tagged with the commit SHA; a change that lands on `main` also moves the `latest` tag. The repository secrets `DOCKER_REPOSITORY`, `DOCKER_USERNAME`, and `DOCKER_PASSWORD` must be set.
+When a change lands on `main`, `docs.yml` builds the site and the rustdoc API reference (served at `/rust-pushrod/api/`, the **API reference** link in the navbar) into the `pushrod-docs` Docker image (an nginx image serving the site at `/rust-pushrod/`) and pushes it as `<DOCKER_REPOSITORY>/pushrod-docs` with the tags `latest` and the commit SHA. Pull requests build the site but do not publish. The repository secrets `DOCKER_REPOSITORY`, `DOCKER_USERNAME`, and `DOCKER_PASSWORD` must be set.
 
 ## Where pages go
 
