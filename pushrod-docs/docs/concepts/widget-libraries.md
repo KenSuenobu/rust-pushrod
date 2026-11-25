@@ -11,6 +11,7 @@ Pushrod separates the core from the widgets:
 |---|---|
 | `pushrod` | The core: engine, widget tree and IDs, events and callbacks, the `paint` helpers, and texture and font caches. The only widget it contains is the window's `RootWidget`. |
 | `pushrod-widgets` | The standard widget set: simple, flat, and predictable, following the [design philosophy](../design-philosophy.md). |
+| `pushrod-extra-widgets` | Larger and compound widgets (pickers, tree view, property grid, panels, dialogs), built only on the public APIs above. Planned: see [Extra widgets](../extra-widgets). |
 
 `pushrod-widgets` uses only the core's public API. Anything it does, another crate can do too, so the look of an application isn't fixed by the core.
 

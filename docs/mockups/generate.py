@@ -609,7 +609,7 @@ def expander():
     return [("Collapsed", a, None), ("Expanded", b, "Toggled(true)")]
 
 
-@sb("3.11")
+# Moved to pushrod-extra-widgets (generate_extra_widgets.py)
 def date_picker():
     c = C(280, 250); x = c.labeled(12, 14, "Due:", 40); c.field(x, 12, 120, "11/24/2026"); c.glyph(x + 122, 12, 22, "down", pressed=True)
     c.rect(52, 40, 214, 196, fill=WHITE); c.tri(62, 50, 9, "left"); c.ctext(52, 42, 214, 22, "November 2026"); c.tri(246, 50, 9, "right")
@@ -811,7 +811,7 @@ def _browser(c, x, y, path, ncols_visible=3, colw=140, rows=5, offset=0):
         if n < ncols_visible - 1: c.line(cx + colw - 1, y, cx + colw - 1, y + rows * 20 + 4, MID)
     return total_w
 
-@sb("3.7", 1)
+# Moved to pushrod-extra-widgets (generate_extra_widgets.py)
 def browser_steps():
     out = []
     for lab, path, note in [("1. Root column", [], None),
@@ -820,7 +820,7 @@ def browser_steps():
         c = C(450, 130); _browser(c, 14, 14, path); out.append((lab, c, note))
     return out
 
-@sb("3.7", 2)
+# Moved to pushrod-extra-widgets (generate_extra_widgets.py)
 def browser_scroll():
     c = C(450, 150); _browser(c, 14, 14, ["Users", "user", "Projects", "pushrod"], offset=2)
     c.scrollbar(14, 122, 422, False, 1.0, 0.6)
@@ -1067,7 +1067,7 @@ def _dial(c, cx, cy, r, frac, disabled=False, focused=False, value=None, notches
     if focused: c.dotted(cx - r - 10, cy - r - 10, 2 * r + 21, 2 * r + 21)
     if disabled: c.dither(cx - r - 8, cy - r - 8, 2 * r + 17, 2 * r + 17, PANEL)
 
-@sb("3.12")
+# Moved to pushrod-extra-widgets (generate_extra_widgets.py)
 def dial():
     out = []
     for lab, f, kw, ptr, note in [("Idle", 0.3, {}, None, None), ("Dragging up", 0.65, {}, (120, 30), "ValueChanged (continuous)"),
