@@ -27,7 +27,7 @@ use crate::paint::{self, CachePolicy, Painter, TextStyle};
 use ::sdl2::image::LoadTexture;
 use ::sdl2::pixels::Color as SdlColor;
 use ::sdl2::rect::{Point as SdlPoint, Rect as SdlRect};
-use ::sdl2::render::Canvas;
+use ::sdl2::render::{BlendMode, Canvas};
 use ::sdl2::ttf::FontStyle as SdlFontStyle;
 use ::sdl2::video::Window;
 
@@ -252,6 +252,31 @@ impl Painter for Sdl2Painter<'_> {
 
         self.canvas.set_draw_color(to_sdl_color(first));
         self.canvas.draw_points(points.as_slice()).unwrap();
+    }
+
+    /// Blends a color over every other pixel of a rectangle, leaving the rest untouched.
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle.
+    /// * `color` - The color to blend; its alpha sets the strength.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `SDL2` fails to draw.
+    fn dither_overlay(&mut self, bounds: Rect, color: Color) {
+        let points: Vec<SdlPoint> = (0..bounds.h as i32)
+            .flat_map(|y| {
+                (0..bounds.w as i32)
+                    .filter(move |x| (x + y) % 2 == 0)
+                    .map(move |x| SdlPoint::new(bounds.x + x, bounds.y + y))
+            })
+            .collect();
+
+        self.canvas.set_blend_mode(BlendMode::Blend);
+        self.canvas.set_draw_color(to_sdl_color(color));
+        self.canvas.draw_points(points.as_slice()).unwrap();
+        self.canvas.set_blend_mode(BlendMode::None);
     }
 
     /// Limits later drawing to a rectangle.

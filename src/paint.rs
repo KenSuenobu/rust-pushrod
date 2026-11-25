@@ -35,6 +35,7 @@
 
 use crate::color::{Color, FontStyle};
 use crate::geometry::{Point, Rect, Size};
+use crate::widget::VisualState;
 
 /// Horizontal alignment of text within its bounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -197,6 +198,16 @@ pub trait Painter {
     /// * `second` - The other color.
     fn dither(&mut self, bounds: Rect, first: Color, second: Color);
 
+    /// Draws a color over every other pixel of a rectangle (the pixels a [`dither`](Painter::dither)
+    /// would draw in `first`), blending with what is already there and leaving the other pixels
+    /// untouched.  The pixel at the rectangle's upper left-hand corner is drawn.
+    ///
+    /// # Arguments
+    ///
+    /// * `bounds` - The rectangle to draw over.
+    /// * `color` - The color to blend; its alpha sets the strength.
+    fn dither_overlay(&mut self, bounds: Rect, color: Color);
+
     /// Limits later drawing to a rectangle, or removes the limit.
     ///
     /// # Arguments
@@ -238,6 +249,51 @@ pub fn border(p: &mut dyn Painter, size: Size, color: Color, width: u8) {
             Rect::new(i as i32, i as i32, size.w - i * 2, size.h - i * 2),
             color,
         );
+    }
+}
+
+/// Draws the generic look of a `Widget`'s visual state on top of what its `paint` drew.
+///
+/// Call it after `paint` (the `WidgetCache` does this for every `Widget`):
+///
+/// - [`VisualState::DISABLED`]: a 50% white dither washes out the `Widget`.
+/// - [`VisualState::FOCUSED`]: a dotted outline, inset one pixel.
+/// - [`VisualState::INDETERMINATE`]: a dotted horizontal bar through the middle.
+///
+/// The other states (`PRESSED`, `CHECKED`, `HOVERED`, `DRAG_OVER`) are drawn by the `Widget`, since
+/// their look depends on what the `Widget` is.
+///
+/// # Arguments
+///
+/// * `p` - The painter, targeting the `Widget`.
+/// * `size` - The size of the surface (the `Widget`'s size).
+/// * `state` - The `Widget`'s visual state.
+pub fn state_overlay(p: &mut dyn Painter, size: Size, state: VisualState) {
+    if size.w == 0 || size.h == 0 {
+        return;
+    }
+
+    if state.contains(VisualState::INDETERMINATE) && size.h >= 3 {
+        let y = (size.h / 2) as i32;
+
+        p.dither_overlay(
+            Rect::new(1, y, size.w.saturating_sub(2).max(1), 1),
+            Color::BLACK,
+        );
+    }
+
+    if state.contains(VisualState::FOCUSED) && size.w > 2 && size.h > 2 {
+        let outline = Color::BLACK;
+        let (w, h) = (size.w - 2, size.h - 2);
+
+        p.dither_overlay(Rect::new(1, 1, w, 1), outline);
+        p.dither_overlay(Rect::new(1, h as i32, w, 1), outline);
+        p.dither_overlay(Rect::new(1, 1, 1, h), outline);
+        p.dither_overlay(Rect::new(w as i32, 1, 1, h), outline);
+    }
+
+    if state.contains(VisualState::DISABLED) {
+        p.dither_overlay(Rect::new(0, 0, size.w, size.h), Color::WHITE);
     }
 }
 
@@ -310,6 +366,66 @@ mod tests {
             Color::BLACK,
             justification,
         )
+    }
+
+    #[test]
+    fn state_overlay_draws_nothing_for_the_normal_state() {
+        let mut p = RecordingPainter::default();
+        state_overlay(&mut p, Size::new(40, 20), VisualState::empty());
+        state_overlay(
+            &mut p,
+            Size::new(40, 20),
+            VisualState::CHECKED | VisualState::HOVERED,
+        );
+        assert!(p.calls.is_empty());
+    }
+
+    #[test]
+    fn state_overlay_dims_disabled_widgets_last() {
+        let mut p = RecordingPainter::default();
+        state_overlay(
+            &mut p,
+            Size::new(40, 20),
+            VisualState::DISABLED | VisualState::FOCUSED,
+        );
+
+        assert_eq!(
+            p.calls.last(),
+            Some(&PaintCall::DitherOverlay(
+                Rect::new(0, 0, 40, 20),
+                Color::WHITE
+            ))
+        );
+        assert_eq!(p.calls.len(), 5, "four focus edges, then the dim");
+    }
+
+    #[test]
+    fn state_overlay_draws_a_focus_outline_and_an_indeterminate_bar() {
+        let mut p = RecordingPainter::default();
+        state_overlay(&mut p, Size::new(40, 20), VisualState::FOCUSED);
+        assert_eq!(p.calls.len(), 4);
+
+        let mut p = RecordingPainter::default();
+        state_overlay(&mut p, Size::new(40, 20), VisualState::INDETERMINATE);
+        assert_eq!(
+            p.calls,
+            vec![PaintCall::DitherOverlay(
+                Rect::new(1, 10, 38, 1),
+                Color::BLACK
+            )]
+        );
+    }
+
+    #[test]
+    fn state_overlay_ignores_empty_and_tiny_surfaces() {
+        let mut p = RecordingPainter::default();
+        state_overlay(&mut p, Size::new(0, 10), VisualState::DISABLED);
+        state_overlay(
+            &mut p,
+            Size::new(2, 2),
+            VisualState::FOCUSED | VisualState::INDETERMINATE,
+        );
+        assert!(p.calls.is_empty());
     }
 
     #[test]
