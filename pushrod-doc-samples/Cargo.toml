@@ -1,7 +1,6 @@
 [package]
 name = "pushrod-doc-samples"
 version = "0.0.1"
-authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
 description = "Compiles the documentation samples marked `rust checked` so they cannot go stale"
 edition.workspace = true
 rust-version.workspace = true
