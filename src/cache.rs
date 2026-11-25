@@ -487,6 +487,53 @@ impl WidgetCache {
         ctx.into_events()
     }
 
+    /// Broadcasts an event to every `Widget` that wants it, in drawing order.
+    ///
+    /// A `Widget` receives the event when it is visible (neither it nor an ancestor is hidden),
+    /// enabled, and both the run loop's mask and its own mask include the event's class.  Events
+    /// that are never filtered (see [`EventKind::mask_class`](crate::event::EventKind::mask_class)) reach every visible, enabled
+    /// `Widget`.  Delivery order is deterministic: parents before children, siblings in the order
+    /// they were added.  Events the `Widget`s generate in response are returned, never
+    /// broadcast again.
+    ///
+    /// Keyboard events are not broadcast; they belong to the focused `Widget`.  Queues
+    /// [`EngineEvent::EventBroadcast`] describing the delivery.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event to broadcast.
+    ///
+    /// # Returns
+    ///
+    /// The events the `Widget`s generated while handling it, in the order emitted.
+    pub fn broadcast(&mut self, event: &Event) -> Vec<Event> {
+        let mut ctx = EventCtx::default();
+        let class = event.kind().mask_class();
+        let loop_mask = self.loop_mask;
+        let mut recipients = 0;
+
+        if class.is_none_or(|class| loop_mask.intersects(class)) {
+            for id in self.draw_order() {
+                let widget = &mut self.cache[id as usize];
+
+                if widget.is_enabled()
+                    && class.is_none_or(|class| widget.event_mask().intersects(class))
+                {
+                    widget.handle_event(event, &mut ctx);
+                    recipients += 1;
+                }
+            }
+        }
+
+        self.pending_events
+            .push(Event::Engine(EngineEvent::EventBroadcast {
+                kind: event.kind(),
+                recipients,
+            }));
+
+        ctx.into_events()
+    }
+
     /// Sets the run loop's event mask, which `Widget`s must also pass.  The `Engine` calls this
     /// whenever its own mask changes.
     ///
@@ -753,5 +800,158 @@ impl Default for WidgetCache {
     /// A new, empty `WidgetCache`.
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod broadcast_tests {
+    use super::*;
+    use crate::event::EngineEvent;
+    use crate::geometry::{Size, size};
+    use crate::root_widget::RootWidget;
+    use crate::widget::WidgetCore;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    /// A `Widget` that records its ID whenever it receives an event.
+    struct Recorder {
+        core: WidgetCore,
+        log: Rc<RefCell<Vec<WidgetId>>>,
+    }
+
+    impl Widget for Recorder {
+        /// Returns the shared state.
+        ///
+        /// # Returns
+        ///
+        /// The `WidgetCore`.
+        fn core(&self) -> &WidgetCore {
+            &self.core
+        }
+
+        /// Returns the shared state for modification.
+        ///
+        /// # Returns
+        ///
+        /// The `WidgetCore`.
+        fn core_mut(&mut self) -> &mut WidgetCore {
+            &mut self.core
+        }
+
+        /// Draws nothing.
+        ///
+        /// # Arguments
+        ///
+        /// * `_p` - The painter.
+        fn paint(&self, _p: &mut dyn crate::paint::Painter) {}
+
+        /// Records the widget's ID.
+        ///
+        /// # Arguments
+        ///
+        /// * `_event` - The event.
+        /// * `_ctx` - The context.
+        fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) {
+            self.log.borrow_mut().push(self.get_id());
+        }
+    }
+
+    /// Creates a recording `Widget` with a mask.
+    fn recorder(log: &Rc<RefCell<Vec<WidgetId>>>, mask: EventMask) -> Box<Recorder> {
+        let mut core = WidgetCore::new(point(0, 0), size(10, 10));
+
+        core.set_event_mask(mask);
+
+        Box::new(Recorder {
+            core,
+            log: log.clone(),
+        })
+    }
+
+    /// Creates a cache holding a root `Widget`, with every class enabled in the run loop.
+    fn cache() -> WidgetCache {
+        let mut cache = WidgetCache::new();
+
+        cache.add(Box::new(RootWidget::new(Size::new(100, 100))));
+        cache.set_loop_mask(EventMask::ALL);
+        cache
+    }
+
+    fn focus() -> Event {
+        Event::WindowFocusChanged { focused: true }
+    }
+
+    #[test]
+    fn delivery_is_in_draw_order_parents_before_children() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut cache = cache();
+        let a = cache.add(recorder(&log, EventMask::WINDOW));
+        let b = cache.add(recorder(&log, EventMask::WINDOW));
+        let a_child = cache.add_child(a, recorder(&log, EventMask::WINDOW));
+
+        cache.broadcast(&focus());
+
+        assert_eq!(*log.borrow(), vec![a, a_child, b]);
+    }
+
+    #[test]
+    fn only_widgets_with_the_class_in_their_mask_receive_it() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut cache = cache();
+        let wants = cache.add(recorder(&log, EventMask::WINDOW));
+
+        cache.add(recorder(&log, EventMask::POINTER_BUTTONS));
+        cache.add(recorder(&log, EventMask::NONE));
+        cache.broadcast(&Event::WindowResized { size: size(5, 5) });
+
+        assert_eq!(*log.borrow(), vec![wants]);
+    }
+
+    #[test]
+    fn hidden_and_disabled_widgets_and_hidden_subtrees_are_skipped() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut cache = cache();
+        let hidden = cache.add(recorder(&log, EventMask::WINDOW));
+        let under_hidden = cache.add_child(hidden, recorder(&log, EventMask::WINDOW));
+        let disabled = cache.add(recorder(&log, EventMask::WINDOW));
+        let ok = cache.add(recorder(&log, EventMask::WINDOW));
+
+        cache.get_mut(hidden).unwrap().set_hidden(true);
+        cache.get_mut(disabled).unwrap().set_enabled(false);
+        cache.broadcast(&focus());
+
+        assert_eq!(*log.borrow(), vec![ok]);
+        assert_ne!(under_hidden, ok);
+    }
+
+    #[test]
+    fn the_run_loop_mask_can_silence_a_class() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut cache = cache();
+
+        cache.add(recorder(&log, EventMask::WINDOW));
+        cache.set_loop_mask(EventMask::ALL & !EventMask::WINDOW);
+        cache.broadcast(&focus());
+
+        assert!(log.borrow().is_empty());
+    }
+
+    #[test]
+    fn a_broadcast_queues_an_engine_event_with_the_recipient_count() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut cache = cache();
+
+        cache.add(recorder(&log, EventMask::WINDOW));
+        cache.add(recorder(&log, EventMask::WINDOW));
+        cache.take_pending_events();
+        cache.broadcast(&focus());
+
+        match cache.take_pending_events().as_slice() {
+            [Event::Engine(EngineEvent::EventBroadcast { kind, recipients })] => {
+                assert_eq!(*kind, crate::event::EventKind::WindowFocusChanged);
+                assert_eq!(*recipients, 2);
+            }
+            other => panic!("unexpected pending events: {other:?}"),
+        }
     }
 }
