@@ -46,6 +46,7 @@
 pub mod backend;
 pub mod cache;
 pub mod color;
+pub mod controllers;
 pub mod engine;
 pub mod event;
 pub mod font;

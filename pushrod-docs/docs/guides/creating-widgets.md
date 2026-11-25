@@ -145,6 +145,10 @@ Pushrod's own widgets are built the same way: a box is `fill` + `border`, a butt
 
 `handle_event` receives each event routed to the widget (see [Handling events](./handling-events.md)). Change the widget's state, call `set_invalidated(true)` if its look changed, and queue events for the application with `ctx.emit(...)`. Mouse events arrive as `Event::PointerPressed`, `Event::PointerReleased`, and `Event::PointerMoved`, plus `Event::PointerEntered` and `Event::PointerExited` when the pointer crosses the widget's edge. `handle_event` returns a [`Propagation`](../events/event-propagation.md): `Stop` consumes an input event, `Continue` lets parents see it. See the [Event reference](../events/event-reference.md).
 
+### Using input controllers
+
+Instead of tracking presses, drags, and timing yourself, attach a controller with `core.add_controller(ClickController::new())` and implement `on_controller_event`; the default `handle_event` feeds the controllers. See [Reusable input controllers](../events/reusable-input-controllers.md).
+
 ## Using the widget
 
 ```rust

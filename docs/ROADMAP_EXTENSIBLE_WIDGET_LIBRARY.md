@@ -2124,6 +2124,8 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 ### 9.4 (#96): Reusable input controllers: click, drag, scroll, hover, long-press, key
 
+**Status:** done (#96). `DragController` is ready for the slider and scroll bar, which adopt it when they are built.
+
 **Problem Statement.** Buttons, check boxes, sliders, scroll bars, and list rows all re-implement 'press, track, release inside', dragging thresholds, double-click counting, and long-press. Duplicated input logic is the most common source of inconsistent behavior.
 
 **Solution / Scope.** Controllers own an input pattern and report high-level results to the widget: `ClickController` (press/release inside, count, capture while pressed), `DragController` (threshold, start/update/end with offsets), `ScrollController`, `HoverController` (enter/exit), `LongPressController`, `KeyController`. A widget holds controllers in a `Controllers` list in its core; the default `handle_event` feeds them; widgets implement small hooks (`on_controller_event`). `ButtonWidget` is ported to `ClickController` as the reference.

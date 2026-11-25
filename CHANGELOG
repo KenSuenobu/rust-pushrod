@@ -20,3 +20,4 @@
 [#3] GPU text: glyph atlas, fonts load once, WidgetCache owns FontCache [kenji]
 [#94] Event propagation: capture, target, bubble phases, Propagation::Stop [kenji]
 [#71] Widget gallery example with --screenshot, used for the README [kenji]
+[#96] Input controllers: click, drag, scroll, hover, long-press, key [kenji]

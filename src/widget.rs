@@ -45,6 +45,7 @@
 //! update elsewhere in the library.
 
 use crate::color::Color;
+use crate::controllers::{Controller, ControllerEvent, Controllers};
 use crate::event::{Event, EventCtx, EventMask, Propagation};
 use crate::geometry::{Point, Size};
 use crate::paint::Painter;
@@ -163,6 +164,7 @@ pub struct WidgetCore {
     state: VisualState,
     event_mask: EventMask,
     invalidated: bool,
+    controllers: Controllers,
     /// The GPU texture the `Widget` paints into, created and resized by the `WidgetCache`.
     pub(crate) texture: TextureStore,
 }
@@ -179,6 +181,19 @@ impl WidgetCore {
     /// * `mask` - The classes of events the `Widget` wants.
     pub fn set_event_mask(&mut self, mask: EventMask) {
         self.event_mask = mask;
+    }
+
+    /// Adds an input controller, and adds the event classes it needs to the event mask.
+    ///
+    /// The default [`Widget::handle_event`] feeds every event to the controllers.  Call
+    /// [`WidgetCore::set_event_mask`] before this, not after, or the added classes are replaced.
+    ///
+    /// # Arguments
+    ///
+    /// * `controller` - The controller, such as [`ClickController`](crate::controllers::ClickController).
+    pub fn add_controller(&mut self, controller: impl Controller + 'static) {
+        self.event_mask = self.event_mask | controller.event_mask();
+        self.controllers.push(Box::new(controller));
     }
 
     /// Creates the shared state for a new `Widget`.
@@ -206,6 +221,7 @@ impl WidgetCore {
             state: VisualState::empty(),
             event_mask: EventMask::NONE,
             invalidated: true,
+            controllers: Controllers::default(),
             texture: TextureStore::default(),
         }
     }
@@ -255,7 +271,8 @@ pub trait Widget: Any {
     /// captured the mouse), and `PointerEntered` and `PointerExited` events when the pointer enters or leaves it.  Events
     /// the `Widget` generates in response, such as `Clicked`, are queued with
     /// [`EventCtx::emit`](crate::event::EventCtx::emit) and delivered to the application after event
-    /// processing completes.  The default implementation ignores every event.
+    /// processing completes.  The default implementation feeds the event to the `Widget`'s controllers
+    /// (see [`Widget::feed_controllers`]) and otherwise ignores it.
     ///
     /// # Arguments
     ///
@@ -268,7 +285,55 @@ pub trait Widget: Any {
     ///
     /// [`Propagation::Stop`] to end delivery of an input event, or [`Propagation::Continue`] (the
     /// default) to let the next `Widget` in the capture, target, bubble path see it.
-    fn handle_event(&mut self, _event: &Event, _ctx: &mut EventCtx) -> Propagation {
+    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
+        self.feed_controllers(event, ctx)
+    }
+
+    /// Feeds an event to the `Widget`'s controllers and calls
+    /// [`Widget::on_controller_event`] for each result, in order.
+    ///
+    /// The default [`Widget::handle_event`] is this call.  A `Widget` that overrides `handle_event`
+    /// calls it to keep its controllers working.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event sent to this `Widget`.
+    /// * `ctx` - The context passed on to `on_controller_event`.
+    ///
+    /// # Returns
+    ///
+    /// [`Propagation::Stop`] if any `on_controller_event` call returned it, otherwise
+    /// [`Propagation::Continue`].
+    fn feed_controllers(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
+        let id = self.get_id();
+        let results = self.core_mut().controllers.feed(id, event);
+        let mut propagation = Propagation::Continue;
+
+        for result in &results {
+            if self.on_controller_event(result, ctx) == Propagation::Stop {
+                propagation = Propagation::Stop;
+            }
+        }
+
+        propagation
+    }
+
+    /// Receives a high-level result from one of the `Widget`'s controllers.
+    ///
+    /// # Arguments
+    ///
+    /// * `_event` - What the controller reported, such as `ControllerEvent::Clicked`.
+    /// * `_ctx` - The context used to queue events the `Widget` generates.
+    ///
+    /// # Returns
+    ///
+    /// [`Propagation::Stop`] to end delivery of the raw event that produced it; the default
+    /// ignores the result and returns [`Propagation::Continue`].
+    fn on_controller_event(
+        &mut self,
+        _event: &ControllerEvent,
+        _ctx: &mut EventCtx,
+    ) -> Propagation {
         Propagation::Continue
     }
 
