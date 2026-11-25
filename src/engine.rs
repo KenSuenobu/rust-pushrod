@@ -65,18 +65,21 @@
 use crate::cache::WidgetCache;
 use crate::color::Color;
 use crate::event::{
-    EngineEvent, EngineEventKind, Event, EventMask, MaskScope, engine_filter_accepts,
+    EngineEvent, EngineEventKind, Event, EventKind, EventMask, MaskScope, engine_filter_accepts,
 };
 use crate::font::FontCache;
-use crate::geometry::{Size, size};
+use crate::geometry::{Point, Size, size};
 use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
 use sdl2::event::{Event as SdlEvent, EventType, WindowEvent};
+use sdl2::keyboard::{Keycode, Mod};
 use sdl2::pixels::Color as SdlColor;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::{EventPump, Sdl};
+use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
+use std::rc::Rc;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -201,11 +204,17 @@ fn sync_sdl_events(pump: &mut EventPump, applied: &mut EventMask, wanted: EventM
     *applied = wanted;
 }
 
-/// A callback that runs when a particular `Widget` is clicked.
+/// A handle identifying one registered callback, returned by every `on_*` registration method.
 ///
-/// It receives the application state and a [`Ui`] handle for reaching the `Widget`s.  Register one
-/// with [`Engine::on_click`].
-pub type ClickCallback<S> = Box<dyn FnMut(&mut S, &mut Ui)>;
+/// IDs are unique within an [`Engine`] and are never reused.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct CallbackId(pub u64);
+
+/// A callback stored in the registry; typed `on_*` methods wrap their closure into this form.
+type RegistryCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &Event)>;
+
+/// The registry: callbacks per `(widget, event kind)`, in registration order.
+type Registry<S> = HashMap<(WidgetId, EventKind), Vec<(CallbackId, RegistryCallback<S>)>>;
 
 /// A callback that receives every event the `Widget`s generate.
 ///
@@ -310,7 +319,8 @@ pub struct Engine<S = ()> {
     widget_cache: WidgetCache,
     event_mask: EventMask,
     font_cache: FontCache,
-    click_callbacks: HashMap<WidgetId, Vec<ClickCallback<S>>>,
+    registry: Registry<S>,
+    next_callback_id: u64,
     event_callbacks: Vec<EventCallback<S>>,
     engine_callbacks: Vec<(Option<Vec<EngineEventKind>>, EngineEventCallback<S>)>,
 }
@@ -340,7 +350,8 @@ impl<S> Engine<S> {
             widget_cache,
             event_mask: EventMask::ALL,
             font_cache: FontCache::default(),
-            click_callbacks: HashMap::new(),
+            registry: HashMap::new(),
+            next_callback_id: 0,
             event_callbacks: Vec::new(),
             engine_callbacks: Vec::new(),
         }
@@ -491,16 +502,42 @@ impl<S> Engine<S> {
         &mut self.widget_cache
     }
 
+    /// Stores a callback in the registry under `(id, kind)`.
+    ///
+    /// # Returns
+    ///
+    /// The new callback's [`CallbackId`].
+    fn register(
+        &mut self,
+        id: WidgetId,
+        kind: EventKind,
+        callback: RegistryCallback<S>,
+    ) -> CallbackId {
+        let callback_id = CallbackId(self.next_callback_id);
+        self.next_callback_id += 1;
+        self.registry
+            .entry((id, kind))
+            .or_default()
+            .push((callback_id, callback));
+        callback_id
+    }
+
     /// Registers a callback that runs when a `Widget` is clicked.
     ///
     /// Several callbacks may be registered for the same `Widget`; they run in the order registered,
     /// before any [`on_event`](Engine::on_event) callbacks.  Callbacks run with
-    /// [`Engine::run`], [`Engine::dispatch`] and [`Engine::next_event_with`].
+    /// [`Engine::run`], [`Engine::dispatch`] and [`Engine::next_event_with`].  Every `on_*`
+    /// method below works the same way: it fires only for its `Widget` and event kind, in
+    /// registration order, after the `Widget` has updated itself.
     ///
     /// # Arguments
     ///
     /// * `id` - The ID of the `Widget`.
     /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
     ///
     /// # Examples
     ///
@@ -512,14 +549,301 @@ impl<S> Engine<S> {
     ///
     /// engine.on_click(0, |clicks, _ui| *clicks += 1);
     /// ```
-    pub fn on_click<F>(&mut self, id: WidgetId, callback: F)
+    pub fn on_click<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
         F: FnMut(&mut S, &mut Ui) + 'static,
     {
-        self.click_callbacks
-            .entry(id)
-            .or_default()
-            .push(Box::new(callback));
+        self.register(
+            id,
+            EventKind::Clicked,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when a mouse button goes down on the `Widget`.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_press<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::PointerPressed,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when a mouse button goes up, inside or outside the `Widget` (it is sent to the `Widget` that captured the press).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_release<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::PointerReleased,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when a `Widget` is activated.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_activate<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::Activated,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when a `Widget`'s value changes.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_value_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::ValueChanged,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when a `Widget`'s selection changes.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_selection_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::SelectionChanged,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when a `Widget`'s text changes.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_text_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::TextChanged,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when editing in a `Widget` finishes.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_editing_finished<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::EditingFinished,
+            Box::new(move |s, ui, _| callback(s, ui)),
+        )
+    }
+
+    /// Registers a callback that runs when a `Widget` is toggled.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state, a [`Ui`] handle, and the new `checked` state.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_toggle<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::Toggled,
+            Box::new(move |s, ui, event| {
+                if let Event::Toggled { checked, .. } = event {
+                    callback(s, ui, *checked);
+                }
+            }),
+        )
+    }
+
+    /// Registers a callback that runs when a scrolling `Widget`'s visible area moves.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state, a [`Ui`] handle, and the new scroll offset.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_viewport_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui, Point) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::ViewportChanged,
+            Box::new(move |s, ui, event| {
+                if let Event::ViewportChanged { offset, .. } = event {
+                    callback(s, ui, *offset);
+                }
+            }),
+        )
+    }
+
+    /// Registers a callback that runs when a key goes down (or repeats) while the `Widget` has the keyboard.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state, a [`Ui`] handle, the key, and the modifiers held.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_key_press<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui, Keycode, Mod) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::KeyPressed,
+            Box::new(move |s, ui, event| {
+                if let Event::KeyPressed { key, modifiers, .. } = event {
+                    callback(s, ui, *key, *modifiers);
+                }
+            }),
+        )
+    }
+
+    /// Registers a callback that runs when a `Widget` gains or loses keyboard focus.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state, a [`Ui`] handle, and `true` if focus was gained.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_focus_change<F>(&mut self, id: WidgetId, callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+    {
+        self.register_pair(id, EventKind::FocusGained, EventKind::FocusLost, callback)
+    }
+
+    /// Registers a callback that runs when the pointer enters or leaves a `Widget`.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `callback` - Called with the application state, a [`Ui`] handle, and `true` if the pointer is inside.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_hover<F>(&mut self, id: WidgetId, callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+    {
+        self.register_pair(
+            id,
+            EventKind::PointerEntered,
+            EventKind::PointerExited,
+            callback,
+        )
+    }
+
+    /// Registers one callback for an "on" kind (passes `true`) and an "off" kind (passes `false`).
+    fn register_pair<F>(
+        &mut self,
+        id: WidgetId,
+        on: EventKind,
+        off: EventKind,
+        callback: F,
+    ) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+    {
+        let shared = Rc::new(RefCell::new(callback));
+        let on_shared = shared.clone();
+        let callback_id = self.register(
+            id,
+            on,
+            Box::new(move |s, ui, _| (on_shared.borrow_mut())(s, ui, true)),
+        );
+        self.registry.entry((id, off)).or_default().push((
+            callback_id,
+            Box::new(move |s, ui, _| (shared.borrow_mut())(s, ui, false)),
+        ));
+        callback_id
     }
 
     /// Registers a callback that receives every event the `Widget`s generate.
@@ -679,11 +1003,11 @@ impl<S> Engine<S> {
             event_mask: &mut self.event_mask,
         };
 
-        if let Event::Clicked { id, .. } = event
-            && let Some(callbacks) = self.click_callbacks.get_mut(id)
+        if let Some(id) = event.widget_id()
+            && let Some(callbacks) = self.registry.get_mut(&(id, event.kind()))
         {
-            for callback in callbacks.iter_mut() {
-                callback(state, &mut ui);
+            for (_, callback) in callbacks.iter_mut() {
+                callback(state, &mut ui, event);
             }
         }
 
@@ -1264,5 +1588,138 @@ mod window_broadcast_tests {
         engine.dispatch(window(WindowEvent::Exposed), &mut ());
 
         assert!(log.borrow().is_empty());
+    }
+}
+
+#[cfg(test)]
+mod registry_tests {
+    use super::*;
+    use crate::geometry::{point, size};
+    use sdl2::mouse::MouseButton;
+
+    fn engine() -> Engine<Vec<String>> {
+        Engine::new(size(100, 100), 30)
+    }
+
+    /// Fires `event` and returns the log the callbacks wrote.
+    fn fire_one(engine: &mut Engine<Vec<String>>, event: Event) -> Vec<String> {
+        let mut log = Vec::new();
+        engine.fire(&event, &mut log);
+        log
+    }
+
+    #[test]
+    fn each_method_fires_for_its_kind_only() {
+        let mut e = engine();
+        e.on_click(1, |l, _| l.push("click".into()));
+        e.on_press(1, |l, _| l.push("press".into()));
+        e.on_release(1, |l, _| l.push("release".into()));
+        e.on_activate(1, |l, _| l.push("activate".into()));
+        e.on_toggle(1, |l, _, c| l.push(format!("toggle {c}")));
+        e.on_value_change(1, |l, _| l.push("value".into()));
+        e.on_viewport_change(1, |l, _, o| l.push(format!("viewport {},{}", o.x, o.y)));
+        e.on_selection_change(1, |l, _| l.push("selection".into()));
+        e.on_text_change(1, |l, _| l.push("text".into()));
+        e.on_editing_finished(1, |l, _| l.push("finished".into()));
+        e.on_key_press(1, |l, _, k, _| l.push(format!("key {k:?}")));
+        e.on_focus_change(1, |l, _, g| l.push(format!("focus {g}")));
+        e.on_hover(1, |l, _, i| l.push(format!("hover {i}")));
+
+        let button = MouseButton::Left;
+        let cases: Vec<(Event, &str)> = vec![
+            (
+                Event::Clicked {
+                    id: 1,
+                    button,
+                    count: 1,
+                },
+                "click",
+            ),
+            (
+                Event::PointerPressed {
+                    id: 1,
+                    button,
+                    position: point(0, 0),
+                    count: 1,
+                },
+                "press",
+            ),
+            (
+                Event::PointerReleased {
+                    id: 1,
+                    button,
+                    position: point(0, 0),
+                    count: 1,
+                },
+                "release",
+            ),
+            (Event::Activated { id: 1 }, "activate"),
+            (
+                Event::Toggled {
+                    id: 1,
+                    checked: true,
+                },
+                "toggle true",
+            ),
+            (Event::ValueChanged { id: 1 }, "value"),
+            (
+                Event::ViewportChanged {
+                    id: 1,
+                    offset: point(3, 4),
+                },
+                "viewport 3,4",
+            ),
+            (Event::SelectionChanged { id: 1 }, "selection"),
+            (Event::TextChanged { id: 1 }, "text"),
+            (Event::EditingFinished { id: 1 }, "finished"),
+            (
+                Event::KeyPressed {
+                    id: 1,
+                    key: Keycode::A,
+                    modifiers: Mod::NOMOD,
+                    repeat: false,
+                },
+                "key Keycode(97)",
+            ),
+            (Event::FocusGained { id: 1 }, "focus true"),
+            (Event::FocusLost { id: 1 }, "focus false"),
+            (Event::PointerEntered { id: 1 }, "hover true"),
+            (Event::PointerExited { id: 1 }, "hover false"),
+        ];
+
+        for (event, expected) in cases {
+            assert_eq!(fire_one(&mut e, event), vec![expected.to_string()]);
+        }
+    }
+
+    #[test]
+    fn callbacks_do_not_fire_for_other_widgets() {
+        let mut e = engine();
+        e.on_toggle(1, |l, _, _| l.push("one".into()));
+        assert!(
+            fire_one(
+                &mut e,
+                Event::Toggled {
+                    id: 2,
+                    checked: true
+                }
+            )
+            .is_empty()
+        );
+        assert!(fire_one(&mut e, Event::Activated { id: 1 }).is_empty());
+    }
+
+    #[test]
+    fn callbacks_run_in_registration_order_and_ids_are_unique() {
+        let mut e = engine();
+        let a = e.on_activate(1, |l, _| l.push("a".into()));
+        let b = e.on_activate(1, |l, _| l.push("b".into()));
+        let c = e.on_hover(1, |_, _, _| {});
+        assert!(a != b && b != c);
+        e.on_event(|l, _, _| l.push("catch-all".into()));
+        assert_eq!(
+            fire_one(&mut e, Event::Activated { id: 1 }),
+            vec!["a", "b", "catch-all"]
+        );
     }
 }
