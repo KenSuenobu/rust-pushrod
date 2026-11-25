@@ -4,7 +4,7 @@ The Pushrod documentation site, built with [Docusaurus](https://docusaurus.io).
 
 ```bash
 npm install
-npm start        # live preview at http://localhost:3000/rust-pushrod/
+npm start        # live preview at http://localhost:3003/rust-pushrod/ (binds 0.0.0.0:3003)
 npm run build    # production build; broken links fail the build
 ```
 
