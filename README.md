@@ -160,11 +160,15 @@ export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
 And you should be able to not only build the application, but you should be able to run the
 examples (`cargo run -p pushrod-widgets --example base`).
 
-### State of the app
+### Widget gallery
 
-This is the current state of the example app.
+The gallery shows every built-in widget, and its states, on a labeled tile
+(`cargo run -p pushrod-widgets --example gallery`).  Each new widget adds its tile.
 
-![App image](pushrod-widgets/examples/example-app.png)
+![Widget gallery](pushrod-docs/static/img/screenshots/gallery.png)
+
+To retake the screenshot, run
+`cargo run -p pushrod-widgets --example gallery -- --screenshot pushrod-docs/static/img/screenshots/gallery.png`.
 
 ## Contributing
 
