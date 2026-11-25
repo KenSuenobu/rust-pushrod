@@ -16,3 +16,4 @@
 [#7] Broadcast window focus and resize events to every interested widget [kenji]
 [#22] Callback registry: on_press, on_toggle, on_hover and more, returning CallbackId [kenji]
 [#78] Custom events: ui.post, ctx.post, on_custom, thread-safe Sender [kenji]
+[#111] TextLayout trait, layout cache, and Parley engine behind a feature [kenji]

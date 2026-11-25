@@ -39,7 +39,7 @@ static TTF_CONTEXT: OnceLock<Result<Sdl2TtfContext, String>> = OnceLock::new();
 ///
 /// The context, or the SDL2_ttf error message if initialization failed (the failure is
 /// remembered, so it is reported the same way on every call).
-fn ttf_context() -> Result<&'static Sdl2TtfContext, String> {
+pub(crate) fn ttf_context() -> Result<&'static Sdl2TtfContext, String> {
     TTF_CONTEXT
         .get_or_init(|| sdl2::ttf::init().map_err(|e| e.to_string()))
         .as_ref()

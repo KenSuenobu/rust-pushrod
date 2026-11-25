@@ -46,7 +46,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 10 | [#7](https://github.com/KenSuenobu/rust-pushrod/issues/7) | pushrod: [1.3] Broadcast events to all interested widgets (done) |
 | ✅ 11 | [#22](https://github.com/KenSuenobu/rust-pushrod/issues/22) | pushrod: [1.6] Callback registry for every widget event (done) |
 | ✅ 12 | [#78](https://github.com/KenSuenobu/rust-pushrod/issues/78) | pushrod: [1.13] Custom application events with payloads (done) |
-| 13 | [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) | pushrod: [1.18] Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) |
+| ✅ 13 | [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) | pushrod: [1.18] Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate) (done) |
 | 14 | [#3](https://github.com/KenSuenobu/rust-pushrod/issues/3) | pushrod: [1.7] GPU text: font cache with a glyph atlas texture |
 | 15 | [#71](https://github.com/KenSuenobu/rust-pushrod/issues/71) | pushrod: [7.3] Widget gallery example |
 | 16 | [#94](https://github.com/KenSuenobu/rust-pushrod/issues/94) | pushrod: [9.2] Event propagation: capture, target, and bubble phases with handled/ignored |
@@ -438,11 +438,11 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Spike passes the compatibility gate (or Parley is feature-gated off by default with the reason recorded in the issue)
-- [ ] Glyphs rasterized once into the SDL2 atlas; steady-state drawing is texture copies only
-- [ ] RTL, CJK, and emoji fallback render correctly; caret/selection geometry drives text fields
-- [ ] Layouts cached; recomputed only on text/font/width change; provide size hints
-- [ ] `TextLayout` trait with Parley as default once the gate passes
+- [x] Spike passes the compatibility gate (or Parley is feature-gated off by default with the reason recorded in the issue)
+- [x] Glyphs rasterized once into the SDL2 atlas; steady-state drawing is texture copies only
+- [x] RTL, CJK, and emoji fallback render correctly; caret/selection geometry drives text fields
+- [x] Layouts cached; recomputed only on text/font/width change; provide size hints
+- [x] `TextLayout` trait; Parley is the default engine only once the glyph atlas (#3) lands (feature-gated until then)
 
 ### Step 14: GPU text: font cache with a glyph atlas texture
 
