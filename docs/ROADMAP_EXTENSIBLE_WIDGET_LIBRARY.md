@@ -1764,7 +1764,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
 | 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
 | 7.7 (#115) | Performance benchmarks and budgets | Measure frame time, input latency, memory per widget, and startup; fail CI on regressions. | `ci`, `mvp`, `parallelizable`, `performance`, `size/S` | Y | v0.1 | S | `benches/ (new)`, `.github/workflows/ci.yml` |
-| 7.8 (#122) | Documentation site: build pushrod-docs in CI and publish it | Build the Docusaurus site on every PR (broken links fail) and publish it to GitHub Pages, with the API reference linked. | `chassis`, `ci`, `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `.github/workflows/docs.yml (new)`, `pushrod-docs/` |
 | 7.9 (#139) | Easy installation: bundled SDL, static linking, and platform guides | Make installing Pushrod painless on Linux, macOS, and Windows, including building SDL from source. | `build`, `documentation`, `mvp`, `parallelizable`, `size/S`, `usability` | Y | v0.1 | S | `Cargo.toml`, `.github/workflows/ci.yml`, `pushrod-docs/` |
 | 7.10 (#140) | Reference application: a real app built only with Pushrod | A small but complete application, maintained in the repository, that exercises the MVP together and surfaces API problems early. | `example`, `mvp`, `parallelizable`, `quality`, `size/M`, `usability` | Y | v0.1 | M | `pushrod-widgets/examples/contacts/ (new)` |
 
@@ -1900,6 +1899,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 
 ### 7.8 (#122): Documentation site: build pushrod-docs in CI and publish it
+
+**Status:** done (#122).
 
 **Problem Statement.** The `pushrod-docs` Docusaurus site exists, but nothing builds it automatically, so broken links or stale pages could merge, and it isn't published anywhere.
 

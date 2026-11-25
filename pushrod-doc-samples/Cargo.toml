@@ -1,0 +1,22 @@
+[package]
+name = "pushrod-doc-samples"
+version = "0.0.1"
+description = "Compiles the documentation samples marked `rust checked` so they cannot go stale"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+[lib]
+name = "pushrod_doc_samples"
+path = "src/lib.rs"
+
+[dependencies]
+pushrod = { path = "..", version = "0.0.1" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.0.1" }
+
+[dependencies.sdl2]
+version = "0.38"
+features = ["ttf", "image", "unsafe_textures"]

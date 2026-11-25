@@ -68,7 +68,7 @@ Replace `src/main.rs` with either version. Both build the same window and behave
 
 Pushrod runs the event loop; you register a callback for the button.
 
-```rust title="src/main.rs"
+```rust checked title="src/main.rs"
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::geometry::{point, size};
@@ -138,7 +138,7 @@ fn main() {
 
 You run the loop: `next_event` waits for input, keeps the screen up to date, and returns each event the widgets generate; `match` on the ones you care about. It returns `None` when the window closes.
 
-```rust title="src/main.rs"
+```rust checked title="src/main.rs"
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
 use pushrod::event::PushrodEvent;

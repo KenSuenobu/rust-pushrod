@@ -57,6 +57,7 @@ const config: Config = {
       title: 'Pushrod',
       items: [
         {type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Documentation'},
+        {href: 'https://kensuenobu.github.io/rust-pushrod/api/pushrod/', label: 'API reference', position: 'left', target: '_self'},
         {to: '/getting-started/quick-start', label: 'Quick start', position: 'left'},
         {
           href: 'https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md',

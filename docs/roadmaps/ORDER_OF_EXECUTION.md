@@ -36,7 +36,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 |---|---|---|
 | ✅ 1 | [#130](https://github.com/KenSuenobu/rust-pushrod/issues/130) | pushrod: [1.21] Split the standard widgets into the pushrod-widgets crate (done) |
 | ✅ 2 | [#69](https://github.com/KenSuenobu/rust-pushrod/issues/69) | pushrod: [7.1] CI: build, test, clippy, fmt, doc with SDL2 (done) |
-| 3 | [#122](https://github.com/KenSuenobu/rust-pushrod/issues/122) | pushrod: [7.8] Documentation site: build pushrod-docs in CI and publish it |
+| ✅ 3 | [#122](https://github.com/KenSuenobu/rust-pushrod/issues/122) | pushrod: [7.8] Documentation site: build pushrod-docs in CI and publish it (done) |
 | 4 | [#93](https://github.com/KenSuenobu/rust-pushrod/issues/93) | pushrod: [9.1] Event vocabulary: modern event names and structure |
 | 5 | [#106](https://github.com/KenSuenobu/rust-pushrod/issues/106) | pushrod: [10.2] Backend-neutral paint API (SDL2 backend by default) |
 | 6 | [#19](https://github.com/KenSuenobu/rust-pushrod/issues/19) | pushrod: [1.1] Widget behavior flags and visual states |
@@ -276,11 +276,13 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] PRs fail when the docs build fails
-- [ ] `main` deploys to GitHub Pages
-- [ ] API reference published and linked
-- [ ] Missing widget pages are reported
-- [ ] Checked code samples compile in CI
+- [x] PRs fail when the docs build fails
+- [x] `main` deploys to GitHub Pages
+- [x] API reference published and linked
+- [x] Missing widget pages are reported
+- [x] Checked code samples compile in CI
+
+**Status:** done (issue closed). Its video can be a recap of the finished work.
 
 ### Step 4: Event vocabulary: modern event names and structure
 
