@@ -15,7 +15,7 @@ const config: Config = {
   },
 
   url: 'https://kensuenobu.github.io',
-  baseUrl: '/rust-pushrod/',
+  baseUrl: '/',
 
   organizationName: 'KenSuenobu',
   projectName: 'rust-pushrod',
