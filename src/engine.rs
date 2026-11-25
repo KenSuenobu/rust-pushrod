@@ -494,8 +494,8 @@ impl<S> Engine<S> {
     /// Registers a callback that runs when a `Widget` is clicked.
     ///
     /// Several callbacks may be registered for the same `Widget`; they run in the order registered,
-    /// before any [`on_event`](Engine::on_event) callbacks.  Callbacks only run with
-    /// [`Engine::run`] and [`Engine::dispatch`], not in the event-loop style.
+    /// before any [`on_event`](Engine::on_event) callbacks.  Callbacks run with
+    /// [`Engine::run`], [`Engine::dispatch`] and [`Engine::next_event_with`].
     ///
     /// # Arguments
     ///
@@ -839,7 +839,7 @@ impl<S> Engine<S> {
             canvas: Self::create_canvas(window),
             event_pump: sdl.event_pump().unwrap(),
             frame_time: Duration::from_millis((1000.0 / self.frame_rate.max(1) as f64) as u64),
-            pending: VecDeque::new(),
+            queue: EventQueue::default(),
             applied_mask: EventMask::ALL,
         }
     }
@@ -849,7 +849,7 @@ impl<S> Engine<S> {
     /// While waiting, the screen is kept up to date: invalidated `Widget`s are repainted and the
     /// frame is presented, so changes made to `Widget`s between calls appear immediately.  When nothing
     /// happens, the call blocks without using the CPU.  Callbacks registered with `on_click` and
-    /// `on_event` are not called in this style; handle the returned events instead.
+    /// `on_event` are not called by this method; use [`Engine::next_event_with`] to run them too.
     ///
     /// # Arguments
     ///
@@ -861,11 +861,7 @@ impl<S> Engine<S> {
     /// has been called.
     pub fn next_event(&mut self, events: &mut EventLoop) -> Option<Event> {
         loop {
-            let drained = self.drain_pending();
-
-            events.pending.extend(drained);
-
-            if let Some(event) = events.pending.pop_front() {
+            if let Some(event) = self.next_queued(&mut events.queue) {
                 return Some(event);
             }
 
@@ -893,21 +889,98 @@ impl<S> Engine<S> {
             } else {
                 events.frame_time.as_millis().max(1) as u32
             };
-            let mut sdl_events: Vec<SdlEvent> = events
-                .event_pump
-                .wait_event_timeout(timeout)
-                .into_iter()
-                .collect();
 
-            sdl_events.extend(events.event_pump.poll_iter());
-
-            for sdl_event in sdl_events {
-                let generated = self.route(sdl_event);
-
-                events.pending.extend(generated);
-            }
+            events
+                .queue
+                .raw
+                .extend(events.event_pump.wait_event_timeout(timeout));
+            events.queue.raw.extend(events.event_pump.poll_iter());
         }
     }
+
+    /// Returns the next event, after running the registered callbacks for it.
+    ///
+    /// This is [`Engine::next_event`] plus the callback style: the `on_click`, `on_engine_event`
+    /// and `on_event` callbacks run for the event, with the application state, and then the event
+    /// is returned.  Use it to mix styles, for example callbacks for most `Widget`s and a loop for
+    /// the main window's logic.  Every event is delivered to both, in the same order as
+    /// [`Engine::run`] delivers it.  Events emitted by a callback's own actions are returned by
+    /// later calls.
+    ///
+    /// # Arguments
+    ///
+    /// * `events` - The loop state returned by [`Engine::event_loop`].
+    /// * `state` - The application state passed to the callbacks.
+    ///
+    /// # Returns
+    ///
+    /// The next event, or `None` once the window has been closed or [`shutdown`](Engine::shutdown)
+    /// has been called.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// # use pushrod::engine::Engine;
+    /// # use pushrod::geometry::size;
+    /// # let sdl = sdl2::init().unwrap();
+    /// # let window = sdl.video().unwrap().window("app", 400, 200).build().unwrap();
+    /// let mut engine: Engine<u32> = Engine::new(size(400, 200), 60);
+    /// let mut events = engine.event_loop(&sdl, window);
+    /// let mut clicks = 0;
+    ///
+    /// engine.on_click(0, |clicks, _ui| *clicks += 1);
+    ///
+    /// // The callback has already run when the event is returned.
+    /// while let Some(event) = engine.next_event_with(&mut events, &mut clicks) {
+    ///     println!("{:?}, {} clicks so far", event, clicks);
+    /// }
+    /// ```
+    pub fn next_event_with(&mut self, events: &mut EventLoop, state: &mut S) -> Option<Event> {
+        let event = self.next_event(events)?;
+
+        self.fire(&event, state);
+
+        Some(event)
+    }
+
+    /// Returns the next event that can be produced without waiting for input.
+    ///
+    /// Events come out in the order [`Engine::dispatch`] delivers them: the events a raw input
+    /// event generated, then the engine events its actions queued, and only then the next raw
+    /// input event.
+    ///
+    /// # Arguments
+    ///
+    /// * `queue` - The generated and raw events waiting to be returned.
+    ///
+    /// # Returns
+    ///
+    /// The next event, or `None` if the queue is empty and nothing more is pending.
+    fn next_queued(&mut self, queue: &mut EventQueue) -> Option<Event> {
+        loop {
+            if let Some(event) = queue.pending.pop_front() {
+                return Some(event);
+            }
+
+            let drained = self.drain_pending();
+
+            if !drained.is_empty() {
+                queue.pending.extend(drained);
+                continue;
+            }
+
+            let raw = queue.raw.pop_front()?;
+
+            queue.pending.extend(self.route(raw));
+        }
+    }
+}
+
+/// Raw input events waiting to be routed, and generated events waiting to be returned.
+#[derive(Default)]
+pub(crate) struct EventQueue {
+    raw: VecDeque<SdlEvent>,
+    pending: VecDeque<Event>,
 }
 
 /// The state of an application-driven event loop.
@@ -919,7 +992,7 @@ pub struct EventLoop {
     canvas: Canvas<Window>,
     event_pump: EventPump,
     frame_time: Duration,
-    pending: VecDeque<Event>,
+    queue: EventQueue,
     applied_mask: EventMask,
 }
 
@@ -971,5 +1044,88 @@ mod mask_tests {
             })
             .is_none()
         );
+    }
+}
+
+#[cfg(test)]
+mod parity_tests {
+    use super::*;
+    use crate::geometry::size;
+    use crate::root_widget::RootWidget;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    /// Scripted input: every action emits engine events, and a widget add mid-script.
+    fn script() -> Vec<SdlEvent> {
+        vec![
+            SdlEvent::Window {
+                timestamp: 0,
+                window_id: 0,
+                win_event: WindowEvent::Exposed,
+            },
+            SdlEvent::Quit { timestamp: 0 },
+        ]
+    }
+
+    /// Prepares an engine whose callbacks change the mask and add widgets, so every input
+    /// produces engine events.
+    fn engine_with_actions(seen: Rc<RefCell<Vec<String>>>) -> Engine<u32> {
+        let mut engine: Engine<u32> = Engine::new(size(100, 100), 30);
+
+        engine.on_event(move |count, ui, event| {
+            *count += 1;
+            seen.borrow_mut().push(format!("cb:{:?}", event));
+
+            if *count == 1 {
+                ui.widgets().add(Box::new(RootWidget::new(size(5, 5))));
+            }
+        });
+
+        engine
+    }
+
+    #[test]
+    fn both_styles_see_the_same_events_in_the_same_order() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut by_callbacks = engine_with_actions(log.clone());
+        let mut count = 0;
+
+        by_callbacks.set_event_mask(EventMask::ALL & !EventMask::HOVER);
+        for event in script() {
+            by_callbacks.dispatch(event, &mut count);
+        }
+
+        let callback_order: Vec<String> = log.borrow().clone();
+
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut by_loop = engine_with_actions(log.clone());
+        let mut queue = EventQueue::default();
+        let mut count = 0;
+        let mut returned = Vec::new();
+
+        by_loop.set_event_mask(EventMask::ALL & !EventMask::HOVER);
+        queue.raw.extend(script());
+
+        while let Some(event) = by_loop.next_queued(&mut queue) {
+            by_loop.fire(&event, &mut count);
+            returned.push(format!("cb:{:?}", event));
+        }
+
+        assert!(!callback_order.is_empty());
+        assert_eq!(callback_order, returned);
+        assert_eq!(callback_order, *log.borrow());
+        assert!(!by_loop.is_running());
+    }
+
+    #[test]
+    fn events_are_returned_without_callbacks_by_next_queued() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut engine = engine_with_actions(log.clone());
+        let mut queue = EventQueue::default();
+
+        engine.set_event_mask(EventMask::NONE);
+
+        assert!(engine.next_queued(&mut queue).is_some());
+        assert!(log.borrow().is_empty());
     }
 }

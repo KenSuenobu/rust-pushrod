@@ -2026,7 +2026,6 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 | 9.7 (#99) | Callback handles: disconnect, block, and unblock | Every registration returns a handle to remove or temporarily silence the callback. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `src/engine.rs` |
 | 9.8 (#100) | Drag and drop within the application | Drag data between widgets (list to list, file icon to drop zone) with drop targets and feedback. | `chassis`, `enhancement`, `events`, `parallelizable`, `size/L`, `usability` | Y | N | L | `src/dnd.rs (new)`, `src/cache.rs` |
 | 9.9 (#101) | Pointer cursor per widget | Widgets choose the pointer shape (I-beam over text, resize arrows, hand over links). | `enhancement`, `events`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
-| 9.11 (#124) | Event-loop style: keep parity with callbacks | Everything delivered to callbacks is also returned by next_event, and both styles can be combined. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs`, `src/event.rs` |
 
 ### 9.1 (#93): Event vocabulary: modern event names and structure
 
@@ -2296,6 +2295,8 @@ Like every widget, it can also receive application-defined custom events in `han
 - Every event kind is delivered by both styles in the same order
 - `next_event_with` runs callbacks then returns the event
 - Conformance test compares both styles on the same input
+
+**Status:** done (#124).
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
 

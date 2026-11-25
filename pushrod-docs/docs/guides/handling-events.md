@@ -17,7 +17,7 @@ Pushrod supports two styles. Both route input through the same widgets and produ
 | Changing widgets | `ui.get_mut::<T>(id)` | `engine.widgets().get_as_mut::<T>(id)` |
 | Good for | Many independent widgets, Visual Basic-style event procedures | Central dispatch, state machines, porting code written for GEM-style event loops |
 
-Use one style per window: callbacks registered with `on_click`/`on_event` are not called while you drive the loop with `next_event`.
+Both styles deliver every event in the same order: semantic events, engine events, then any others, with the run-loop event mask applied to both. `next_event` returns events without running callbacks; `next_event_with` runs the registered callbacks first. See [Mixing the styles](#mixing-the-styles).
 
 ### Event-loop style
 
@@ -40,6 +40,22 @@ while let Some(event) = engine.next_event(&mut events) {
 ```
 
 `next_event` repaints any widgets you changed and presents the frame, waits for input (up to one frame at a time, without using the CPU while idle), routes the input through the widgets, and returns the events they generated, one at a time. It returns `None` after the window is closed or `engine.shutdown()` is called. See the [quick start](../getting-started/quick-start.mdx) for a complete program.
+
+### Mixing the styles
+
+`engine.next_event_with(&mut events, &mut state)` runs the callbacks registered with `on_click`, `on_engine_event` and `on_event` for the event, then returns it. Use callbacks for most widgets and a loop for the main window's logic:
+
+```rust
+engine.on_click(button, |clicks, _ui| *clicks += 1);
+
+while let Some(event) = engine.next_event_with(&mut events, &mut clicks) {
+    if let Event::Engine(engine_event) = event {
+        println!("{:?}", engine_event);
+    }
+}
+```
+
+Events a callback's own actions cause (for example changing the event mask) are returned by later calls, after the events already waiting, exactly as `engine.run` delivers them.
 
 The rest of this page describes the callback style and the event flow common to both.
 
