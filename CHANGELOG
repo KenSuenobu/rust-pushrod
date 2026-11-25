@@ -12,3 +12,4 @@
 [#109] Engine events: EngineEvent, ENGINE mask, on_engine_event [kenji]
 [0] Additional updates to AGENTS.md to indicate any new behavior must be part of an executable test [kenji]
 
+[#124] Event-loop parity: next_event_with runs callbacks; same order as run [kenji]
