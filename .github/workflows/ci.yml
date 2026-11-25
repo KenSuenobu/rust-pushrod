@@ -77,18 +77,18 @@ jobs:
           RUSTDOCFLAGS: -D warnings
 
   docs:
-    name: Documentation site
+    name: Documentation checks (widget pages, checked samples)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: pushrod-docs/package-lock.json
-      - name: Build (broken links fail the build)
-        working-directory: pushrod-docs
-        run: npm ci && npm run build
+      - name: Every widget module has a page
+        run: python3 scripts/check_widget_pages.py
+      - name: Install SDL2
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Checked code samples compile
+        run: cargo test -p pushrod-doc-samples
 
   sample-data:
     name: Sample data (no real e-mail addresses or home paths)

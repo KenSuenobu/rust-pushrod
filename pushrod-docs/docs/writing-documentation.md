@@ -20,6 +20,19 @@ npm start          # live preview at http://localhost:3000/rust-pushrod/
 npm run build      # must pass: broken links fail the build
 ```
 
+## How CI checks the documentation
+
+Two workflows keep the site honest. Both run on every pull request:
+
+| Check | What fails it | Run it yourself |
+|---|---|---|
+| **Site build** (`docs.yml`) | A broken link or anchor, or a page that does not build | `cd pushrod-docs && npm run build` |
+| **API reference** (`docs.yml`) | Any rustdoc warning | `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps` |
+| **Widget pages** (`ci.yml`) | A `pushrod-widgets/src/<name>_widget.rs` with no `docs/widgets/<name>.md` (the missing pages are listed) | `python3 scripts/check_widget_pages.py` |
+| **Checked samples** (`ci.yml`) | A `rust checked` code sample that no longer compiles | `cargo test -p pushrod-doc-samples` |
+
+When a change lands on `main`, `docs.yml` publishes the site to GitHub Pages at `/rust-pushrod/`, with the rustdoc API reference alongside it at `/rust-pushrod/api/` (the **API reference** link in the navbar).
+
 ## Where pages go
 
 | Content | Location | Sidebar group |
@@ -53,7 +66,7 @@ Every widget page uses the same sections, in this order (see [Button](./widgets/
 
 ## Code samples
 
-Code samples must compile against the current library. Prefer copying from an example (`pushrod-widgets/examples/`) or a test, and keep samples complete enough to paste. Import standard widgets from `pushrod_widgets` and everything else from `pushrod`.
+Code samples must compile against the current library. Mark a complete sample as checked by writing `rust checked` on its opening fence (for example ```` ```rust checked title="src/main.rs" ````). The `pushrod-doc-samples` crate compiles every checked sample, and CI fails when one breaks. A checked sample must be a whole program or module: its own `use` lines and no code outside functions. Fragments that rely on an `engine` defined elsewhere stay plain `rust`. Prefer copying from an example (`pushrod-widgets/examples/`) or a test, and keep samples complete enough to paste. Import standard widgets from `pushrod_widgets` and everything else from `pushrod`.
 
 ## Documenting the code
 

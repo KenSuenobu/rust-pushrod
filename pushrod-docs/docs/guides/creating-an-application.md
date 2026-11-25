@@ -68,7 +68,7 @@ Callbacks receive `&mut AppState` and a `Ui` handle. See [Handling events](./han
 
 ![The application below, after clicking Save](/img/screenshots/events.png)
 
-```rust title="src/main.rs"
+```rust checked title="src/main.rs"
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;

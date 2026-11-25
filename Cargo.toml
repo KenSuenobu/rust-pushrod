@@ -17,7 +17,7 @@ include = [
 ]
 
 [workspace]
-members = ["pushrod-widgets"]
+members = ["pushrod-widgets", "pushrod-doc-samples"]
 
 [workspace.package]
 edition = "2024"

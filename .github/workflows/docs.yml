@@ -1,0 +1,59 @@
+name: Documentation site
+
+# Builds the Docusaurus site and the rustdoc API reference together, and publishes them to
+# GitHub Pages from main.  Pull requests build only (the build fails on broken links).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build site and API reference
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pushrod-docs/package-lock.json
+      - name: Build the site (broken links fail the build)
+        working-directory: pushrod-docs
+        run: npm ci && npm run build
+      - name: Install SDL2
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build the API reference
+        run: cargo doc --workspace --no-deps --exclude pushrod-doc-samples
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - name: Publish the API reference at /api/
+        run: cp -r target/doc pushrod-docs/build/api
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: pushrod-docs/build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
