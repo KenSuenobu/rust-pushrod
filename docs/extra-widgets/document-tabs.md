@@ -54,7 +54,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Close buttons, modified marks, middle-click close
 - [ ] Drag to reorder and context menu
 - [ ] Overflow arrows and tab list menu
-- [ ] Registered as `extra.document_tabs` and shown in the gallery (1.2)
+- [ ] Registered as `extra.document_tabs` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

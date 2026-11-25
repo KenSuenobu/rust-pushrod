@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Collapses to a strip and restores its width
 - [ ] Left, right, and bottom sides
 - [ ] Toggle by button and action shortcut
-- [ ] Registered as `extra.drawer` and shown in the gallery (1.2)
+- [ ] Registered as `extra.drawer` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

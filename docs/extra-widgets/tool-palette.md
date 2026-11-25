@@ -54,7 +54,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Select, Click, and Drag modes
 - [ ] Grid and List layouts, group header rows, and tooltips
 - [ ] Grid reflows with width; keyboard navigation
-- [ ] Registered as `extra.tool_palette` and shown in the gallery (1.2)
+- [ ] Registered as `extra.tool_palette` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

@@ -24,3 +24,4 @@
 [#20] Keyboard focus: click, Tab, arrows, Return/Escape, FocusChanged [kenji]
 [#104] Per-state appearance: StateStyle and Appearance per visual state [kenji]
 [0] Roadmap for pushrod-extra-widgets: 44 widget issues with mockups; nine larger widgets moved out of the standard set [kenji]
+[0] Roadmap: text truncation and wrapping in the MVP, the Pushrod Showcase (Epic 12), and eight more extra widgets [kenji]

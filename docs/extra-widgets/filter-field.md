@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Works with list, table, and tree views
 - [ ] Tree filtering keeps ancestors
 - [ ] Custom matching and no-match message
-- [ ] Registered as `extra.filter_field` and shown in the gallery (1.2)
+- [ ] Registered as `extra.filter_field` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

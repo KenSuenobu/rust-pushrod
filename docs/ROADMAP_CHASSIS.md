@@ -388,7 +388,7 @@ Main window, three-pane workspace, Designer/Code tabs, and commands.
 
 **Problem Statement.** Users coming from Delphi or VS Code expect their usual keys, and every command must be reachable consistently.
 
-**Solution / Scope.** Every command (New, Open, Save, Undo, Redo, Cut, Copy, Paste, Delete, Select All, Bring to Front, Send to Back, Align, Run, Toggle Inspector, Switch Tab) is a Pushrod action with its menu entry, toolbar button where shown, and shortcut: Ctrl+N/O/S, Ctrl+Z/Y, Ctrl+X/C/V, Del, Ctrl+A, F4, F12, F5. Actions enable and disable with the selection.
+**Solution / Scope.** Every command (New, Open, Save, Undo, Redo, Cut, Copy, Paste, Delete, Select All, Bring to Front, Send to Back, Align, Run, Toggle Inspector, Switch Tab) is a Pushrod action with its menu entry, toolbar button where shown, and shortcut: Ctrl+N/O/S, Ctrl+Z/Y, Ctrl+X/C/V, Del, Ctrl+A, F4, F12, F5. Actions enable and disable with the selection. Ctrl+Shift+P opens the command palette (extra-widgets 6.9), which lists every action.
 
 **Acceptance Criteria.**
 
@@ -396,7 +396,7 @@ Main window, three-pane workspace, Designer/Code tabs, and commands.
 - Commands disabled when not applicable
 - Shortcut list on the docs site
 
-**Parallelism / Dependencies.** Parallelizable. Chassis: 1.1 ([#168](https://github.com/KenSuenobu/rust-pushrod/issues/168)); Pushrod: Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
+**Parallelism / Dependencies.** Parallelizable. Chassis: 1.1 ([#168](https://github.com/KenSuenobu/rust-pushrod/issues/168)); Pushrod: Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons; Extra widgets: extra-widgets 6.9 [#305](https://github.com/KenSuenobu/rust-pushrod/issues/305) Command palette
 
 **Technical Stack.** Rust, Pushrod
 
@@ -408,7 +408,7 @@ Main window, three-pane workspace, Designer/Code tabs, and commands.
 
 **Problem Statement.** Re-arranging panes and reopening the last project every session is tedious.
 
-**Solution / Scope.** Save window size and position, pane widths and collapsed state, open forms and active tabs per project, and a recent-projects list (File menu), in the user's configuration directory, never in the project.
+**Solution / Scope.** Save window size and position, pane widths and collapsed state, open forms and active tabs per project, and a recent-projects list (File menu), in the user's configuration directory, never in the project. The recent-projects list can use the extra-widgets recent files menu (extra-widgets 6.10) once it ships.
 
 **Acceptance Criteria.**
 
@@ -710,7 +710,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 
 **Problem Statement.** Forms must be edited exactly as they will look, without their widgets reacting to clicks the way they do at run time.
 
-**Solution / Scope.** The Designer tab shows the form (built from the resource file through the registry) on a gray canvas with a dotted grid (8 px default, View menu). Pushrod design mode intercepts input: clicks select instead of activating, and an overlay draws selection outlines, handles, guides, layout tags, and code indicators. Zoom 100% and 200%.
+**Solution / Scope.** Built on the extra-widgets canvas view (extra-widgets 4.14), which supplies the scrolling, zooming surface, grid, rubber band, and hit-testing. The Designer tab shows the form (built from the resource file through the registry) on a gray canvas with a dotted grid (8 px default, View menu). Pushrod design mode intercepts input: clicks select instead of activating, and an overlay draws selection outlines, handles, guides, layout tags, and code indicators. Zoom 100% and 200%.
 
 ![chassis-1.png](mockups/chassis-1.png)
 
@@ -720,7 +720,7 @@ Design surface, palette, drag and drop, selection, snapping, containers, layouts
 - Widgets don't react in the designer
 - Grid size and visibility adjustable
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 1.3 ([#171](https://github.com/KenSuenobu/rust-pushrod/issues/171)), 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 6.9 [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) Design-mode hooks for Chassis, Pushrod 6.4 [#63](https://github.com/KenSuenobu/rust-pushrod/issues/63) Form loader: build a form from a file with stable IDs
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 1.3 ([#171](https://github.com/KenSuenobu/rust-pushrod/issues/171)), 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 6.9 [#68](https://github.com/KenSuenobu/rust-pushrod/issues/68) Design-mode hooks for Chassis, Pushrod 6.4 [#63](https://github.com/KenSuenobu/rust-pushrod/issues/63) Form loader: build a form from a file with stable IDs; Extra widgets: extra-widgets 4.14 [#304](https://github.com/KenSuenobu/rust-pushrod/issues/304) Canvas view (zoomable surface of items)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -1008,7 +1008,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 
 **Problem Statement.** Each kind of property needs an editor that prevents invalid values.
 
-**Solution / Scope.** Text (text field, or a string resource via `@strings.NAME`), integer (numeric field with range), boolean (check box; behavior flags grouped), enumeration (choice button), color (swatch plus hex field; the extra-widgets color well, extra-widgets 3.4, when it ships), font (choice of registered fonts; the extra-widgets font chooser, extra-widgets 3.5, when it ships), image and icon (choice of the resource file's images and icons, 2.6). Invalid input is marked and not applied.
+**Solution / Scope.** Text (text field, or a string resource via `@strings.NAME`), integer (numeric field with range), boolean (check box; behavior flags grouped), enumeration (choice button), color (swatch plus hex field; the extra-widgets color well, extra-widgets 3.4, when it ships), font (choice of registered fonts; the extra-widgets font chooser, extra-widgets 3.5, when it ships), image and icon (choice of the resource file's images and icons, 2.6). Invalid input is marked and not applied. Position and size values use the extra-widgets drag value (extra-widgets 2.9), so they can be dragged or typed.
 
 ![chassis-1.png](mockups/chassis-1.png)
 
@@ -1018,7 +1018,7 @@ The right-hand drawer: identity, typed property editors, names and IDs.
 - Behavior flags appear as grouped check boxes
 - Text and images can reference resources by ID
 
-**Parallelism / Dependencies.** Parallelizable. Chassis: 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187)), 2.5 ([#175](https://github.com/KenSuenobu/rust-pushrod/issues/175)), 2.6 ([#176](https://github.com/KenSuenobu/rust-pushrod/issues/176)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 3.6 [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) Choice button: pop-up list and click-to-cycle modes, Pushrod 1.24 [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) Fonts: shared font handles and a built-in default font
+**Parallelism / Dependencies.** Parallelizable. Chassis: 4.2 ([#187](https://github.com/KenSuenobu/rust-pushrod/issues/187)), 2.5 ([#175](https://github.com/KenSuenobu/rust-pushrod/issues/175)), 2.6 ([#176](https://github.com/KenSuenobu/rust-pushrod/issues/176)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 2.4 [#30](https://github.com/KenSuenobu/rust-pushrod/issues/30) Check box with indeterminate state, Pushrod 3.6 [#44](https://github.com/KenSuenobu/rust-pushrod/issues/44) Choice button: pop-up list and click-to-cycle modes, Pushrod 1.24 [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) Fonts: shared font handles and a built-in default font; Extra widgets: extra-widgets 2.9 [#302](https://github.com/KenSuenobu/rust-pushrod/issues/302) Drag value (numeric scrubber)
 
 **Technical Stack.** Rust, Pushrod
 
@@ -1309,14 +1309,14 @@ Code generation rules, a command-line generator, build and run, error list, temp
 
 **Problem Statement.** Trying the application should be one key away.
 
-**Solution / Scope.** Run (F5, toolbar) saves, runs `cargo build` with JSON messages, shows progress in a collapsible output panel below the editor, and launches the application. Stop ends it. Failures open the output panel.
+**Solution / Scope.** Run (F5, toolbar) saves, runs `cargo build` with JSON messages, shows progress in a collapsible output panel below the editor, and launches the application. Stop ends it. Failures open the output panel. Build output is shown in the extra-widgets log view (extra-widgets 4.13).
 
 **Acceptance Criteria.**
 
 - F5 builds and launches the app
 - Build output visible; failures reported
 
-**Parallelism / Dependencies.** Not parallelizable. Chassis: 2.2 ([#172](https://github.com/KenSuenobu/rust-pushrod/issues/172)), 6.1 ([#165](https://github.com/KenSuenobu/rust-pushrod/issues/165))
+**Parallelism / Dependencies.** Not parallelizable. Chassis: 2.2 ([#172](https://github.com/KenSuenobu/rust-pushrod/issues/172)), 6.1 ([#165](https://github.com/KenSuenobu/rust-pushrod/issues/165)); Extra widgets: extra-widgets 4.13 [#303](https://github.com/KenSuenobu/rust-pushrod/issues/303) Log view (append-only output)
 
 **Technical Stack.** Rust, Cargo
 
@@ -1896,7 +1896,7 @@ Once Chassis reaches the MVP, the example projects (Epic 8) are built with it: e
 
 ### Pushrod work Chassis depends on
 
-Pushrod MVP issues Chassis uses directly: Pushrod 1.1 ([#19](https://github.com/KenSuenobu/rust-pushrod/issues/19)), Pushrod 1.2 ([#6](https://github.com/KenSuenobu/rust-pushrod/issues/6)), Pushrod 1.4 ([#20](https://github.com/KenSuenobu/rust-pushrod/issues/20)), Pushrod 1.5 ([#21](https://github.com/KenSuenobu/rust-pushrod/issues/21)), Pushrod 1.6 ([#22](https://github.com/KenSuenobu/rust-pushrod/issues/22)), Pushrod 1.7 ([#3](https://github.com/KenSuenobu/rust-pushrod/issues/3)), Pushrod 1.8 ([#23](https://github.com/KenSuenobu/rust-pushrod/issues/23)), Pushrod 1.10 ([#25](https://github.com/KenSuenobu/rust-pushrod/issues/25)), Pushrod 1.12 ([#76](https://github.com/KenSuenobu/rust-pushrod/issues/76)), Pushrod 1.18 ([#111](https://github.com/KenSuenobu/rust-pushrod/issues/111)), Pushrod 1.19 ([#112](https://github.com/KenSuenobu/rust-pushrod/issues/112)), Pushrod 1.21 ([#130](https://github.com/KenSuenobu/rust-pushrod/issues/130)), Pushrod 1.24 ([#137](https://github.com/KenSuenobu/rust-pushrod/issues/137)), Pushrod 1.25 ([#138](https://github.com/KenSuenobu/rust-pushrod/issues/138)), Pushrod 2.2 ([#28](https://github.com/KenSuenobu/rust-pushrod/issues/28)), Pushrod 2.3 ([#29](https://github.com/KenSuenobu/rust-pushrod/issues/29)), Pushrod 2.4 ([#30](https://github.com/KenSuenobu/rust-pushrod/issues/30)), Pushrod 2.6 ([#32](https://github.com/KenSuenobu/rust-pushrod/issues/32)), Pushrod 2.7 ([#33](https://github.com/KenSuenobu/rust-pushrod/issues/33)), Pushrod 3.1 ([#39](https://github.com/KenSuenobu/rust-pushrod/issues/39)), Pushrod 3.3 ([#41](https://github.com/KenSuenobu/rust-pushrod/issues/41)), Pushrod 5.1 ([#56](https://github.com/KenSuenobu/rust-pushrod/issues/56)), Pushrod 5.2 ([#57](https://github.com/KenSuenobu/rust-pushrod/issues/57)), Pushrod 5.3 ([#58](https://github.com/KenSuenobu/rust-pushrod/issues/58)), Pushrod 5.5 ([#116](https://github.com/KenSuenobu/rust-pushrod/issues/116)), Pushrod 5.6 ([#117](https://github.com/KenSuenobu/rust-pushrod/issues/117)), Pushrod 5.7 ([#118](https://github.com/KenSuenobu/rust-pushrod/issues/118)), Pushrod 6.1 ([#60](https://github.com/KenSuenobu/rust-pushrod/issues/60)), Pushrod 6.2 ([#61](https://github.com/KenSuenobu/rust-pushrod/issues/61)), Pushrod 6.3 ([#62](https://github.com/KenSuenobu/rust-pushrod/issues/62)), Pushrod 6.4 ([#63](https://github.com/KenSuenobu/rust-pushrod/issues/63)), Pushrod 6.5 ([#64](https://github.com/KenSuenobu/rust-pushrod/issues/64)), Pushrod 6.6 ([#65](https://github.com/KenSuenobu/rust-pushrod/issues/65)), Pushrod 6.7 ([#66](https://github.com/KenSuenobu/rust-pushrod/issues/66)), Pushrod 6.10 ([#153](https://github.com/KenSuenobu/rust-pushrod/issues/153)), Pushrod 6.11 ([#154](https://github.com/KenSuenobu/rust-pushrod/issues/154)), Pushrod 6.12 ([#155](https://github.com/KenSuenobu/rust-pushrod/issues/155)), Pushrod 7.1 ([#69](https://github.com/KenSuenobu/rust-pushrod/issues/69)), Pushrod 7.2 ([#70](https://github.com/KenSuenobu/rust-pushrod/issues/70)), Pushrod 7.7 ([#115](https://github.com/KenSuenobu/rust-pushrod/issues/115)), Pushrod 7.8 ([#122](https://github.com/KenSuenobu/rust-pushrod/issues/122)), Pushrod 9.1 ([#93](https://github.com/KenSuenobu/rust-pushrod/issues/93)), Pushrod 9.2 ([#94](https://github.com/KenSuenobu/rust-pushrod/issues/94)), Pushrod 9.4 ([#96](https://github.com/KenSuenobu/rust-pushrod/issues/96)), Pushrod 9.10 ([#109](https://github.com/KenSuenobu/rust-pushrod/issues/109)), Pushrod 10.2 ([#106](https://github.com/KenSuenobu/rust-pushrod/issues/106)), Pushrod 10.6 ([#134](https://github.com/KenSuenobu/rust-pushrod/issues/134)).
+Pushrod MVP issues Chassis uses directly: Pushrod 1.1 ([#19](https://github.com/KenSuenobu/rust-pushrod/issues/19)), Pushrod 1.2 ([#6](https://github.com/KenSuenobu/rust-pushrod/issues/6)), Pushrod 1.4 ([#20](https://github.com/KenSuenobu/rust-pushrod/issues/20)), Pushrod 1.5 ([#21](https://github.com/KenSuenobu/rust-pushrod/issues/21)), Pushrod 1.6 ([#22](https://github.com/KenSuenobu/rust-pushrod/issues/22)), Pushrod 1.7 ([#3](https://github.com/KenSuenobu/rust-pushrod/issues/3)), Pushrod 1.8 ([#23](https://github.com/KenSuenobu/rust-pushrod/issues/23)), Pushrod 1.10 ([#25](https://github.com/KenSuenobu/rust-pushrod/issues/25)), Pushrod 1.12 ([#76](https://github.com/KenSuenobu/rust-pushrod/issues/76)), Pushrod 1.18 ([#111](https://github.com/KenSuenobu/rust-pushrod/issues/111)), Pushrod 1.19 ([#112](https://github.com/KenSuenobu/rust-pushrod/issues/112)), Pushrod 1.21 ([#130](https://github.com/KenSuenobu/rust-pushrod/issues/130)), Pushrod 1.24 ([#137](https://github.com/KenSuenobu/rust-pushrod/issues/137)), Pushrod 1.25 ([#138](https://github.com/KenSuenobu/rust-pushrod/issues/138)), Pushrod 2.2 ([#28](https://github.com/KenSuenobu/rust-pushrod/issues/28)), Pushrod 2.3 ([#29](https://github.com/KenSuenobu/rust-pushrod/issues/29)), Pushrod 2.4 ([#30](https://github.com/KenSuenobu/rust-pushrod/issues/30)), Pushrod 2.6 ([#32](https://github.com/KenSuenobu/rust-pushrod/issues/32)), Pushrod 2.7 ([#33](https://github.com/KenSuenobu/rust-pushrod/issues/33)), Pushrod 2.10 ([#36](https://github.com/KenSuenobu/rust-pushrod/issues/36)), Pushrod 3.1 ([#39](https://github.com/KenSuenobu/rust-pushrod/issues/39)), Pushrod 3.3 ([#41](https://github.com/KenSuenobu/rust-pushrod/issues/41)), Pushrod 5.1 ([#56](https://github.com/KenSuenobu/rust-pushrod/issues/56)), Pushrod 5.2 ([#57](https://github.com/KenSuenobu/rust-pushrod/issues/57)), Pushrod 5.3 ([#58](https://github.com/KenSuenobu/rust-pushrod/issues/58)), Pushrod 5.5 ([#116](https://github.com/KenSuenobu/rust-pushrod/issues/116)), Pushrod 5.6 ([#117](https://github.com/KenSuenobu/rust-pushrod/issues/117)), Pushrod 5.7 ([#118](https://github.com/KenSuenobu/rust-pushrod/issues/118)), Pushrod 6.1 ([#60](https://github.com/KenSuenobu/rust-pushrod/issues/60)), Pushrod 6.2 ([#61](https://github.com/KenSuenobu/rust-pushrod/issues/61)), Pushrod 6.3 ([#62](https://github.com/KenSuenobu/rust-pushrod/issues/62)), Pushrod 6.4 ([#63](https://github.com/KenSuenobu/rust-pushrod/issues/63)), Pushrod 6.5 ([#64](https://github.com/KenSuenobu/rust-pushrod/issues/64)), Pushrod 6.6 ([#65](https://github.com/KenSuenobu/rust-pushrod/issues/65)), Pushrod 6.7 ([#66](https://github.com/KenSuenobu/rust-pushrod/issues/66)), Pushrod 6.10 ([#153](https://github.com/KenSuenobu/rust-pushrod/issues/153)), Pushrod 6.11 ([#154](https://github.com/KenSuenobu/rust-pushrod/issues/154)), Pushrod 6.12 ([#155](https://github.com/KenSuenobu/rust-pushrod/issues/155)), Pushrod 7.1 ([#69](https://github.com/KenSuenobu/rust-pushrod/issues/69)), Pushrod 7.2 ([#70](https://github.com/KenSuenobu/rust-pushrod/issues/70)), Pushrod 7.7 ([#115](https://github.com/KenSuenobu/rust-pushrod/issues/115)), Pushrod 7.8 ([#122](https://github.com/KenSuenobu/rust-pushrod/issues/122)), Pushrod 9.1 ([#93](https://github.com/KenSuenobu/rust-pushrod/issues/93)), Pushrod 9.2 ([#94](https://github.com/KenSuenobu/rust-pushrod/issues/94)), Pushrod 9.4 ([#96](https://github.com/KenSuenobu/rust-pushrod/issues/96)), Pushrod 9.10 ([#109](https://github.com/KenSuenobu/rust-pushrod/issues/109)), Pushrod 10.2 ([#106](https://github.com/KenSuenobu/rust-pushrod/issues/106)), Pushrod 10.6 ([#134](https://github.com/KenSuenobu/rust-pushrod/issues/134)).
 
 Issues **after the Pushrod MVP** that the Chassis MVP needs, directly or through their own dependencies (all labeled `chassis` on GitHub, so `label:chassis` shows the whole path):
 
@@ -1926,6 +1926,7 @@ Issues **after the Pushrod MVP** that the Chassis MVP needs, directly or through
 | 9.3 ([#95](https://github.com/KenSuenobu/rust-pushrod/issues/95)) | Event filters: observe or intercept another widget's events | indirectly, through 6.9 (first in M3) |
 | 9.5 ([#97](https://github.com/KenSuenobu/rust-pushrod/issues/97)) | Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons | 1.1, 1.4 (first in M2) |
 | 9.8 ([#100](https://github.com/KenSuenobu/rust-pushrod/issues/100)) | Drag and drop within the application | 2.6, 3.3 (first in M2) |
+| 9.9 ([#101](https://github.com/KenSuenobu/rust-pushrod/issues/101)) | Pointer cursor per widget | indirectly, through extra-widgets 2.9 (first in M4) |
 | 10.1 ([#105](https://github.com/KenSuenobu/rust-pushrod/issues/105)) | Drawing modes: live or outline feedback while moving and resizing | 3.4 (first in M3) |
 | 11.1 ([#142](https://github.com/KenSuenobu/rust-pushrod/issues/142)) | Chassis: Code editor crate and editing core | indirectly, through 11.2, 11.3, 11.8 (first in M4) |
 | 11.2 ([#143](https://github.com/KenSuenobu/rust-pushrod/issues/143)) | Chassis: Code editor view: gutter, visible-line rendering, caret | 5.4 (first in M4) |
@@ -1940,11 +1941,16 @@ Generic widgets that any application can use live in the `pushrod-extra-widgets`
 
 | Extra widget | Needed by |
 |---|---|
-| extra-widgets 1.1 [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) Create the pushrod-extra-widgets crate | 2.3, 3.2, 3.8, 4.1, 4.2 |
+| extra-widgets 1.1 [#252](https://github.com/KenSuenobu/rust-pushrod/issues/252) Create the pushrod-extra-widgets crate | 1.4, 2.3, 3.1, 3.2, 3.8, 4.1, 4.2, 4.3, 6.2 |
+| extra-widgets 1.3 [#254](https://github.com/KenSuenobu/rust-pushrod/issues/254) Popover: a floating panel anchored to a control | 1.4 |
 | extra-widgets 2.6 [#42](https://github.com/KenSuenobu/rust-pushrod/issues/42) Tool palette (grid of tool buttons) | 3.2 |
+| extra-widgets 2.9 [#302](https://github.com/KenSuenobu/rust-pushrod/issues/302) Drag value (numeric scrubber) | 4.3 |
 | extra-widgets 4.5 [#255](https://github.com/KenSuenobu/rust-pushrod/issues/255) Property grid (name and value inspector) | 4.2 |
 | extra-widgets 4.9 [#256](https://github.com/KenSuenobu/rust-pushrod/issues/256) Breadcrumb bar (path control) | 3.8 |
+| extra-widgets 4.13 [#303](https://github.com/KenSuenobu/rust-pushrod/issues/303) Log view (append-only output) | 6.2 |
+| extra-widgets 4.14 [#304](https://github.com/KenSuenobu/rust-pushrod/issues/304) Canvas view (zoomable surface of items) | 3.1 |
 | extra-widgets 5.1 [#257](https://github.com/KenSuenobu/rust-pushrod/issues/257) Drawer (collapsible side panel) | 2.3, 4.1 |
+| extra-widgets 6.9 [#305](https://github.com/KenSuenobu/rust-pushrod/issues/305) Command palette | 1.4 |
 
 ### Parallel tracks
 

@@ -45,9 +45,9 @@ The MVP (v1 release candidate, published to crates.io) is a version of Pushrod i
 6. Rely on CI, golden-image tests, a widget gallery, a reference application built only with Pushrod, a guide for writing widgets, and documentation for everything.
 7. Draw everything through a backend crate (SDL2 today, SDL3 later) into GPU textures, with no OS-native UI, no per-frame CPU pixel work, sharp rendering on high-DPI displays, and no SDL types in the core or widget APIs.
 
-MVP scope: **66 of 121 active issues**, delivered in two release stages. The MVP column shows each issue's stage, and GitHub milestones match.
+MVP scope: **68 of 134 active issues**, delivered in two release stages. The MVP column shows each issue's stage, and GitHub milestones match.
 
-- **v0.1: dialog applications** (53 issues): Build and ship real dialog-style applications: core, backends, events, focus, the core widgets, composition, layouts, high-DPI, modal dialogs, CI, docs, and the first crates.io release.
+- **v0.1: dialog applications** (55 issues): Build and ship real dialog-style applications: core, backends, events, focus, the core widgets, composition, layouts, high-DPI, modal dialogs, CI, docs, and the first crates.io release.
 - **v0.2: forms (MVP complete)** (13 issues): Forms and form files (the runtime foundation for Chassis), plus input methods, mnemonics, accessibility, and written specs. Completes the MVP.
 
 Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, tabs, menus, toolbars, file chooser, text areas, multiple windows, the SDL3 backend, Chassis design mode, theming) follows the MVP.
@@ -56,10 +56,10 @@ Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, 
 
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
-| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 25 | 19 |
-| 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 22 | 10 |
+| 1 (#11) | Core: behavior flags, focus, timing, and performance | Shared behavior every widget gets for free: behavior flags and visual states, event masks, keyboard focus and mnemonics, timers, GPU text, and tree editing. | 27 | 21 |
+| 2 (#12) | Core dialog widgets | The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more. | 24 | 10 |
 | 3 (#13) | Value and choice controls | Scroll bar, slider, group box, choice button, split view, and expander. | 6 | 3 |
-| 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 7 | 1 |
+| 4 (#14) | Lists, tables, progress, spin boxes, and tabs | Progress bar, spin box, tab view, list view, table view, and combo box. | 9 | 1 |
 | 5 (#15) | Composition, clipping, and layout managers | Clip children to parents, composite widgets with retrievable parts, a scrollable Container with its own content area, autoresizing, and simple, extensible layout managers. | 10 | 6 |
 | 6 (#16) | Forms and form files (foundation for Chassis) | Widget registry, property introspection, a binary form file format, loader and writer, generated ID constants, modal dialogs, named actions, and design-mode hooks. | 13 | 10 |
 | 7 (#17) | Quality, documentation, and release | CI, golden-image tests, a widget gallery, a guide for writing widgets, a changelog, and the crates.io release. | 10 | 10 |
@@ -67,6 +67,7 @@ Everything else (actions and shortcuts, bindings, drag and drop, lists, tables, 
 | 9 (#79) | Event model and callbacks | A modern event vocabulary, capture/bubble propagation, reusable input controllers, event filters, actions and shortcuts, property bindings, callback handles, and drag and drop. | 11 | 5 |
 | 10 (#103) | Rendering backends, drawing modes, and vintage hardware | Backend crates (SDL2 now, SDL3 later) with no SDL in the core, a backend-neutral paint API, high-DPI, live vs. outline drawing for slow and vintage machines, a no_std core, and an experimental Atari ST backend. | 6 | 2 |
 | 11 (#141) | Chassis: code editor (chassis-code-editor) | A lightweight code editor component ("Monaco lite", Tier 1 features only) for Chassis's code-behind view, built as its own crate on Pushrod. | 9 | 0 |
+| 12 (#288) | Pushrod Showcase: an interactive demo of every widget | One application that shows every widget Pushrod provides, live: try it, change its properties, watch its events, and read the code. | 7 | 0 |
 
 ```mermaid
 flowchart LR
@@ -204,6 +205,8 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.23 (#136) | Public API polish before publishing: builders, prelude, and stability | Make the public API pleasant and stable before crates.io: builders with defaults, preludes, non-exhaustive enums, and consistent names. | `api`, `enhancement`, `mvp`, `parallelizable`, `size/M`, `usability` | Y | v0.1 | M | `src/lib.rs`, `pushrod-widgets (all widgets)` |
 | 1.24 (#137) | Fonts: shared font handles and a built-in default font | Replace per-widget font file paths with shared `Font` handles, and ship a default font so applications work without any font files. | `api`, `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `text`, `usability` | Y | v0.1 | S | `src/font.rs`, `assets/ (font and license)` |
 | 1.25 (#138) | Errors: return Result instead of panicking | Library code reports failures (fonts, images, windows, unknown widget IDs) as `Result` values instead of panicking. | `api`, `enhancement`, `mvp`, `parallelizable`, `reliability`, `size/S` | Y | v0.1 | S | `src/error.rs (new)`, `src/font.rs`, `src/engine.rs`, `src/cache.rs` |
+| 1.26 (#289) | Text truncation: shorten text that doesn't fit with an ellipsis | Text that is wider than its space is cut cleanly and ends in an ellipsis, at the end, start, or middle. | `chassis`, `core`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `usability` | Y | v0.1 | S | `src/paint.rs`, `src/text/layout.rs`, `pushrod-widgets/src/text_widget.rs`, `pushrod-widgets/src/button_widget.rs` |
+| 1.27 (#290) | Wrapped text: multi-line labels that reflow | Labels wrap their text onto several lines at word boundaries and reflow when their width changes. | `chassis`, `core`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `usability` | Y | v0.1 | S | `src/paint.rs`, `src/text/layout.rs`, `pushrod-widgets/src/text_widget.rs` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
@@ -861,6 +864,60 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/guides/creating-an-application.md` ("Creating an application", Guides, update). Guides: update the guide or concept page covering: a new Errors section in creating an application. Rustdoc: `pushrod::Error`, fallible functions. Examples: examples handle errors with `?`. Screenshots: n/a.
 
+### 1.26 (#289): Text truncation: shorten text that doesn't fit with an ellipsis
+
+**Problem Statement.** Text that doesn't fit its widget is currently clipped mid-letter or drawn over its neighbors. Buttons, labels, list rows, table cells, tabs, and breadcrumbs all meet text that is too long sooner or later, and every toolkit handles it the same way: shorten it and show an ellipsis.
+
+**Solution / Scope.** `paint::text` and the text layout (1.18 (#111)) take a `Truncate` mode: `None` (clip, as today), `End` ("Quarterly rep…"), `Start` ("…report.txt"), or `Middle` ("Quart…t.txt", for paths and file names). The cut falls on a grapheme boundary and the ellipsis is measured in the same font. `TextWidget` and `ButtonWidget` get a `truncate` property (default `End`); every later widget that draws text uses the same helper, so list rows, table cells, tabs, and menu items behave alike. `is_truncated()` reports whether text was shortened, so a tooltip (2.13 (#77)) can show the full text. Truncated layouts are cached with the rest of the text layout.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**A label in a narrow space: clipped today, then End, Start, and Middle truncation**
+
+![1.26 step set 1: A label in a narrow space: clipped today, then End, Start, and Middle truncation](mockups/1.26-1.png)
+
+**Acceptance Criteria.**
+
+- End, Start, and Middle modes cut on grapheme boundaries and never overflow the widget
+- Text that fits is drawn unchanged
+- `is_truncated()` reports shortening
+- Text and Button widgets default to End; paint tests cover all modes
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.18 (#111), 1.7 (#3).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text.md` ("Text", Concepts, update). Guides: update the guide or concept page covering: Text (truncation section). Rustdoc: `Truncate`, `paint::text`. Examples: Truncation modes in the showcase. Screenshots: Text page screenshot.
+
+### 1.27 (#290): Wrapped text: multi-line labels that reflow
+
+**Problem Statement.** Alert messages, explanations beside options, and help text are sentences, not single lines. Today a label draws one line; long text is cut off, so dialogs with real messages can't be built.
+
+**Solution / Scope.** `TextWidget` gets `wrap: Wrap` (`None`, `Word`, `Anywhere`) and `max_lines`. With wrapping on, the text layout (1.18 (#111)) breaks lines to the widget's width, honoring explicit `\n`; alignment (left, center, right) applies per line. If `max_lines` is set and the text needs more, the last line is truncated with an ellipsis (1.26 (#289)). The widget reports its height for a given width (`height_for_width`), which the layout managers (5.5 (#116)) use so a wrapped label pushes the widgets below it down. The boxed label (2.1 (#27)), check box and radio labels, and the alert (2.9 (#35)) use the same wrapping when they are built.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**A paragraph label: one clipped line today, wrapped, narrower (reflowed), and limited to two lines**
+
+![1.27 step set 1: A paragraph label: one clipped line today, wrapped, narrower (reflowed), and limited to two lines](mockups/1.27-1.png)
+
+**Acceptance Criteria.**
+
+- Text wraps at word boundaries and reflows when the width changes
+- `max_lines` truncates the last line with an ellipsis
+- `height_for_width` is reported and used by layouts once 5.5 (#116) lands
+- Explicit line breaks and per-line alignment
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.18 (#111), 1.7 (#3), 1.26 (#289).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text.md` ("Text", Concepts, update). Guides: update the guide or concept page covering: Text (wrapping section). Rustdoc: `Wrap`, `TextWidget::wrap`. Examples: Wrapped paragraph in the showcase. Screenshots: Text page screenshot.
+
 ## Epic 2: Core dialog widgets (#12)
 
 The widgets every dialog needs: labels, buttons, check boxes, radio groups, text fields, images, alerts, menus, tooltips, toolbars, and more.
@@ -895,6 +952,8 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | 2.20 (#89) | Message bar (non-modal inline notice) | A dismissible banner for warnings and information that doesn't block the window. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/message_bar.rs (new)` |
 | 2.21 (#125) | Image button | A button that shows an image, or an image with a text label, with the full button behavior. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/image_button.rs (new)` |
 | 2.22 (#126) | Link label | Clickable text that looks like a link and opens a URL or runs a callback. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/link_label.rs (new)` |
+| 2.23 (#291) | Selectable label text | Text in labels can be selected with the mouse or keyboard and copied. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/text_widget.rs` |
+| 2.24 (#292) | Count badge on buttons, tabs, and rows | A small count or dot drawn on a corner of a button, tab, or list row. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `src/paint.rs`, `pushrod-widgets/src/image_button.rs`, `pushrod-widgets/src/tab_view.rs`, `pushrod-widgets/src/list_view.rs` |
 
 ### 2.1 (#27): Boxed label widget
 
@@ -1028,6 +1087,66 @@ Clickable text that looks like a link and opens a URL or runs a callback. **Widg
 
 **Dependencies.** Requires 1.4 (#20), 1.6 (#22).
 
+### 2.23 (#291): Selectable label text
+
+**Problem Statement.** Users need to copy what an application tells them: an error message, a version number, a path, an ID. Text they can read but can't copy forces retyping.
+
+**Solution / Scope.** `TextWidget::selectable(true)`: drag selects, double-click selects a word, triple-click a line, Ctrl+A all; Ctrl+C copies through the clipboard; the pointer becomes an I-beam (9.9 (#101)). The selection is inverted like a text field's. Not focusable by Tab unless `focusable(true)`; no caret, no editing. Works with wrapped text (1.27 (#290)). The boxed label and link label inherit it.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**A selectable label: idle, dragging a selection, and copied**
+
+![2.23 step set 1: A selectable label: idle, dragging a selection, and copied](mockups/2.23-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `SelectionChanged { id }` | Selected text changed | `on_selection_change(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- Mouse and keyboard selection, copy to the clipboard
+- Works across wrapped lines
+- No caret or editing; off by default
+
+**Parallelism / Dependencies.** Parallelizable. Requires 1.27 (#290), 2.6 (#32), 9.9 (#101).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/text.md` ("Text", Widgets, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: `TextWidget::selectable`. Examples: Copyable error text in the showcase. Screenshots: Text page screenshot.
+
+### 2.24 (#292): Count badge on buttons, tabs, and rows
+
+**Problem Statement.** Unread counts, pending changes, and "something new here" markers are shown on the control that leads to them. Each widget otherwise invents its own.
+
+**Solution / Scope.** A shared `Badge` (`Count(n)`, `Dot`, or `Text`) that image buttons, toolbar buttons, tabs, and list rows can carry: a small filled box (flat, square corners) with inverted text at the top-right corner, or right-aligned in a row. Counts above `max` show as "99+"; zero hides the badge. One `paint::badge` helper draws it everywhere.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Badges: a count on a toolbar button, a dot on a tab, and counts on list rows**
+
+![2.24 step set 1: Badges: a count on a toolbar button, a dot on a tab, and counts on list rows](mockups/2.24-1.png)
+
+**Acceptance Criteria.**
+
+- Count, dot, and text badges on image buttons, tabs, and list rows
+- Zero hides it; large counts are capped
+- Same look everywhere through one paint helper
+
+**Parallelism / Dependencies.** Parallelizable. Requires 2.21 (#125), 4.4 (#51), 4.5 (#52).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/badges.md` ("Badges", Concepts, new). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: `Badge`. Examples: Badges in the showcase. Screenshots: Badge screenshot.
+
 ## Epic 3: Value and choice controls (#13)
 
 Scroll bar, slider, group box, choice button, split view, and expander.
@@ -1102,6 +1221,8 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 | 4.6 (#53) | Combo box | Text field with a drop-down list of suggestions. | `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `pushrod-widgets/src/combo_box.rs (new)` |
 | 4.9 (#92) | Table view | Multi-column list with headers, column resizing, and sorting. | `chassis`, `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/table_view.rs (new)` |
 | 4.10 (#128) | Busy spinner | A small animated indicator for work of unknown length, for use inline or on buttons. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/spinner.rs (new)` |
+| 4.11 (#293) | Empty-state text for list, table, and other views | A message shown in the middle of a view when it has no rows. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/list_view.rs`, `pushrod-widgets/src/table_view.rs` |
+| 4.12 (#294) | Arithmetic in number fields | Type a simple calculation into a number field and it is replaced by the result. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/spin_box.rs`, `pushrod-widgets/src/text_field.rs`, `src/expr.rs (new)` |
 
 ### 4.1 (#48): Progress bar
 
@@ -1144,6 +1265,66 @@ Multi-column list with headers, column resizing, and sorting. **Widget roadmap:*
 A small animated indicator for work of unknown length, for use inline or on buttons. **Widget roadmap:** [`docs/widgets/spinner.md`](widgets/spinner.md) (look, behavior, events, acceptance criteria).
 
 **Dependencies.** Requires 1.5 (#21).
+
+### 4.11 (#293): Empty-state text for list, table, and other views
+
+**Problem Statement.** An empty list looks broken: users can't tell whether it is loading, filtered to nothing, or truly empty.
+
+**Solution / Scope.** List view and table view (and the views built on them) get `placeholder: Option<String>` and an optional placeholder widget: shown centered, in gray wrapped text (1.27 (#290)), whenever the data source has no rows; table headers stay visible. Typical text: "No files yet", "No matches". Views in other widget libraries use the same property name.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**A list with rows, the same list empty with its message, and an empty table**
+
+![4.11 step set 1: A list with rows, the same list empty with its message, and an empty table](mockups/4.11-1.png)
+
+**Acceptance Criteria.**
+
+- Placeholder shown only when there are no rows
+- Table headers stay visible
+- Custom placeholder widget supported
+
+**Parallelism / Dependencies.** Parallelizable. Requires 4.5 (#52), 4.9 (#92), 1.27 (#290).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/list-view.md` ("List View", Widgets, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: `placeholder`. Examples: Empty list in the showcase. Screenshots: Empty-state screenshot.
+
+### 4.12 (#294): Arithmetic in number fields
+
+**Problem Statement.** Sizes and positions are often derived: half of 730, 48 plus a 12-pixel margin. Reaching for a calculator breaks the flow.
+
+**Solution / Scope.** Numeric text fields (2.6 (#32)) and the spin box (4.2 (#49)) get `accepts_expressions(true)`: on Return or focus loss, input such as `730/2`, `48+12`, or `(16+4)*3` is evaluated (+, -, *, /, parentheses, decimals) and replaced by the result, then range-checked as usual. Invalid input is marked like any invalid value. A small evaluator in the core, with no dependency.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Typing 730/2 in a width field, then Return**
+
+![4.12 step set 1: Typing 730/2 in a width field, then Return](mockups/4.12-1.png)
+
+#### Events and callbacks
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `ValueChanged { id }` | The result is committed | `on_value_change(id, ..)` |
+
+Like every widget, it can also receive application-defined custom events in `handle_event` and emit its own (1.13 (#78)).
+
+**Acceptance Criteria.**
+
+- +, -, *, / and parentheses evaluated on commit
+- Result clamped and validated like typed numbers
+- Off by default; invalid expressions marked
+
+**Parallelism / Dependencies.** Parallelizable. Requires 2.6 (#32), 4.2 (#49).
+
+**Technical Stack.** Rust
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/spin-box.md` ("Spin Box", Widgets, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: `accepts_expressions`. Examples: Expression field in the showcase. Screenshots: n/a.
 
 ## Epic 5: Composition, clipping, and layout managers (#15)
 
@@ -2538,6 +2719,205 @@ Document the code editor on the site, ship an example editor, and cover it with 
 
 **Dependencies.** Requires 11.6 (#147), 11.7 (#148), 11.8 (#149), 7.2 (#70).
 
+## Epic 12: Pushrod Showcase: an interactive demo of every widget (#288)
+
+One application that shows every widget Pushrod provides, live: try it, change its properties, watch its events, and read the code.
+
+**Problem.** Pushrod is growing to dozens of standard widgets and dozens more extra widgets. Small separate examples don't scale: nobody can see everything in one place, try a widget before using it, or check that a change didn't break another widget.
+
+**Scope.** A `pushrod-showcase` application in the workspace, growing out of the widget gallery example (7.3 (#71)): a searchable list of every widget and core feature, a live page for each with a property panel, an event log, and the source code, and a scripted run that produces the documentation screenshots. Every widget, standard or extra, must have a page; a test enforces it.
+
+**Dependencies.** Starts once the container (5.3 (#58)), row and column layouts (5.6 (#117)), and text field (2.6 (#32)) exist; the shell (12.1 (#295)) comes first, then the other issues in parallel. Needs only MVP features, so it follows the MVP release directly.
+
+| Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
+|---|---|---|---|---|---|---|---|
+| 12.1 (#295) | Showcase application shell | The showcase window: a searchable list of pages on the left and the selected page on the right. | `documentation`, `example`, `showcase`, `size/M` | N | N | M | `pushrod-showcase/ (new crate)`, `pushrod-showcase/src/main.rs`, `pushrod-showcase/src/page.rs`, `Cargo.toml` |
+| 12.2 (#296) | Showcase pages for every standard widget, with a completeness test | One page per standard widget showing its states and variations, and a test that fails when a widget has no page. | `documentation`, `example`, `parallelizable`, `showcase`, `size/M` | Y | N | M | `pushrod-showcase/src/pages/ (one file per widget)`, `pushrod-showcase/tests/completeness.rs` |
+| 12.3 (#297) | Showcase property panel: change any property live | A panel listing the selected demo widget's properties; editing one updates the widget immediately. | `documentation`, `example`, `parallelizable`, `showcase`, `size/M` | Y | N | M | `pushrod-showcase/src/property_panel.rs` |
+| 12.4 (#298) | Showcase event log | A panel that lists every event the demo widgets emit, as it happens. | `documentation`, `example`, `parallelizable`, `showcase`, `size/M` | Y | N | M | `pushrod-showcase/src/event_log.rs` |
+| 12.5 (#299) | Showcase source view: the code for each page | Each page shows the code that builds it, checked by the compiler, with a Copy button. | `documentation`, `example`, `parallelizable`, `showcase`, `size/M` | Y | N | M | `pushrod-showcase/src/source_view.rs`, `pushrod-showcase/build.rs` |
+| 12.6 (#300) | Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources | Pages that demonstrate what isn't a widget: text, layouts, focus and keys, modal dialogs, forms loaded from files, and resources by ID. | `documentation`, `example`, `parallelizable`, `showcase`, `size/M` | Y | N | M | `pushrod-showcase/src/pages/core/` |
+| 12.7 (#301) | Showcase in CI: scripted tour, golden screenshots, and documentation images | CI opens every page, compares it with its golden image, and publishes the screenshots the documentation uses. | `ci`, `documentation`, `example`, `parallelizable`, `showcase`, `size/M` | Y | N | M | `pushrod-showcase/tests/tour.rs`, `.github/workflows/ci.yml`, `pushrod-docs/static/img/screenshots/` |
+
+### 12.1 (#295): Showcase application shell
+
+**Problem Statement.** There is no single place to see what Pushrod can do. The gallery example (7.3 (#71)) is one fixed screen and will not hold dozens of widgets.
+
+**Solution / Scope.** A `pushrod-showcase` binary crate (`cargo run -p pushrod-showcase`). Left: a search field and the list of pages, grouped (Core, Standard widgets, Layouts, Forms and resources, Extra widgets). Right: the selected page inside a scrolling container, with its title and one-line description. A `Page` trait (`name`, `group`, `description`, `build(&mut Ui) -> WidgetId`, `source()`), so adding a page is one small file. Search filters by name and description. The window is resizable; the last page is remembered. Built only from MVP widgets (buttons in a column inside a container, a text field) so it works from v0.1; it adopts the list view, split view, and tab view as they land. The gallery example's content moves into pages and `gallery.rs` becomes a thin launcher.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**The showcase: page list with search on the left, the Button page on the right**
+
+![12.1 step set 1: The showcase: page list with search on the left, the Button page on the right](mockups/12.1-1.png)
+
+**Typing in the search field filters the pages**
+
+![12.1 step set 2: Typing in the search field filters the pages](mockups/12.1-2.png)
+
+**Acceptance Criteria.**
+
+- `cargo run -p pushrod-showcase` opens the shell with grouped pages
+- Search filters the page list
+- Adding a page needs only an implementation of `Page` and one registration line
+- Gallery example content available as pages
+
+**Parallelism / Dependencies.** Not parallelizable. Requires 5.3 (#58), 5.6 (#117), 2.6 (#32), 7.3 (#71).
+
+**Technical Stack.** Rust, pushrod, pushrod-widgets
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/showcase.md` ("The Pushrod Showcase", Guides, new). Guides: update the guide or concept page covering: Introduction, Quick start (run the showcase). Rustdoc: `Page` trait. Examples: the showcase itself. Screenshots: Shell screenshot.
+
+### 12.2 (#296): Showcase pages for every standard widget, with a completeness test
+
+**Problem Statement.** A demo is only "all inclusive" if nothing can be left out. As widgets are added by many pull requests, pages will be forgotten unless something checks.
+
+**Solution / Scope.** A page for each widget in `pushrod-widgets`: its common variations side by side (normal, pressed or selected, focused, disabled; sizes and options), each one live. A test walks the widget registry (6.1 (#60)) and fails if any registered widget type has no showcase page; the same test covers every widget library that registers itself, including `pushrod-extra-widgets`. From this issue on, a pull request that adds a widget adds its page (CONTRIBUTING.md).
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**The Check Box page: every state, live**
+
+![12.2 step set 1: The Check Box page: every state, live](mockups/12.2-1.png)
+
+**Acceptance Criteria.**
+
+- Every registered standard widget has a page
+- The completeness test fails when a registered type has no page
+- CONTRIBUTING.md states the rule
+
+**Parallelism / Dependencies.** Parallelizable. Requires 12.1 (#295), 6.1 (#60).
+
+**Technical Stack.** Rust, pushrod, pushrod-widgets
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/showcase.md` ("The Pushrod Showcase", Guides, update). Guides: update the guide or concept page covering: Contributing (every widget has a showcase page). Rustdoc: n/a. Examples: one page per widget. Screenshots: Per-widget screenshots.
+
+### 12.3 (#297): Showcase property panel: change any property live
+
+**Problem Statement.** Seeing fixed variations doesn't answer "what happens if I set this?". Trying a property should not require writing code.
+
+**Solution / Scope.** Clicking a widget on a page selects it (outlined). A panel lists its properties from introspection (6.2 (#61)), each with a simple editor: text field, check box, number field, or choice by cycling. Edits apply at once; Reset restores the page. When `pushrod-extra-widgets` is present, the panel uses its property grid (extra-widgets 4.5 (#52)) instead.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**A button selected on its page; its text and disabled flag changed in the property panel**
+
+![12.3 step set 1: A button selected on its page; its text and disabled flag changed in the property panel](mockups/12.3-1.png)
+
+**Acceptance Criteria.**
+
+- Selecting a demo widget lists its properties
+- Edits apply immediately; Reset restores
+- Works for any registered widget without per-widget code
+
+**Parallelism / Dependencies.** Parallelizable. Requires 12.2 (#296), 6.2 (#61).
+
+**Technical Stack.** Rust, pushrod, pushrod-widgets
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/showcase.md` ("The Pushrod Showcase", Guides, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: n/a. Examples: the property panel. Screenshots: Panel screenshot.
+
+### 12.4 (#298): Showcase event log
+
+**Problem Statement.** Pushrod's widgets are driven by events and callbacks; learning which event fires when is half of learning a widget.
+
+**Solution / Scope.** A panel at the bottom of the window: each widget event (`Clicked`, `Toggled`, `ValueChanged`, ...) and, optionally, each engine event (9.10 (#109)) is appended with its widget ID and payload. Filter by kind; Clear; pause. Clicking a line outlines the widget that emitted it.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**Clicking and toggling on a page; the events appear in the log**
+
+![12.4 step set 1: Clicking and toggling on a page; the events appear in the log](mockups/12.4-1.png)
+
+**Acceptance Criteria.**
+
+- Widget events appear as they happen with ID and payload
+- Engine events can be switched on
+- Filter, clear, and pause
+
+**Parallelism / Dependencies.** Parallelizable. Requires 12.1 (#295), 9.10 (#109).
+
+**Technical Stack.** Rust, pushrod, pushrod-widgets
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/showcase.md` ("The Pushrod Showcase", Guides, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: n/a. Examples: the event log. Screenshots: Log screenshot.
+
+### 12.5 (#299): Showcase source view: the code for each page
+
+**Problem Statement.** A demo that shows a widget but not how to create it sends people to the documentation to find the same thing again.
+
+**Solution / Scope.** A Source toggle on every page shows the page's own `build` function, embedded at compile time from the page's source file (so it cannot go stale), in a monospaced, scrolling, selectable label. Copy puts it on the clipboard. The same snippets are what the documentation site's widget pages include.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**The Source toggle shows the code that builds the page**
+
+![12.5 step set 1: The Source toggle shows the code that builds the page](mockups/12.5-1.png)
+
+**Acceptance Criteria.**
+
+- Every page shows its real source
+- Copy places it on the clipboard
+- Documentation pages include the same snippets
+
+**Parallelism / Dependencies.** Parallelizable. Requires 12.2 (#296), 1.27 (#290).
+
+**Technical Stack.** Rust, pushrod, pushrod-widgets
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/showcase.md` ("The Pushrod Showcase", Guides, update). Guides: update the guide or concept page covering: Writing documentation (snippets come from showcase pages). Rustdoc: n/a. Examples: the source view. Screenshots: n/a.
+
+### 12.6 (#300): Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources
+
+**Problem Statement.** Much of Pushrod is behavior rather than widgets. Layouts, keyboard focus, modal dialogs, and resource loading need to be seen working as much as buttons do.
+
+**Solution / Scope.** Pages for: text (fonts, truncation 1.26 (#289), wrapping 1.27 (#290)), per-state appearance, focus and Tab order, row, column, and form layouts (resize the page to watch them reflow), modal dialogs and alerts, a form loaded from a resource file with typed IDs, and images and strings by ID. Later features (drag and drop, undo, actions, more layouts, multiple windows) add their page in their own pull request.
+
+#### Look and behavior (proposed)
+
+Each image shows the widget step by step, drawn in Pushrod's current style; blue notes name the event emitted. Mockups come from [`docs/mockups/generate.py`](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/generate.py): edit a frame there and re-run it to change the design, and update this section.
+
+**The Form layout page at two window widths**
+
+![12.6 step set 1: The Form layout page at two window widths](mockups/12.6-1.png)
+
+**Acceptance Criteria.**
+
+- A page for each MVP core feature listed
+- Layout pages reflow when resized
+- The forms page loads a real resource file
+
+**Parallelism / Dependencies.** Parallelizable. Requires 12.1 (#295), 5.7 (#118), 6.7 (#66), 6.10 (#153).
+
+**Technical Stack.** Rust, pushrod, pushrod-widgets
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/showcase.md` ("The Pushrod Showcase", Guides, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: n/a. Examples: core feature pages. Screenshots: Per-page screenshots.
+
+### 12.7 (#301): Showcase in CI: scripted tour, golden screenshots, and documentation images
+
+**Problem Statement.** An all-inclusive demo is also the best regression test: if every page renders as before, every widget still draws correctly. And the documentation needs a screenshot of each widget that is never out of date.
+
+**Solution / Scope.** `--tour` runs the showcase headless with the test painter: it visits every page, renders it, and compares it with a golden image (7.2 (#70)). `--screenshots <dir>` writes the page images that the documentation site's widget pages show. CI runs the tour on every pull request and uploads differing images as artifacts.
+
+**Acceptance Criteria.**
+
+- The tour visits every page and compares golden images in CI
+- Documentation screenshots are generated, not hand-made
+- Differences are uploaded as artifacts
+
+**Parallelism / Dependencies.** Parallelizable. Requires 12.2 (#296), 7.2 (#70).
+
+**Technical Stack.** Rust, pushrod, pushrod-widgets
+
+**Documentation.** Docusaurus page: `pushrod-docs/docs/guides/showcase.md` ("The Pushrod Showcase", Guides, update). Guides: update the guide or concept page covering: Contributing (CI), Writing documentation (screenshots). Rustdoc: n/a. Examples: n/a. Screenshots: all widget screenshots.
+
 ## Work Order
 
 Work in this order. Items in the same step can be done in parallel unless their dependencies say otherwise.
@@ -2568,6 +2948,8 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.4 (#20) Keyboard focus, Tab order, and Return/Escape — MVP v0.1
 - 1.19 (#112) Input method (IME) support: composition text and candidate window — MVP v0.2
 - 1.17 (#104) Per-state appearance: colors, border, and font for each visual state — MVP v0.1
+- 1.26 (#289) Text truncation: shorten text that doesn't fit with an ellipsis — MVP v0.1
+- 1.27 (#290) Wrapped text: multi-line labels that reflow — MVP v0.1
 - 1.12 (#76) Keyboard mnemonics: underlined shortcut letters — MVP v0.2
 - 1.5 (#21) Timers and idle callbacks — MVP v0.1
 - 10.6 (#134) Backend crates: keep SDL out of the core and the widgets — MVP v0.1
@@ -2626,7 +3008,17 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 7.4 (#72) Guide: writing widgets and composites — MVP v0.1
 - 7.5 (#73) Changelog, Cargo metadata, and crates.io release — MVP v0.1
 
-**7. After MVP: events and commands**
+**7. Showcase (right after the MVP; pages keep growing with each widget)**
+
+- 12.1 (#295) Showcase application shell
+- 12.2 (#296) Showcase pages for every standard widget, with a completeness test
+- 12.3 (#297) Showcase property panel: change any property live
+- 12.4 (#298) Showcase event log
+- 12.5 (#299) Showcase source view: the code for each page
+- 12.6 (#300) Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources
+- 12.7 (#301) Showcase in CI: scripted tour, golden screenshots, and documentation images
+
+**8. After MVP: events and commands**
 
 - 9.3 (#95) Event filters: observe or intercept another widget's events
 - 9.5 (#97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons
@@ -2638,7 +3030,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 1.15 (#81) Undo and redo command stack
 - 10.1 (#105) Drawing modes: live or outline feedback while moving and resizing
 
-**8. After MVP: widgets**
+**9. After MVP: widgets**
 
 - 5.4 (#59) Autoresizing (keep margins or stretch on resize)
 - 5.8 (#119) Grid layout
@@ -2665,8 +3057,12 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 2.22 (#126) Link label
 - 4.10 (#128) Busy spinner
 - 3.9 (#47) Split view (panes with draggable dividers)
+- 2.23 (#291) Selectable label text
+- 2.24 (#292) Count badge on buttons, tabs, and rows
+- 4.11 (#293) Empty-state text for list, table, and other views
+- 4.12 (#294) Arithmetic in number fields
 
-**9. After MVP: platform and Chassis**
+**10. After MVP: platform and Chassis**
 
 - 1.9 (#24) Dirty-rectangle redraw
 - 1.16 (#82) Multiple windows: separate OS windows, each with its own engine
@@ -2679,7 +3075,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 10.5 (#135) SDL3 backend (pushrod-sdl3)
 - 6.13 (#156) Event metadata in the widget registry
 
-**10. After MVP: Chassis code editor**
+**11. After MVP: Chassis code editor**
 
 - 11.1 (#142) Chassis: Code editor crate and editing core
 - 11.2 (#143) Chassis: Code editor view: gutter, visible-line rendering, caret
@@ -2691,7 +3087,7 @@ Work in this order. Items in the same step can be done in parallel unless their 
 - 11.8 (#149) Chassis: Code editor API for the Chassis designer
 - 11.9 (#150) Chassis: Code editor documentation, example, and tests
 
-**11. Distant future**
+**12. Distant future**
 
 - 8.1 (#74) Theme for colors and metrics (future)
 - 8.2 (#75) Skins: image-based widget rendering (future)

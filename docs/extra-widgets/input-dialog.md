@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Text, number, and choice forms
 - [ ] Validation disables OK
 - [ ] Completion receives None on Cancel
-- [ ] Registered as `extra.input_dialog` and shown in the gallery (1.2)
+- [ ] Registered as `extra.input_dialog` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

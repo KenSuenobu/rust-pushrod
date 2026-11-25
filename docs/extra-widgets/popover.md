@@ -54,11 +54,15 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Escape and an outside click close it; focus returns to the anchor
 - [ ] Any widget tree can be the content
 - [ ] Modal and modeless modes
-- [ ] Registered as `extra.popover` and shown in the gallery (1.2)
+- [ ] Registered as `extra.popover` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 
 Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 5.1 [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) Clip children to their parent's bounds, Pushrod 5.2 [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) Composite widgets: build widgets from parts that applications can retrieve and modify, Pushrod 9.2 [#94](https://github.com/KenSuenobu/rust-pushrod/issues/94) Event propagation: capture, target, and bubble phases with handled/ignored, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
+
+## Used by Chassis
+
+Chassis 1.4 [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) Commands, menus, and shortcuts.
 
 ## Implementation notes
 

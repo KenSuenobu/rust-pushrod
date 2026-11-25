@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Headings, icons, and counts
 - [ ] Bound to a stack layout
 - [ ] Keyboard navigation
-- [ ] Registered as `extra.sidebar` and shown in the gallery (1.2)
+- [ ] Registered as `extra.sidebar` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

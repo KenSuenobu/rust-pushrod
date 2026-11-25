@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Part-by-part editing with keys and stepper
 - [ ] 12- and 24-hour formats
 - [ ] Date-time field keeps one combined value
-- [ ] Registered as `extra.time_field` and shown in the gallery (1.2)
+- [ ] Registered as `extra.time_field` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

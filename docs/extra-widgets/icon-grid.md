@@ -54,7 +54,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Reflowing, virtualized grid
 - [ ] Rubber-band and keyboard selection, type-to-find
 - [ ] Drag and drop and in-place rename
-- [ ] Registered as `extra.icon_grid` and shown in the gallery (1.2)
+- [ ] Registered as `extra.icon_grid` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

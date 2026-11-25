@@ -55,7 +55,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Expand and collapse by mouse and keyboard
 - [ ] Lazy children from a data source
 - [ ] Optional columns and drag to reparent
-- [ ] Registered as `extra.tree_view` and shown in the gallery (1.2)
+- [ ] Registered as `extra.tree_view` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

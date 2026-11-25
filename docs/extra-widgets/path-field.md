@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Browse opens the chooser at the current path
 - [ ] Typed, browsed, and dropped paths
 - [ ] Missing-path mark when required
-- [ ] Registered as `extra.path_field` and shown in the gallery (1.2)
+- [ ] Registered as `extra.path_field` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

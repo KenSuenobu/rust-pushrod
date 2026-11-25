@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Operators follow the field's type
 - [ ] Add, remove, and optional nested groups
 - [ ] Rules returned as plain, serializable data
-- [ ] Registered as `extra.rule_editor` and shown in the gallery (1.2)
+- [ ] Registered as `extra.rule_editor` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

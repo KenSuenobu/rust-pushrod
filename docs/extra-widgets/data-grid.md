@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Typed cell editors with validation
 - [ ] Spreadsheet-style keyboard editing
 - [ ] Add and delete rows through the data source
-- [ ] Registered as `extra.data_grid` and shown in the gallery (1.2)
+- [ ] Registered as `extra.data_grid` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

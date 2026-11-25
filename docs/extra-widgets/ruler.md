@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Units, origin, and zoom
 - [ ] Follows an attached container's scroll
 - [ ] Pointer tracking line and draggable markers
-- [ ] Registered as `extra.ruler` and shown in the gallery (1.2)
+- [ ] Registered as `extra.ruler` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

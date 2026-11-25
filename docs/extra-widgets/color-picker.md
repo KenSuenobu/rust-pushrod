@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Swatches, recent colors, RGB and HSV sliders, hex field
 - [ ] Popover and inline use
 - [ ] Drag a color between wells
-- [ ] Registered as `extra.color_picker` and shown in the gallery (1.2)
+- [ ] Registered as `extra.color_picker` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

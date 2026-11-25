@@ -15,7 +15,7 @@ Profile pictures, icons, and document images are set by dropping or choosing a p
 
 ## What it does
 
-`ImageWell { image }`: an image widget (Pushrod 2.7) scaled to fit inside a frame. Drop an image file (Pushrod 9.8), paste with Ctrl+V, or double-click to choose with the file chooser; Delete clears it. A dotted outline shows while a drop is over it. Optional square crop with a draggable selection.
+`ImageWell { image }`: an image widget (Pushrod 2.7) scaled to fit inside a frame. Drop an image file (Pushrod 9.8) or double-click to choose with the file chooser; Delete clears it. Pasting an image with Ctrl+V works on the SDL3 backend only (Pushrod 10.5): SDL2's clipboard carries text, not images; on SDL2, pasting a file path loads that file. A dotted outline shows while a drop is over it. Optional square crop with a draggable selection.
 
 ## How it looks
 
@@ -49,10 +49,10 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Drop, paste, choose, and clear
+- [ ] Drop, choose, and clear; paste of a file path on SDL2 and of image data on SDL3
 - [ ] Drop feedback outline
 - [ ] Optional square crop
-- [ ] Registered as `extra.image_well` and shown in the gallery (1.2)
+- [ ] Registered as `extra.image_well` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

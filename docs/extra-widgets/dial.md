@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Drag, wheel, and keys change the value within range
 - [ ] Wrapping mode for angles
 - [ ] Notches and optional value text
-- [ ] Registered as `extra.dial` and shown in the gallery (1.2)
+- [ ] Registered as `extra.dial` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

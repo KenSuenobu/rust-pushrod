@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Blocks, name search, and recent characters
 - [ ] Preview with name and code point
 - [ ] Grid virtualized for large blocks
-- [ ] Registered as `extra.character_picker` and shown in the gallery (1.2)
+- [ ] Registered as `extra.character_picker` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

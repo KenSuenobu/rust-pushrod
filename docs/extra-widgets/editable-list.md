@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Add, remove, edit, and reorder
 - [ ] Validation and uniqueness
 - [ ] Buttons disabled when not applicable
-- [ ] Registered as `extra.editable_list` and shown in the gallery (1.2)
+- [ ] Registered as `extra.editable_list` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 

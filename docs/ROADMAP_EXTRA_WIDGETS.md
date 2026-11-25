@@ -4,7 +4,7 @@
 
 ## Description
 
-A deep dive into the Pushrod widgets in the issues list, and a survey of the widgets that Atari GEM, AmigaOS (GadTools, ReAction, MUI), the classic Mac OS Toolbox, macOS AppKit, GTK and libadwaita, Qt, KDE Frameworks, Motif, and other toolkits (Win32 common controls, Delphi VCL, Java Swing, BeOS/Haiku) provide, to find the widgets and compound widgets that are generic enough to be worth building. They go in a separate crate, `pushrod-extra-widgets`, outside the deliberately simple `pushrod-widgets` and outside the Pushrod MVP. Chassis's generic widgets (property grid, breadcrumb bar, tool palette, drawer) live here too, so any application can use them.
+A deep dive into the Pushrod widgets in the issues list, and a survey of the widgets that Atari GEM, AmigaOS (GadTools, ReAction, MUI), the classic Mac OS Toolbox, macOS AppKit, GTK and libadwaita, Qt, KDE Frameworks, Motif, and other toolkits (Win32 common controls, Delphi VCL, Java Swing, BeOS/Haiku) provide, to find the widgets and compound widgets that are generic enough to be worth building. They go in a separate crate, `pushrod-extra-widgets`, outside the deliberately simple `pushrod-widgets` and outside the Pushrod MVP. Chassis's generic widgets (property grid, breadcrumb bar, tool palette, drawer, drag value, log view, canvas view, command palette) live here too, so any application can use them. A second pass surveyed modern toolkits (egui, Dear ImGui, WinUI, Flutter, Material, Ant Design, and editor-style tools) for popular widgets the classic toolkits lack.
 
 ## Why a separate crate
 
@@ -13,11 +13,12 @@ A deep dive into the Pushrod widgets in the issues list, and a survey of the wid
 - **Same look.** Extra widgets follow the [design philosophy](../DESIGN_PHILOSOPHY.md): flat fills, one-pixel borders, no bevels, gradients, shadows, glass, or rounded corners. They mix with standard widgets on the same form. The freedom here is in how much a widget does, not in how it looks; graphically ambitious looks belong in skin and theme libraries.
 - **Built from parts.** Compound widgets reuse standard widgets as parts (Pushrod 5.2) that applications can retrieve and restyle, rather than redrawing them.
 - **Registered for forms and Chassis.** `pushrod_extra_widgets::register` adds every widget to the registry under the `extra.` prefix, so form files and Chassis's palette load them like standard widgets.
-- **Chassis's generic widgets live here.** The drawer, tool palette, breadcrumb bar, and property grid are useful to any application, so Chassis uses them from this crate instead of keeping private copies.
+- **Chassis's generic widgets live here.** The drawer, tool palette, breadcrumb bar, property grid, drag value, log view, canvas view, and command palette are useful to any application, so Chassis uses them from this crate instead of keeping private copies.
+- **One demo for everything.** Every extra widget has a live page in the Pushrod Showcase ([Pushrod Epic 12](ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md)), next to the standard widgets.
 
 ## MVP Definition
 
-The extra-widgets MVP is its first crates.io release: milestones **X1** and **X2**, 26 of 44 issues (label `extra-widgets-mvp`). It is separate from, and comes after, the Pushrod MVP. X1 is small and comes first because the Chassis MVP needs five of its issues (label `chassis`): the crate, tool palette, property grid, breadcrumb bar, and drawer. X2 adds the controls, pickers, lists, panels, and dialogs most applications reach for. X3 (specialized views and assistants) follows the MVP.
+The extra-widgets MVP is its first crates.io release: milestones **X1** and **X2**, 34 of 52 issues (label `extra-widgets-mvp`). It is separate from, and comes after, the Pushrod MVP. X1 comes first because the Chassis MVP needs 10 of its issues (label `chassis`): popover, tool palette, drag value, property grid, breadcrumb bar, log view, canvas view, drawer, command palette, and the crate itself. X2 adds the controls, pickers, lists, panels, and dialogs most applications reach for. X3 (specialized views and assistants) follows the MVP.
 
 An application using the MVP can:
 
@@ -29,8 +30,8 @@ An application using the MVP can:
 
 | Milestone | Result | Issues | MVP |
 |---|---|---|---|
-| **Extra widgets 1: crate and Chassis widgets** | The crate, its gallery, the popover, and the generic widgets the Chassis MVP uses: tool palette, property grid, breadcrumb bar, and drawer. | 7 | Yes |
-| **Extra widgets 2: everyday controls and pickers** | Controls and pickers most applications reach for: menu and split buttons, segmented control, stepper, dial, level indicator, calendar, date and time pickers, color and font choosers, path field, tree view, check and editable lists, accordion, sidebar, and the common dialogs. | 19 | Yes |
+| **Extra widgets 1: crate and Chassis widgets** | The crate, its showcase pages, the popover, and the generic widgets the Chassis MVP uses: tool palette, property grid, breadcrumb bar, drawer, drag value, log view, canvas view, and command palette. | 11 | Yes |
+| **Extra widgets 2: everyday controls and pickers** | Controls and pickers most applications reach for: menu and split buttons, segmented control, stepper, dial, level indicator, calendar, date and time pickers, color and font choosers, path field, tree view, check and editable lists, accordion, sidebar, and the common dialogs. | 23 | Yes |
 | **Extra widgets 3: specialized views and assistants** | Specialized views and assistants: ruler, shortcut field, image well, new-password, character picker, column browser, icon grid, data grid, dual list, filter field, rule editor, image viewer, document tabs, wizard, settings and about dialogs, find bar, and shortcuts editor. | 18 | No |
 
 ## Review of the widgets already in the issues
@@ -58,7 +59,7 @@ Every widget issue in the Pushrod roadmap was reviewed against one test: *is it 
 
 ## Survey: what other toolkits provide
 
-Each widget below exists, in some form, in at least two of the toolkits reviewed (the column browser, from NeXTSTEP and the Mac Finder, is the one exception; it was already planned). **Mac OS** is the classic Toolbox (including the Mac OS 8 Appearance controls); **macOS** is AppKit (NeXTSTEP's successor); **Amiga** covers GadTools, ReAction, and MUI; **Win/VCL** covers Win32 common controls, Delphi's VCL, and similar. Ideas only: names and behavior are Pushrod's own.
+Each widget in this table exists, in some form, in at least two of the toolkits reviewed (the column browser, from NeXTSTEP and the Mac Finder, is the one exception; it was already planned). **Mac OS** is the classic Toolbox (including the Mac OS 8 Appearance controls); **macOS** is AppKit (NeXTSTEP's successor); **Amiga** covers GadTools, ReAction, and MUI; **Win/VCL** covers Win32 common controls, Delphi's VCL, and similar. Ideas only: names and behavior are Pushrod's own.
 
 | Widget | GEM | Amiga | Mac OS | macOS | GTK | Qt | KDE | Motif | Win/VCL |
 |---|---|---|---|---|---|---|---|---|---|
@@ -105,6 +106,23 @@ Each widget below exists, in some form, in at least two of the toolkits reviewed
 | [Find and replace bar](extra-widgets/find-bar.md) |  |  |  | ✓ | ✓ |  | ✓ |  |  |
 | [Keyboard shortcuts editor](extra-widgets/shortcuts-editor.md) |  |  |  | ✓ | ✓ | ✓ | ✓ |  |  |
 
+### From modern toolkits
+
+A second pass looked at what is popular in newer libraries and tool-style applications and missing above. These are not in the classic toolkits, or only in one.
+
+| Widget | Where it is popular |
+|---|---|
+| [Command palette](extra-widgets/command-palette.md) | The command palettes of VS Code and Sublime Text, Search Everywhere in JetBrains tools, Blender's operator search, the locator in Qt Creator |
+| [Drag value](extra-widgets/drag-value.md) | egui's DragValue, Dear ImGui's drag fields, numeric fields in Blender, Figma, Unity, and Godot inspectors |
+| [Log view](extra-widgets/log-view.md) | Output panels in VS Code and Qt Creator, Dear ImGui's console and log examples, plain-text log widgets in Qt |
+| [Canvas view](extra-widgets/canvas-view.md) | Tk's Canvas, Qt's Graphics View, JavaFX's scene graph, the node canvases of egui and Dear ImGui add-ons |
+| [Token field](extra-widgets/token-field.md) | macOS NSTokenField, tag modes of Ant Design's Select and Material's Autocomplete, Fluent's tag picker, Flutter's input chips |
+| [Range slider](extra-widgets/range-slider.md) | Qt Quick's RangeSlider, Flutter's RangeSlider, Material and Ant Design sliders in range mode |
+| [Rich text view](extra-widgets/rich-text-view.md) | Qt's text browser, GTK's text view with tags, Tk's text widget, Markdown viewers for egui, WinUI, and Flutter |
+| [Recent files menu](extra-widgets/recent-files-menu.md) | KDE's recent-files action, Open Recent on macOS, most-recently-used lists in Win32 and Delphi, GTK's recent manager |
+
+The same pass added behaviors to the core and standard widgets rather than new widgets: text truncation (Pushrod 1.26) and wrapped labels (Pushrod 1.27) in the MVP, then selectable label text (2.23), count badges (2.24), empty-state text for views (4.11), and arithmetic in number fields (4.12).
+
 ### Reviewed and not added
 
 | Widget | Why not |
@@ -115,7 +133,11 @@ Each widget below exists, in some form, in at least two of the toolkits reviewed
 | LCD / numeric display (Qt QLCDNumber) | Shelved earlier; a boxed label with a large font covers it. |
 | LED indicator (KDE KLed) | Single toolkit; the level indicator's discrete style with one segment covers it. |
 | Rating stars (macOS, KDE) | Rare outside media and shopping apps; the level indicator's editable discrete style covers it. |
-| Squeezed (elided) label (KDE, Qt, GTK) | Better as a text-truncation property on the standard label and boxed label than as a widget; raise as a core issue if needed. |
+| Squeezed (elided) label (KDE, Qt, GTK) | Not a widget: text truncation is now a core feature of every widget that draws text (Pushrod 1.26). |
+| Docking panels (Qt, Dear ImGui, egui_dock, Visual Studio-style tools) | Popular in tools but a large system of its own; the drawer covers Chassis. Revisit after Chassis v2. |
+| Pagination bar (Ant Design, Material, Bootstrap) | Web-centric; desktop lists scroll and draw only visible rows, which the list view already does. |
+| Teaching tips, skeleton loaders, one-time-code inputs, floating action buttons (WinUI, Material, web kits) | Covered by the popover and message bar, or phone and web patterns. |
+| Settings rows with title, subtitle, and trailing control (libadwaita, iOS, WinUI) | The form layout does the same job in a flatter way. |
 | Size grip (Tk, Qt, Win32) | Resizing belongs to the OS window frame. |
 | Command console (Motif XmCommand) | A text area plus a text field with history covers it; too specialized. |
 | Gradient slider, sketchboard (AmigaOS ReAction) | Specialized drawing controls; the custom paint widget covers one-off needs. |
@@ -129,11 +151,11 @@ Each widget below exists, in some form, in at least two of the toolkits reviewed
 | Epic | Title | Summary | Issues | MVP issues |
 |---|---|---|---|---|
 | 1 ([#246](https://github.com/KenSuenobu/rust-pushrod/issues/246)) | Crate and foundations | The crate, registration, gallery, and the popover every picker uses. | 3 | 3 |
-| 2 ([#247](https://github.com/KenSuenobu/rust-pushrod/issues/247)) | Buttons and value controls | Menu and split buttons, segmented control, stepper, dial, level indicator, tool palette, ruler, shortcut field. | 8 | 6 |
-| 3 ([#248](https://github.com/KenSuenobu/rust-pushrod/issues/248)) | Pickers and special fields | Calendar, date and time pickers, color and font choosers, path field, image well, new-password, character picker. | 9 | 6 |
-| 4 ([#249](https://github.com/KenSuenobu/rust-pushrod/issues/249)) | Data views | Tree view, column browser, icon grid, data grid, property grid, check list, editable list, dual list, breadcrumb bar, filter field, rule editor, image viewer. | 12 | 5 |
+| 2 ([#247](https://github.com/KenSuenobu/rust-pushrod/issues/247)) | Buttons and value controls | Menu and split buttons, segmented control, stepper, dial, level indicator, tool palette, ruler, shortcut field. | 10 | 8 |
+| 3 ([#248](https://github.com/KenSuenobu/rust-pushrod/issues/248)) | Pickers and special fields | Calendar, date and time pickers, color and font choosers, path field, image well, new-password, character picker. | 10 | 7 |
+| 4 ([#249](https://github.com/KenSuenobu/rust-pushrod/issues/249)) | Data views | Tree view, column browser, icon grid, data grid, property grid, check list, editable list, dual list, breadcrumb bar, filter field, rule editor, image viewer. | 15 | 8 |
 | 5 ([#250](https://github.com/KenSuenobu/rust-pushrod/issues/250)) | Panels and navigation | Drawer, accordion, sidebar, document tabs. | 4 | 3 |
-| 6 ([#251](https://github.com/KenSuenobu/rust-pushrod/issues/251)) | Dialogs and assistants | Input, progress, and task dialogs, wizard, settings and about dialogs, find bar, shortcuts editor. | 8 | 3 |
+| 6 ([#251](https://github.com/KenSuenobu/rust-pushrod/issues/251)) | Dialogs and assistants | Input, progress, and task dialogs, wizard, settings and about dialogs, find bar, shortcuts editor. | 10 | 5 |
 
 ## Epic 1: Crate and foundations ([#246](https://github.com/KenSuenobu/rust-pushrod/issues/246))
 
@@ -146,8 +168,8 @@ The crate, registration, gallery, and the popover every picker uses.
 | Issue | Title | Summary | Labels | Parallel | MVP | Phase | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|---|
 | 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)) | Create the pushrod-extra-widgets crate | The crate, its registration function, its docs section, and its place in CI. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `size/S`, `widget` | N | Y | X1 | S | `pushrod-extra-widgets/Cargo.toml (new)`, `pushrod-extra-widgets/src/lib.rs (new)`, `Cargo.toml`, `.github/workflows/ci.yml`, `pushrod-docs` |
-| 1.2 ([#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)) | Extra widgets gallery example | A runnable gallery showing every extra widget, used for golden screenshots. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/examples/gallery.rs (new)`, `pushrod-docs` |
-| 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)) | Popover: a floating panel anchored to a control | A borderless panel that opens next to a control, holds any widgets, and closes on Escape or a click outside. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/popover.rs (new)`, `pushrod-docs` |
+| 1.2 ([#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)) | Extra widgets in the Pushrod Showcase | Every extra widget gets its page in the Pushrod Showcase, with the property panel, event log, and source view. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/src/showcase.rs (new)`, `pushrod-showcase/Cargo.toml`, `pushrod-docs` |
+| 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)) | Popover: a floating panel anchored to a control | A borderless panel that opens next to a control, holds any widgets, and closes on Escape or a click outside. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/popover.rs (new)`, `pushrod-docs` |
 
 ### 1.1: Create the pushrod-extra-widgets crate
 
@@ -177,43 +199,43 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Parallelism / Dependencies.** Not parallelizable. Pushrod: Pushrod 1.21 [#130](https://github.com/KenSuenobu/rust-pushrod/issues/130) Split the standard widgets into the pushrod-widgets crate, Pushrod 1.22 [#131](https://github.com/KenSuenobu/rust-pushrod/issues/131) Widget libraries: extend or replace pushrod-widgets, Pushrod 6.1 [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) Widget registry and factory, Pushrod 10.6 [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) Backend crates: keep SDL out of the core and the widgets
 
-**Used by Chassis:** Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette, Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer, Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid.
+**Used by Chassis:** Chassis 1.4 [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) Commands, menus, and shortcuts, Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 3.1 [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) Design surface, Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette, Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer, Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid, Chassis 4.3 [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) Typed property editors, Chassis 6.2 [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) Build and run.
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/crate.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/crate.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
-### 1.2: Extra widgets gallery example
+### 1.2: Extra widgets in the Pushrod Showcase
 
 *Issue [#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)* · *Extra widgets 1: crate and Chassis widgets*
 
 **Widget roadmap:** [`docs/extra-widgets/gallery.md`](extra-widgets/gallery.md)
 
-**Problem Statement.** Each widget needs a place to be seen, tried, and screenshotted, and contributors need a quick way to check their work.
+**Problem Statement.** Each widget needs a place to be seen, tried, and screenshotted. Pushrod already has one: the Showcase (Pushrod 12.1). A second gallery would split the demos in two.
 
-**Solution / Scope.** `cargo run -p pushrod-extra-widgets --example gallery`: one page per epic (tab view), each widget in its common states with its events logged in a status line. Golden-image tests (Pushrod 7.2) capture each page. Every new widget adds itself to the gallery in the same PR.
+**Solution / Scope.** `pushrod-extra-widgets` exports `showcase_pages()`, and the Showcase lists them in an **Extra widgets** group (behind the showcase's `extra` feature, on by default). The Showcase's completeness test (Pushrod 12.2) walks the registry, so an extra widget registered without a page fails CI; its tour (Pushrod 12.7) produces the golden images and documentation screenshots. Every new extra widget adds its page in the same pull request.
 
-*Ideas from:* Qt's widget gallery example and GTK's widget factory. Names and behavior are Pushrod's own.
+*Ideas from:* Qt's widget gallery, GTK's widget factory, the WinUI Gallery. Names and behavior are Pushrod's own.
 
 ![xw-1.2-1.png](mockups/xw-1.2-1.png)
 
 | Event emitted | When | Application callback |
 |---|---|---|
-| (per widget) | Any interaction | Logged in the gallery's status line |
+| (per widget) | Any interaction | Shown in the Showcase's event log |
 
 Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
 
 **Acceptance Criteria.**
 
-- Gallery runs and shows every widget built so far
-- Golden images captured in CI
-- Contributing guide says new widgets must be added to the gallery
+- The Showcase has an Extra widgets group with a page for every widget built so far
+- The completeness test covers `extra.` types
+- Golden images and documentation screenshots come from the Showcase tour
 
-**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 7.2 [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) Golden-image rendering tests, Pushrod 7.3 [#71](https://github.com/KenSuenobu/rust-pushrod/issues/71) Widget gallery example, Pushrod 4.4 [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) Tab view
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 12.1 [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) Showcase application shell, Pushrod 12.2 [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) Showcase pages for every standard widget, with a completeness test, Pushrod 12.7 [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) Showcase in CI: scripted tour, golden screenshots, and documentation images
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/gallery.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/gallery.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 1.3: Popover: a floating panel anchored to a control
 
@@ -245,9 +267,11 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 5.1 [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) Clip children to their parent's bounds, Pushrod 5.2 [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) Composite widgets: build widgets from parts that applications can retrieve and modify, Pushrod 9.2 [#94](https://github.com/KenSuenobu/rust-pushrod/issues/94) Event propagation: capture, target, and bubble phases with handled/ignored, Pushrod 1.4 [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) Keyboard focus, Tab order, and Return/Escape
 
+**Used by Chassis:** Chassis 1.4 [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) Commands, menus, and shortcuts.
+
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/popover.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/popover.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ## Epic 2: Buttons and value controls ([#247](https://github.com/KenSuenobu/rust-pushrod/issues/247))
 
@@ -267,6 +291,8 @@ Menu and split buttons, segmented control, stepper, dial, level indicator, tool 
 | 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)) | Tool palette (grid of tool buttons) | A grid of icon buttons with one-of-many selection and optional drag out, for tools, swatches, or components. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/tool_palette.rs (new)`, `pushrod-docs` |
 | 2.7 ([#270](https://github.com/KenSuenobu/rust-pushrod/issues/270)) | Ruler | A horizontal or vertical scale in pixels, points, or units, with markers that can be dragged. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/ruler.rs (new)`, `pushrod-docs` |
 | 2.8 ([#271](https://github.com/KenSuenobu/rust-pushrod/issues/271)) | Shortcut field (key combination recorder) | A field that records the key combination pressed while it has focus. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/shortcut_field.rs (new)`, `pushrod-docs` |
+| 2.9 ([#302](https://github.com/KenSuenobu/rust-pushrod/issues/302)) | Drag value (numeric scrubber) | A compact number that changes as you drag it sideways, and becomes a text field when clicked. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/src/drag_value.rs (new)`, `pushrod-docs` |
+| 2.10 ([#306](https://github.com/KenSuenobu/rust-pushrod/issues/306)) | Range slider (two thumbs) | A slider with two thumbs selecting a lower and an upper value. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/range_slider.rs (new)`, `pushrod-docs` |
 
 ### 2.1: Menu button and split button
 
@@ -300,7 +326,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/menu-button.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/menu-button.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 2.2: Segmented control
 
@@ -333,7 +359,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/segmented-control.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/segmented-control.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 2.3: Stepper (up and down arrows)
 
@@ -365,7 +391,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/stepper.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/stepper.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 2.4: Dial (rotary knob)
 
@@ -398,7 +424,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/dial.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/dial.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 2.5: Level indicator (meter)
 
@@ -430,7 +456,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/level-indicator.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/level-indicator.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 2.6: Tool palette (grid of tool buttons)
 
@@ -466,7 +492,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/tool-palette.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/tool-palette.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 2.7: Ruler
 
@@ -498,7 +524,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/ruler.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/ruler.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 2.8: Shortcut field (key combination recorder)
 
@@ -530,7 +556,75 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/shortcut-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/shortcut-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 2.9: Drag value (numeric scrubber)
+
+*Issue [#302](https://github.com/KenSuenobu/rust-pushrod/issues/302)* · *Extra widgets 1: crate and Chassis widgets*
+
+**Widget roadmap:** [`docs/extra-widgets/drag-value.md`](extra-widgets/drag-value.md)
+
+**Problem Statement.** Inspectors are full of numbers (X, Y, width, height, spacing). A spin box per number is wide and slow; tool applications let you drag the number itself.
+
+**Solution / Scope.** `DragValue { value, min, max, speed, decimals, prefix, suffix }`: shows the value as text in a flat box ("X 120", "50 %"). Dragging left or right changes it by `speed` per pixel (Shift for fine steps, Ctrl for coarse); the pointer becomes a horizontal-resize cursor (Pushrod 9.9). A click without dragging, or Return when focused, turns it into a text field for typing (with arithmetic when Pushrod 4.12 is available); Escape restores the old value. Arrow keys step. Outline drawing mode defers dependent work to release (Pushrod 10.1).
+
+*Ideas from:* egui's DragValue, Dear ImGui's drag fields, numeric fields in Blender, Figma, Unity, and Godot inspectors. Names and behavior are Pushrod's own.
+
+![xw-2.9-1.png](mockups/xw-2.9-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `ValueChanged { id, value }` | While dragging, stepping, or on commit | `on_value_change(id, ..)` |
+| `EditingFinished { id }` | Drag released or typing committed | `on_editing_finished(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Drag changes the value with fine and coarse modifiers
+- Click to type; Escape cancels
+- Range, decimals, prefix, and suffix
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 9.9 [#101](https://github.com/KenSuenobu/rust-pushrod/issues/101) Pointer cursor per widget
+
+**Used by Chassis:** Chassis 4.3 [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) Typed property editors.
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/drag-value.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 2.10: Range slider (two thumbs)
+
+*Issue [#306](https://github.com/KenSuenobu/rust-pushrod/issues/306)* · *Extra widgets 2: everyday controls and pickers*
+
+**Widget roadmap:** [`docs/extra-widgets/range-slider.md`](extra-widgets/range-slider.md)
+
+**Problem Statement.** Filters such as price from/to, a year span, or a trim range need two bounds on one scale; two separate sliders don't show the span.
+
+**Solution / Scope.** `RangeSlider { min, max, low, high, step, min_gap }` builds on the slider (Pushrod 3.2): two thumbs on one track with the span between them filled. Drag a thumb (they can't cross; `min_gap` keeps them apart), or drag the filled span to move both. Tab moves between thumbs; arrow keys step the focused one. Optional ticks and value labels as on the slider.
+
+*Ideas from:* Qt Quick's RangeSlider, Flutter's RangeSlider, Material and Ant Design sliders in range mode. Names and behavior are Pushrod's own.
+
+![xw-2.10-1.png](mockups/xw-2.10-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `RangeChanged { id, low, high }` | While dragging or stepping | `on_range_change(id, ..)` |
+| `EditingFinished { id }` | Drag released | `on_editing_finished(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Two thumbs that cannot cross
+- Dragging the span moves both
+- Keyboard control of each thumb
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 3.2 [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) Slider, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/range-slider.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ## Epic 3: Pickers and special fields ([#248](https://github.com/KenSuenobu/rust-pushrod/issues/248))
 
@@ -551,6 +645,7 @@ Calendar, date and time pickers, color and font choosers, path field, image well
 | 3.7 ([#272](https://github.com/KenSuenobu/rust-pushrod/issues/272)) | Image well | A framed area that shows an image and accepts a new one by drop, paste, or Choose. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/image_well.rs (new)`, `pushrod-docs` |
 | 3.8 ([#273](https://github.com/KenSuenobu/rust-pushrod/issues/273)) | New password (enter, confirm, strength) | Two password fields with a strength meter and a match check. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/new_password.rs (new)`, `pushrod-docs` |
 | 3.9 ([#274](https://github.com/KenSuenobu/rust-pushrod/issues/274)) | Character picker | A searchable grid of characters by block, with a preview and code point. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/character_picker.rs (new)`, `pushrod-docs` |
+| 3.10 ([#307](https://github.com/KenSuenobu/rust-pushrod/issues/307)) | Token field (tags in a field) | A text field whose entries become removable tokens, with optional suggestions. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X2 | M | `pushrod-extra-widgets/src/token_field.rs (new)`, `pushrod-docs` |
 
 ### 3.1: Calendar (month view)
 
@@ -583,7 +678,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/calendar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/calendar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.2: Date picker
 
@@ -615,7 +710,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/date-picker.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/date-picker.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.3: Time field and date-time field
 
@@ -647,7 +742,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/time-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/time-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.4: Color well and color picker
 
@@ -679,7 +774,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/color-picker.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/color-picker.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.5: Font chooser
 
@@ -711,7 +806,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/font-chooser.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/font-chooser.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.6: Path field (file or folder with Browse)
 
@@ -743,7 +838,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/path-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/path-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.7: Image well
 
@@ -753,7 +848,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Problem Statement.** Profile pictures, icons, and document images are set by dropping or choosing a picture into a framed slot.
 
-**Solution / Scope.** `ImageWell { image }`: an image widget (Pushrod 2.7) scaled to fit inside a frame. Drop an image file (Pushrod 9.8), paste with Ctrl+V, or double-click to choose with the file chooser; Delete clears it. A dotted outline shows while a drop is over it. Optional square crop with a draggable selection.
+**Solution / Scope.** `ImageWell { image }`: an image widget (Pushrod 2.7) scaled to fit inside a frame. Drop an image file (Pushrod 9.8) or double-click to choose with the file chooser; Delete clears it. Pasting an image with Ctrl+V works on the SDL3 backend only (Pushrod 10.5): SDL2's clipboard carries text, not images; on SDL2, pasting a file path loads that file. A dotted outline shows while a drop is over it. Optional square crop with a draggable selection.
 
 *Ideas from:* macOS editable NSImageView, the Mac OS 8 image well, KDE KPixmapRegionSelector, avatar pickers in GTK and KDE settings. Names and behavior are Pushrod's own.
 
@@ -767,7 +862,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Acceptance Criteria.**
 
-- Drop, paste, choose, and clear
+- Drop, choose, and clear; paste of a file path on SDL2 and of image data on SDL3
 - Drop feedback outline
 - Optional square crop
 
@@ -775,7 +870,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/image-well.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/image-well.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.8: New password (enter, confirm, strength)
 
@@ -807,7 +902,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/new-password.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/new-password.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 3.9: Character picker
 
@@ -839,7 +934,39 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/character-picker.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/character-picker.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 3.10: Token field (tags in a field)
+
+*Issue [#307](https://github.com/KenSuenobu/rust-pushrod/issues/307)* · *Extra widgets 2: everyday controls and pickers*
+
+**Widget roadmap:** [`docs/extra-widgets/token-field.md`](extra-widgets/token-field.md)
+
+**Problem Statement.** Tags, recipients, keywords, and filters are short lists of values typed one after another. A plain text field with commas gives no feedback and no way to remove one entry.
+
+**Solution / Scope.** `TokenField { tokens, suggestions, separators }`: typing then Return, Tab, or a separator (comma by default) turns the text into a token: a flat box with the text and a small x. Tokens flow and wrap inside the field (Pushrod 5.10). Backspace at the start selects the last token, again removes it; arrow keys move across tokens; tokens can be dragged to reorder. Optional suggestions appear in a list below while typing. `validate` can reject a token; `unique(true)` rejects duplicates.
+
+*Ideas from:* macOS NSTokenField, tag modes of Ant Design's Select and Material's Autocomplete, Fluent's tag picker, Flutter's input chips. Names and behavior are Pushrod's own.
+
+![xw-3.10-1.png](mockups/xw-3.10-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `TokensChanged { id }` | A token added, removed, or moved | `on_tokens_change(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Tokens created by Return, Tab, and separators; removed by x and Backspace
+- Wraps to more lines as tokens are added
+- Suggestions, validation, and uniqueness
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)); Pushrod: Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 5.10 [#121](https://github.com/KenSuenobu/rust-pushrod/issues/121) Flow layout (wrapping rows), Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/token-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ## Epic 4: Data views ([#249](https://github.com/KenSuenobu/rust-pushrod/issues/249))
 
@@ -863,6 +990,9 @@ Tree view, column browser, icon grid, data grid, property grid, check list, edit
 | 4.10 ([#277](https://github.com/KenSuenobu/rust-pushrod/issues/277)) | Filter field (live filter for lists, tables, and trees) | A search field bound to a list, table, or tree that hides non-matching rows as you type. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/filter_field.rs (new)`, `pushrod-docs` |
 | 4.11 ([#279](https://github.com/KenSuenobu/rust-pushrod/issues/279)) | Rule editor (query builder) | Rows of "field, operator, value" with add and remove buttons, joined by All or Any. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/rule_editor.rs (new)`, `pushrod-docs` |
 | 4.12 ([#280](https://github.com/KenSuenobu/rust-pushrod/issues/280)) | Image viewer (zoom and pan) | An image in a scrollable view with zoom to fit, actual size, zoom by wheel, and drag to pan. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/image_viewer.rs (new)`, `pushrod-docs` |
+| 4.13 ([#303](https://github.com/KenSuenobu/rust-pushrod/issues/303)) | Log view (append-only output) | A read-only, scrolling view of lines that follows the newest line, for build output and logs. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X1 | S | `pushrod-extra-widgets/src/log_view.rs (new)`, `pushrod-docs` |
+| 4.14 ([#304](https://github.com/KenSuenobu/rust-pushrod/issues/304)) | Canvas view (zoomable surface of items) | A scrollable, zoomable surface holding positioned items, with selection, rubber band, and moving. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/L`, `widget` | Y | Y | X1 | L | `pushrod-extra-widgets/src/canvas_view.rs (new)`, `pushrod-docs` |
+| 4.15 ([#308](https://github.com/KenSuenobu/rust-pushrod/issues/308)) | Rich text view (formatted, read-only) | Read-only formatted text: headings, bold and italic, lists, code, and links, from Markdown or styled spans. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X2 | M | `pushrod-extra-widgets/src/rich_text_view.rs (new)`, `pushrod-docs` |
 
 ### 4.1: Tree view (outline)
 
@@ -897,7 +1027,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/tree-view.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/tree-view.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.2: Column browser
 
@@ -930,7 +1060,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/column-browser.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/column-browser.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.3: Icon grid view
 
@@ -964,7 +1094,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/icon-grid.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/icon-grid.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.4: Data grid (editable table)
 
@@ -997,7 +1127,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/data-grid.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/data-grid.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.5: Property grid (name and value inspector)
 
@@ -1031,7 +1161,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/property-grid.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/property-grid.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.6: Check list
 
@@ -1063,7 +1193,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/check-list.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/check-list.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.7: Editable list (add, remove, reorder)
 
@@ -1095,7 +1225,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/editable-list.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/editable-list.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.8: Dual list (list builder)
 
@@ -1127,7 +1257,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/dual-list.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/dual-list.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.9: Breadcrumb bar (path control)
 
@@ -1162,7 +1292,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/breadcrumb-bar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/breadcrumb-bar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.10: Filter field (live filter for lists, tables, and trees)
 
@@ -1194,7 +1324,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/filter-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/filter-field.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.11: Rule editor (query builder)
 
@@ -1226,7 +1356,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/rule-editor.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/rule-editor.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 4.12: Image viewer (zoom and pan)
 
@@ -1258,7 +1388,110 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/image-viewer.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/image-viewer.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 4.13: Log view (append-only output)
+
+*Issue [#303](https://github.com/KenSuenobu/rust-pushrod/issues/303)* · *Extra widgets 1: crate and Chassis widgets*
+
+**Widget roadmap:** [`docs/extra-widgets/log-view.md`](extra-widgets/log-view.md)
+
+**Problem Statement.** Build output, test runs, and application logs arrive line by line, thousands of lines long. A text area is built for editing, not for appending fast and trimming old lines. Chassis needs this for Build and Run.
+
+**Solution / Scope.** `LogView { max_lines }`: `append(line, level)` adds a line (levels: plain, info, warning, error; warnings and errors get a marker in the left margin and bold text, not color alone). Only visible lines are drawn. The view follows the tail while scrolled to the bottom and stops following when the user scrolls up (a "Jump to end" glyph appears). Old lines beyond `max_lines` are dropped. Lines can be selected and copied; `on_activate` reports a double-clicked line (to jump to `file:line`). Optional timestamps and wrapping.
+
+*Ideas from:* Output panels in VS Code and Qt Creator, Dear ImGui's console and log examples, plain-text log widgets in Qt. Names and behavior are Pushrod's own.
+
+![xw-4.13-1.png](mockups/xw-4.13-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `Activated { id, line }` | A line double-clicked | `on_activate(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Appending 100,000 lines stays responsive; old lines trimmed
+- Follows the tail unless the user scrolled up
+- Select and copy; levels marked without relying on color
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 1.18 [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate), Pushrod 3.1 [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) Scroll bar
+
+**Used by Chassis:** Chassis 6.2 [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) Build and run.
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/log-view.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 4.14: Canvas view (zoomable surface of items)
+
+*Issue [#304](https://github.com/KenSuenobu/rust-pushrod/issues/304)* · *Extra widgets 1: crate and Chassis widgets*
+
+**Widget roadmap:** [`docs/extra-widgets/canvas-view.md`](extra-widgets/canvas-view.md)
+
+**Problem Statement.** Diagram editors, node graphs, floor plans, and form designers all place items on a large surface, select them, and move them. It is the base for a graph view, and Chassis's design surface is one.
+
+**Solution / Scope.** `CanvasView { content_size, zoom, grid }`: items are widgets or `CanvasItem`s (custom-painted shapes) at content coordinates inside a container (Pushrod 5.3). Wheel scrolls, Ctrl+wheel zooms around the pointer, middle-drag or Space-drag pans. Optional grid (dots or lines) and snapping. Click selects (Shift or Ctrl extends), dragging on empty space draws a dotted rubber band, dragging a selection moves it (live or outline, Pushrod 10.1); arrow keys nudge. Hit-testing and z-order are the canvas's; what an item means is the application's. `connectors` draw straight or right-angled lines between items for graphs. Only visible items are painted.
+
+*Ideas from:* Tk's Canvas, Qt's Graphics View, JavaFX's scene graph, the node canvases of egui and Dear ImGui add-ons. Names and behavior are Pushrod's own.
+
+![xw-4.14-1.png](mockups/xw-4.14-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `SelectionChanged { id }` | Selection changed | `on_selection_change(id, ..)` |
+| `ItemsMoved { id, delta }` | A drag or nudge finished | `on_items_move(id, ..)` |
+| `ViewChanged { id, zoom, offset }` | Zoom or pan | `on_view_change(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Pan and zoom around the pointer
+- Click, extend, and rubber-band selection; move with snapping
+- Widgets and custom-painted items; connectors between items
+- Only visible items are painted
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 9.4 [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) Reusable input controllers: click, drag, scroll, hover, long-press, key, Pushrod 1.8 [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) Edit the widget tree at run time: remove, reparent, reorder, Pushrod 2.10 [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) Custom paint widget (closure-drawn)
+
+**Used by Chassis:** Chassis 3.1 [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) Design surface.
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/canvas-view.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 4.15: Rich text view (formatted, read-only)
+
+*Issue [#308](https://github.com/KenSuenobu/rust-pushrod/issues/308)* · *Extra widgets 2: everyday controls and pickers*
+
+**Widget roadmap:** [`docs/extra-widgets/rich-text-view.md`](extra-widgets/rich-text-view.md)
+
+**Problem Statement.** Help pages, release notes, license text, and error explanations need a little structure. Plain labels can't show a heading, a list, or a link in a sentence.
+
+**Solution / Scope.** `RichTextView::markdown(text)` or `::spans(...)`: headings (larger, bold), paragraphs with bold, italic, and `code` spans, bulleted and numbered lists, code blocks in a monospaced font, horizontal rules, and links (underlined; `LinkActivated` or open in the browser like the link label, Pushrod 2.22). Wraps to its width and scrolls in a container; text can be selected and copied. A deliberately small subset: no tables, images optional, no HTML. Markdown is parsed with `pulldown-cmark`; drawing uses the text layout's styled runs (Pushrod 1.18).
+
+*Ideas from:* Qt's text browser, GTK's text view with tags, Tk's text widget, Markdown viewers for egui, WinUI, and Flutter. Names and behavior are Pushrod's own.
+
+![xw-4.15-1.png](mockups/xw-4.15-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `LinkActivated { id, url }` | A link clicked | `on_link_activate(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Headings, emphasis, lists, code, rules, and links render and wrap
+- Select and copy
+- Links emit an event or open in the browser
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 1.18 [#111](https://github.com/KenSuenobu/rust-pushrod/issues/111) Text layout engine: Parley for shaping, bidi, line breaking, and font fallback (with an SDL2 compatibility gate), Pushrod 1.27 [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) Wrapped text: multi-line labels that reflow, Pushrod 5.3 [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) Container: a scrollable viewport onto fixed-size content, Pushrod 2.22 [#126](https://github.com/KenSuenobu/rust-pushrod/issues/126) Link label
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/rich-text-view.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ## Epic 5: Panels and navigation ([#250](https://github.com/KenSuenobu/rust-pushrod/issues/250))
 
@@ -1308,7 +1541,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/drawer.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/drawer.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 5.2: Accordion (one section open at a time)
 
@@ -1340,7 +1573,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/accordion.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/accordion.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 5.3: Sidebar (navigation list)
 
@@ -1372,7 +1605,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/sidebar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/sidebar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 5.4: Document tabs (closable and reorderable)
 
@@ -1406,7 +1639,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/document-tabs.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/document-tabs.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ## Epic 6: Dialogs and assistants ([#251](https://github.com/KenSuenobu/rust-pushrod/issues/251))
 
@@ -1426,6 +1659,8 @@ Input, progress, and task dialogs, wizard, settings and about dialogs, find bar,
 | 6.6 ([#284](https://github.com/KenSuenobu/rust-pushrod/issues/284)) | About dialog | The application's icon, name, version, copyright, website, and credits and license pages. | `extra-widgets`, `parallelizable`, `size/S`, `widget` | Y | N | X3 | S | `pushrod-extra-widgets/src/about_dialog.rs (new)`, `pushrod-docs` |
 | 6.7 ([#285](https://github.com/KenSuenobu/rust-pushrod/issues/285)) | Find and replace bar | A bar with find and replace fields, match options, a match count, and next and previous. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/find_bar.rs (new)`, `pushrod-docs` |
 | 6.8 ([#286](https://github.com/KenSuenobu/rust-pushrod/issues/286)) | Keyboard shortcuts editor | A filterable table of actions and their shortcuts, edited with the shortcut field. | `extra-widgets`, `parallelizable`, `size/M`, `widget` | Y | N | X3 | M | `pushrod-extra-widgets/src/shortcuts_editor.rs (new)`, `pushrod-docs` |
+| 6.9 ([#305](https://github.com/KenSuenobu/rust-pushrod/issues/305)) | Command palette | A pop-up search box listing every command; type a few letters, press Return, and it runs. | `chassis`, `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/M`, `widget` | Y | Y | X1 | M | `pushrod-extra-widgets/src/command_palette.rs (new)`, `pushrod-docs` |
+| 6.10 ([#309](https://github.com/KenSuenobu/rust-pushrod/issues/309)) | Recent files menu | An Open Recent submenu that remembers the last files, with Clear and missing-file handling. | `extra-widgets`, `extra-widgets-mvp`, `parallelizable`, `size/S`, `widget` | Y | Y | X2 | S | `pushrod-extra-widgets/src/recent_files_menu.rs (new)`, `pushrod-docs` |
 
 ### 6.1: Input dialog (ask for one value)
 
@@ -1457,7 +1692,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/input-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/input-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 6.2: Progress dialog
 
@@ -1489,7 +1724,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/progress-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/progress-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 6.3: Task dialog (alert with details and options)
 
@@ -1521,7 +1756,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/task-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/task-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 6.4: Wizard (step-by-step assistant)
 
@@ -1554,7 +1789,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/wizard.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/wizard.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 6.5: Settings dialog
 
@@ -1587,7 +1822,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/settings-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/settings-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 6.6: About dialog
 
@@ -1619,7 +1854,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/about-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/about-dialog.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 6.7: Find and replace bar
 
@@ -1652,7 +1887,7 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/find-bar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/find-bar.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ### 6.8: Keyboard shortcuts editor
 
@@ -1684,7 +1919,75 @@ Like every Pushrod widget, it can also receive application-defined custom events
 
 **Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
 
-**Documentation.** `pushrod-docs/docs/extra-widgets/shortcuts-editor.md` (new page in the **Extra widgets** section: what it is, a screenshot from the gallery, a short example, events and callbacks); rustdoc on every non-private item; the gallery (1.2) shows it.
+**Documentation.** `pushrod-docs/docs/extra-widgets/shortcuts-editor.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 6.9: Command palette
+
+*Issue [#305](https://github.com/KenSuenobu/rust-pushrod/issues/305)* · *Extra widgets 1: crate and Chassis widgets*
+
+**Widget roadmap:** [`docs/extra-widgets/command-palette.md`](extra-widgets/command-palette.md)
+
+**Problem Statement.** Applications with many commands bury them in menus. A palette makes every command reachable from the keyboard in a few keystrokes, and shows its shortcut so users learn it. Pushrod's actions (Pushrod 9.5) already know every command's name, shortcut, and enabled state.
+
+**Solution / Scope.** `CommandPalette::new(&actions)`: opened by a shortcut (Ctrl+Shift+P by default), it shows a framed panel at the top center of the window: a text field and a list of actions with category, name, and shortcut. Typing filters by fuzzy match (letters in order), best match first, matched letters bold; recently used commands come first when the field is empty. Up/Down move, Return runs the action and closes, Escape closes. Disabled actions are shown dimmed and don't run. `add_source` lets an application list other things (open files, forms, settings) with a prefix character.
+
+*Ideas from:* The command palettes of VS Code and Sublime Text, Search Everywhere in JetBrains tools, Blender's operator search, the locator in Qt Creator. Names and behavior are Pushrod's own.
+
+![xw-6.9-1.png](mockups/xw-6.9-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `CommandRun { id, action }` | An entry chosen | the action's own callback, and `on_command_run(id, ..)` |
+| `PaletteClosed { id }` | Closed without choosing | `on_close(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Lists every action with its shortcut; disabled ones dimmed
+- Fuzzy filtering with matched letters marked; recent first
+- Keyboard only: open, move, run, close
+- Extra sources with a prefix
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)); Pushrod: Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons, Pushrod 2.6 [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) Text field: single-line entry with input masks, validation, and numeric mode, Pushrod 4.5 [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) List view
+
+**Used by Chassis:** Chassis 1.4 [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) Commands, menus, and shortcuts.
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/command-palette.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
+
+### 6.10: Recent files menu
+
+*Issue [#309](https://github.com/KenSuenobu/rust-pushrod/issues/309)* · *Extra widgets 2: everyday controls and pickers*
+
+**Widget roadmap:** [`docs/extra-widgets/recent-files-menu.md`](extra-widgets/recent-files-menu.md)
+
+**Problem Statement.** Every document application has an Open Recent menu, and every one rebuilds the same list handling: move to top, cap the length, drop missing files, save and load.
+
+**Solution / Scope.** `RecentFiles { max, store }`: `add(path)` moves a path to the top and trims the list; `menu()` returns a submenu (Pushrod 2.11) with one numbered item per file (file name, with the folder shown when names repeat, long paths truncated in the middle, Pushrod 1.26), then a separator and Clear Menu. Choosing an item emits the path; files that no longer exist are shown dimmed or removed. The list is saved to and loaded from a small file in the user's configuration directory, or through a `store` closure.
+
+*Ideas from:* KDE's recent-files action, Open Recent on macOS, most-recently-used lists in Win32 and Delphi, GTK's recent manager. Names and behavior are Pushrod's own.
+
+![xw-6.10-1.png](mockups/xw-6.10-1.png)
+
+| Event emitted | When | Application callback |
+|---|---|---|
+| `RecentChosen { id, path }` | An item chosen | `on_recent_choose(id, ..)` |
+
+Like every Pushrod widget, it can also receive application-defined custom events in `handle_event` and emit its own (Pushrod 1.13), and every internal action emits an engine event (Pushrod 9.10).
+
+**Acceptance Criteria.**
+
+- Add moves to top and caps the list
+- Numbered items with mnemonics; Clear Menu
+- Persists across runs; missing files handled
+
+**Parallelism / Dependencies.** Parallelizable. Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)); Pushrod: Pushrod 2.11 [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) Menu bar and drop-down menus (drawn by Pushrod), Pushrod 9.5 [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons, Pushrod 1.26 [#289](https://github.com/KenSuenobu/rust-pushrod/issues/289) Text truncation: shorten text that doesn't fit with an ellipsis
+
+**Technical Stack.** Rust (edition 2024, Rust 1.100), `pushrod`, `pushrod-widgets`.
+
+**Documentation.** `pushrod-docs/docs/extra-widgets/recent-files-menu.md` (new page in the **Extra widgets** section: what it is, a screenshot from the Showcase, a short example, events and callbacks); rustdoc on every non-private item; a page in the Pushrod Showcase (1.2).
 
 ## Work Order
 
@@ -1693,22 +1996,26 @@ Work in this order; items in the same milestone can run in parallel unless their
 ```mermaid
 flowchart LR
   P["Pushrod v0.1 and v0.2 (MVP)"] --> X1["Extra widgets 1: crate and Chassis widgets"]
-  X1 --> CH["Chassis MVP (M2 to M4 use drawer, tool palette, breadcrumb, property grid)"]
+  X1 --> CH["Chassis MVP (uses the X1 widgets)"]
   X1 --> X2["Extra widgets 2: everyday controls and pickers (extra-widgets MVP)"]
   X2 --> X3["Extra widgets 3: specialized views and assistants"]
 ```
 
 **Extra widgets 1: crate and Chassis widgets** (MVP)
 
-The crate, its gallery, the popover, and the generic widgets the Chassis MVP uses: tool palette, property grid, breadcrumb bar, and drawer.
+The crate, its showcase pages, the popover, and the generic widgets the Chassis MVP uses: tool palette, property grid, breadcrumb bar, drawer, drag value, log view, canvas view, and command palette.
 
 1. 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)) Create the pushrod-extra-widgets crate — needed by the Chassis MVP
-2. 1.2 ([#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)) Extra widgets gallery example
-3. 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)) Popover: a floating panel anchored to a control
+2. 1.2 ([#253](https://github.com/KenSuenobu/rust-pushrod/issues/253)) Extra widgets in the Pushrod Showcase
+3. 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)) Popover: a floating panel anchored to a control — needed by the Chassis MVP
 4. 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)) Tool palette (grid of tool buttons) — needed by the Chassis MVP
-5. 4.5 ([#255](https://github.com/KenSuenobu/rust-pushrod/issues/255)) Property grid (name and value inspector) — needed by the Chassis MVP
-6. 4.9 ([#256](https://github.com/KenSuenobu/rust-pushrod/issues/256)) Breadcrumb bar (path control) — needed by the Chassis MVP
-7. 5.1 ([#257](https://github.com/KenSuenobu/rust-pushrod/issues/257)) Drawer (collapsible side panel) — needed by the Chassis MVP
+5. 2.9 ([#302](https://github.com/KenSuenobu/rust-pushrod/issues/302)) Drag value (numeric scrubber) — needed by the Chassis MVP
+6. 4.5 ([#255](https://github.com/KenSuenobu/rust-pushrod/issues/255)) Property grid (name and value inspector) — needed by the Chassis MVP
+7. 4.9 ([#256](https://github.com/KenSuenobu/rust-pushrod/issues/256)) Breadcrumb bar (path control) — needed by the Chassis MVP
+8. 4.13 ([#303](https://github.com/KenSuenobu/rust-pushrod/issues/303)) Log view (append-only output) — needed by the Chassis MVP
+9. 4.14 ([#304](https://github.com/KenSuenobu/rust-pushrod/issues/304)) Canvas view (zoomable surface of items) — needed by the Chassis MVP
+10. 5.1 ([#257](https://github.com/KenSuenobu/rust-pushrod/issues/257)) Drawer (collapsible side panel) — needed by the Chassis MVP
+11. 6.9 ([#305](https://github.com/KenSuenobu/rust-pushrod/issues/305)) Command palette — needed by the Chassis MVP
 
 **Extra widgets 2: everyday controls and pickers** (MVP)
 
@@ -1719,20 +2026,24 @@ Controls and pickers most applications reach for: menu and split buttons, segmen
 3. 2.3 ([#259](https://github.com/KenSuenobu/rust-pushrod/issues/259)) Stepper (up and down arrows)
 4. 2.4 ([#127](https://github.com/KenSuenobu/rust-pushrod/issues/127)) Dial (rotary knob)
 5. 2.5 ([#54](https://github.com/KenSuenobu/rust-pushrod/issues/54)) Level indicator (meter)
-6. 3.1 ([#260](https://github.com/KenSuenobu/rust-pushrod/issues/260)) Calendar (month view)
-7. 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)) Date picker
-8. 3.3 ([#261](https://github.com/KenSuenobu/rust-pushrod/issues/261)) Time field and date-time field
-9. 3.4 ([#46](https://github.com/KenSuenobu/rust-pushrod/issues/46)) Color well and color picker
-10. 3.5 ([#129](https://github.com/KenSuenobu/rust-pushrod/issues/129)) Font chooser
-11. 3.6 ([#262](https://github.com/KenSuenobu/rust-pushrod/issues/262)) Path field (file or folder with Browse)
-12. 4.1 ([#55](https://github.com/KenSuenobu/rust-pushrod/issues/55)) Tree view (outline)
-13. 4.6 ([#263](https://github.com/KenSuenobu/rust-pushrod/issues/263)) Check list
-14. 4.7 ([#264](https://github.com/KenSuenobu/rust-pushrod/issues/264)) Editable list (add, remove, reorder)
-15. 5.2 ([#265](https://github.com/KenSuenobu/rust-pushrod/issues/265)) Accordion (one section open at a time)
-16. 5.3 ([#266](https://github.com/KenSuenobu/rust-pushrod/issues/266)) Sidebar (navigation list)
-17. 6.1 ([#267](https://github.com/KenSuenobu/rust-pushrod/issues/267)) Input dialog (ask for one value)
-18. 6.2 ([#268](https://github.com/KenSuenobu/rust-pushrod/issues/268)) Progress dialog
-19. 6.3 ([#269](https://github.com/KenSuenobu/rust-pushrod/issues/269)) Task dialog (alert with details and options)
+6. 2.10 ([#306](https://github.com/KenSuenobu/rust-pushrod/issues/306)) Range slider (two thumbs)
+7. 3.1 ([#260](https://github.com/KenSuenobu/rust-pushrod/issues/260)) Calendar (month view)
+8. 3.2 ([#91](https://github.com/KenSuenobu/rust-pushrod/issues/91)) Date picker
+9. 3.3 ([#261](https://github.com/KenSuenobu/rust-pushrod/issues/261)) Time field and date-time field
+10. 3.4 ([#46](https://github.com/KenSuenobu/rust-pushrod/issues/46)) Color well and color picker
+11. 3.5 ([#129](https://github.com/KenSuenobu/rust-pushrod/issues/129)) Font chooser
+12. 3.6 ([#262](https://github.com/KenSuenobu/rust-pushrod/issues/262)) Path field (file or folder with Browse)
+13. 3.10 ([#307](https://github.com/KenSuenobu/rust-pushrod/issues/307)) Token field (tags in a field)
+14. 4.1 ([#55](https://github.com/KenSuenobu/rust-pushrod/issues/55)) Tree view (outline)
+15. 4.6 ([#263](https://github.com/KenSuenobu/rust-pushrod/issues/263)) Check list
+16. 4.7 ([#264](https://github.com/KenSuenobu/rust-pushrod/issues/264)) Editable list (add, remove, reorder)
+17. 4.15 ([#308](https://github.com/KenSuenobu/rust-pushrod/issues/308)) Rich text view (formatted, read-only)
+18. 5.2 ([#265](https://github.com/KenSuenobu/rust-pushrod/issues/265)) Accordion (one section open at a time)
+19. 5.3 ([#266](https://github.com/KenSuenobu/rust-pushrod/issues/266)) Sidebar (navigation list)
+20. 6.1 ([#267](https://github.com/KenSuenobu/rust-pushrod/issues/267)) Input dialog (ask for one value)
+21. 6.2 ([#268](https://github.com/KenSuenobu/rust-pushrod/issues/268)) Progress dialog
+22. 6.3 ([#269](https://github.com/KenSuenobu/rust-pushrod/issues/269)) Task dialog (alert with details and options)
+23. 6.10 ([#309](https://github.com/KenSuenobu/rust-pushrod/issues/309)) Recent files menu
 
 **Extra widgets 3: specialized views and assistants**
 
@@ -1763,11 +2074,16 @@ The Chassis MVP uses these extra widgets; the Chassis issues list them as requir
 
 | Extra widget | Chassis issues |
 |---|---|
-| 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)) Create the pushrod-extra-widgets crate | Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette, Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer, Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid |
+| 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252)) Create the pushrod-extra-widgets crate | Chassis 1.4 [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) Commands, menus, and shortcuts, Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 3.1 [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) Design surface, Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette, Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer, Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid, Chassis 4.3 [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) Typed property editors, Chassis 6.2 [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) Build and run |
+| 1.3 ([#254](https://github.com/KenSuenobu/rust-pushrod/issues/254)) Popover: a floating panel anchored to a control | Chassis 1.4 [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) Commands, menus, and shortcuts |
 | 2.6 ([#42](https://github.com/KenSuenobu/rust-pushrod/issues/42)) Tool palette (grid of tool buttons) | Chassis 3.2 [#179](https://github.com/KenSuenobu/rust-pushrod/issues/179) Widget palette |
+| 2.9 ([#302](https://github.com/KenSuenobu/rust-pushrod/issues/302)) Drag value (numeric scrubber) | Chassis 4.3 [#188](https://github.com/KenSuenobu/rust-pushrod/issues/188) Typed property editors |
 | 4.5 ([#255](https://github.com/KenSuenobu/rust-pushrod/issues/255)) Property grid (name and value inspector) | Chassis 4.2 [#187](https://github.com/KenSuenobu/rust-pushrod/issues/187) Property grid |
 | 4.9 ([#256](https://github.com/KenSuenobu/rust-pushrod/issues/256)) Breadcrumb bar (path control) | Chassis 3.8 [#185](https://github.com/KenSuenobu/rust-pushrod/issues/185) Layout managers in the designer |
+| 4.13 ([#303](https://github.com/KenSuenobu/rust-pushrod/issues/303)) Log view (append-only output) | Chassis 6.2 [#196](https://github.com/KenSuenobu/rust-pushrod/issues/196) Build and run |
+| 4.14 ([#304](https://github.com/KenSuenobu/rust-pushrod/issues/304)) Canvas view (zoomable surface of items) | Chassis 3.1 [#178](https://github.com/KenSuenobu/rust-pushrod/issues/178) Design surface |
 | 5.1 ([#257](https://github.com/KenSuenobu/rust-pushrod/issues/257)) Drawer (collapsible side panel) | Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer |
+| 6.9 ([#305](https://github.com/KenSuenobu/rust-pushrod/issues/305)) Command palette | Chassis 1.4 [#170](https://github.com/KenSuenobu/rust-pushrod/issues/170) Commands, menus, and shortcuts |
 
 ## Sources
 

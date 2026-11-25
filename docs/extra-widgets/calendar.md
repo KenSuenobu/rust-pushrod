@@ -53,7 +53,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 - [ ] Single and range selection
 - [ ] Min/max limits and marked days
 - [ ] Keyboard navigation by day and month
-- [ ] Registered as `extra.calendar` and shown in the gallery (1.2)
+- [ ] Registered as `extra.calendar` with a page in the Pushrod Showcase (1.2)
 
 ## Depends on
 
