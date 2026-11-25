@@ -328,6 +328,10 @@ pub enum EngineEventKind {
     EventBroadcast,
     /// See [`EngineEvent::CustomEventDropped`].
     CustomEventDropped,
+    /// See [`EngineEvent::FontLoaded`].
+    FontLoaded,
+    /// See [`EngineEvent::GlyphAtlasPageAdded`].
+    GlyphAtlasPageAdded,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -370,6 +374,19 @@ pub enum EngineEvent {
         /// The target of the discarded event.
         target: EventTarget,
     },
+    /// A font was loaded from disk, the first time text was drawn with it.  Each
+    /// `(font_name, font_size, style)` loads once per process run.
+    FontLoaded {
+        /// The path of the font file.
+        font_name: String,
+        /// The font size in points.
+        font_size: u16,
+    },
+    /// A glyph atlas texture was created because the existing ones were full (or none existed).
+    GlyphAtlasPageAdded {
+        /// How many atlas textures exist now.
+        pages: usize,
+    },
 }
 
 impl EngineEvent {
@@ -384,6 +401,8 @@ impl EngineEvent {
             EngineEvent::WidgetAdded { .. } => EngineEventKind::WidgetAdded,
             EngineEvent::EventBroadcast { .. } => EngineEventKind::EventBroadcast,
             EngineEvent::CustomEventDropped { .. } => EngineEventKind::CustomEventDropped,
+            EngineEvent::FontLoaded { .. } => EngineEventKind::FontLoaded,
+            EngineEvent::GlyphAtlasPageAdded { .. } => EngineEventKind::GlyphAtlasPageAdded,
         }
     }
 }

@@ -36,7 +36,7 @@ use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventCtx, EventMask, EventTarget, MaskScope,
     engine_filter_accepts,
 };
-use crate::font::FontCache;
+use crate::font::{FontCache, FontNotice};
 use crate::geometry::{Point, make_rect, point};
 use crate::paint::{self, CachePolicy};
 use crate::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
@@ -77,6 +77,7 @@ pub struct WidgetCache {
     pending_events: Vec<Event>,
     loop_mask: EventMask,
     engine_filters: HashMap<WidgetId, Vec<EngineEventKind>>,
+    fonts: FontCache,
 }
 
 impl WidgetCache {
@@ -98,6 +99,7 @@ impl WidgetCache {
             pending_events: Vec::new(),
             loop_mask: EventMask::ALL,
             engine_filters: HashMap::new(),
+            fonts: FontCache::new(),
         }
     }
 
@@ -763,7 +765,7 @@ impl WidgetCache {
     }
 
     /// Paints a single `Widget` into its texture.
-    fn paint(&mut self, id: WidgetId, c: &mut Canvas<Window>, fc: &mut FontCache) {
+    fn paint(&mut self, id: WidgetId, c: &mut Canvas<Window>) {
         let widget = &mut self.cache[id as usize];
         let size = widget.get_size();
 
@@ -775,9 +777,10 @@ impl WidgetCache {
 
         let mut texture = widget.core_mut().texture.take().unwrap();
         let painter: &dyn Widget = widget.as_ref();
+        let fonts = &mut self.fonts;
 
         c.with_texture_canvas(&mut texture, |texture_canvas| {
-            let mut sdl_painter = Sdl2Painter::new(texture_canvas, fc);
+            let mut sdl_painter = Sdl2Painter::new(texture_canvas, fonts);
 
             painter.paint(&mut sdl_painter);
             paint::state_overlay(&mut sdl_painter, size, painter.state());
@@ -785,6 +788,34 @@ impl WidgetCache {
         .unwrap();
 
         widget.core_mut().texture.restore(texture);
+    }
+
+    /// Queues an engine event for each font loaded and atlas page created while painting.
+    fn queue_font_events(&mut self) {
+        for notice in self.fonts.take_notices() {
+            let event = match notice {
+                FontNotice::FontLoaded {
+                    font_name,
+                    font_size,
+                } => EngineEvent::FontLoaded {
+                    font_name,
+                    font_size,
+                },
+                FontNotice::AtlasPageAdded { pages } => EngineEvent::GlyphAtlasPageAdded { pages },
+            };
+
+            self.queue_event(Event::Engine(event));
+        }
+    }
+
+    /// Returns the font cache the cache's widgets draw text with.
+    ///
+    /// # Returns
+    ///
+    /// The `FontCache`; its [`stats`](FontCache::stats) show how many fonts and glyphs it has
+    /// loaded.
+    pub fn fonts(&self) -> &FontCache {
+        &self.fonts
     }
 
     /// Repaints changed `Widget`s and redraws the window if anything changed.
@@ -797,7 +828,6 @@ impl WidgetCache {
     /// # Arguments
     ///
     /// * `c` - The window's canvas.
-    /// * `fc` - The font cache, passed to each `Widget`'s `paint`.
     ///
     /// # Returns
     ///
@@ -807,7 +837,7 @@ impl WidgetCache {
     /// # Panics
     ///
     /// Panics if `SDL2` fails to render into a `Widget`'s texture or copy it to the window.
-    pub fn draw_loop(&mut self, c: &mut Canvas<Window>, fc: &mut FontCache) -> bool {
+    pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
         let order = self.draw_order();
         let mut visible = vec![false; self.cache.len()];
         let mut redraw = self.needs_full_redraw;
@@ -819,13 +849,15 @@ impl WidgetCache {
         for (id, is_visible) in visible.into_iter().enumerate() {
             if self.cache[id].is_invalidated() {
                 if is_visible {
-                    self.paint(id as WidgetId, c, fc);
+                    self.paint(id as WidgetId, c);
                 }
 
                 self.cache[id].set_invalidated(false);
                 redraw = true;
             }
         }
+
+        self.queue_font_events();
 
         if !redraw {
             return false;

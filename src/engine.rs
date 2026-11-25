@@ -68,7 +68,6 @@ use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventKind, EventMask, EventTarget, MaskScope,
     engine_filter_accepts,
 };
-use crate::font::FontCache;
 use crate::geometry::{Point, Size, size};
 use crate::root_widget::RootWidget;
 use crate::widget::{Widget, WidgetId};
@@ -410,7 +409,6 @@ pub struct Engine<S = ()> {
     running: bool,
     widget_cache: WidgetCache,
     event_mask: EventMask,
-    font_cache: FontCache,
     registry: Registry<S>,
     next_callback_id: u64,
     event_callbacks: Vec<EventCallback<S>>,
@@ -445,7 +443,6 @@ impl<S> Engine<S> {
             running: true,
             widget_cache,
             event_mask: EventMask::ALL,
-            font_cache: FontCache::default(),
             registry: HashMap::new(),
             next_callback_id: 0,
             event_callbacks: Vec::new(),
@@ -1332,10 +1329,7 @@ impl<S> Engine<S> {
                 break;
             }
 
-            if self
-                .widget_cache
-                .draw_loop(&mut canvas, &mut self.font_cache)
-            {
+            if self.widget_cache.draw_loop(&mut canvas) {
                 canvas.present();
             }
 
@@ -1448,10 +1442,7 @@ impl<S> Engine<S> {
                 return None;
             }
 
-            if self
-                .widget_cache
-                .draw_loop(&mut events.canvas, &mut self.font_cache)
-            {
+            if self.widget_cache.draw_loop(&mut events.canvas) {
                 events.canvas.present();
             }
 

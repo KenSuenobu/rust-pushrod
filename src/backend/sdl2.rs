@@ -165,7 +165,7 @@ impl Painter for Sdl2Painter<'_> {
             .unwrap();
     }
 
-    /// Draws text, rendered by the font cache and copied into the canvas.
+    /// Draws text by copying glyphs from the font cache's atlas into the canvas.
     ///
     /// # Arguments
     ///
@@ -182,25 +182,23 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// Panics if the font cannot be loaded or `SDL2` fails to render or copy the text.
     fn text(&mut self, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size {
-        let (font_texture, font_width, font_height) = self.fonts.render_text(
+        let block = self.fonts.layout(
             self.canvas,
             &style.font_name,
             style.font_size,
             to_sdl_font_style(style.font_style),
-            to_sdl_color(color),
             msg,
             bounds.w,
         );
-        let text_size = Size::new(font_width, font_height);
+        let text_size = block.size;
         let dest = paint::align_text(bounds, text_size, style.justification);
 
-        self.canvas
-            .copy(&font_texture, None, to_sdl_rect(dest))
-            .unwrap();
-
-        // With `unsafe_textures`, textures must be explicitly destroyed, otherwise every repaint of
-        // text leaks a GPU texture.
-        unsafe { font_texture.destroy() };
+        self.fonts.draw(
+            self.canvas,
+            &block,
+            Point::new(dest.x, dest.y),
+            to_sdl_color(color),
+        );
 
         text_size
     }
