@@ -6,8 +6,9 @@
 [0] macOS uses the OpenGL renderer, fixing the 1-pixel view shift on click [kenji]
 [#93] Event vocabulary: modern Event enum replaces PushrodEvent [kenji]
 [0] Updated build workflow for pushrod-docs so it publishes from secrets data [kenji]
-
 [#106] Backend-neutral Painter API with SDL2 backend and headless test painter [kenji]
 [#19] Widget behavior flags and visual states, disabled input routing [kenji]
 [#6] Event masks for the run loop and widgets [kenji]
 [#109] Engine events: EngineEvent, ENGINE mask, on_engine_event [kenji]
+[0] Additional updates to AGENTS.md to indicate any new behavior must be part of an executable test [kenji]
+
