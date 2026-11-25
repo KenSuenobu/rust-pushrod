@@ -2016,7 +2016,6 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 9.1 (#93) | Event vocabulary: modern event names and structure | Define Pushrod's event enum and naming once; rename the PR #10 events. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/event.rs`, `src/cache.rs`, `src/engine.rs`, `pushrod-widgets/src/button_widget.rs`, `tests/` |
 | 9.2 (#94) | Event propagation: capture, target, and bubble phases with handled/ignored | Input events travel from the window down to the target widget and back up to its parents, and any widget can mark them handled. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/cache.rs`, `src/widget.rs`, `src/event.rs` |
 | 9.3 (#95) | Event filters: observe or intercept another widget's events | Install a filter that sees a widget's (or the whole application's) events first and can stop them. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `src/cache.rs`, `src/engine.rs` |
 | 9.4 (#96) | Reusable input controllers: click, drag, scroll, hover, long-press, key | Composable input handlers that widgets attach instead of re-implementing press/drag/release logic. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/controllers.rs (new)`, `src/widget.rs`, `pushrod-widgets/src/button_widget.rs` |
@@ -2029,6 +2028,8 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 | 9.11 (#124) | Event-loop style: keep parity with callbacks | Everything delivered to callbacks is also returned by next_event, and both styles can be combined. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs`, `src/event.rs` |
 
 ### 9.1 (#93): Event vocabulary: modern event names and structure
+
+**Status:** done (#93).
 
 **Problem Statement.** PR #10 inherited `BoundsChange`, `Clicked(u32, u8)`, and `SystemEvent`. Names should say what happened in plain modern terms, carry named fields, and cover pointer, keyboard, focus, semantic, lifecycle, window, time, and custom events consistently, so every other issue uses the same words.
 

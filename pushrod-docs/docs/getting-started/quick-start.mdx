@@ -141,7 +141,7 @@ You run the loop: `next_event` waits for input, keeps the screen up to date, and
 ```rust checked title="src/main.rs"
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
-use pushrod::event::PushrodEvent;
+use pushrod::event::Event;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use sdl2::pixels::Color;
@@ -191,7 +191,7 @@ fn main() {
     // and returns each event the widgets generate. It returns None when the window closes.
     while let Some(event) = engine.next_event(&mut events) {
         match event {
-            PushrodEvent::Clicked(id, _) if id == button => {
+            Event::Clicked { id, .. } if id == button => {
                 clicks += 1;
 
                 if let Some(text) = engine.widgets().get_as_mut::<TextWidget>(label) {
@@ -223,7 +223,7 @@ Click the button: the label counts your clicks. Close the window and the final c
 - `Engine` owns the window's widget tree. With callbacks, its type parameter is your state type (`Engine<Counter>`); in the event-loop version you keep state in local variables, so it's plain `Engine`.
 - `add_widget` added each widget to the window and returned its `WidgetId`.
 - **Callbacks:** `on_click(button, ..)` registered code that runs for that button. It receives `&mut Counter` and a `Ui` handle, which finds widgets by ID (`ui.get_mut::<TextWidget>(label)`). `engine.run` ran the loop until the window closed, then gave the state back.
-- **Event loop:** `engine.event_loop(&sdl, window)` opened the window for drawing, and each `engine.next_event(&mut events)` returned the next event, such as `PushrodEvent::Clicked(id, clicks)`. You change widgets directly through `engine.widgets()`. The call blocks while nothing happens, so the loop doesn't spin.
+- **Event loop:** `engine.event_loop(&sdl, window)` opened the window for drawing, and each `engine.next_event(&mut events)` returned the next event, such as `Event::Clicked { id, button, count }`. You change widgets directly through `engine.widgets()`. The call blocks while nothing happens, so the loop doesn't spin.
 
 Both styles route input through the same widgets and produce the same events; see [Handling events](../guides/handling-events.md#two-ways-to-handle-events) for when to choose which.
 

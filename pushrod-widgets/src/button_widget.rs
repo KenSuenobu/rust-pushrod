@@ -16,7 +16,7 @@
 //! # ButtonWidget
 //!
 //! This is a simple system `Widget` that fills its background, displays a text message within its
-//! bounds, and draws a border around its frame.  It generates a `Clicked(id, clicks)` event when
+//! bounds, and draws a border around its frame.  It generates a `Clicked { id, button, count }` event when
 //! the left mouse button is pressed and released within its bounds.
 //!
 //! The button follows the same behavior as a GEM button on the Atari ST: pressing the mouse
@@ -24,12 +24,11 @@
 //! selects it again.  `Clicked` is only generated if the mouse button is released while the
 //! button is still selected.
 
-use pushrod::event::{EventCtx, PushrodEvent};
+use pushrod::event::{Event, EventCtx};
 use pushrod::font::FontCache;
 use pushrod::geometry::{Point, Size};
 use pushrod::paint::{self, TextJustify, TextStyle};
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -41,7 +40,7 @@ use sdl2::video::Window;
 ///
 /// Pressing the left mouse button selects (inverts) the button; dragging out of its bounds
 /// deselects it and dragging back in selects it again.  Releasing the mouse button while the
-/// button is selected emits `Clicked(id, clicks)`.
+/// button is selected emits `Clicked { id, button, count }`.
 pub struct ButtonWidget {
     core: WidgetCore,
     style: TextStyle,
@@ -105,38 +104,37 @@ impl Widget for ButtonWidget {
 
     /// Tracks the left mouse button and emits `Clicked`.
     ///
-    /// - Left button pressed: the button is pressed and selected.
-    /// - Pointer leaves or re-enters while pressed (`BoundsChange`): deselects or reselects it.
-    /// - Left button released: if still selected, emits `Clicked(id, clicks)`; then the button is
-    ///   released and deselected.
+    /// - Left button pressed (`PointerPressed`): the button is pressed and selected.
+    /// - Pointer leaves or re-enters while pressed (`PointerExited`, `PointerEntered`): deselects
+    ///   or reselects it.
+    /// - Left button released (`PointerReleased`): if still selected, emits
+    ///   `Clicked { id, button, count }`; then the button is released and deselected.
     ///
     /// # Arguments
     ///
     /// * `event` - The event sent to the button.
     /// * `ctx` - The context used to emit `Clicked`.
-    fn handle_event(&mut self, event: &PushrodEvent, ctx: &mut EventCtx) {
+    fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) {
         match event {
-            PushrodEvent::SystemEvent(
-                _,
-                Event::MouseButtonDown {
-                    mouse_btn: MouseButton::Left,
-                    ..
-                },
-            ) => {
+            Event::PointerPressed {
+                button: MouseButton::Left,
+                ..
+            } => {
                 self.pressed = true;
                 self.set_selected(true);
             }
 
-            PushrodEvent::SystemEvent(
-                _,
-                Event::MouseButtonUp {
-                    mouse_btn: MouseButton::Left,
-                    clicks,
-                    ..
-                },
-            ) => {
+            Event::PointerReleased {
+                button: MouseButton::Left,
+                count,
+                ..
+            } => {
                 if self.pressed && self.selected {
-                    ctx.emit(PushrodEvent::Clicked(self.get_id(), *clicks));
+                    ctx.emit(Event::Clicked {
+                        id: self.get_id(),
+                        button: MouseButton::Left,
+                        count: *count,
+                    });
                 }
 
                 self.pressed = false;
@@ -144,8 +142,12 @@ impl Widget for ButtonWidget {
             }
 
             // While pressed, the button follows the mouse pointer in and out of its bounds.
-            PushrodEvent::BoundsChange(_, entered) if self.pressed => {
-                self.set_selected(*entered == self.get_id());
+            Event::PointerEntered { id } if self.pressed && *id == self.get_id() => {
+                self.set_selected(true);
+            }
+
+            Event::PointerExited { id } if self.pressed && *id == self.get_id() => {
+                self.set_selected(false);
             }
 
             _ => {}

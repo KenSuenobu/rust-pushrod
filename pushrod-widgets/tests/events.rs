@@ -2,12 +2,12 @@
 
 use pushrod::cache::WidgetCache;
 use pushrod::engine::Engine;
-use pushrod::event::PushrodEvent;
+use pushrod::event::{Event, EventKind};
 use pushrod::geometry::{point, size};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use sdl2::event::Event;
+use sdl2::event::Event as SdlEvent;
 use sdl2::mouse::{MouseButton, MouseState};
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
@@ -31,8 +31,8 @@ fn button(x: i32, y: i32) -> ButtonWidget {
     )
 }
 
-fn down(x: i32, y: i32) -> Event {
-    Event::MouseButtonDown {
+fn down(x: i32, y: i32) -> SdlEvent {
+    SdlEvent::MouseButtonDown {
         timestamp: 0,
         window_id: 0,
         which: 0,
@@ -43,8 +43,8 @@ fn down(x: i32, y: i32) -> Event {
     }
 }
 
-fn up(x: i32, y: i32) -> Event {
-    Event::MouseButtonUp {
+fn up(x: i32, y: i32) -> SdlEvent {
+    SdlEvent::MouseButtonUp {
         timestamp: 0,
         window_id: 0,
         which: 0,
@@ -55,8 +55,8 @@ fn up(x: i32, y: i32) -> Event {
     }
 }
 
-fn motion(x: i32, y: i32) -> Event {
-    Event::MouseMotion {
+fn motion(x: i32, y: i32) -> SdlEvent {
+    SdlEvent::MouseMotion {
         timestamp: 0,
         window_id: 0,
         which: 0,
@@ -68,11 +68,11 @@ fn motion(x: i32, y: i32) -> Event {
     }
 }
 
-fn clicks(events: &[PushrodEvent]) -> Vec<u32> {
+fn clicks(events: &[Event]) -> Vec<u32> {
     events
         .iter()
         .filter_map(|event| match event {
-            PushrodEvent::Clicked(id, _) => Some(*id),
+            Event::Clicked { id, .. } => Some(*id),
             _ => None,
         })
         .collect()
@@ -245,4 +245,102 @@ fn callbacks_can_shut_down_the_engine() {
     engine.dispatch(down(20, 20), &mut ());
     engine.dispatch(up(20, 20), &mut ());
     assert!(!engine.is_running());
+}
+
+/// A widget that echoes every event it receives, so tests can see what the cache routed to it.
+struct Recorder {
+    core: pushrod::widget::WidgetCore,
+}
+
+impl pushrod::widget::Widget for Recorder {
+    fn core(&self) -> &pushrod::widget::WidgetCore {
+        &self.core
+    }
+
+    fn core_mut(&mut self) -> &mut pushrod::widget::WidgetCore {
+        &mut self.core
+    }
+
+    fn paint(
+        &self,
+        _c: &mut sdl2::render::Canvas<sdl2::video::Window>,
+        _fc: &mut pushrod::font::FontCache,
+    ) {
+    }
+
+    fn handle_event(&mut self, event: &Event, ctx: &mut pushrod::event::EventCtx) {
+        ctx.emit(event.clone());
+    }
+}
+
+fn recorder(x: i32, y: i32) -> Recorder {
+    Recorder {
+        core: pushrod::widget::WidgetCore::new(point(x, y), size(100, 20)),
+    }
+}
+
+#[test]
+fn pointer_events_use_the_new_names_and_named_fields() {
+    let mut cache = WidgetCache::new();
+
+    cache.add(Box::new(BaseWidget::new(point(0, 0), size(400, 300))));
+
+    let first = cache.add(Box::new(recorder(10, 10)));
+    let second = cache.add(Box::new(recorder(10, 50)));
+
+    // Pointer enters the first widget from the root (which echoes nothing): Entered, then Moved.
+    let events = cache.handle_event(motion(20, 15));
+    let kinds: Vec<_> = events.iter().map(Event::kind).collect();
+
+    assert_eq!(
+        kinds,
+        vec![EventKind::PointerEntered, EventKind::PointerMoved]
+    );
+    assert_eq!(events[0].widget(), Some(first));
+
+    // Pointer goes from the first widget to the second: Exited, Entered, then Moved.
+    let events = cache.handle_event(motion(20, 55));
+    let kinds: Vec<_> = events.iter().map(Event::kind).collect();
+
+    assert_eq!(
+        kinds,
+        vec![
+            EventKind::PointerExited,
+            EventKind::PointerEntered,
+            EventKind::PointerMoved
+        ]
+    );
+    assert_eq!(events[0].widget(), Some(first));
+    assert_eq!(events[1].widget(), Some(second));
+
+    // Press and release carry the button, position, and click count.
+    let pressed = cache.handle_event(down(20, 55));
+
+    assert!(matches!(
+        pressed.as_slice(),
+        [Event::PointerPressed { id, button: MouseButton::Left, position, count: 1 }]
+            if *id == second && position.x == 20 && position.y == 55
+    ));
+
+    let released = cache.handle_event(up(20, 55));
+
+    assert!(matches!(
+        released.as_slice(),
+        [Event::PointerReleased { id, button: MouseButton::Left, count: 1, .. }] if *id == second
+    ));
+}
+
+#[test]
+fn clicked_carries_button_and_count() {
+    let (mut cache, _, button) = cache_with_button();
+
+    cache.handle_event(motion(40, 40));
+    cache.handle_event(down(40, 40));
+
+    let events = cache.handle_event(up(40, 40));
+
+    assert!(matches!(
+        events.as_slice(),
+        [Event::Clicked { id, button: MouseButton::Left, count: 1 }] if *id == button
+    ));
 }

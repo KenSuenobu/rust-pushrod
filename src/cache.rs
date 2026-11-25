@@ -31,11 +31,11 @@
 //! A flat list addressed by ID avoids reference-counted parent pointers entirely, and allows a
 //! form to be stored and reloaded by ID.
 
-use crate::event::{EventCtx, PushrodEvent};
+use crate::event::{Event, EventCtx};
 use crate::font::FontCache;
-use crate::geometry::{Point, make_rect};
+use crate::geometry::{Point, make_rect, point};
 use crate::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
-use sdl2::event::Event;
+use sdl2::event::Event as SdlEvent;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
@@ -360,7 +360,7 @@ impl WidgetCache {
     }
 
     /// Sends an event to a `Widget`.
-    fn send(&mut self, id: WidgetId, event: &PushrodEvent, ctx: &mut EventCtx) {
+    fn send(&mut self, id: WidgetId, event: &Event, ctx: &mut EventCtx) {
         if let Some(widget) = self.get_mut(id) {
             widget.handle_event(event, ctx);
         }
@@ -368,12 +368,13 @@ impl WidgetCache {
 
     /// Routes a raw input event to the `Widget`s.
     ///
-    /// - A mouse button press goes to the top-most `Widget` under the pointer, which captures the
-    ///   mouse until the button is released.
-    /// - Mouse motion sends `BoundsChange` to the `Widget` that was left and the `Widget` that was
-    ///   entered (when they differ), then goes to the capturing `Widget`, or the `Widget` under the
-    ///   pointer.
-    /// - A mouse button release goes to the capturing `Widget`, then ends the capture.
+    /// - A mouse button press sends `PointerPressed` to the top-most `Widget` under the pointer,
+    ///   which captures the mouse until the button is released.
+    /// - Mouse motion sends `PointerExited` to the `Widget` that was left and `PointerEntered` to
+    ///   the `Widget` that was entered (when they differ), then `PointerMoved` to the capturing
+    ///   `Widget`, or the `Widget` under the pointer.
+    /// - A mouse button release sends `PointerReleased` to the capturing `Widget`, then ends the
+    ///   capture.
     /// - Other events are ignored.
     ///
     /// # Arguments
@@ -382,8 +383,8 @@ impl WidgetCache {
     ///
     /// # Returns
     ///
-    /// The `PushrodEvent`s the `Widget`s generated while handling the event, in the order emitted.
-    pub fn handle_event(&mut self, event: Event) -> Vec<PushrodEvent> {
+    /// The `Event`s the `Widget`s generated while handling the event, in the order emitted.
+    pub fn handle_event(&mut self, event: SdlEvent) -> Vec<Event> {
         let mut ctx = EventCtx::default();
 
         if self.cache.is_empty() {
@@ -391,16 +392,37 @@ impl WidgetCache {
         }
 
         match event {
-            Event::MouseButtonDown { x, y, .. } => {
+            SdlEvent::MouseButtonDown {
+                x,
+                y,
+                mouse_btn,
+                clicks,
+                ..
+            } => {
                 self.current_widget_id = self.widget_at(x, y);
 
                 let target = self.current_widget_id;
 
                 self.captured_widget_id = Some(target);
-                self.send(target, &PushrodEvent::SystemEvent(target, event), &mut ctx);
+                self.send(
+                    target,
+                    &Event::PointerPressed {
+                        id: target,
+                        button: mouse_btn,
+                        position: point(x, y),
+                        count: clicks,
+                    },
+                    &mut ctx,
+                );
             }
 
-            Event::MouseButtonUp { x, y, .. } => {
+            SdlEvent::MouseButtonUp {
+                x,
+                y,
+                mouse_btn,
+                clicks,
+                ..
+            } => {
                 self.current_widget_id = self.widget_at(x, y);
 
                 let target = self
@@ -408,25 +430,50 @@ impl WidgetCache {
                     .take()
                     .unwrap_or(self.current_widget_id);
 
-                self.send(target, &PushrodEvent::SystemEvent(target, event), &mut ctx);
+                self.send(
+                    target,
+                    &Event::PointerReleased {
+                        id: target,
+                        button: mouse_btn,
+                        position: point(x, y),
+                        count: clicks,
+                    },
+                    &mut ctx,
+                );
             }
 
-            Event::MouseMotion { x, y, .. } => {
+            SdlEvent::MouseMotion { x, y, .. } => {
                 let previous_widget_id = self.current_widget_id;
 
                 self.current_widget_id = self.widget_at(x, y);
 
                 if self.current_widget_id != previous_widget_id {
-                    let bounds_event =
-                        PushrodEvent::BoundsChange(previous_widget_id, self.current_widget_id);
-
-                    self.send(previous_widget_id, &bounds_event, &mut ctx);
-                    self.send(self.current_widget_id, &bounds_event, &mut ctx);
+                    self.send(
+                        previous_widget_id,
+                        &Event::PointerExited {
+                            id: previous_widget_id,
+                        },
+                        &mut ctx,
+                    );
+                    self.send(
+                        self.current_widget_id,
+                        &Event::PointerEntered {
+                            id: self.current_widget_id,
+                        },
+                        &mut ctx,
+                    );
                 }
 
                 let target = self.captured_widget_id.unwrap_or(self.current_widget_id);
 
-                self.send(target, &PushrodEvent::SystemEvent(target, event), &mut ctx);
+                self.send(
+                    target,
+                    &Event::PointerMoved {
+                        id: target,
+                        position: point(x, y),
+                    },
+                    &mut ctx,
+                );
             }
 
             _ => {}
