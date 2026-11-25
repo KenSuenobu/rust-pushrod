@@ -2,7 +2,7 @@ name: Documentation site
 
 # Builds the Docusaurus site and the rustdoc API reference together, and publishes them as the
 # `pushrod-docs` Docker image from main.  Pull requests build only (a broken link fails the
-# build).  Needs the repository secrets DOCKER_REPOSITORY (the registry namespace the image is
+# build).  Needs the repository secrets DOCKER_REGISTRY (the registry host/namespace the image is
 # pushed under), DOCKER_USERNAME, and DOCKER_PASSWORD.
 on:
   push:
@@ -63,6 +63,7 @@ jobs:
           path: pushrod-docs/build
       - uses: docker/login-action@v3
         with:
+          registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       - uses: docker/build-push-action@v6
