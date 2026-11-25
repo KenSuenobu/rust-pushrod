@@ -113,11 +113,23 @@ A disabled widget (`set_enabled(false)`) receives no mouse events, so it never e
 | Method | Runs when | Signature |
 |---|---|---|
 | `engine.on_click(id, f)` | Widget `id` emits `Clicked` | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_press(id, f)` | A mouse button goes down on the widget (`PointerPressed`) | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_release(id, f)` | A mouse button goes up, inside or outside the widget (`PointerReleased`) | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_activate(id, f)` | The widget is activated (`Activated`) | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_toggle(id, f)` | A checkable widget changes state (`Toggled`) | `FnMut(&mut S, &mut Ui, checked: bool)` |
+| `engine.on_value_change(id, f)` | The widget's value changes (`ValueChanged`) | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_viewport_change(id, f)` | A scrolling widget's visible area moves (`ViewportChanged`) | `FnMut(&mut S, &mut Ui, offset: Point)` |
+| `engine.on_selection_change(id, f)` | The selection changes (`SelectionChanged`) | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_text_change(id, f)` | The text changes (`TextChanged`) | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_editing_finished(id, f)` | Editing finishes (`EditingFinished`) | `FnMut(&mut S, &mut Ui)` |
+| `engine.on_key_press(id, f)` | A key goes down or repeats while the widget has the keyboard (`KeyPressed`) | `FnMut(&mut S, &mut Ui, Keycode, Mod)` |
+| `engine.on_focus_change(id, f)` | The widget gains (`true`) or loses (`false`) focus | `FnMut(&mut S, &mut Ui, gained: bool)` |
+| `engine.on_hover(id, f)` | The pointer enters (`true`) or leaves (`false`) the widget | `FnMut(&mut S, &mut Ui, inside: bool)` |
 | `engine.on_engine_event(f)` | Pushrod completes an internal action | `FnMut(&mut S, &mut Ui, &EngineEvent)` |
 | `engine.on_engine_event_filtered(&kinds, f)` | Same, for the listed kinds only | `FnMut(&mut S, &mut Ui, &EngineEvent)` |
 | `engine.on_event(f)` | Any widget emits any event | `FnMut(&mut S, &mut Ui, &Event)` |
 
-Several callbacks can be registered for the same widget; they run in the order they were registered, and `on_event` callbacks run after the widget-specific ones and the engine-event ones. Pushrod's own actions (such as a mask change or a widget being added) arrive as [engine events](../events/engine-events.md).
+A callback only runs for events the widget actually emits. `ButtonWidget` emits `Clicked`, `PointerPressed`, `PointerReleased`, `PointerEntered` and `PointerExited`, so `on_click`, `on_press`, `on_release` and `on_hover` work on buttons; the other methods run for widgets that emit their event (value controls, text fields, lists). Every `on_*` method fires only for its widget and event kind, after the widget has updated itself, and returns a `CallbackId`. Several callbacks can be registered for the same widget; they run in the order they were registered, and `on_event` callbacks run after the widget-specific ones and the engine-event ones. Pushrod's own actions (such as a mask change or a widget being added) arrive as [engine events](../events/engine-events.md).
 
 ## The `Ui` handle
 

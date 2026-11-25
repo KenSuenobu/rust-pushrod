@@ -370,6 +370,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Callbacks run in registration order after the widget updated itself
 - Tests for each kind
 
+**Status:** done (#22).
+
 **Parallelism / Dependencies.** Parallelizable. Requires 9.1 (#93).
 
 **Technical Stack.** Rust

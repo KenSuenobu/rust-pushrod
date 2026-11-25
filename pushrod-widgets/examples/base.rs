@@ -169,6 +169,13 @@ pub fn main() {
 
     engine.on_click(quit_id, |_state, ui| ui.shutdown());
 
+    // Per-kind callbacks: pointer-down on the button shows a message before the click completes.
+    engine.on_press(button_id, move |_state, ui| {
+        ui.get_mut::<TextWidget>(status_id)
+            .unwrap()
+            .set_text(String::from("Button pressed..."));
+    });
+
     engine.on_click(hover_id, |state, ui| {
         state.hover_enabled = !state.hover_enabled;
         ui.set_event_mask(if state.hover_enabled {

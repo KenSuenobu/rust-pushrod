@@ -213,7 +213,7 @@ fn engine_runs_click_callbacks_with_state_and_widget_access() {
             .set_text(format!("{}", state.clicks));
     });
     engine.on_event(|state, _ui, event| {
-        if !matches!(event, Event::Engine(_)) {
+        if matches!(event, Event::Clicked { .. }) {
             state.events += 1;
         }
     });
@@ -340,10 +340,10 @@ fn clicked_carries_button_and_count() {
 
     let events = cache.handle_event(up(40, 40));
 
-    assert!(matches!(
-        events.as_slice(),
-        [Event::Clicked { id, button: MouseButton::Left, count: 1 }] if *id == button
-    ));
+    assert!(events.iter().any(|event| matches!(
+        event,
+        Event::Clicked { id, button: MouseButton::Left, count: 1 } if *id == button
+    )));
 }
 
 #[test]
@@ -471,7 +471,7 @@ fn widgets_with_an_empty_mask_receive_nothing_while_a_button_still_clicks() {
         .map(Event::kind)
         .collect();
 
-    assert_eq!(kinds, vec![EventKind::Clicked]);
+    assert_eq!(kinds, vec![EventKind::Clicked, EventKind::PointerReleased]);
     assert!(cache.get(button_id).is_some());
 }
 
@@ -691,4 +691,39 @@ fn engine_events_do_not_loop_when_widgets_respond_to_them() {
     // `WidgetAdded`, plus the copy this test widget emits in response.  The copy is not broadcast
     // again, and the second dispatch adds nothing, so there is no loop.
     assert_eq!(count, 2);
+}
+
+#[test]
+fn registry_callbacks_fire_from_real_pointer_input_on_a_button() {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    let mut engine: Engine<Vec<String>> = Engine::new(size(200, 100), 30);
+    let id = engine.add_widget(button(10, 10));
+    let other = engine.add_widget(button(10, 50));
+    let order = Rc::new(RefCell::new(Vec::new()));
+
+    let log = order.clone();
+    engine.on_hover(id, move |_, _, inside| {
+        log.borrow_mut().push(format!("hover {inside}"))
+    });
+    let log = order.clone();
+    engine.on_press(id, move |_, _| log.borrow_mut().push("press".into()));
+    let log = order.clone();
+    engine.on_release(id, move |_, _| log.borrow_mut().push("release".into()));
+    let log = order.clone();
+    engine.on_click(id, move |_, _| log.borrow_mut().push("click".into()));
+    // A callback on the other button must stay silent.
+    let log = order.clone();
+    engine.on_press(other, move |_, _| log.borrow_mut().push("other".into()));
+
+    let mut state = Vec::new();
+    for event in [motion(20, 20), down(20, 20), up(20, 20), motion(150, 90)] {
+        engine.dispatch(event, &mut state);
+    }
+
+    assert_eq!(
+        *order.borrow(),
+        vec!["hover true", "press", "click", "release", "hover false"]
+    );
 }

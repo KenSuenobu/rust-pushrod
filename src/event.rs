@@ -664,6 +664,33 @@ pub enum Event {
 }
 
 impl Event {
+    /// The widget a widget-addressed event is for.
+    ///
+    /// # Returns
+    ///
+    /// The `WidgetId`, or `None` for window-level, engine, custom and raw events.
+    pub fn widget_id(&self) -> Option<WidgetId> {
+        match self {
+            Event::PointerEntered { id }
+            | Event::PointerExited { id }
+            | Event::PointerMoved { id, .. }
+            | Event::PointerPressed { id, .. }
+            | Event::PointerReleased { id, .. }
+            | Event::Clicked { id, .. }
+            | Event::KeyPressed { id, .. }
+            | Event::FocusGained { id }
+            | Event::FocusLost { id }
+            | Event::Activated { id }
+            | Event::Toggled { id, .. }
+            | Event::ValueChanged { id }
+            | Event::SelectionChanged { id }
+            | Event::TextChanged { id }
+            | Event::EditingFinished { id }
+            | Event::ViewportChanged { id, .. } => Some(*id),
+            _ => None,
+        }
+    }
+
     /// Returns the kind of this event, without its data.
     ///
     /// # Returns
