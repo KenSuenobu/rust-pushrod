@@ -129,7 +129,11 @@ def ensure_project(gh, owner, repo, spec):
 
 
 def ensure_fields(gh, owner, number, phases):
-    """Creates the Phase and Order fields when missing.
+    """Creates the Phase and Order fields when missing, and rebuilds Phase when its options changed.
+
+    The GitHub CLI cannot add options to an existing single-select field.  When the project's Phase
+    field lacks an option the definitions now need, the field is deleted and created again with the
+    full list; the values it held are set again for every item by `add_items`.
 
     # Arguments
 
@@ -159,7 +163,15 @@ def ensure_fields(gh, owner, number, phases):
     options = {o["name"]: o["id"] for o in phase.get("options", [])}
     missing = [p for p in phases if p not in options]
     if missing:
-        sys.exit(f"Project {number}: Phase field lacks options {missing}; add them in the project settings and re-run.")
+        print(f"  Phase field lacks {missing}; rebuilding it with all {len(phases)} options")
+        gh.run(["project", "field-delete", "--id", phase["id"], "--format", "json"])
+        gh.run(["project", "field-create", number, "--owner", owner, "--name", "Phase",
+                "--data-type", "SINGLE_SELECT", "--single-select-options", ",".join(phases), "--format", "json"])
+        phase = {f["name"]: f for f in field_list().get("fields", [])}["Phase"]
+        options = {o["name"]: o["id"] for o in phase.get("options", [])}
+        missing = [p for p in phases if p not in options]
+        if missing:
+            sys.exit(f"Project {number}: could not create Phase options {missing}; add them in the project settings and re-run.")
     return (phase["id"], options, fields["Order"]["id"])
 
 
