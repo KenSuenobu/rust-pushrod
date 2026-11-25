@@ -262,12 +262,24 @@ impl ClickController {
 }
 
 impl Default for ClickController {
+    /// Creates the controller with its defaults.
+    ///
+    /// # Returns
+    ///
+    /// The controller.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl Controller for ClickController {
+    /// Examines one event and reports any result.
+    ///
+    /// # Arguments
+    ///
+    /// * `widget` - The ID of the owning `Widget`.
+    /// * `event` - The event the `Widget` received.
+    /// * `out` - Where results are pushed.
     fn handle(&mut self, widget: WidgetId, event: &Event, out: &mut Vec<ControllerEvent>) {
         match event {
             Event::PointerPressed { id, button, .. } if *id == widget && *button == self.button => {
@@ -305,6 +317,11 @@ impl Controller for ClickController {
         }
     }
 
+    /// Returns the event classes this controller needs.
+    ///
+    /// # Returns
+    ///
+    /// The mask added to the `Widget`'s event mask.
     fn event_mask(&self) -> EventMask {
         EventMask::POINTER_BUTTONS | EventMask::HOVER
     }
@@ -366,12 +383,24 @@ impl DragController {
 }
 
 impl Default for DragController {
+    /// Creates the controller with its defaults.
+    ///
+    /// # Returns
+    ///
+    /// The controller.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl Controller for DragController {
+    /// Examines one event and reports any result.
+    ///
+    /// # Arguments
+    ///
+    /// * `widget` - The ID of the owning `Widget`.
+    /// * `event` - The event the `Widget` received.
+    /// * `out` - Where results are pushed.
     fn handle(&mut self, widget: WidgetId, event: &Event, out: &mut Vec<ControllerEvent>) {
         match event {
             Event::PointerPressed {
@@ -424,6 +453,11 @@ impl Controller for DragController {
         }
     }
 
+    /// Returns the event classes this controller needs.
+    ///
+    /// # Returns
+    ///
+    /// The mask added to the `Widget`'s event mask.
     fn event_mask(&self) -> EventMask {
         EventMask::POINTER_BUTTONS | EventMask::POINTER_MOTION
     }
@@ -447,12 +481,24 @@ impl ScrollController {
 }
 
 impl Controller for ScrollController {
+    /// Examines one event and reports any result.
+    ///
+    /// # Arguments
+    ///
+    /// * `_widget` - The ID of the owning `Widget` (unused).
+    /// * `event` - The event the `Widget` received.
+    /// * `out` - Where results are pushed.
     fn handle(&mut self, _widget: WidgetId, event: &Event, out: &mut Vec<ControllerEvent>) {
         if let Event::Scrolled { delta, .. } = event {
             out.push(ControllerEvent::Scrolled { delta: *delta });
         }
     }
 
+    /// Returns the event classes this controller needs.
+    ///
+    /// # Returns
+    ///
+    /// The mask added to the `Widget`'s event mask.
     fn event_mask(&self) -> EventMask {
         EventMask::SCROLL
     }
@@ -476,6 +522,13 @@ impl HoverController {
 }
 
 impl Controller for HoverController {
+    /// Examines one event and reports any result.
+    ///
+    /// # Arguments
+    ///
+    /// * `widget` - The ID of the owning `Widget`.
+    /// * `event` - The event the `Widget` received.
+    /// * `out` - Where results are pushed.
     fn handle(&mut self, widget: WidgetId, event: &Event, out: &mut Vec<ControllerEvent>) {
         match event {
             Event::PointerEntered { id } if *id == widget && !self.hovered => {
@@ -492,6 +545,11 @@ impl Controller for HoverController {
         }
     }
 
+    /// Returns the event classes this controller needs.
+    ///
+    /// # Returns
+    ///
+    /// The mask added to the `Widget`'s event mask.
     fn event_mask(&self) -> EventMask {
         EventMask::HOVER
     }
@@ -548,12 +606,24 @@ impl LongPressController {
 }
 
 impl Default for LongPressController {
+    /// Creates the controller with its defaults.
+    ///
+    /// # Returns
+    ///
+    /// The controller.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl Controller for LongPressController {
+    /// Examines one event and reports any result.
+    ///
+    /// # Arguments
+    ///
+    /// * `widget` - The ID of the owning `Widget`.
+    /// * `event` - The event the `Widget` received.
+    /// * `out` - Where results are pushed.
     fn handle(&mut self, widget: WidgetId, event: &Event, out: &mut Vec<ControllerEvent>) {
         match event {
             Event::PointerPressed {
@@ -599,6 +669,11 @@ impl Controller for LongPressController {
         }
     }
 
+    /// Returns the event classes this controller needs.
+    ///
+    /// # Returns
+    ///
+    /// The mask added to the `Widget`'s event mask.
     fn event_mask(&self) -> EventMask {
         EventMask::POINTER_BUTTONS | EventMask::POINTER_MOTION | EventMask::TIMER
     }
@@ -644,6 +719,13 @@ impl KeyController {
 }
 
 impl Controller for KeyController {
+    /// Examines one event and reports any result.
+    ///
+    /// # Arguments
+    ///
+    /// * `_widget` - The ID of the owning `Widget` (unused).
+    /// * `event` - The event the `Widget` received.
+    /// * `out` - Where results are pushed.
     fn handle(&mut self, _widget: WidgetId, event: &Event, out: &mut Vec<ControllerEvent>) {
         match event {
             Event::KeyPressed {
@@ -668,6 +750,11 @@ impl Controller for KeyController {
         }
     }
 
+    /// Returns the event classes this controller needs.
+    ///
+    /// # Returns
+    ///
+    /// The mask added to the `Widget`'s event mask.
     fn event_mask(&self) -> EventMask {
         EventMask::KEYBOARD
     }

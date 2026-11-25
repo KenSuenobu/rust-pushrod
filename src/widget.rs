@@ -276,8 +276,8 @@ pub trait Widget: Any {
     ///
     /// # Arguments
     ///
-    /// * `_event` - The event sent to this `Widget`.
-    /// * `_ctx` - The context used to queue events the `Widget` generates;
+    /// * `event` - The event sent to this `Widget`.
+    /// * `ctx` - The context used to queue events the `Widget` generates;
     ///   [`EventCtx::phase`](crate::event::EventCtx::phase) says whether the event is being
     ///   captured, handled as the target, or bubbled.
     ///
