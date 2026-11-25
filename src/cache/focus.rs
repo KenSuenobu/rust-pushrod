@@ -159,6 +159,10 @@ impl WidgetCache {
     /// Focuses the nearest focusable `Widget` at or above the one that was clicked.
     ///
     /// A click on something that cannot take focus leaves the focus where it is.
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - The `Widget` that was clicked.
     pub(super) fn focus_for_click(&mut self, target: WidgetId) {
         let mut candidates = vec![target];
 
@@ -169,7 +173,11 @@ impl WidgetCache {
         }
     }
 
-    /// Returns the `Widget` that receives keys: the focused one, or the root with no focus.
+    /// Returns the `Widget` that receives keys.
+    ///
+    /// # Returns
+    ///
+    /// The focused `Widget`, or the root with no focus.
     pub(super) fn key_target(&self) -> WidgetId {
         self.focused_widget_id
             .filter(|&id| self.can_focus(id))
@@ -346,6 +354,13 @@ impl WidgetCache {
     /// Delivers a key press to the focused `Widget`, then, if nothing stopped it, applies the
     /// keyboard rules: Tab and Shift-Tab, the arrow keys within a group, Return for the default
     /// `Widget`, and Escape (or Cmd-. on macOS) for the cancel `Widget`.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - The key pressed.
+    /// * `modifiers` - The modifier keys held.
+    /// * `repeat` - `true` if this is an auto-repeat.
+    /// * `ctx` - The context collecting generated events.
     pub(super) fn handle_key_down(
         &mut self,
         key: Keycode,
