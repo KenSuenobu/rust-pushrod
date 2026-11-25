@@ -10,8 +10,9 @@ mod tests {
     /// The documentation must contain at least one checked sample, or the check is not running.
     #[test]
     fn docs_have_checked_samples() {
+        let count = std::hint::black_box(super::CHECKED_SAMPLES);
         assert!(
-            super::CHECKED_SAMPLES > 0,
+            count > 0,
             "no `rust checked` samples found in pushrod-docs/docs"
         );
     }
