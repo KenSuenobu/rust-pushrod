@@ -61,7 +61,7 @@ Extra widgets: 1.1 ([#252](https://github.com/KenSuenobu/rust-pushrod/issues/252
 
 ## Used by Chassis
 
-Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer.
+Chassis 2.3 [#173](https://github.com/KenSuenobu/rust-pushrod/issues/173) Project drawer, Chassis 4.1 [#186](https://github.com/KenSuenobu/rust-pushrod/issues/186) Inspector drawer, Chassis 9.7 [#318](https://github.com/KenSuenobu/rust-pushrod/issues/318) Assistant activity, review mode, and safety, Chassis 9.9 [#320](https://github.com/KenSuenobu/rust-pushrod/issues/320) Assistant drawer: chat inside Chassis.
 
 ## Implementation notes
 
