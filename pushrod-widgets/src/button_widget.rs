@@ -107,7 +107,28 @@ impl Widget for ButtonWidget {
     ///
     /// * `event` - The event sent to the button.
     /// * `ctx` - The context used to emit `Clicked`.
+    ///
+    /// After the button has updated itself, it also re-emits `PointerPressed`, `PointerReleased`,
+    /// `PointerEntered` and `PointerExited` so the application's `on_press`, `on_release` and
+    /// `on_hover` callbacks run (each is emitted after `Clicked`, when there is one).
     fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) {
+        self.track(event, ctx);
+
+        if matches!(
+            event,
+            Event::PointerPressed { .. }
+                | Event::PointerReleased { .. }
+                | Event::PointerEntered { .. }
+                | Event::PointerExited { .. }
+        ) {
+            ctx.emit(event.clone());
+        }
+    }
+}
+
+impl ButtonWidget {
+    /// Updates the pressed and selected state for `event`, emitting `Clicked` on a click.
+    fn track(&mut self, event: &Event, ctx: &mut EventCtx) {
         match event {
             Event::PointerPressed {
                 button: MouseButton::Left,
