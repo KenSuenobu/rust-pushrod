@@ -151,11 +151,8 @@ impl Widget for GlyphButton {
     fn paint(&self, p: &mut dyn Painter) {
         let size = self.get_size();
         let style = self.style();
-        let (background, foreground) = if self.selected {
-            (Color::BLACK, Color::WHITE)
-        } else {
-            (self.get_color(), self.style.font_color)
-        };
+        let (background, foreground) =
+            paint::pressed_colors(self.selected, self.get_color(), self.style.font_color);
         let (background, foreground) = (
             style.background.unwrap_or(background),
             style.foreground.unwrap_or(foreground),

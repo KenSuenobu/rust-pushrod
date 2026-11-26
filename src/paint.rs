@@ -396,6 +396,28 @@ pub fn state_overlay(p: &mut dyn Painter, size: Size, state: VisualState) {
     }
 }
 
+/// Returns the colors a button-like `Widget` paints with: its own colors, or the two swapped to
+/// black on white's inverse (a black fill with white text) while it is pressed or checked.
+///
+/// This is the shared rule for the pressed look, so every button inverts the same way.
+///
+/// # Arguments
+///
+/// * `pressed` - `true` while the `Widget` is pressed or checked.
+/// * `background` - The fill color when not pressed.
+/// * `foreground` - The text or glyph color when not pressed.
+///
+/// # Returns
+///
+/// `(background, foreground)` to paint with.
+pub fn pressed_colors(pressed: bool, background: Color, foreground: Color) -> (Color, Color) {
+    if pressed {
+        (Color::BLACK, Color::WHITE)
+    } else {
+        (background, foreground)
+    }
+}
+
 /// Draws a string of text within a rectangle.
 ///
 /// The text is aligned horizontally according to `style`, wraps at the rectangle's width, and is
@@ -789,6 +811,18 @@ mod tests {
             Color::BLACK,
             justification,
         )
+    }
+
+    #[test]
+    fn pressed_colors_invert_only_when_pressed() {
+        assert_eq!(
+            pressed_colors(false, Color::WHITE, Color::RED),
+            (Color::WHITE, Color::RED)
+        );
+        assert_eq!(
+            pressed_colors(true, Color::WHITE, Color::RED),
+            (Color::BLACK, Color::WHITE)
+        );
     }
 
     #[test]

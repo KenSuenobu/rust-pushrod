@@ -326,7 +326,8 @@ impl WidgetCache {
         found
     }
 
-    /// Queues the activation of the default or cancel `Widget`, if the form has one.
+    /// Queues the activation of the default or cancel `Widget`, if the form has one, and delivers
+    /// [`Event::Activated`] to that `Widget` so it can act.
     fn trigger_action(&mut self, cancel: bool, ctx: &mut EventCtx) -> bool {
         let flag = if cancel {
             Behavior::CANCEL_ACTION
@@ -338,7 +339,10 @@ impl WidgetCache {
             return false;
         };
 
+        // The application hears of the activation first; then the widget itself is told, so a
+        // button can respond as if it had been clicked.
         ctx.emit(Event::Activated { id });
+        self.send(id, &Event::Activated { id }, EventPhase::Target, ctx);
         self.queue_event(Event::Engine(EngineEvent::ActionTriggered { id, cancel }));
 
         true

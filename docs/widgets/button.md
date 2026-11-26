@@ -61,9 +61,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Each flag combination behaves as described and is tested
-- [ ] Default button is recognizable at a glance
-- [ ] No regression in PR [#10](https://github.com/KenSuenobu/rust-pushrod/pull/10) click tests
+- [x] Each flag combination behaves as described and is tested
+- [x] Default button is recognizable at a glance
+- [x] No regression in PR [#10](https://github.com/KenSuenobu/rust-pushrod/pull/10) click tests
 
 ## Depends on
 
