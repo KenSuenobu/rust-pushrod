@@ -28,8 +28,9 @@ use pushrod::color::{Color, FontStyle};
 use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::geometry::{Point, Rect, Size};
-use pushrod::paint::{self, Painter, TextJustify, TextStyle};
+use pushrod::paint::{self, Painter, TextJustify, TextStyle, Truncate};
 use pushrod::widget::{VisualState, Widget, WidgetCore};
+use std::cell::Cell;
 
 /// A push button with a text label.
 ///
@@ -42,6 +43,8 @@ pub struct ButtonWidget {
     msg: String,
     border_width: u8,
     selected: bool,
+    truncate: Truncate,
+    truncated: Cell<bool>,
 }
 
 impl Widget for ButtonWidget {
@@ -89,13 +92,18 @@ impl Widget for ButtonWidget {
         paint::fill(p, background);
 
         if size.w > inset * 2 {
-            paint::text(
+            let drawn = paint::text(
                 p,
                 Rect::new(inset as i32, 0, size.w - inset * 2, size.h),
                 font,
                 foreground,
                 &self.msg,
+                self.truncate,
             );
+
+            self.truncated.set(drawn.truncated);
+        } else {
+            self.truncated.set(false);
         }
 
         paint::border(
@@ -219,6 +227,8 @@ impl ButtonWidget {
             msg,
             border_width,
             selected: false,
+            truncate: Truncate::End,
+            truncated: Cell::new(false),
         }
     }
 
@@ -249,6 +259,37 @@ impl ButtonWidget {
     pub fn set_text(&mut self, msg: String) {
         self.msg = msg;
         self.set_invalidated(true);
+    }
+
+    /// Sets how a label that doesn't fit is shortened, and invalidates the button.
+    ///
+    /// # Arguments
+    ///
+    /// * `truncate` - The mode; the default is [`Truncate::End`].
+    pub fn set_truncate(&mut self, truncate: Truncate) {
+        if self.truncate != truncate {
+            self.truncate = truncate;
+            self.set_invalidated(true);
+        }
+    }
+
+    /// Returns how a label that doesn't fit is shortened.
+    ///
+    /// # Returns
+    ///
+    /// The truncation mode.
+    pub fn get_truncate(&self) -> Truncate {
+        self.truncate
+    }
+
+    /// Returns whether the label was shortened the last time the button painted, so a tooltip can
+    /// show the full label.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the last paint drew a shortened label; `false` before the first paint.
+    pub fn is_truncated(&self) -> bool {
+        self.truncated.get()
     }
 
     /// Returns the label.

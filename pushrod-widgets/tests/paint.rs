@@ -3,6 +3,7 @@
 use pushrod::backend::headless::{PaintCall, RecordingPainter};
 use pushrod::color::{Color, FontStyle};
 use pushrod::geometry::{Rect, point, size};
+use pushrod::paint::Truncate;
 use pushrod::widget::Widget;
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
@@ -206,4 +207,85 @@ fn box_base_and_text_widgets_honor_their_styles() {
         &painted(&t)[..],
         [PaintCall::Fill(f), PaintCall::Text(_, _, c)] if *f == Color::YELLOW && *c == Color::RED
     ));
+}
+
+/// A 50-pixel-wide text widget (ten characters at 5 pixels each in the recording painter).
+fn narrow_text(msg: &str) -> TextWidget {
+    TextWidget::new(
+        point(0, 0),
+        size(50, 20),
+        String::from("font.ttf"),
+        FontStyle::NORMAL,
+        10,
+        Color::BLACK,
+        TextJustify::Left,
+        String::from(msg),
+    )
+}
+
+fn drawn_string(calls: &[PaintCall]) -> String {
+    calls
+        .iter()
+        .find_map(|c| match c {
+            PaintCall::Text(_, t, _) => Some(t.clone()),
+            _ => None,
+        })
+        .unwrap_or_default()
+}
+
+#[test]
+fn text_and_button_widgets_truncate_at_the_end_by_default() {
+    let t = narrow_text("Quarterly report.txt");
+
+    assert_eq!(t.get_truncate(), Truncate::End);
+    assert!(!t.is_truncated(), "nothing painted yet");
+    assert_eq!(drawn_string(&painted(&t)), "Quarterly\u{2026}");
+    assert!(t.is_truncated());
+
+    let mut b = ButtonWidget::new(
+        point(0, 0),
+        size(50, 20),
+        String::from("font.ttf"),
+        FontStyle::NORMAL,
+        10,
+        Color::BLACK,
+        TextJustify::Center,
+        String::from("Quarterly report.txt"),
+        0,
+    );
+
+    assert_eq!(b.get_truncate(), Truncate::End);
+    assert_eq!(drawn_string(&painted(&b)), "Quarterl\u{2026}");
+    assert!(b.is_truncated());
+
+    b.set_text(String::from("OK"));
+    assert_eq!(drawn_string(&painted(&b)), "OK");
+    assert!(!b.is_truncated(), "short text is drawn unchanged");
+}
+
+#[test]
+fn text_widget_truncates_in_every_mode() {
+    let mut t = narrow_text("Quarterly report.txt");
+
+    for (mode, expected, truncated) in [
+        (Truncate::End, "Quarterly\u{2026}", true),
+        (Truncate::Start, "\u{2026}eport.txt", true),
+        (Truncate::Middle, "Quart\u{2026}.txt", true),
+        (Truncate::None, "Quarterly report.txt", false),
+    ] {
+        t.set_truncate(mode);
+        assert_eq!(drawn_string(&painted(&t)), expected, "{mode:?}");
+        assert_eq!(t.is_truncated(), truncated, "{mode:?}");
+    }
+}
+
+#[test]
+fn changing_the_truncate_mode_invalidates_the_widget() {
+    let mut t = narrow_text("Quarterly report.txt");
+
+    t.set_invalidated(false);
+    t.set_truncate(Truncate::End);
+    assert!(!t.is_invalidated(), "the same mode changes nothing");
+    t.set_truncate(Truncate::Middle);
+    assert!(t.is_invalidated());
 }

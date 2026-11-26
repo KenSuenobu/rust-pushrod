@@ -134,6 +134,20 @@ impl Painter for RecordingPainter {
         Size::new(width, style.font_size as u32)
     }
 
+    /// Measures text the way [`text`](Painter::text) sizes it, without recording a call.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The font (its size sets the width of each character).
+    /// * `msg` - The text.
+    ///
+    /// # Returns
+    ///
+    /// Half the font size per character.
+    fn text_width(&mut self, style: &TextStyle, msg: &str) -> u32 {
+        msg.chars().count() as u32 * (style.font_size as u32 / 2)
+    }
+
     /// Records an image.
     ///
     /// # Arguments

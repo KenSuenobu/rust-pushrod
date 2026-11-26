@@ -112,6 +112,48 @@ fn lay_out_twice() {
 }
 ```
 
+## Truncation
+
+Text that is wider than its space is shortened and marked with an ellipsis (`…`), instead of being clipped mid-letter. `paint::text` takes a `Truncate` mode:
+
+| Mode | Result for `Quarterly report.txt` in ten characters |
+| --- | --- |
+| `Truncate::None` | Not shortened; the backend clips it as before. |
+| `Truncate::End` (default) | `Quarterly…` |
+| `Truncate::Start` | `…eport.txt` |
+| `Truncate::Middle` | `Quart….txt`, for paths and file names. |
+
+The cut falls on a grapheme boundary, so an accent, flag or emoji is never split, and the ellipsis is measured in the same font as the text, so the result never overflows. Text that fits is drawn unchanged. Truncation applies to single-line text; text that contains a newline is left alone. If not even the ellipsis fits, nothing is drawn.
+
+```mermaid
+flowchart LR
+    A[Text] --> B{Fits the width?}
+    B -- yes --> C[Draw unchanged]
+    B -- "no, mode None" --> D[Backend clips]
+    B -- "no, End / Start / Middle" --> E[fit_text cuts on a grapheme<br/>and adds the ellipsis]
+    E --> F[Draw shortened text,<br/>truncated = true]
+```
+
+`TextWidget` and `ButtonWidget` have a `truncate` property (`set_truncate`, `get_truncate`) that defaults to `Truncate::End`, and `is_truncated()` reports whether the last paint shortened the text, so a tooltip can show the full text. Every widget that draws text through `paint::text` behaves the same way. A widget paints into its cached texture only when invalidated, so the shortened text is computed once per change, not once per frame.
+
+`fit_text` is the pure helper behind it. Give it a function that measures a string:
+
+```rust checked
+use pushrod::paint::{fit_text, Truncate};
+
+fn main() {
+    // Pretend every character is 5 pixels wide; a painter measures with the real font.
+    let mut measure = |s: &str| s.chars().count() as u32 * 5;
+    let name = "Quarterly report.txt";
+
+    assert_eq!(fit_text(name, 50, Truncate::End, &mut measure).as_deref(), Some("Quarterly…"));
+    assert_eq!(fit_text(name, 50, Truncate::Start, &mut measure).as_deref(), Some("…eport.txt"));
+    assert_eq!(fit_text(name, 50, Truncate::Middle, &mut measure).as_deref(), Some("Quart….txt"));
+    // Text that fits comes back as `None`: draw it unchanged.
+    assert_eq!(fit_text("Short", 50, Truncate::End, &mut measure), None);
+}
+```
+
 ## Using Parley
 
 Enable the feature in your `Cargo.toml`:
@@ -140,5 +182,6 @@ The layout engine and the rasterizer pass the gate, but Parley adds a sizable de
 
 ## See also
 
+- The widget gallery shows the truncation modes on `TextWidget` (`cargo run -p pushrod-widgets --example gallery`).
 - [Drawing](drawing.md) for how widgets paint into cached textures.
 - [Backend-neutral paint API](../platforms/backend-neutral-paint-api.md) for the `Painter` trait.

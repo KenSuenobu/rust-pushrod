@@ -20,19 +20,23 @@
 
 use pushrod::color::{Color, FontStyle};
 use pushrod::geometry::{Point, Rect, Size};
-use pushrod::paint::{self, Painter, TextStyle};
+use pushrod::paint::{self, Painter, TextStyle, Truncate};
 use pushrod::widget::{Widget, WidgetCore};
+use std::cell::Cell;
 
 pub use pushrod::paint::TextJustify;
 
 /// A string of text on a filled background.
 ///
-/// The text is aligned horizontally by its justification, wraps at the widget's width, and is
-/// centered vertically when it fits.  It doesn't respond to input.
+/// The text is aligned horizontally by its justification and centered vertically when it fits.
+/// Text wider than the widget is shortened with an ellipsis as set by [`TextWidget::set_truncate`]
+/// (the end, by default).  It doesn't respond to input.
 pub struct TextWidget {
     core: WidgetCore,
     style: TextStyle,
     msg: String,
+    truncate: Truncate,
+    truncated: Cell<bool>,
 }
 
 impl Widget for TextWidget {
@@ -64,13 +68,16 @@ impl Widget for TextWidget {
         let style = self.style();
 
         paint::fill(p, style.background.unwrap_or(self.get_color()));
-        paint::text(
+        let drawn = paint::text(
             p,
             Rect::new(0, 0, size.w, size.h),
             style.font.as_ref().unwrap_or(&self.style),
             style.foreground.unwrap_or(self.style.font_color),
             &self.msg,
+            self.truncate,
         );
+
+        self.truncated.set(drawn.truncated);
     }
 }
 
@@ -106,6 +113,8 @@ impl TextWidget {
             core: WidgetCore::new(origin, size),
             style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
             msg,
+            truncate: Truncate::End,
+            truncated: Cell::new(false),
         }
     }
 
@@ -145,5 +154,36 @@ impl TextWidget {
     /// A copy of the text.
     pub fn get_text(&self) -> String {
         self.msg.clone()
+    }
+
+    /// Sets how text that doesn't fit is shortened, and invalidates the widget.
+    ///
+    /// # Arguments
+    ///
+    /// * `truncate` - The mode; the default is [`Truncate::End`].
+    pub fn set_truncate(&mut self, truncate: Truncate) {
+        if self.truncate != truncate {
+            self.truncate = truncate;
+            self.set_invalidated(true);
+        }
+    }
+
+    /// Returns how text that doesn't fit is shortened.
+    ///
+    /// # Returns
+    ///
+    /// The truncation mode.
+    pub fn get_truncate(&self) -> Truncate {
+        self.truncate
+    }
+
+    /// Returns whether the text was shortened the last time the widget painted, so a tooltip can
+    /// show the full text.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the last paint drew a shortened text; `false` before the first paint.
+    pub fn is_truncated(&self) -> bool {
+        self.truncated.get()
     }
 }

@@ -36,6 +36,7 @@
 use crate::color::{Color, FontStyle};
 use crate::geometry::{Point, Rect, Size};
 use crate::widget::VisualState;
+use unicode_segmentation::UnicodeSegmentation;
 
 /// Horizontal alignment of text within its bounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -46,6 +47,36 @@ pub enum TextJustify {
     Center,
     /// Aligned to the right edge.
     Right,
+}
+
+/// What [`text`] does with text that is wider than its rectangle.
+///
+/// The text is shortened on a grapheme boundary (never inside a character) and an ellipsis (`…`),
+/// measured in the same font, marks the cut.  Truncation applies to single-line text; text that
+/// contains a newline is left alone.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Truncate {
+    /// Don't shorten the text; it is clipped (or wrapped) as before.
+    None,
+    /// Keep the start and cut the end: `Quarterly rep…`.
+    #[default]
+    End,
+    /// Keep the end and cut the start: `…report.txt`.
+    Start,
+    /// Keep both ends and cut the middle: `Quart….txt`, for paths and file names.
+    Middle,
+}
+
+/// The ellipsis drawn where text is cut.
+pub const ELLIPSIS: &str = "\u{2026}";
+
+/// The result of [`text`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TextDrawn {
+    /// The size of the text drawn; `0` by `0` if nothing was drawn.
+    pub size: Size,
+    /// Whether the text was shortened to fit (see [`Truncate`]), so a tooltip can show it in full.
+    pub truncated: bool,
 }
 
 /// How a backend keeps painted `Widget`s between frames.
@@ -171,6 +202,18 @@ pub trait Painter {
     ///
     /// The size of the text drawn; `0` by `0` if nothing was drawn.
     fn text(&mut self, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size;
+
+    /// Measures how wide text is on one line, without drawing it.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The font.
+    /// * `msg` - The text.
+    ///
+    /// # Returns
+    ///
+    /// The width in pixels.
+    fn text_width(&mut self, style: &TextStyle, msg: &str) -> u32;
 
     /// Draws an image file, scaled to a rectangle.
     ///
@@ -300,7 +343,8 @@ pub fn state_overlay(p: &mut dyn Painter, size: Size, state: VisualState) {
 /// Draws a string of text within a rectangle.
 ///
 /// The text is aligned horizontally according to `style`, wraps at the rectangle's width, and is
-/// centered vertically when it fits (top-aligned when it doesn't).  An empty string, or a
+/// centered vertically when it fits (top-aligned when it doesn't).  If it is wider than the
+/// rectangle, `truncate` shortens it with an ellipsis (see [`fit_text`]).  An empty string, or a
 /// rectangle with no width, draws nothing.
 ///
 /// # Arguments
@@ -310,16 +354,107 @@ pub fn state_overlay(p: &mut dyn Painter, size: Size, state: VisualState) {
 /// * `style` - The font and alignment.
 /// * `color` - The text color (overrides `style.font_color`, so a `Widget` can invert it).
 /// * `msg` - The text to draw.
+/// * `truncate` - How to shorten text that doesn't fit.
 ///
 /// # Returns
 ///
-/// The size of the text drawn; `0` by `0` if nothing was drawn.
-pub fn text(p: &mut dyn Painter, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size {
+/// The size of the text drawn (`0` by `0` if nothing was drawn) and whether it was shortened.
+pub fn text(
+    p: &mut dyn Painter,
+    bounds: Rect,
+    style: &TextStyle,
+    color: Color,
+    msg: &str,
+    truncate: Truncate,
+) -> TextDrawn {
     if msg.is_empty() || bounds.w == 0 {
-        return Size::new(0, 0);
+        return TextDrawn {
+            size: Size::new(0, 0),
+            truncated: false,
+        };
     }
 
-    p.text(bounds, style, color, msg)
+    let shortened = fit_text(msg, bounds.w, truncate, &mut |s| p.text_width(style, s));
+    let truncated = shortened.is_some();
+    let drawn = shortened.as_deref().unwrap_or(msg);
+
+    if drawn.is_empty() {
+        return TextDrawn {
+            size: Size::new(0, 0),
+            truncated,
+        };
+    }
+
+    TextDrawn {
+        size: p.text(bounds, style, color, drawn),
+        truncated,
+    }
+}
+
+/// Shortens text so it fits a width, cutting on grapheme boundaries and marking the cut with an
+/// ellipsis.  The ellipsis is measured with the same `measure` function as the text, so the result
+/// never overflows `max_width`.
+///
+/// # Arguments
+///
+/// * `msg` - The text.
+/// * `max_width` - The width in pixels the text must fit.
+/// * `mode` - Which part of the text to cut.
+/// * `measure` - Returns the width in pixels of a string in the font being drawn.
+///
+/// # Returns
+///
+/// `None` if the text fits as is, or if `mode` is [`Truncate::None`] or the text has a newline.
+/// Otherwise the shortened text, which is empty if not even the ellipsis fits.
+pub fn fit_text(
+    msg: &str,
+    max_width: u32,
+    mode: Truncate,
+    measure: &mut dyn FnMut(&str) -> u32,
+) -> Option<String> {
+    if mode == Truncate::None || msg.contains('\n') || measure(msg) <= max_width {
+        return None;
+    }
+
+    let graphemes: Vec<&str> = msg.graphemes(true).collect();
+    let build = |keep: usize| -> String {
+        match mode {
+            Truncate::Start => {
+                format!("{ELLIPSIS}{}", graphemes[graphemes.len() - keep..].concat())
+            }
+            Truncate::Middle => {
+                let head = keep.div_ceil(2);
+                let tail = keep - head;
+
+                format!(
+                    "{}{ELLIPSIS}{}",
+                    graphemes[..head].concat(),
+                    graphemes[graphemes.len() - tail..].concat()
+                )
+            }
+            _ => format!("{}{ELLIPSIS}", graphemes[..keep].concat()),
+        }
+    };
+
+    // Width grows with the number of kept graphemes, so binary search for the most that fit.
+    let (mut low, mut high) = (0, graphemes.len());
+    let mut best: Option<String> = None;
+
+    while low <= high {
+        let mid = (low + high) / 2;
+        let candidate = build(mid);
+
+        if measure(&candidate) <= max_width {
+            best = Some(candidate);
+            low = mid + 1;
+        } else if mid == 0 {
+            break;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    Some(best.unwrap_or_default())
 }
 
 /// Computes where text of a given size is drawn within a rectangle.
@@ -467,11 +602,27 @@ mod tests {
         let mut p = RecordingPainter::default();
         let s = style(TextJustify::Left);
         assert_eq!(
-            text(&mut p, Rect::new(0, 0, 50, 20), &s, Color::BLACK, ""),
+            text(
+                &mut p,
+                Rect::new(0, 0, 50, 20),
+                &s,
+                Color::BLACK,
+                "",
+                Truncate::End
+            )
+            .size,
             Size::new(0, 0)
         );
         assert_eq!(
-            text(&mut p, Rect::new(0, 0, 0, 20), &s, Color::BLACK, "hi"),
+            text(
+                &mut p,
+                Rect::new(0, 0, 0, 20),
+                &s,
+                Color::BLACK,
+                "hi",
+                Truncate::End
+            )
+            .size,
             Size::new(0, 0)
         );
         assert!(p.calls.is_empty());
@@ -481,8 +632,16 @@ mod tests {
     fn text_is_recorded() {
         let mut p = RecordingPainter::default();
         let s = style(TextJustify::Left);
-        let drawn = text(&mut p, Rect::new(0, 0, 100, 20), &s, Color::WHITE, "hi");
-        assert_ne!(drawn, Size::new(0, 0));
+        let drawn = text(
+            &mut p,
+            Rect::new(0, 0, 100, 20),
+            &s,
+            Color::WHITE,
+            "hi",
+            Truncate::End,
+        );
+        assert_ne!(drawn.size, Size::new(0, 0));
+        assert!(!drawn.truncated, "text that fits is drawn unchanged");
         assert_eq!(
             p.calls,
             vec![PaintCall::Text(
@@ -523,5 +682,120 @@ mod tests {
     #[test]
     fn cache_policy_defaults_to_texture_cache() {
         assert_eq!(CachePolicy::default(), CachePolicy::TextureCache);
+    }
+
+    /// Draws `msg` in a 50-pixel-wide box (ten characters at 5 pixels each) and returns what the
+    /// painter recorded, plus whether the text was shortened.
+    fn drawn_text(msg: &str, mode: Truncate) -> (String, bool) {
+        let mut p = RecordingPainter::default();
+        let s = style(TextJustify::Left);
+        let drawn = text(&mut p, Rect::new(0, 0, 50, 20), &s, Color::BLACK, msg, mode);
+        let recorded = match p.calls.first() {
+            Some(PaintCall::Text(_, t, _)) => t.clone(),
+            _ => String::new(),
+        };
+
+        (recorded, drawn.truncated)
+    }
+
+    #[test]
+    fn text_that_fits_is_unchanged_in_every_mode() {
+        for mode in [
+            Truncate::None,
+            Truncate::End,
+            Truncate::Start,
+            Truncate::Middle,
+        ] {
+            assert_eq!(
+                drawn_text("0123456789", mode),
+                (String::from("0123456789"), false)
+            );
+        }
+    }
+
+    #[test]
+    fn end_start_and_middle_cut_with_an_ellipsis() {
+        let msg = "Quarterly report.txt";
+
+        assert_eq!(
+            drawn_text(msg, Truncate::End),
+            (String::from("Quarterly\u{2026}"), true)
+        );
+        assert_eq!(
+            drawn_text(msg, Truncate::Start),
+            (String::from("\u{2026}eport.txt"), true)
+        );
+        assert_eq!(
+            drawn_text(msg, Truncate::Middle),
+            (String::from("Quart\u{2026}.txt"), true)
+        );
+    }
+
+    #[test]
+    fn none_leaves_long_text_for_the_backend_to_clip() {
+        assert_eq!(
+            drawn_text("Quarterly report.txt", Truncate::None),
+            (String::from("Quarterly report.txt"), false)
+        );
+    }
+
+    #[test]
+    fn truncated_text_never_overflows() {
+        let mut measure = |s: &str| s.chars().count() as u32 * 5;
+
+        for mode in [Truncate::End, Truncate::Start, Truncate::Middle] {
+            for width in 0..60 {
+                let cut = fit_text("The quick brown fox jumps", width, mode, &mut measure).unwrap();
+                assert!(measure(&cut) <= width, "{mode:?} at {width}: {cut:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn a_width_too_small_for_the_ellipsis_draws_nothing() {
+        let mut p = RecordingPainter::default();
+        let s = style(TextJustify::Left);
+        let drawn = text(
+            &mut p,
+            Rect::new(0, 0, 4, 20),
+            &s,
+            Color::BLACK,
+            "hello",
+            Truncate::End,
+        );
+
+        assert!(drawn.truncated);
+        assert_eq!(drawn.size, Size::new(0, 0));
+        assert!(p.calls.is_empty());
+    }
+
+    #[test]
+    fn cuts_fall_on_grapheme_boundaries() {
+        // "e" + combining acute, a flag (two scalars), and a family emoji (a ZWJ sequence).
+        let msg = "e\u{301}e\u{301}e\u{301}\u{1F1FA}\u{1F1F8}\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}ab";
+        let mut by_graphemes = |s: &str| s.graphemes(true).count() as u32;
+
+        for mode in [Truncate::End, Truncate::Start, Truncate::Middle] {
+            let cut = fit_text(msg, 4, mode, &mut by_graphemes).unwrap();
+            assert_eq!(cut.graphemes(true).count(), 4, "{mode:?}: {cut:?}");
+        }
+
+        let end = fit_text(msg, 4, Truncate::End, &mut by_graphemes).unwrap();
+        assert_eq!(end, "e\u{301}e\u{301}e\u{301}\u{2026}");
+    }
+
+    #[test]
+    fn text_with_a_newline_is_not_truncated() {
+        let mut measure = |s: &str| s.chars().count() as u32 * 5;
+
+        assert_eq!(
+            fit_text("a long first line\nb", 10, Truncate::End, &mut measure),
+            None
+        );
+    }
+
+    #[test]
+    fn end_is_the_default_mode() {
+        assert_eq!(Truncate::default(), Truncate::End);
     }
 }
