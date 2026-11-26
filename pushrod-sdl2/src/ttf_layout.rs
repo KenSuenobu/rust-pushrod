@@ -20,9 +20,10 @@
 //! the `parley` feature for those), and no glyph runs are produced because the SDL2 painter draws
 //! the text with SDL2_ttf.
 
-use crate::font::ttf_context;
+use crate::font::load_ttf;
 use crate::painter::to_sdl_font_style;
 use pushrod::error::Error;
+use pushrod::font::FontRegistry;
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::TextStyle;
 use pushrod::text::layout::{LaidOut, Line, TextGeometry, TextLayout};
@@ -205,6 +206,7 @@ impl TextGeometry for LtrGeometry {
 pub struct TtfLayout {
     fonts: HashMap<(String, u16), Font<'static, 'static>>,
     errors: Vec<Error>,
+    registry: FontRegistry,
 }
 
 impl TtfLayout {
@@ -215,6 +217,21 @@ impl TtfLayout {
     /// The new `TtfLayout`.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Resolves fonts with an application's registry instead of the built-in one.
+    ///
+    /// # Arguments
+    ///
+    /// * `registry` - The registry, usually `engine.fonts().clone()`.
+    ///
+    /// # Returns
+    ///
+    /// This engine, using the registry.
+    #[must_use]
+    pub fn with_fonts(mut self, registry: FontRegistry) -> Self {
+        self.registry = registry;
+        self
     }
 
     /// Removes and returns the errors [`TextLayout::layout`] recorded since the last call.
@@ -244,21 +261,24 @@ impl TtfLayout {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::Backend`] if SDL2_ttf cannot be initialized, or [`Error::Font`] if the
-    /// font file cannot be loaded.
+    /// Returns [`Error::Font`] if the font's family is not registered or its file or data cannot
+    /// be loaded.
     pub fn try_layout(
         &mut self,
         text: &str,
         style: &TextStyle,
         max_width: Option<u32>,
     ) -> Result<LaidOut, Error> {
-        let key = (style.font_name.clone(), style.font_size);
+        let family = self.registry.resolve_family(&style.font);
+        let key = (family.clone(), style.font.size());
 
         if !self.fonts.contains_key(&key) {
-            let font = ttf_context()
-                .map_err(Error::backend)?
-                .load_font(&style.font_name, style.font_size)
-                .map_err(|message| Error::font(&style.font_name, message))?;
+            let source = self
+                .registry
+                .source(&style.font)
+                .ok_or_else(|| Error::font(&family, "the family is not registered"))?;
+            let font = load_ttf(&source, style.font.size())
+                .map_err(|message| Error::font(&family, message))?;
 
             self.fonts.insert(key.clone(), font);
         }
@@ -266,9 +286,9 @@ impl TtfLayout {
         let font = self
             .fonts
             .get_mut(&key)
-            .ok_or_else(|| Error::font(&style.font_name, "the font is not loaded"))?;
+            .ok_or_else(|| Error::font(&family, "the font is not loaded"))?;
 
-        font.set_style(to_sdl_font_style(style.font_style));
+        font.set_style(to_sdl_font_style(style.font.style()));
 
         let line_height = font.height().max(1) as u32;
 
@@ -426,12 +446,11 @@ mod tests {
     #[test]
     fn a_missing_font_is_an_error_and_layout_falls_back_to_empty() {
         use pushrod::color::{Color, FontStyle};
+        use pushrod::font::Font;
         use pushrod::paint::TextJustify;
 
         let style = TextStyle {
-            font_name: "no/such/font.ttf".into(),
-            font_style: FontStyle::NORMAL,
-            font_size: 16,
+            font: Font::new("Missing", 16, FontStyle::NORMAL),
             font_color: Color::BLACK,
             justification: TextJustify::Left,
         };
@@ -453,16 +472,11 @@ mod tests {
     #[test]
     fn measures_with_a_real_font() {
         use pushrod::color::{Color, FontStyle};
+        use pushrod::font::Font;
         use pushrod::paint::TextJustify;
 
         let style = TextStyle {
-            font_name: concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../assets/OpenSans-Regular.ttf"
-            )
-            .into(),
-            font_style: FontStyle::NORMAL,
-            font_size: 16,
+            font: Font::new("", 16, FontStyle::NORMAL),
             font_color: Color::BLACK,
             justification: TextJustify::Left,
         };

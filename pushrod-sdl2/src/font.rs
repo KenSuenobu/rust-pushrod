@@ -34,9 +34,11 @@
 
 use crate::ttf_layout::wrap_lines;
 use pushrod::error::Error;
+use pushrod::font::{Font as PushrodFont, FontRegistry, FontSource};
 use pushrod::geometry::{Point, Rect, Size};
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::{BlendMode, Canvas, Texture, TextureAccess};
+use sdl2::rwops::RWops;
 use sdl2::ttf::{Font, FontStyle, Sdl2TtfContext};
 use sdl2::video::Window;
 use std::collections::HashMap;
@@ -61,10 +63,33 @@ pub(crate) fn ttf_context() -> Result<&'static Sdl2TtfContext, String> {
 /// The width and height of a new atlas page in pixels.
 const ATLAS_PAGE_SIZE: u32 = 1024;
 
-/// Identifies one loaded font: file path, size in points and style bits.
+/// Loads a font from a registered source.
+///
+/// # Arguments
+///
+/// * `source` - The font file or in-memory data.
+/// * `size` - The size in points.
+///
+/// # Returns
+///
+/// The loaded font.
+///
+/// # Errors
+///
+/// Returns the SDL2_ttf error message, or the reason SDL2_ttf could not be initialized.
+pub(crate) fn load_ttf(source: &FontSource, size: u16) -> Result<Font<'static, 'static>, String> {
+    let ttf = ttf_context()?;
+
+    match source {
+        FontSource::Path(path) => ttf.load_font(path, size),
+        FontSource::Bytes(bytes) => ttf.load_font_from_rwops(RWops::from_bytes(bytes)?, size),
+    }
+}
+
+/// Identifies one loaded font: family, size in points and style bits.
 #[derive(Clone, PartialEq, Eq, Hash)]
 struct FaceKey {
-    path: String,
+    family: String,
     size: u16,
     style: i32,
 }
@@ -186,6 +211,7 @@ pub struct FontCache {
     pages: Vec<AtlasPage>,
     stats: FontCacheStats,
     notices: Vec<FontNotice>,
+    registry: FontRegistry,
 }
 
 /// Returns the kerning adjustment between two glyphs.
@@ -222,6 +248,16 @@ impl FontCache {
         Self::default()
     }
 
+    /// Resolves fonts with the engine's registry instead of the built-in one.  The backend calls
+    /// this when the run loop starts.
+    ///
+    /// # Arguments
+    ///
+    /// * `registry` - The registry shared with the engine.
+    pub fn set_fonts(&mut self, registry: FontRegistry) {
+        self.registry = registry;
+    }
+
     /// Returns what the cache has loaded and rasterized so far.
     ///
     /// # Returns
@@ -244,21 +280,24 @@ impl FontCache {
     ///
     /// # Arguments
     ///
-    /// * `key` - The font's path, size and style.
+    /// * `key` - The font's family, size and style.
+    /// * `font` - The handle the key came from, to find its source in the registry.
     ///
     /// # Errors
     ///
-    /// Returns [`Error::Backend`] if SDL2_ttf cannot be initialized, or [`Error::Font`] if the
-    /// font file cannot be loaded.
-    fn ensure_face(&mut self, key: &FaceKey) -> Result<(), Error> {
+    /// Returns [`Error::Font`] if the family is not registered or its file or data cannot be
+    /// loaded.
+    fn ensure_face(&mut self, key: &FaceKey, font: &PushrodFont) -> Result<(), Error> {
         if self.faces.contains_key(key) {
             return Ok(());
         }
 
-        let mut font = ttf_context()
-            .map_err(Error::backend)?
-            .load_font(&key.path, key.size)
-            .map_err(|message| Error::font(&key.path, message))?;
+        let source = self
+            .registry
+            .source(font)
+            .ok_or_else(|| Error::font(&key.family, "the family is not registered"))?;
+        let mut font =
+            load_ttf(&source, key.size).map_err(|message| Error::font(&key.family, message))?;
 
         font.set_style(FontStyle::from_bits_truncate(key.style));
 
@@ -274,7 +313,7 @@ impl FontCache {
         );
         self.stats.fonts_loaded += 1;
         self.notices.push(FontNotice::FontLoaded {
-            font_name: key.path.clone(),
+            font_name: key.family.clone(),
             font_size: key.size,
         });
 
@@ -293,7 +332,7 @@ impl FontCache {
     fn face_mut(&mut self, key: &FaceKey) -> Result<&mut Face, Error> {
         self.faces
             .get_mut(key)
-            .ok_or_else(|| Error::font(&key.path, "the font is not loaded"))
+            .ok_or_else(|| Error::font(&key.family, "the font is not loaded"))
     }
 
     /// Rasterizes a glyph into the atlas if it is not there yet.
@@ -451,9 +490,7 @@ impl FontCache {
     /// # Arguments
     ///
     /// * `c` - The canvas whose renderer creates and updates atlas textures.
-    /// * `font_name` - Path to the TrueType font file.
-    /// * `font_size` - The font size in points.
-    /// * `font_style` - The font style (normal, bold, italic, ...).
+    /// * `font` - The font: a registered family, size, and style.
     /// * `text` - The text.
     /// * `width` - The width in pixels at which to wrap the text.
     ///
@@ -463,25 +500,23 @@ impl FontCache {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::Backend`] if SDL2_ttf cannot be initialized, [`Error::Font`] if the font
-    /// file cannot be loaded, or [`Error::Texture`] if SDL2 cannot create or update an atlas
+    /// Returns [`Error::Font`] if the font's family is not registered or its file or data cannot
+    /// be loaded, or [`Error::Texture`] if SDL2 cannot create or update an atlas
     /// texture.
     pub fn layout(
         &mut self,
         c: &Canvas<Window>,
-        font_name: &str,
-        font_size: u16,
-        font_style: FontStyle,
+        font: &PushrodFont,
         text: &str,
         width: u32,
     ) -> Result<GlyphBlock, Error> {
         let key = FaceKey {
-            path: font_name.to_string(),
-            size: font_size,
-            style: font_style.bits(),
+            family: self.registry.resolve_family(font),
+            size: font.size(),
+            style: i32::from(font.style().bits()),
         };
 
-        self.ensure_face(&key)?;
+        self.ensure_face(&key, font)?;
 
         // Make sure every glyph exists first so measuring needs only the face.
         for ch in text.chars().filter(|ch| *ch != '\n') {

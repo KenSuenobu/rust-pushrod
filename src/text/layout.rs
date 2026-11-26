@@ -31,6 +31,7 @@
 //! Wrap an engine in a [`LayoutCache`] so a widget lays its text out again only when the text,
 //! font, or width changes.
 
+use crate::font::Font;
 use crate::geometry::{Point, Rect, Size};
 use crate::paint::TextStyle;
 use std::ops::Range;
@@ -188,9 +189,7 @@ pub trait TextLayout {
 #[derive(Clone, PartialEq)]
 struct LayoutKey {
     text: String,
-    font_name: String,
-    font_size: u16,
-    font_style: crate::color::FontStyle,
+    font: Font,
     max_width: Option<u32>,
 }
 
@@ -234,9 +233,7 @@ impl LayoutCache {
     ) -> &LaidOut {
         let key = LayoutKey {
             text: text.to_string(),
-            font_name: style.font_name.clone(),
-            font_size: style.font_size,
-            font_style: style.font_style,
+            font: style.font.clone(),
             max_width,
         };
 
@@ -357,9 +354,7 @@ mod tests {
 
     fn style() -> TextStyle {
         TextStyle {
-            font_name: "a.ttf".into(),
-            font_style: FontStyle::NORMAL,
-            font_size: 12,
+            font: Font::new("a", 12, FontStyle::NORMAL),
             font_color: Color {
                 r: 0,
                 g: 0,
@@ -385,11 +380,11 @@ mod tests {
         cache.get(&mut engine, "a", &style(), None);
         cache.get(&mut engine, "ab", &style(), None);
         let mut s = style();
-        s.font_name = "b.ttf".into();
+        s.font = Font::new("b", 12, FontStyle::NORMAL);
         cache.get(&mut engine, "ab", &s, None);
-        s.font_size = 14;
+        s.font = Font::new("b", 14, FontStyle::NORMAL);
         cache.get(&mut engine, "ab", &s, None);
-        s.font_style = FontStyle::BOLD;
+        s.font = Font::new("b", 14, FontStyle::BOLD);
         cache.get(&mut engine, "ab", &s, None);
         cache.get(&mut engine, "ab", &s, Some(50));
         assert_eq!(cache.layouts(), 6);

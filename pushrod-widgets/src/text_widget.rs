@@ -18,7 +18,8 @@
 //! This is a simple system `Widget` that fills its background like the `BaseWidget`, and draws a
 //! text message with a given font name, style, color, and message on top of it.
 
-use pushrod::color::{Color, FontStyle};
+use pushrod::color::Color;
+use pushrod::font::Font;
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{self, Painter, TextStyle, Truncate, Wrap};
 use pushrod::widget::{Widget, WidgetCore};
@@ -92,9 +93,8 @@ impl TextWidget {
     ///
     /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
     /// * `size` - The width and height in pixels.
-    /// * `font_name` - Path to the TrueType font file.
-    /// * `font_style` - The font style (normal, bold, italic, ...).
-    /// * `font_size` - The font size in points.
+    /// * `font` - The font handle: a registered family, size, and style.  `Font::default()` is
+    ///   the engine's default font, which needs no files.
     /// * `font_color` - The text color.
     /// * `justification` - The horizontal alignment of the text.
     /// * `msg` - The text to display.
@@ -102,20 +102,17 @@ impl TextWidget {
     /// # Returns
     ///
     /// The new `TextWidget`.
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         origin: Point,
         size: Size,
-        font_name: String,
-        font_style: FontStyle,
-        font_size: u16,
+        font: Font,
         font_color: Color,
         justification: TextJustify,
         msg: String,
     ) -> Self {
         Self {
             core: WidgetCore::new(origin, size),
-            style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
+            style: TextStyle::new(font, font_color, justification),
             msg,
             truncate: Truncate::End,
             wrap: Wrap::None,

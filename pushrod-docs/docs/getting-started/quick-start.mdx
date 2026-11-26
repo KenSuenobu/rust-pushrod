@@ -10,7 +10,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 :::tip[TL;DR]
-Install SDL2 (with SDL2_ttf and SDL2_image), add `pushrod`, `pushrod-widgets` and `pushrod-sdl2` to `Cargo.toml`, copy a font into `assets/`, paste one of the two programs below into `src/main.rs`, and run `cargo run`. Pick the style you prefer: **callbacks** (Pushrod runs the loop and calls your code) or **your own event loop** (you ask Pushrod for the next event and `match` on it).
+Install SDL2 (with SDL2_ttf and SDL2_image), add `pushrod`, `pushrod-widgets` and `pushrod-sdl2` to `Cargo.toml`, paste one of the two programs below into `src/main.rs`, and run `cargo run`. Pick the style you prefer: **callbacks** (Pushrod runs the loop and calls your code) or **your own event loop** (you ask Pushrod for the next event and `match` on it).
 :::
 
 You'll build this: a label and a button; each click updates the label.
@@ -47,14 +47,9 @@ pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 
 `pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets; `pushrod-sdl2` is the SDL2 [backend](../platforms/backends.md) that opens the window and draws. Your application does not depend on `sdl2` itself. Pushrod requires Rust 1.100 or newer (edition 2024).
 
-## 4. Add a font
+## 4. Fonts
 
-Pushrod draws text with a TrueType font. Copy the one that ships with Pushrod:
-
-```bash
-mkdir assets
-curl -L -o assets/OpenSans-Regular.ttf https://github.com/KenSuenobu/rust-pushrod/raw/main/assets/OpenSans-Regular.ttf
-```
+There is nothing to install. Pushrod embeds Open Sans (SIL Open Font License 1.1), and `Font::default()` uses it, so the programs below run from any directory with no font files. To use your own font, see [Text and fonts](../concepts/text-and-fonts.md).
 
 ## 5. Write the program
 
@@ -71,9 +66,8 @@ use pushrod::engine::Engine;
 use pushrod_sdl2::WindowSettings;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use pushrod::color::{Color, FontStyle};
-
-const FONT: &str = "assets/OpenSans-Regular.ttf";
+use pushrod::color::Color;
+use pushrod::font::Font;
 
 /// Application state: passed to every callback as `&mut Counter`.
 #[derive(Default)]
@@ -88,9 +82,7 @@ fn main() -> Result<(), pushrod::error::Error> {
     let label = engine.add_widget(TextWidget::new(
         point(20, 20),
         size(360, 24),
-        FONT.into(),
-        FontStyle::NORMAL,
-        16,
+        Font::default().with_size(16),
         Color::BLACK,
         TextJustify::Left,
         "Not clicked yet.".into(),
@@ -99,9 +91,7 @@ fn main() -> Result<(), pushrod::error::Error> {
     let button = engine.add_widget(ButtonWidget::new(
         point(20, 70),
         size(120, 30),
-        FONT.into(),
-        FontStyle::NORMAL,
-        16,
+        Font::default().with_size(16),
         Color::BLACK,
         TextJustify::Center,
         "Click me".into(),
@@ -136,9 +126,8 @@ use pushrod_sdl2::WindowSettings;
 use pushrod::event::Event;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use pushrod::color::{Color, FontStyle};
-
-const FONT: &str = "assets/OpenSans-Regular.ttf";
+use pushrod::color::Color;
+use pushrod::font::Font;
 
 fn main() -> Result<(), pushrod::error::Error> {
 
@@ -147,9 +136,7 @@ fn main() -> Result<(), pushrod::error::Error> {
     let label = engine.add_widget(TextWidget::new(
         point(20, 20),
         size(360, 24),
-        FONT.into(),
-        FontStyle::NORMAL,
-        16,
+        Font::default().with_size(16),
         Color::BLACK,
         TextJustify::Left,
         "Not clicked yet.".into(),
@@ -158,9 +145,7 @@ fn main() -> Result<(), pushrod::error::Error> {
     let button = engine.add_widget(ButtonWidget::new(
         point(20, 70),
         size(120, 30),
-        FONT.into(),
-        FontStyle::NORMAL,
-        16,
+        Font::default().with_size(16),
         Color::BLACK,
         TextJustify::Center,
         "Click me".into(),

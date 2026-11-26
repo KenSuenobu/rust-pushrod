@@ -28,7 +28,8 @@
 //! use pushrod::geometry::{point, size};
 //! use pushrod_widgets::button_widget::ButtonWidget;
 //! use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-//! use pushrod::color::{Color, FontStyle};
+//! use pushrod::color::Color;
+//! use pushrod::font::Font;
 //!
 //! #[derive(Default)]
 //! struct AppState {
@@ -37,11 +38,11 @@
 //!
 //! let mut engine: Engine<AppState> = Engine::new(size(400, 200), 30);
 //!
-//! let font = String::from("assets/OpenSans-Regular.ttf");
+//! let font = Font::default();
 //! let label = engine.add_widget(TextWidget::new(point(20, 20), size(200, 20), font.clone(),
-//!     FontStyle::NORMAL, 14, Color::BLACK, TextJustify::Left, String::from("Not clicked")));
+//!     Color::BLACK, TextJustify::Left, String::from("Not clicked")));
 //! let button = engine.add_widget(ButtonWidget::new(point(20, 60), size(120, 20), font,
-//!     FontStyle::NORMAL, 14, Color::BLACK, TextJustify::Center, String::from("Click me"), 2));
+//!     Color::BLACK, TextJustify::Center, String::from("Click me"), 2));
 //!
 //! engine.on_click(button, move |state, ui| {
 //!     state.clicks += 1;

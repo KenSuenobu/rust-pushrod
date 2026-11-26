@@ -33,6 +33,7 @@ use super::{Backend, Waker};
 use crate::color::Color;
 use crate::error::Error;
 use crate::event::{EngineEvent, EventMask};
+use crate::font::FontRegistry;
 use crate::geometry::{Point, Rect, Size};
 use crate::input::InputEvent;
 use crate::paint::{CachePolicy, Painter, TextStyle};
@@ -137,9 +138,9 @@ impl Painter for RecordingPainter {
         self.calls
             .push(PaintCall::Text(bounds, msg.to_string(), color));
 
-        let width = (msg.chars().count() as u32 * (style.font_size as u32 / 2)).min(bounds.w);
+        let width = (msg.chars().count() as u32 * (style.font.size() as u32 / 2)).min(bounds.w);
 
-        Size::new(width, style.font_size as u32)
+        Size::new(width, style.font.size() as u32)
     }
 
     /// Returns the line height: the font size.
@@ -152,7 +153,7 @@ impl Painter for RecordingPainter {
     ///
     /// The font size in pixels.
     fn line_height(&mut self, style: &TextStyle) -> u32 {
-        style.font_size as u32
+        style.font.size() as u32
     }
 
     /// Measures text the way [`text`](Painter::text) sizes it, without recording a call.
@@ -166,7 +167,7 @@ impl Painter for RecordingPainter {
     ///
     /// Half the font size per character.
     fn text_width(&mut self, style: &TextStyle, msg: &str) -> u32 {
-        msg.chars().count() as u32 * (style.font_size as u32 / 2)
+        msg.chars().count() as u32 * (style.font.size() as u32 / 2)
     }
 
     /// Records an image.
@@ -257,6 +258,8 @@ pub struct HeadlessBackend {
     pub clipboard: Option<String>,
     /// The URLs the engine asked to open.
     pub opened_urls: Vec<String>,
+    /// The font registry the engine gave the backend when the run loop started.
+    pub fonts: Option<FontRegistry>,
 }
 
 impl HeadlessBackend {
@@ -287,6 +290,15 @@ impl HeadlessBackend {
 }
 
 impl Backend for HeadlessBackend {
+    /// Records the font registry in [`HeadlessBackend::fonts`].
+    ///
+    /// # Arguments
+    ///
+    /// * `fonts` - The registry shared with the engine.
+    fn set_fonts(&mut self, fonts: FontRegistry) {
+        self.fonts = Some(fonts);
+    }
+
     /// Returns the cache policy.
     ///
     /// # Returns
@@ -446,6 +458,20 @@ impl Backend for HeadlessBackend {
 mod tests {
     use super::*;
     use crate::color::FontStyle;
+    use crate::font::Font;
+
+    #[test]
+    fn the_engines_font_registry_is_shared_with_the_backend() {
+        let engine: crate::engine::Engine = crate::engine::Engine::new(Size::new(10, 10), 30);
+        let mut backend = HeadlessBackend::new(Size::new(10, 10));
+
+        engine.fonts().load_bytes("Mem", vec![0, 1, 0, 0]).unwrap();
+        backend.set_fonts(engine.fonts().clone());
+
+        let shared = backend.fonts.as_ref().unwrap();
+        assert_eq!(shared.families(), engine.fonts().families());
+        assert!(shared.families().contains(&String::from("Mem")));
+    }
     use crate::paint::TextJustify;
 
     #[test]
@@ -471,9 +497,7 @@ mod tests {
     fn text_size_is_deterministic_and_clamped() {
         let mut p = RecordingPainter::default();
         let style = TextStyle::new(
-            String::from("f.ttf"),
-            FontStyle::NORMAL,
-            10,
+            Font::new("f", 10, FontStyle::NORMAL),
             Color::BLACK,
             TextJustify::Left,
         );

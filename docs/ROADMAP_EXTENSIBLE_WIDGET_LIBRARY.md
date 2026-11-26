@@ -202,7 +202,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.21 (#130) | Split the standard widgets into the pushrod-widgets crate | Make Pushrod a Cargo workspace: `pushrod` is the core, and the standard widgets move to their own crate, `pushrod-widgets`. | `architecture`, `enhancement`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml (workspace)`, `src/root_widget.rs (new)`, `pushrod-widgets/ (new crate)` |
 | 1.22 (#131) | Widget libraries: extend or replace pushrod-widgets | Make it straightforward for a separate crate to add widgets alongside pushrod-widgets, or to replace it with a different look. | `architecture`, `chassis`, `enhancement`, `extensibility`, `parallelizable`, `size/M` | Y | N | M | `src/registry.rs`, `pushrod-widgets/src/lib.rs`, `examples/widget-library/ (new crate)` |
 | 1.23 (#136) | Public API polish before publishing: builders, prelude, and stability | Make the public API pleasant and stable before crates.io: builders with defaults, preludes, non-exhaustive enums, and consistent names. | `api`, `enhancement`, `mvp`, `parallelizable`, `size/M`, `usability` | Y | v0.1 | M | `src/lib.rs`, `pushrod-widgets (all widgets)` |
-| 1.24 (#137) | Fonts: shared font handles and a built-in default font | Replace per-widget font file paths with shared `Font` handles, and ship a default font so applications work without any font files. | `api`, `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `text`, `usability` | Y | v0.1 | S | `src/font.rs`, `assets/ (font and license)` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
@@ -828,15 +827,17 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ### 1.24 (#137): Fonts: shared font handles and a built-in default font
 
+**Status:** done (#137). `pushrod::font::{Font, FontRegistry}`; `engine.fonts().load(family, path)` and `load_bytes`; Open Sans Regular is embedded with its license (`assets/OFL.txt`) and is the default; widget constructors take a `Font`.
+
 **Problem Statement.** Every text widget takes a font file path, size, and style, so applications repeat them everywhere and the quick start fails unless it runs from a directory containing `assets/`.
 
 **Solution / Scope.** A `Font { family, size, style }` handle, cheap to clone, resolved by the font cache (1.7 (#3)). Fonts are registered once (`engine.fonts().load("Body", path)` or from bytes). The core embeds one default font (an OFL-licensed sans serif, with its license file) so `Font::default()` works with no files at all; applications can change the default. Widgets use the engine's default font unless given one.
 
 **Acceptance Criteria.**
 
-- Quick start runs from any directory with no font files
-- Widgets accept a `Font` handle; no file paths in widget constructors
-- Embedded font's license included and noted in the docs
+- [x] Quick start runs from any directory with no font files
+- [x] Widgets accept a `Font` handle; no file paths in widget constructors
+- [x] Embedded font's license included and noted in the docs
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.7 (#3).
 

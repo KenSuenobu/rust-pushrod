@@ -7,15 +7,11 @@
 //! Run it with `cargo run -p pushrod-sdl2 --example gpu_text`.  Set `SDL_VIDEODRIVER=dummy` to run without a
 //! display.
 
+use pushrod::color::FontStyle;
+use pushrod::font::Font;
 use pushrod::geometry::Point;
 use pushrod_sdl2::font::FontCache;
 use sdl2::pixels::Color;
-use sdl2::ttf::FontStyle;
-
-const FONT: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../assets/OpenSans-Regular.ttf"
-);
 
 fn main() -> Result<(), pushrod::error::Error> {
     let sdl = sdl2::init().expect("SDL2 must initialize");
@@ -43,7 +39,7 @@ fn main() -> Result<(), pushrod::error::Error> {
         let mut y = 4;
 
         for (text, color) in lines {
-            let block = fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, text, 312)?;
+            let block = fonts.layout(&canvas, &Font::new("", 16, FontStyle::NORMAL), text, 312)?;
 
             fonts.draw(&mut canvas, &block, Point::new(4, y), color)?;
             y += block.size.h as i32 + 4;

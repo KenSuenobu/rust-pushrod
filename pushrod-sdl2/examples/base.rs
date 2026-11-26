@@ -2,6 +2,7 @@ use pushrod::appearance::StateStyle;
 use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, EngineEventKind, Event, EventMask, EventTarget, MaskScope};
+use pushrod::font::Font;
 use pushrod::geometry::{point, size};
 use pushrod::widget::{Behavior, VisualState, Widget};
 use pushrod_sdl2::WindowSettings;
@@ -9,11 +10,6 @@ use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-
-const FONT: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../assets/OpenSans-Regular.ttf"
-);
 
 /// A custom event posted by the background thread below: how far along the "download" is.
 struct DownloadProgress {
@@ -39,9 +35,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut welcome = TextWidget::new(
         point(20, 10),
         size(180, 18),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::WHITE,
         TextJustify::Left,
         String::from("Welcome to Pushrod!"),
@@ -66,9 +60,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         ButtonWidget::new(
             point(20, 160),
             size(120, 20),
-            String::from(FONT),
-            FontStyle::NORMAL,
-            14,
+            Font::default(),
             Color::BLACK,
             TextJustify::Center,
             String::from("Click me"),
@@ -79,9 +71,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut status = TextWidget::new(
         point(160, 161),
         size(300, 18),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::WHITE,
         TextJustify::Left,
         String::from("Not clicked yet."),
@@ -93,9 +83,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut disabled = ButtonWidget::new(
         point(20, 240),
         size(120, 20),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::BLACK,
         TextJustify::Center,
         String::from("Disabled"),
@@ -109,9 +97,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut styled = ButtonWidget::new(
         point(20, 320),
         size(120, 20),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::BLACK,
         TextJustify::Center,
         String::from("Hover me"),
@@ -140,9 +126,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         ButtonWidget::new(
             point(20, 200),
             size(120, 20),
-            String::from(FONT),
-            FontStyle::NORMAL,
-            14,
+            Font::default(),
             Color::BLACK,
             TextJustify::Center,
             String::from("Quit"),
@@ -154,9 +138,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut engine_status = TextWidget::new(
         point(160, 201),
         size(560, 18),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::WHITE,
         TextJustify::Left,
         String::from("Engine events appear here."),
@@ -164,15 +146,34 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     engine_status.set_color(Color::RGBA(127, 127, 127, 255));
     let engine_status_id = engine.add_child_widget(panel_id, engine_status);
 
+    // Fonts: `Font::default()` above needs no files.  A registered family is used by name; this
+    // one is registered from bytes, and it becomes the default for widgets created after it.
+    engine
+        .fonts()
+        .load_bytes(
+            "Body",
+            include_bytes!("../../assets/OpenSans-Regular.ttf").to_vec(),
+        )
+        .unwrap();
+
+    let mut font_status = TextWidget::new(
+        point(160, 281),
+        size(560, 24),
+        Font::new("Body", 18, FontStyle::BOLD),
+        Color::WHITE,
+        TextJustify::Left,
+        String::from("Font \"Body\" registered with engine.fonts().load_bytes"),
+    );
+    font_status.set_color(Color::RGBA(127, 127, 127, 255));
+    engine.add_child_widget(panel_id, font_status);
+
     // Toggling the run-loop hover mask is an internal action, so it emits `EventMaskChanged`.
     let hover_id = engine.add_child_widget(
         panel_id,
         ButtonWidget::new(
             point(20, 280),
             size(120, 20),
-            String::from(FONT),
-            FontStyle::NORMAL,
-            14,
+            Font::default(),
             Color::BLACK,
             TextJustify::Center,
             String::from("Toggle hover"),
@@ -184,9 +185,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut task_status = TextWidget::new(
         point(160, 241),
         size(560, 18),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::WHITE,
         TextJustify::Left,
         String::from("Background task: starting..."),

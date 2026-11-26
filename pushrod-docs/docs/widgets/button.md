@@ -16,14 +16,13 @@ description: A push button with a text label that emits `Clicked`.
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::TextJustify;
-use pushrod::color::{Color, FontStyle};
+use pushrod::color::Color;
+use pushrod::font::Font;
 
 let button = engine.add_widget(ButtonWidget::new(
     point(20, 70),
     size(120, 30),
-    "assets/OpenSans-Regular.ttf".into(),
-    FontStyle::NORMAL,
-    16,
+    Font::default().with_size(16),
     Color::BLACK,
     TextJustify::Center,
     "Click me".into(),
@@ -39,9 +38,7 @@ engine.on_click(button, |state, ui| {
 |---|---|---|
 | `origin` | `Point` | Upper-left corner, relative to the parent. |
 | `size` | `Size` | Width and height in pixels. |
-| `font_name` | `String` | Path to a TrueType font file. |
-| `font_style` | `FontStyle` | `FontStyle::NORMAL`, `BOLD`, `ITALIC`, ... |
-| `font_size` | `u16` | Size in points. |
+| `font` | `Font` | A [font handle](../concepts/text-and-fonts.md): family, size, and style. `Font::default()` is the built-in font. |
 | `font_color` | `Color` | Text color. |
 | `justification` | `TextJustify` | `Left`, `Center`, or `Right`. |
 | `msg` | `String` | The label. |

@@ -1,9 +1,10 @@
 // Event dispatch tests.  These exercise the WidgetCache and Engine without opening a window.
 
 use pushrod::cache::WidgetCache;
-use pushrod::color::{Color, FontStyle};
+use pushrod::color::Color;
 use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, EngineEventKind, Event, EventKind, EventMask, MaskScope};
+use pushrod::font::Font;
 use pushrod::geometry::{point, size};
 use pushrod::input::InputEvent;
 use pushrod::input::MouseButton;
@@ -12,18 +13,11 @@ use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 
-const FONT: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../assets/OpenSans-Regular.ttf"
-);
-
 fn button(x: i32, y: i32) -> ButtonWidget {
     ButtonWidget::new(
         point(x, y),
         size(100, 20),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::BLACK,
         TextJustify::Center,
         String::from("Button"),
@@ -183,9 +177,7 @@ fn engine_runs_click_callbacks_with_state_and_widget_access() {
     let label_id = engine.add_widget(TextWidget::new(
         point(10, 50),
         size(200, 20),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::BLACK,
         TextJustify::Left,
         String::new(),

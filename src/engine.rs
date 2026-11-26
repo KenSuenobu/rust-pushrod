@@ -35,7 +35,8 @@
 //! use pushrod::geometry::{point, size};
 //! use pushrod_widgets::button_widget::ButtonWidget;
 //! use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-//! use pushrod::color::{Color, FontStyle};
+//! use pushrod::color::Color;
+//! use pushrod::font::Font;
 //!
 //! #[derive(Default)]
 //! struct AppState {
@@ -44,11 +45,11 @@
 //!
 //! let mut engine: Engine<AppState> = Engine::new(size(400, 200), 30);
 //!
-//! let font = String::from("assets/OpenSans-Regular.ttf");
+//! let font = Font::default();
 //! let label = engine.add_widget(TextWidget::new(point(20, 20), size(200, 20), font.clone(),
-//!     FontStyle::NORMAL, 14, Color::BLACK, TextJustify::Left, String::from("Not clicked")));
+//!     Color::BLACK, TextJustify::Left, String::from("Not clicked")));
 //! let button = engine.add_widget(ButtonWidget::new(point(20, 60), size(120, 20), font,
-//!     FontStyle::NORMAL, 14, Color::BLACK, TextJustify::Center, String::from("Click me"), 2));
+//!     Color::BLACK, TextJustify::Center, String::from("Click me"), 2));
 //!
 //! engine.on_click(button, move |state, ui| {
 //!     state.clicks += 1;
@@ -68,6 +69,7 @@ use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventKind, EventMask, EventTarget, MaskScope,
     engine_filter_accepts,
 };
+use crate::font::FontRegistry;
 use crate::geometry::{Point, Size};
 use crate::input::{InputEvent, Key, Modifiers};
 use crate::root_widget::RootWidget;
@@ -386,6 +388,7 @@ pub struct Engine<S = ()> {
     timer_callbacks: HashMap<TimerId, TimerCallback<S>>,
     idle_callbacks: Vec<IdleCallback<S>>,
     last_tick: Instant,
+    fonts: FontRegistry,
 }
 
 impl<S> Engine<S> {
@@ -426,7 +429,21 @@ impl<S> Engine<S> {
             timer_callbacks: HashMap::new(),
             idle_callbacks: Vec::new(),
             last_tick: Instant::now(),
+            fonts: FontRegistry::new(),
         }
+    }
+
+    /// Returns the font registry.
+    ///
+    /// Register fonts once, then give widgets a [`Font`](crate::font::Font) that names them:
+    /// `engine.fonts().load("Body", path)`.  The built-in font is always registered and is the
+    /// default.
+    ///
+    /// # Returns
+    ///
+    /// The registry the run loop shares with the backend.
+    pub fn fonts(&self) -> &FontRegistry {
+        &self.fonts
     }
 
     /// Stops the `Engine`.
@@ -1367,7 +1384,9 @@ impl<S> Engine<S> {
     /// # Arguments
     ///
     /// * `backend` - The backend the loop runs on.
-    fn connect_sender(&mut self, backend: &dyn Backend) {
+    fn connect_sender(&mut self, backend: &mut dyn Backend) {
+        backend.set_fonts(self.fonts.clone());
+
         if let Ok(mut wake) = self.mailbox.wake.lock() {
             *wake = backend.waker();
         }
@@ -1629,9 +1648,9 @@ impl<S> Engine<S> {
     ///     }
     /// }
     /// ```
-    pub fn event_loop(&mut self, backend: Box<dyn Backend>) -> EventLoop {
+    pub fn event_loop(&mut self, mut backend: Box<dyn Backend>) -> EventLoop {
         self.widget_cache.invalidate_all();
-        self.connect_sender(backend.as_ref());
+        self.connect_sender(backend.as_mut());
 
         EventLoop {
             backend,

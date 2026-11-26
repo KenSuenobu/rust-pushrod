@@ -4,17 +4,13 @@
 //!
 //! The checks share one test function because SDL's video subsystem is initialized once.
 
+use pushrod::color::FontStyle;
+use pushrod::font::Font;
 use pushrod::geometry::Point;
 use pushrod_sdl2::font::FontCache;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::Canvas;
-use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
-
-const FONT: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../assets/OpenSans-Regular.ttf"
-);
 
 /// Counts the pixels on the canvas that are not the white background.
 fn inked_pixels(canvas: &Canvas<Window>) -> Vec<Color> {
@@ -50,7 +46,12 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
 
     // Warm-up: the font loads and the glyphs rasterize.
     let block = fonts
-        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod", 240)
+        .layout(
+            &canvas,
+            &Font::new("", 16, FontStyle::NORMAL),
+            "Hello Pushrod",
+            240,
+        )
         .unwrap();
     let warm = fonts.stats();
 
@@ -63,7 +64,12 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
     // Repainting, with a different color each time, never loads or rasterizes anything.
     for color in [Color::RED, Color::GREEN, Color::BLUE] {
         let again = fonts
-            .layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod", 240)
+            .layout(
+                &canvas,
+                &Font::new("", 16, FontStyle::NORMAL),
+                "Hello Pushrod",
+                240,
+            )
             .unwrap();
 
         assert_eq!(again, block);
@@ -95,14 +101,19 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
 
     // Changing the text rasterizes only the glyphs that are new.
     fonts
-        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod!", 240)
+        .layout(
+            &canvas,
+            &Font::new("", 16, FontStyle::NORMAL),
+            "Hello Pushrod!",
+            240,
+        )
         .unwrap();
     assert_eq!(fonts.stats().glyphs_rasterized, 11);
     assert_eq!(fonts.stats().fonts_loaded, 1);
 
     // A new size or style is a new font and its own glyphs.
     fonts
-        .layout(&canvas, FONT, 24, FontStyle::NORMAL, "Hi", 240)
+        .layout(&canvas, &Font::new("", 24, FontStyle::NORMAL), "Hi", 240)
         .unwrap();
     assert_eq!(fonts.stats().fonts_loaded, 2);
 
@@ -110,9 +121,7 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
     let wide = fonts
         .layout(
             &canvas,
-            FONT,
-            16,
-            FontStyle::NORMAL,
+            &Font::new("", 16, FontStyle::NORMAL),
             "one two three four",
             400,
         )
@@ -120,9 +129,7 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
     let narrow = fonts
         .layout(
             &canvas,
-            FONT,
-            16,
-            FontStyle::NORMAL,
+            &Font::new("", 16, FontStyle::NORMAL),
             "one two three four",
             60,
         )
@@ -133,10 +140,10 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
 
     // Newlines always break.
     let two = fonts
-        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "a\nb", 400)
+        .layout(&canvas, &Font::new("", 16, FontStyle::NORMAL), "a\nb", 400)
         .unwrap();
     let one = fonts
-        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "a", 400)
+        .layout(&canvas, &Font::new("", 16, FontStyle::NORMAL), "a", 400)
         .unwrap();
 
     assert_eq!(two.size.h, one.size.h * 2);
@@ -146,16 +153,14 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
     let loaded = fonts.stats().fonts_loaded;
     let missing = fonts.layout(
         &canvas,
-        "no/such/font.ttf",
-        16,
-        FontStyle::NORMAL,
+        &Font::new("Missing", 16, FontStyle::NORMAL),
         "Hi",
         100,
     );
 
     assert!(matches!(
         missing,
-        Err(pushrod::error::Error::Font { ref path, .. }) if path == "no/such/font.ttf"
+        Err(pushrod::error::Error::Font { ref path, .. }) if path == "Missing"
     ));
     assert_eq!(fonts.stats().fonts_loaded, loaded);
 }

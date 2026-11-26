@@ -387,10 +387,10 @@ pub enum EngineEvent {
         /// The target of the discarded event.
         target: EventTarget,
     },
-    /// A font was loaded from disk, the first time text was drawn with it.  Each
-    /// `(font_name, font_size, style)` loads once per process run.
+    /// A font was loaded, the first time text was drawn with it.  Each
+    /// `(family, size, style)` loads once per process run.
     FontLoaded {
-        /// The path of the font file.
+        /// The font's family name, as registered with `Engine::fonts`.
         font_name: String,
         /// The font size in points.
         font_size: u16,

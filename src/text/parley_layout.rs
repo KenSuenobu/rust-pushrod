@@ -22,6 +22,7 @@
 
 use super::layout::{FontData, GlyphRun, LaidOut, Line, PositionedGlyph, TextGeometry, TextLayout};
 use crate::color::FontStyle;
+use crate::font::{Font, FontRegistry, FontSource};
 use crate::geometry::{Point, Rect, Size};
 use crate::paint::TextStyle;
 use parley::fontique::Blob;
@@ -115,6 +116,7 @@ pub struct ParleyLayout {
     fonts: FontContext,
     context: LayoutContext<()>,
     families: HashMap<String, Option<String>>,
+    registry: FontRegistry,
 }
 
 impl ParleyLayout {
@@ -128,35 +130,60 @@ impl ParleyLayout {
             fonts: FontContext::new(),
             context: LayoutContext::new(),
             families: HashMap::new(),
+            registry: FontRegistry::new(),
         }
     }
 
-    /// Registers the font file at `path` with Parley, once.
+    /// Resolves fonts with an application's registry instead of the built-in one.
     ///
     /// # Arguments
     ///
-    /// * `path` - Path to a TrueType or OpenType font file.
+    /// * `registry` - The registry, usually `engine.fonts().clone()`.
     ///
     /// # Returns
     ///
-    /// The family name to request, or `None` if the file cannot be read (the generic sans-serif
-    /// family is used instead).
-    fn family_for(&mut self, path: &str) -> Option<String> {
-        if let Some(known) = self.families.get(path) {
+    /// This engine, using the registry.
+    #[must_use]
+    pub fn with_fonts(mut self, registry: FontRegistry) -> Self {
+        self.registry = registry;
+        self
+    }
+
+    /// Registers a font's data with Parley, once per registered family.
+    ///
+    /// # Arguments
+    ///
+    /// * `font` - The font to resolve through the registry.
+    ///
+    /// # Returns
+    ///
+    /// The family name to request, or `None` if the family is not registered or its file cannot
+    /// be read (the generic sans-serif family is used instead).
+    fn family_for(&mut self, font: &Font) -> Option<String> {
+        let key = self.registry.resolve_family(font);
+
+        if let Some(known) = self.families.get(&key) {
             return known.clone();
         }
 
-        let family = std::fs::read(path).ok().and_then(|bytes| {
-            let (id, _) = self
-                .fonts
-                .collection
-                .register_fonts(Blob::new(Arc::new(bytes)), None)
-                .into_iter()
-                .next()?;
-            self.fonts.collection.family_name(id).map(str::to_string)
-        });
+        let family = self
+            .registry
+            .source(font)
+            .and_then(|source| match source {
+                FontSource::Path(path) => std::fs::read(path).ok(),
+                FontSource::Bytes(bytes) => Some(bytes.to_vec()),
+            })
+            .and_then(|bytes| {
+                let (id, _) = self
+                    .fonts
+                    .collection
+                    .register_fonts(Blob::new(Arc::new(bytes)), None)
+                    .into_iter()
+                    .next()?;
+                self.fonts.collection.family_name(id).map(str::to_string)
+            });
 
-        self.families.insert(path.to_string(), family.clone());
+        self.families.insert(key, family.clone());
         family
     }
 }
@@ -187,7 +214,7 @@ impl TextLayout for ParleyLayout {
     fn layout(&mut self, text: &str, style: &TextStyle, max_width: Option<u32>) -> LaidOut {
         let mut families = Vec::new();
 
-        if let Some(name) = self.family_for(&style.font_name) {
+        if let Some(name) = self.family_for(&style.font) {
             families.push(FontFamilyName::Named(name.into()));
         }
         families.push(FontFamilyName::Generic(GenericFamily::SansSerif));
@@ -195,13 +222,13 @@ impl TextLayout for ParleyLayout {
         let mut builder = self
             .context
             .ranged_builder(&mut self.fonts, text, 1.0, true);
-        builder.push_default(StyleProperty::FontSize(f32::from(style.font_size)));
+        builder.push_default(StyleProperty::FontSize(f32::from(style.font.size())));
         builder.push_default(StyleProperty::FontFamily(FontFamily::List(families.into())));
 
-        if style.font_style.contains(FontStyle::BOLD) {
+        if style.font.style().contains(FontStyle::BOLD) {
             builder.push_default(StyleProperty::FontWeight(FontWeight::BOLD));
         }
-        if style.font_style.contains(FontStyle::ITALIC) {
+        if style.font.style().contains(FontStyle::ITALIC) {
             builder.push_default(StyleProperty::FontStyle(ParleyFontStyle::Italic));
         }
 
@@ -271,13 +298,9 @@ mod tests {
     use crate::color::Color;
     use crate::paint::TextJustify;
 
-    const FONT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/OpenSans-Regular.ttf");
-
     fn style() -> TextStyle {
         TextStyle {
-            font_name: FONT.into(),
-            font_style: FontStyle::NORMAL,
-            font_size: 16,
+            font: Font::new("", 16, FontStyle::NORMAL),
             font_color: Color {
                 r: 0,
                 g: 0,

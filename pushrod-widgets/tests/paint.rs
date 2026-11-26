@@ -1,7 +1,8 @@
 // Paint tests.  Each widget paints into a RecordingPainter, so no window or display is needed.
 
 use pushrod::backend::headless::{PaintCall, RecordingPainter};
-use pushrod::color::{Color, FontStyle};
+use pushrod::color::Color;
+use pushrod::font::Font;
 use pushrod::geometry::{Rect, point, size};
 use pushrod::paint::{Truncate, Wrap};
 use pushrod::widget::Widget;
@@ -42,9 +43,7 @@ fn text_widget_fills_then_draws_text() {
     let mut w = TextWidget::new(
         point(0, 0),
         size(100, 20),
-        String::from("font.ttf"),
-        FontStyle::NORMAL,
-        10,
+        Font::default().with_size(10),
         Color::BLACK,
         TextJustify::Left,
         String::from("Hello"),
@@ -68,9 +67,7 @@ fn button_widget_draws_label_inset_and_frame() {
     let mut w = ButtonWidget::new(
         point(0, 0),
         size(60, 20),
-        String::from("font.ttf"),
-        FontStyle::NORMAL,
-        10,
+        Font::default().with_size(10),
         Color::BLACK,
         TextJustify::Center,
         String::from("OK"),
@@ -91,9 +88,7 @@ fn plain_button() -> ButtonWidget {
     let mut w = ButtonWidget::new(
         point(0, 0),
         size(60, 20),
-        String::from("font.ttf"),
-        FontStyle::NORMAL,
-        10,
+        Font::default().with_size(10),
         Color::BLACK,
         TextJustify::Center,
         String::from("OK"),
@@ -195,9 +190,7 @@ fn box_base_and_text_widgets_honor_their_styles() {
     let mut t = TextWidget::new(
         point(0, 0),
         size(100, 20),
-        String::from("font.ttf"),
-        FontStyle::NORMAL,
-        10,
+        Font::default().with_size(10),
         Color::BLACK,
         TextJustify::Left,
         String::from("Hi"),
@@ -214,9 +207,7 @@ fn narrow_text(msg: &str) -> TextWidget {
     TextWidget::new(
         point(0, 0),
         size(50, 20),
-        String::from("font.ttf"),
-        FontStyle::NORMAL,
-        10,
+        Font::default().with_size(10),
         Color::BLACK,
         TextJustify::Left,
         String::from(msg),
@@ -245,9 +236,7 @@ fn text_and_button_widgets_truncate_at_the_end_by_default() {
     let mut b = ButtonWidget::new(
         point(0, 0),
         size(50, 20),
-        String::from("font.ttf"),
-        FontStyle::NORMAL,
-        10,
+        Font::default().with_size(10),
         Color::BLACK,
         TextJustify::Center,
         String::from("Quarterly report.txt"),
@@ -296,9 +285,7 @@ fn paragraph_widget(width: u32) -> TextWidget {
     let mut t = TextWidget::new(
         point(0, 0),
         size(width, 60),
-        String::from("font.ttf"),
-        FontStyle::NORMAL,
-        10,
+        Font::default().with_size(10),
         Color::BLACK,
         TextJustify::Left,
         String::from(PARAGRAPH),
