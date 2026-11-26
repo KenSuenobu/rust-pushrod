@@ -17,6 +17,7 @@
 //! plus [`run`] and [`event_loop`], which build a window and start the engine's loop on it.
 
 use crate::font::{FontCache, FontNotice};
+use crate::image_cache::ImageCache;
 use crate::input::{Wake, to_input_event, types_to_disable};
 use crate::painter::{Sdl2Painter, to_sdl_color, to_sdl_rect};
 use crate::texture::TextureStore;
@@ -96,6 +97,8 @@ impl WindowSettings {
 /// [`FontCache`].
 pub struct Sdl2Backend {
     _sdl: Sdl,
+    // Declared before `canvas` so the cached textures are freed while the renderer lives.
+    images: ImageCache,
     canvas: Canvas<Window>,
     pump: EventPump,
     text_input: TextInputUtil,
@@ -214,6 +217,7 @@ impl Sdl2Backend {
             clipboard: video.clipboard(),
             _sdl: sdl,
             canvas,
+            images: ImageCache::new(),
             waker,
             textures: HashMap::new(),
             fonts: FontCache::new(),
@@ -349,11 +353,12 @@ impl Backend for Sdl2Backend {
             return;
         };
         let fonts = &mut self.fonts;
+        let images = &mut self.images;
         let mut painted = Vec::new();
         let result = self
             .canvas
             .with_texture_canvas(&mut texture, |texture_canvas| {
-                let mut painter = Sdl2Painter::new(texture_canvas, fonts);
+                let mut painter = Sdl2Painter::new(texture_canvas, fonts).with_images(images);
 
                 paint(&mut painter);
                 painted = painter.take_errors();

@@ -245,6 +245,48 @@ pub trait Painter {
     /// Returns [`Error::Image`] if the image cannot be loaded or drawn.
     fn image(&mut self, path: &str, bounds: Rect) -> Result<(), Error>;
 
+    /// Returns the pixel size of an image file, loading it into the backend's shared image
+    /// cache if it is not there yet.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the image file.
+    ///
+    /// # Returns
+    ///
+    /// The image's width and height in pixels.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Image`] if the image cannot be loaded, or if the backend draws no
+    /// images (the default).
+    fn image_size(&mut self, path: &str) -> Result<Size, Error> {
+        Err(Error::image(path, "this painter draws no images"))
+    }
+
+    /// Draws part of an image file, scaled to a rectangle.  The image comes from the backend's
+    /// shared image cache, so repeated calls (for example when tiling) load the file once.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the image file.
+    /// * `source` - The part of the image to draw, in image pixels; `None` draws all of it.
+    /// * `bounds` - The rectangle to draw into.
+    ///
+    /// # Returns
+    ///
+    /// `Ok(())` once the image is drawn.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Image`] if the image cannot be loaded or drawn.  The default draws the
+    /// whole image with [`image`](Painter::image), ignoring `source`.
+    fn image_part(&mut self, path: &str, source: Option<Rect>, bounds: Rect) -> Result<(), Error> {
+        let _ = source;
+
+        self.image(path, bounds)
+    }
+
     /// Fills a rectangle with a 50% checkerboard of two colors, for backends and displays with few
     /// colors.  The pixel at the rectangle's upper left-hand corner is `first`.
     ///

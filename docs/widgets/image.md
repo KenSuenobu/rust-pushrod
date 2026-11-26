@@ -1,7 +1,7 @@
 # Image: widget roadmap
 
 > **Issue:** [#33](https://github.com/KenSuenobu/rust-pushrod/issues/33) (2.7) · **Epic 2:** Core dialog widgets · **Release:** MVP (v0.1) · **Size:** S
-> **User docs:** `pushrod-docs/docs/widgets/image.md` · **Overview:** [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) · **Rules:** [design philosophy](../../DESIGN_PHILOSOPHY.md)
+> **User docs:** `pushrod-docs/docs/widgets/image-widget.md` · **Overview:** [main roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) · **Rules:** [design philosophy](../../DESIGN_PHILOSOPHY.md)
 
 This file is the specification for this widget: what it is, what it does, and how it responds. To change its look or behavior, edit this file in a pull request (and its mockup in [`docs/mockups/generate.py`](../mockups/generate.py) if the picture changes), then bring the issue in line. If this file and the issue disagree, this file wins.
 
@@ -50,9 +50,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Loads PNG and BMP
-- [ ] Fit modes render as documented
-- [ ] Missing files don't panic
+- [x] Loads PNG and BMP
+- [x] Fit modes render as documented
+- [x] Missing files don't panic
 
 ## Depends on
 
