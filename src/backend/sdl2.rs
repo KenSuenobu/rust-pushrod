@@ -203,6 +203,33 @@ impl Painter for Sdl2Painter<'_> {
         text_size
     }
 
+    /// Returns the height of one line, as the font cache lays out a single line.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The font.
+    ///
+    /// # Returns
+    ///
+    /// The line height in pixels.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the font cannot be loaded.
+    fn line_height(&mut self, style: &TextStyle) -> u32 {
+        self.fonts
+            .layout(
+                self.canvas,
+                &style.font_name,
+                style.font_size,
+                to_sdl_font_style(style.font_style),
+                "A",
+                u32::MAX,
+            )
+            .size
+            .h
+    }
+
     /// Measures one line of text with the font cache, without drawing it.
     ///
     /// # Arguments

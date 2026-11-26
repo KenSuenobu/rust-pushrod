@@ -20,7 +20,7 @@
 
 use pushrod::color::{Color, FontStyle};
 use pushrod::geometry::{Point, Rect, Size};
-use pushrod::paint::{self, Painter, TextStyle, Truncate};
+use pushrod::paint::{self, Painter, TextStyle, Truncate, Wrap};
 use pushrod::widget::{Widget, WidgetCore};
 use std::cell::Cell;
 
@@ -30,12 +30,16 @@ pub use pushrod::paint::TextJustify;
 ///
 /// The text is aligned horizontally by its justification and centered vertically when it fits.
 /// Text wider than the widget is shortened with an ellipsis as set by [`TextWidget::set_truncate`]
-/// (the end, by default).  It doesn't respond to input.
+/// (the end, by default), or, with [`TextWidget::set_wrap`], broken into lines (each aligned by
+/// the justification) that reflow when the width changes; [`TextWidget::set_max_lines`] limits
+/// them.  It doesn't respond to input.
 pub struct TextWidget {
     core: WidgetCore,
     style: TextStyle,
     msg: String,
     truncate: Truncate,
+    wrap: Wrap,
+    max_lines: Option<usize>,
     truncated: Cell<bool>,
 }
 
@@ -68,14 +72,14 @@ impl Widget for TextWidget {
         let style = self.style();
 
         paint::fill(p, style.background.unwrap_or(self.get_color()));
-        let drawn = paint::text(
-            p,
-            Rect::new(0, 0, size.w, size.h),
-            style.font.as_ref().unwrap_or(&self.style),
-            style.foreground.unwrap_or(self.style.font_color),
-            &self.msg,
-            self.truncate,
-        );
+        let bounds = Rect::new(0, 0, size.w, size.h);
+        let font = style.font.as_ref().unwrap_or(&self.style);
+        let color = style.foreground.unwrap_or(self.style.font_color);
+        let drawn = if self.wrap == Wrap::None {
+            paint::text(p, bounds, font, color, &self.msg, self.truncate)
+        } else {
+            paint::paragraph(p, bounds, font, color, &self.msg, self.wrap, self.max_lines)
+        };
 
         self.truncated.set(drawn.truncated);
     }
@@ -114,6 +118,8 @@ impl TextWidget {
             style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
             msg,
             truncate: Truncate::End,
+            wrap: Wrap::None,
+            max_lines: None,
             truncated: Cell::new(false),
         }
     }
@@ -185,5 +191,65 @@ impl TextWidget {
     /// `true` if the last paint drew a shortened text; `false` before the first paint.
     pub fn is_truncated(&self) -> bool {
         self.truncated.get()
+    }
+
+    /// Sets how text is broken into lines, and invalidates the widget.  With wrapping on,
+    /// `truncate` is not used: only `max_lines` shortens the text.
+    ///
+    /// # Arguments
+    ///
+    /// * `wrap` - The mode; the default is [`Wrap::None`] (one line).
+    pub fn set_wrap(&mut self, wrap: Wrap) {
+        if self.wrap != wrap {
+            self.wrap = wrap;
+            self.set_invalidated(true);
+        }
+    }
+
+    /// Returns how text is broken into lines.
+    ///
+    /// # Returns
+    ///
+    /// The wrap mode.
+    pub fn get_wrap(&self) -> Wrap {
+        self.wrap
+    }
+
+    /// Sets the most lines a wrapped text may use, and invalidates the widget.  If the text needs
+    /// more, the last line ends in an ellipsis.  Has no effect while the wrap mode is
+    /// [`Wrap::None`].
+    ///
+    /// # Arguments
+    ///
+    /// * `max_lines` - The limit (at least one), or `None` for no limit.
+    pub fn set_max_lines(&mut self, max_lines: Option<usize>) {
+        if self.max_lines != max_lines {
+            self.max_lines = max_lines;
+            self.set_invalidated(true);
+        }
+    }
+
+    /// Returns the line limit.
+    ///
+    /// # Returns
+    ///
+    /// The most lines, or `None` for no limit.
+    pub fn get_max_lines(&self) -> Option<usize> {
+        self.max_lines
+    }
+
+    /// Returns the height the text needs at a width, for layout managers so a wrapped label can
+    /// push the widgets below it down.
+    ///
+    /// # Arguments
+    ///
+    /// * `p` - A painter, used to measure the text.
+    /// * `width` - The width in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The height in pixels: the number of lines times the line height.
+    pub fn height_for_width(&self, p: &mut dyn Painter, width: u32) -> u32 {
+        paint::height_for_width(p, &self.style, &self.msg, width, self.wrap, self.max_lines)
     }
 }

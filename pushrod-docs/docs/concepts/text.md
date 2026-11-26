@@ -154,6 +154,57 @@ fn main() {
 }
 ```
 
+## Wrapping
+
+A label draws one line unless you turn wrapping on. `TextWidget::set_wrap` takes a `Wrap` mode, and `set_max_lines` limits the lines.
+
+| Mode | Lines break |
+| --- | --- |
+| `Wrap::None` (default) | Never; one line, shortened by `Truncate` if it doesn't fit. |
+| `Wrap::Word` | At spaces. A word wider than the widget is broken between graphemes. |
+| `Wrap::Anywhere` | Between any two graphemes, as late as possible. |
+
+- An explicit `\n` always starts a new line, and a blank line stays blank.
+- Each line is aligned on its own by the widget's justification (left, center or right).
+- The lines are recomputed whenever the widget is painted, so resizing the widget reflows the text.
+- If `max_lines` is set and the text needs more lines, the last line ends in an ellipsis; `is_truncated()` reports it. While wrapping is on, `truncate` is not used.
+- `height_for_width(painter, width)` returns the height the text needs at a width (lines times line height), so a layout can give a wrapped label the room it needs.
+
+```mermaid
+flowchart TD
+    A[Text] --> B[Split at explicit newlines]
+    B --> C{Wrap mode}
+    C -- None --> D[One line per paragraph]
+    C -- Word --> E[Greedy lines at spaces]
+    C -- Anywhere --> F[Greedy lines at graphemes]
+    D --> G{More than max_lines?}
+    E --> G
+    F --> G
+    G -- no --> H[Draw each line, aligned]
+    G -- yes --> I[Cut the last line with an ellipsis] --> H
+```
+
+`wrap_text` is the pure helper behind it:
+
+```rust checked
+use pushrod::paint::{wrap_text, Wrap};
+
+fn main() {
+    // Pretend every character is 5 pixels wide; a painter measures with the real font.
+    let mut measure = |s: &str| s.chars().count() as u32 * 5;
+    let msg = "the quick brown fox jumps";
+
+    let (lines, cut) = wrap_text(msg, 50, Wrap::Word, None, &mut measure);
+    assert_eq!(lines, ["the quick", "brown fox", "jumps"]);
+    assert!(!cut);
+
+    // Limited to two lines, the last one ends in an ellipsis.
+    let (lines, cut) = wrap_text(msg, 50, Wrap::Word, Some(2), &mut measure);
+    assert_eq!(lines, ["the quick", "brown fox…"]);
+    assert!(cut);
+}
+```
+
 ## Using Parley
 
 Enable the feature in your `Cargo.toml`:
@@ -182,6 +233,6 @@ The layout engine and the rasterizer pass the gate, but Parley adds a sizable de
 
 ## See also
 
-- The widget gallery shows the truncation modes on `TextWidget` (`cargo run -p pushrod-widgets --example gallery`).
+- The widget gallery shows the truncation and wrapping modes on `TextWidget` (`cargo run -p pushrod-widgets --example gallery`).
 - [Drawing](drawing.md) for how widgets paint into cached textures.
 - [Backend-neutral paint API](../platforms/backend-neutral-paint-api.md) for the `Painter` trait.

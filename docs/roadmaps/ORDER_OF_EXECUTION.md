@@ -57,7 +57,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 18 | [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) | pushrod: [1.4] Keyboard focus, Tab order, and Return/Escape (done) |
 | ✅ 19 | [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) | pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state (done) |
 | ✅ 20 | [#289](https://github.com/KenSuenobu/rust-pushrod/issues/289) | pushrod: [1.26] Text truncation: shorten text that doesn't fit with an ellipsis (done) |
-| 21 | [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) | pushrod: [1.27] Wrapped text: multi-line labels that reflow |
+| ✅ 21 | [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) | pushrod: [1.27] Wrapped text: multi-line labels that reflow (done) |
 | 22 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks |
 | 23 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
 | 24 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking |
@@ -641,10 +641,10 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Text wraps at word boundaries and reflows when the width changes
-- [ ] `max_lines` truncates the last line with an ellipsis
-- [ ] `height_for_width` is reported and used by layouts once 5.5 lands
-- [ ] Explicit line breaks and per-line alignment
+- [x] Text wraps at word boundaries and reflows when the width changes
+- [x] `max_lines` truncates the last line with an ellipsis
+- [x] `height_for_width` is reported and used by layouts once 5.5 lands
+- [x] Explicit line breaks and per-line alignment
 
 ### Step 22: Timers and idle callbacks
 

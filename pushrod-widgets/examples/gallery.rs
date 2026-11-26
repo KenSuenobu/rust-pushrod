@@ -11,7 +11,7 @@
 use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::geometry::{Point, point, size};
-use pushrod::paint::Truncate;
+use pushrod::paint::{Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
@@ -236,6 +236,25 @@ pub fn main() {
         sample.set_truncate(mode);
         engine.add_child_widget(truncate_tile, sample);
     }
+
+    // Wrapped text: a (fictional) paragraph that reflows, limited to four lines.
+    let wrap_tile = add_tile(&mut engine, panel_id, 1, 2, "Wrap (Word, max 4 lines)");
+    let mut paragraph = TextWidget::new(
+        point(10, 32),
+        size(TILE_W - 20, 110),
+        String::from(FONT),
+        FontStyle::NORMAL,
+        14,
+        Color::WHITE,
+        TextJustify::Left,
+        String::from(
+            "Your changes to the quarterly report have not been saved.\nClose the document anyway and discard them?",
+        ),
+    );
+    paragraph.set_color(Color::RGBA(30, 90, 160, 255));
+    paragraph.set_wrap(Wrap::Word);
+    paragraph.set_max_lines(Some(4));
+    engine.add_child_widget(wrap_tile, paragraph);
 
     let quit_id = engine.add_child_widget(
         panel_id,
