@@ -19,6 +19,7 @@ use pushrod_widgets::boxed_label::BoxedLabel;
 use pushrod_widgets::button::Button;
 use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
+use pushrod_widgets::glyph_button::GlyphButton;
 use pushrod_widgets::group_box::GroupBox;
 use pushrod_widgets::image_widget::{FitMode, ImageWidget};
 use pushrod_widgets::panel::Panel;
@@ -306,6 +307,27 @@ pub fn main() -> Result<(), pushrod::error::Error> {
             .size(TILE_W - 44, 18),
     );
     engine.add_child_widget(group, button(point(12, 56), "Apply"));
+
+    // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.
+    let glyph_tile = add_tile(&mut engine, panel_id, 1, 5, "Glyph Button");
+    let glyphs = [
+        ('<', "Click", false),
+        ('>', "Click", false),
+        ('^', "Repeats", true),
+        ('v', "Repeats", true),
+    ];
+
+    for (column, (glyph, note, repeats)) in glyphs.into_iter().enumerate() {
+        let x = 10 + column as i32 * 64;
+        let mut glyph_button = GlyphButton::new(glyph).at(x, 44).size(24, 24);
+
+        if repeats {
+            glyph_button = glyph_button.activate_on_press();
+        }
+
+        engine.add_child_widget(glyph_tile, glyph_button);
+        engine.add_child_widget(glyph_tile, Text::new(note).at(x, 76).size(60, 20));
+    }
 
     // ImageWidget: the four fit modes, then a missing file (a crossed box).
     let image_tile = add_tile(&mut engine, panel_id, 0, 5, "Image");
