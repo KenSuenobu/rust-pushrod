@@ -38,3 +38,4 @@
 [#83] Separator widget: horizontal/vertical line, optionally etched [kenji]
 [#41] GroupBox widget: titled frame that holds child widgets [kenji]
 [#33] ImageWidget: PNG/BMP with center/stretch/fit/tile, missing-file box [kenji]
+[#28] GlyphButton widget: one-character button, activate-on-press repeat [kenji]

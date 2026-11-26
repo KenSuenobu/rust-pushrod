@@ -52,9 +52,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Centered glyph
-- [ ] Pressed state inverts
-- [ ] Activate-on-press with auto-repeat
+- [x] Centered glyph
+- [x] Pressed state inverts
+- [x] Activate-on-press with auto-repeat
 
 ## Depends on
 
