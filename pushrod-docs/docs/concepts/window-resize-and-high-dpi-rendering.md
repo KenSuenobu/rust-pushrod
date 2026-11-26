@@ -36,11 +36,11 @@ All drawing still goes through SDL2 into each widget's GPU texture, only when th
 
 ## Reading the scale factor
 
-A widget rarely needs it, but `paint` can ask, for example to pick a `@2x` image:
+A widget rarely needs it, but `paint` can ask, for example to pick a double-resolution image:
 
 ```rust
 fn paint(&self, p: &mut dyn Painter) {
-    let icon = if p.scale_factor() >= 2.0 { "save@2x.png" } else { "save.png" };
+    let icon = if p.scale_factor() >= 2.0 { "save-2x.png" } else { "save.png" };
 
     let _ = p.image(icon, Rect::new(0, 0, 16, 16));
 }
