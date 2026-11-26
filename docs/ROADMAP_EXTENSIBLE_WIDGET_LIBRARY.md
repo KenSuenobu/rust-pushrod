@@ -1172,7 +1172,6 @@ Scroll bar, slider, group box, choice button, split view, and expander.
 |---|---|---|---|---|---|---|---|
 | 3.1 (#39) | Scroll bar | Vertical/horizontal scroll bar with arrows and a proportional thumb. | `enhancement`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/scroll_bar.rs (new)` |
 | 3.2 (#40) | Slider | Horizontal/vertical slider with range, optional ticks, and value label. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/slider.rs (new)` |
-| 3.3 (#41) | Group box (titled frame) | A frame with a title in its top border, grouping related controls. | `chassis`, `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/group_box.rs (new)` |
 | 3.6 (#44) | Choice button: pop-up list and click-to-cycle modes | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | `chassis`, `enhancement`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/choice_button.rs (new)` |
 | 3.9 (#47) | Split view (panes with draggable dividers) | Two or more panes side by side or stacked, separated by dividers the user drags to resize them. | `chassis`, `enhancement`, `layout`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/split_view.rs (new)` |
 | 3.10 (#90) | Expander (collapsible section) | A titled section that shows or hides its contents when clicked. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/expander.rs (new)` |
@@ -1190,6 +1189,8 @@ Horizontal/vertical slider with range, optional ticks, and value label. **Widget
 **Dependencies.** Requires 1.6 (#22).
 
 ### 3.3 (#41): Group box (titled frame)
+
+**Status:** done (#41). `pushrod_widgets::group_box::GroupBox`: `new(title)` with `at`, `size`, `font`, `font_color`, `border_color`, `border_width`; display only (empty event mask); children are added with `add_child_widget`; the gallery shows it.
 
 A frame with a title in its top border, grouping related controls. **Widget roadmap:** [`docs/widgets/group-box.md`](widgets/group-box.md) (look, behavior, events, acceptance criteria).
 
