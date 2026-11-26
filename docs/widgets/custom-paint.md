@@ -52,9 +52,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Closure paints into the texture
-- [ ] Optional event closure receives events
-- [ ] Example draws a chart
+- [x] Closure paints into the texture
+- [x] Optional event closure receives events
+- [x] Example draws a chart
 
 ## Depends on
 

@@ -219,4 +219,5 @@ fn swatch_toggles_and_reports_clicks() {
 - Draw only with `paint` helpers (or `Painter` calls) inside `paint`; never draw elsewhere.
 - Call `set_invalidated(true)` whenever the look changes.
 - Emit events with `ctx.emit` rather than calling application code.
+- For a one-off drawing, skip the struct: [Custom Paint](../widgets/custom-paint.md) draws with a closure.
 - Add a page for it under **Widgets** in this site (see [Writing documentation](../writing-documentation.md)).

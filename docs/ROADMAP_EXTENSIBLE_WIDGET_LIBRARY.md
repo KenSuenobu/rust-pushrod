@@ -947,7 +947,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | 2.7 (#33) | Image widget | Display a PNG/BMP image centered, stretched, scaled to fit, or tiled. | `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/image_widget.rs (new)`, `src/texture.rs` |
 | 2.8 (#34) | Icon widget (picture with caption) | Picture with a caption, selectable and double-clickable, like desktop icons. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/icon_widget.rs (new)` |
 | 2.9 (#35) | Alert dialog | One-call modal alert with icon, message, and up to three buttons. | `enhancement`, `forms`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/alert.rs (new)`, `src/engine.rs` |
-| 2.10 (#36) | Custom paint widget (closure-drawn) | One-off custom drawing without writing a widget struct. | `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/custom_paint.rs (new)` |
 | 2.11 (#37) | Menu bar and drop-down menus (drawn by Pushrod) | Menu bar with drop-down menus, separators, check marks, submenus, shortcuts, and mnemonics. | `chassis`, `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/menu.rs (new)`, `src/cache.rs`, `src/engine.rs` |
 | 2.12 (#38) | File chooser dialog (drawn by Pushrod) | Choose a file or directory with a consistent look on every platform. | `chassis`, `enhancement`, `forms`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/file_chooser.rs (new)` |
 | 2.13 (#77) | Tooltips | Short help text shown after the pointer rests on a widget. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `src/cache.rs`, `pushrod-widgets/src/tooltip.rs (new)` |
@@ -1018,6 +1017,8 @@ One-call modal alert with icon, message, and up to three buttons. **Widget roadm
 **Dependencies.** Requires 2.3 (#29), 6.7 (#66), 5.2 (#57).
 
 ### 2.10 (#36): Custom paint widget (closure-drawn)
+
+**Status:** done (#36). `pushrod_widgets::custom_paint::CustomPaint`: `new(origin, size, |painter, size, data| ..)` or `with_data`, plus an optional `on_event` closure; the gallery draws a bar chart with it.
 
 One-off custom drawing without writing a widget struct. **Widget roadmap:** [`docs/widgets/custom-paint.md`](widgets/custom-paint.md) (look, behavior, events, acceptance criteria).
 
