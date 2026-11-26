@@ -52,7 +52,7 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Horizontal and vertical render correctly
+- [x] Horizontal and vertical render correctly
 
 ## Depends on
 

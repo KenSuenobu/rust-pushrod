@@ -63,4 +63,5 @@ pub mod custom_paint;
 pub mod frame;
 pub mod panel;
 pub mod prelude;
+pub mod separator;
 pub mod text;
