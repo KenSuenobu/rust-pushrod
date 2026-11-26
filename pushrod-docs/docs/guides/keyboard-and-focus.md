@@ -53,6 +53,8 @@ While a [modal dialog](../forms/modal-dialogs.md) is open, the keyboard belongs 
 
 A dialog's default and cancel buttons usually also have `Behavior::DISMISSES_DIALOG` (`Button::dismisses_dialog`), so Return and Escape close it. See [Modal dialogs](../forms/modal-dialogs.md).
 
+An [alert](../widgets/alert.md) opened with `ui.alert(..)` follows the same rules: Return chooses its default button and Escape the last of the buttons it was given.
+
 ## Events
 
 Focus changes deliver `Event::FocusLost` to the old widget, then `Event::FocusGained` to the new one. Both are also sent to the application, so `engine.on_focus_change(id, |state, ui, gained| ...)` works. A widget receives them when `EventMask::FOCUS` is in its mask. Every change also emits `EngineEvent::FocusChanged { old, new }`, and Return or Escape emit `EngineEvent::ActionTriggered { id, cancel }`; see [Engine events](../events/engine-events.md).

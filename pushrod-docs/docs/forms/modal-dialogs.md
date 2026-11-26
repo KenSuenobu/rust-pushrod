@@ -11,6 +11,8 @@ A **modal dialog** takes all the input until it is dismissed. Alerts, file choos
 - `root` is the dialog's root widget. Usually it is a hidden `Panel` that holds the dialog's controls and is built with the rest of the window.
 - The callback runs **once**, when a dismissing control inside the dialog is chosen. It receives the application state, a `Ui`, and the ID of the control that closed the dialog.
 
+For a simple question (an icon, a message, and a few buttons) there is no need to build a dialog: `ui.alert(..)` builds, opens, and removes an [alert](../widgets/alert.md) in one call.
+
 ![A settings dialog with an outlined border open over the main window, which is darkened and blurred: a Settings title, Dark theme and Autosave check boxes, and Reset..., Cancel, and Save buttons](/img/screenshots/modal-dialog.png)
 
 ## Running a dialog

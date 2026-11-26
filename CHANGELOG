@@ -58,3 +58,4 @@
 [#139] Bundled-SDL CI build on macOS/Windows; per-platform install guides [kenji]
 [#23] Tree editing at run time: remove, reparent, set_stacking_index [kenji]
 [#66] Modal dialogs: ui.open_modal, dimmed blurred layers, GEM border [kenji]
+[#35] Alert dialog: one-call ui.alert with restylable parts [kenji]
