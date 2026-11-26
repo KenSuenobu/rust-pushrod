@@ -8,7 +8,11 @@ description: Layout managers measure and arrange a container's children, so form
 
 By default a container is **absolutely positioned**: every child keeps the origin and size the application gave it. A **layout manager** replaces that for one container. Give a container a layout and it places its children from their **size hints**, so forms adapt to a resized window, translated text, and larger fonts.
 
-Layouts are optional and extensible. A container without a layout behaves exactly as before, and an application can write its own manager by implementing one small trait. Row, column, and other ready-made layouts are built on this foundation.
+Layouts are optional and extensible. A container without a layout behaves exactly as before, and an application can write its own manager by implementing one small trait. Ready-made layouts are built on this foundation:
+
+| Layout | Use it for |
+|---|---|
+| [Row and Column](./row-and-column.md) | Children in a line, with spacing, margins, alignment, stretch, and `Spacer`: a column of fields, a row of buttons. |
 
 ## The pieces
 
