@@ -181,6 +181,12 @@ pub struct WidgetCore {
     layout_dirty: bool,
     /// Whether a composite asked for its parts to be laid out again before the next frame.
     arrange_requested: bool,
+    /// The point of the child area shown at the `Widget`'s upper left-hand corner; see
+    /// [`Widget::child_offset`].
+    pub(crate) child_offset: Point,
+    /// The size of the area the children are placed on, when it differs from the `Widget`'s own
+    /// size; see [`Widget::child_area`].
+    pub(crate) child_area: Option<Size>,
 }
 
 /// Holds a container's layout manager, so `WidgetCore` can still derive `Debug`.
@@ -227,6 +233,8 @@ impl WidgetCore {
 
         if resized {
             self.invalidated = true;
+            // A composite's parts follow its new size.
+            self.arrange_requested = true;
         }
 
         (moved, resized)
@@ -336,6 +344,8 @@ impl WidgetCore {
             layout: None,
             layout_dirty: false,
             arrange_requested: false,
+            child_offset: Point::new(0, 0),
+            child_area: None,
         }
     }
 }
@@ -538,7 +548,8 @@ pub trait Widget: Any {
 
     /// Resizes the `Widget`, and invalidates it.  Its texture is resized on the next repaint.
     /// The new size is also the `Widget`'s default [`size_hint`](Widget::size_hint), and marks
-    /// layout as needed.
+    /// layout as needed.  A composite's parts are laid out again before the next frame, as if
+    /// it had called [`request_arrange_parts`](Widget::request_arrange_parts).
     ///
     /// # Arguments
     ///
@@ -549,6 +560,7 @@ pub trait Widget: Any {
         core.size = size;
         core.requested_size = size;
         core.layout_dirty = true;
+        core.arrange_requested = true;
         self.set_invalidated(true);
     }
 
@@ -884,6 +896,42 @@ pub trait Widget: Any {
     fn request_arrange_parts(&mut self) {
         self.core_mut().arrange_requested = true;
     }
+
+    /// Returns the point of the child area that is shown at the `Widget`'s upper left-hand
+    /// corner: how far its children are scrolled.
+    ///
+    /// A child at `origin` is drawn at `origin - child_offset`, relative to this `Widget`, and
+    /// is still cropped to this `Widget`'s rectangle.  The offset moves the children on screen
+    /// without repainting them.  Change it with
+    /// [`WidgetCache::set_child_offset`](crate::cache::WidgetCache::set_child_offset).
+    ///
+    /// # Returns
+    ///
+    /// The offset; `(0, 0)` unless the `Widget` scrolls its children.
+    fn child_offset(&self) -> Point {
+        self.core().child_offset
+    }
+
+    /// Returns the size of the area the `Widget`'s children are placed on, when it differs from
+    /// the `Widget`'s own size: a scrolling viewport's content.  A layout manager arranges the
+    /// children in this area instead of in the `Widget`'s rectangle.  Change it with
+    /// [`WidgetCache::set_child_area`](crate::cache::WidgetCache::set_child_area).
+    ///
+    /// # Returns
+    ///
+    /// The area's size, or `None` when the children are placed on the `Widget`'s own rectangle.
+    fn child_area(&self) -> Option<Size> {
+        self.core().child_area
+    }
+
+    /// Tells the `Widget` that something below it changed: a descendant was added, removed,
+    /// moved, resized, repainted, or given the keyboard focus.  The `WidgetCache` calls it
+    /// before a frame is laid out and drawn, at most once per frame, and when focus moves.
+    ///
+    /// A `Widget` that tracks its descendants, such as a scrolling container that grows with
+    /// its content, overrides it, usually to call
+    /// [`request_arrange_parts`](Widget::request_arrange_parts).  The default does nothing.
+    fn descendant_changed(&mut self) {}
 
     /// Returns this `Widget` as a [`Composite`], if it is one.
     ///

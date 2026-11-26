@@ -60,6 +60,7 @@
 pub mod boxed_label;
 pub mod button;
 pub mod check_box;
+pub mod container;
 pub mod custom_paint;
 pub mod frame;
 pub mod glyph_button;

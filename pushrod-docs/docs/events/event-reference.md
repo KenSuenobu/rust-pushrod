@@ -41,7 +41,7 @@ Positions are `Point`s in window coordinates.
 | `PointerPressed { id, button, position, count }` | A mouse button goes down over widget `id`. The widget captures the mouse until release. |
 | `PointerReleased { id, button, position, count }` | A mouse button goes up. Sent to the widget that captured the press. |
 | `Clicked { id, button, count }` | A widget was pressed and released on itself. `count` is 1 for a single click, 2 for a double click. |
-| `Scrolled { id, delta }` | The wheel or trackpad scrolls over widget `id`. |
+| `Scrolled { id, delta }` | The wheel or trackpad scrolls over widget `id` (the widget under the pointer as of the last mouse event). `delta.y` is positive away from the user (up) and `delta.x` positive to the right. It bubbles, so a [Container](../widgets/container.md) pans for scrolls over its children. |
 
 ## Keyboard
 
@@ -72,7 +72,7 @@ Positions are `Point`s in window coordinates.
 | `Triggered { id, action }` | A named action is triggered. |
 | `ContextMenuRequested { id, position }` | The user asks for a context menu. |
 | `PropertyChanged { id, name }` | A named property changes. |
-| `ViewportChanged { id, offset }` | A scrolling widget's visible area moves. |
+| `ViewportChanged { id, offset }` | A scrolling widget's visible area moves or changes size, such as a [Container](../widgets/container.md) panned or resized. |
 
 ## Lifecycle
 

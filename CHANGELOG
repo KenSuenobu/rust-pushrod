@@ -51,3 +51,4 @@
 [#117] Row and Column layouts with spacing, margins, stretch; Spacer [kenji]
 [#118] FormLayout: aligned labels, stretching fields, narrow stacking [kenji]
 [#39] ScrollBar: repeating arrows, track paging, proportional thumb [kenji]
+[#58] Container: scrollable viewport onto content with its own 0,0 [kenji]

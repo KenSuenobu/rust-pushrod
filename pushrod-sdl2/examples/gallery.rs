@@ -9,6 +9,7 @@
 //! data in this gallery is fictional.
 
 use pushrod::color::Color;
+use pushrod::composite::TypedParts;
 use pushrod::engine::Engine;
 use pushrod::event::{Event, Propagation};
 use pushrod::geometry::{Point, Rect, Size, point, size};
@@ -19,6 +20,7 @@ use pushrod_sdl2::{Sdl2Backend, WindowSettings};
 use pushrod_widgets::boxed_label::BoxedLabel;
 use pushrod_widgets::button::Button;
 use pushrod_widgets::check_box::CheckBox;
+use pushrod_widgets::container::Container;
 use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
 use pushrod_widgets::glyph_button::GlyphButton;
@@ -35,7 +37,7 @@ use pushrod_widgets::text_field::{Accessory, IntegerField, TextField};
 
 /// Window size in pixels: three columns of tiles.
 const WINDOW_W: u32 = 950;
-const WINDOW_H: u32 = 1250;
+const WINDOW_H: u32 = 1420;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -670,6 +672,40 @@ pub fn main() -> Result<(), pushrod::error::Error> {
             }
         });
     }
+
+    // Container: a 270 by 104 viewport onto 420 by 260 of content, panned a little so both
+    // scroll bars show their thumbs away from the ends.  Scroll it with the wheel or the bars.
+    let container_tile = add_tile(&mut engine, panel_id, 0, 7, "Container");
+    let mut container = Container::new(point(10, 36), size(TILE_W - 20, 104), size(420, 260));
+
+    container.set_color(Color::WHITE);
+    container.scroll_to(point(30, 20));
+
+    let container = engine.add_child_widget(container_tile, container);
+    let content = engine
+        .widgets()
+        .get_as::<Container>(container)
+        .map_or(container, |c| c.typed_parts().content);
+
+    for (index, text) in ["Inbox", "Drafts", "Sent", "Archive", "Trash"]
+        .into_iter()
+        .enumerate()
+    {
+        let offset = index as i32;
+
+        engine.add_child_widget(
+            content,
+            button(point(20 + offset * 70, 20 + offset * 44), text),
+        );
+    }
+
+    add_label(
+        &mut engine,
+        content,
+        point(160, 24),
+        220,
+        "Content: 420 by 260",
+    );
 
     let quit_id = engine.add_child_widget(
         panel_id,

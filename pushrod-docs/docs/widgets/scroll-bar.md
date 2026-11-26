@@ -165,10 +165,10 @@ stateDiagram-v2
 - The thumb is never shorter than 8 pixels (`MIN_THUMB_LENGTH`), so it can always be grabbed. With a page size of `1.0` it fills the track and cannot be dragged.
 - The value is a fraction, so the scroll bar works with any content. To turn it into a position, multiply by the part that does not fit: `value * (total - visible)`.
 - After `set_value` or `set_page_size`, the thumb moves when the next frame is drawn. The scroll bar asks for this with `Widget::request_arrange_parts`, which any composite can use to move its own parts.
-- After resizing a scroll bar with `set_size`, call `request_arrange_parts` (or `WidgetCache::arrange_parts`) so the parts follow.
+- After `set_size`, the parts follow the new size before the next frame.
 - While the scroll bar is disabled, its arrows and track do nothing.
 - Pointer positions arrive in window coordinates. The scroll bar converts them with `EventCtx::origin()`.
 
 ## Planned
 
-Scrollable containers use this scroll bar when they arrive with the [container issue](https://github.com/KenSuenobu/rust-pushrod/issues/58). Changing the scroll bar's look by theme is the distant [theming epic](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).
+The [Container](container.md) uses this scroll bar for its vertical and horizontal bars. Changing the scroll bar's look by theme is the distant [theming epic](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).

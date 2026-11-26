@@ -72,15 +72,15 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Children positioned relative to the content's 0,0; content size independent of the container size
-- [ ] Resizing the container changes only the visible area; moving it doesn't shift content
-- [ ] Scroll bars appear when needed (or always/never); wheel and keyboard pan; offset clamped to content bounds
-- [ ] `scroll_to`, `scroll_by`, `ensure_visible`, `viewport()`; focused widgets scrolled into view
-- [ ] Children clipped to and hit-tested through the viewport; panning doesn't repaint unchanged children
-- [ ] Content size modes Fixed, FitChildren, FollowWidth; works with a layout manager and with a loaded form
-- [ ] `ViewportChanged` emitted on pan and resize
-- [ ] Content larger than the GPU's maximum texture size works
-- [ ] Only visible children are drawn
+- [x] Children positioned relative to the content's 0,0; content size independent of the container size
+- [x] Resizing the container changes only the visible area; moving it doesn't shift content
+- [x] Scroll bars appear when needed (or always/never); wheel and keyboard pan; offset clamped to content bounds
+- [x] `scroll_to`, `scroll_by`, `ensure_visible`, `viewport()`; focused widgets scrolled into view
+- [x] Children clipped to and hit-tested through the viewport; panning doesn't repaint unchanged children
+- [ ] Content size modes Fixed, FitChildren, FollowWidth; works with a layout manager and with a loaded form (modes and layout manager done in #58; a loaded form waits for the form loader, 6.4 (#63))
+- [x] `ViewportChanged` emitted on pan and resize
+- [x] Content larger than the GPU's maximum texture size works
+- [x] Only visible children are drawn
 
 ## Depends on
 

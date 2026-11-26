@@ -20,6 +20,7 @@ flowchart LR
 
 - **Drawing.** `draw_loop` copies only the visible part of each widget's cached texture. `Backend::draw_widget(id, source, dest)` receives the cropped `source` (relative to the widget's corner) and `dest` (window coordinates), which are the same size. A widget with no visible part is not blitted. Widgets are still painted once into their own texture; clipping costs no repainting.
 - **Input.** `WidgetCache::widget_at(x, y)` tests the visible rectangle, so the cropped part of a child does not catch the pointer, and whatever is underneath it does.
+- **Scrolled children.** A widget that scrolls its children, such as a [Container](../widgets/container.md)'s content, crops them the same way: each child is drawn at its origin less the [child offset](widget-tree-and-ids.md#content-coordinates), and only the part inside the viewport is copied or can be clicked.
 - **Overlays opt out.** A widget with `Behavior::OVERLAY` (menus, tooltips, pop-ups) is not clipped by its ancestors. Its own children are still clipped to it.
 
 ## Asking for the visible rectangle

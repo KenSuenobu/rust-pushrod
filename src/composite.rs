@@ -457,6 +457,21 @@ pub trait Composite: Widget {
         Vec::new()
     }
 
+    /// Brings the parts up to date with the composite's own state, with access to the whole
+    /// `WidgetCache`: set a part's value, hide it, or read what the parts hold.  The
+    /// `WidgetCache` calls this just before [`Composite::layout_parts`], every time the parts
+    /// are arranged.
+    ///
+    /// While it runs the composite is out of the cache (its slot holds a hidden placeholder), so
+    /// reach the composite through `self`, not through `cache`.  Events emitted through `ctx`
+    /// are delivered to the application like any other.  The default does nothing.
+    ///
+    /// # Arguments
+    ///
+    /// * `_cache` - The cache holding the parts.
+    /// * `_ctx` - Queues the events the composite generates.
+    fn sync_parts(&mut self, _cache: &mut WidgetCache, _ctx: &mut EventCtx) {}
+
     /// Receives an event one of the parts emitted, before it reaches the application.  Emit
     /// translated events through `ctx`, such as the scroll bar's own `ValueChanged` for an
     /// arrow's `Clicked`.  The part's event is still delivered (callbacks on the part's ID run),
