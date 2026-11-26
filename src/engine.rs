@@ -70,6 +70,7 @@ use crate::event::{
 };
 use crate::geometry::{Point, Size, size};
 use crate::root_widget::RootWidget;
+use crate::timer::TimerSchedule;
 use crate::widget::{Widget, WidgetId};
 use sdl2::event::EventSender;
 use sdl2::event::{Event as SdlEvent, EventType, WindowEvent};
@@ -88,6 +89,8 @@ use std::time::{Duration, Instant};
 
 /// How long an idle loop blocks waiting for an event before checking again, in milliseconds.
 const IDLE_WAIT_MS: u32 = 1000;
+
+pub use crate::timer::TimerId;
 
 /// The most custom events delivered in one frame; the rest are discarded, which stops callbacks
 /// that post a custom event in response to a custom event forever.
@@ -297,6 +300,12 @@ pub type EventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &Event)>;
 /// [`Engine::on_engine_event`] or [`Engine::on_engine_event_filtered`].
 pub type EngineEventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &EngineEvent)>;
 
+/// A callback run by a timer; see [`Engine::on_timer`].
+type TimerCallback<S> = Box<dyn FnMut(&mut S, &mut Ui)>;
+
+/// A callback run when the loop is idle; see [`Engine::on_idle`].
+type IdleCallback<S> = Box<dyn FnMut(&mut S, &mut Ui)>;
+
 /// A callback for custom events carrying one payload type; see [`Engine::on_custom`].
 type CustomCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &CustomEvent)>;
 
@@ -310,9 +319,45 @@ pub struct Ui<'a> {
     running: &'a mut bool,
     event_mask: &'a mut EventMask,
     posted: &'a mut Vec<Event>,
+    timers: &'a mut TimerSchedule,
 }
 
 impl<'a> Ui<'a> {
+    /// Cancels a timer started with [`Engine::on_timer`].
+    ///
+    /// Safe to call from any callback, including the timer's own: a timer cancelled while the
+    /// timers due this frame are running does not fire afterwards.  Emits
+    /// [`EngineEvent::TimerCancelled`] when a waiting timer was stopped.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The timer to cancel.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the timer was still scheduled; `false` if it was a one-shot that already fired,
+    /// or was already cancelled.
+    pub fn cancel_timer(&mut self, id: TimerId) -> bool {
+        let cancelled = self.timers.cancel(id);
+
+        if cancelled {
+            self.widgets
+                .queue_event(Event::Engine(EngineEvent::TimerCancelled { id }));
+        }
+
+        cancelled
+    }
+
+    /// Asks for an [`Event::Tick`] for a `Widget` on the next frame.  See
+    /// [`WidgetCache::request_animation`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget` to tick.
+    pub fn request_animation(&mut self, id: WidgetId) {
+        self.widgets.request_animation(id);
+    }
+
     /// Posts a custom event, to be delivered after the callbacks currently running.
     ///
     /// The event is queued, never delivered from inside this call.  Posting from a custom-event
@@ -441,6 +486,10 @@ pub struct Engine<S = ()> {
     custom_budget: usize,
     text_input: Option<TextInputUtil>,
     text_input_active: bool,
+    timers: TimerSchedule,
+    timer_callbacks: HashMap<TimerId, TimerCallback<S>>,
+    idle_callbacks: Vec<IdleCallback<S>>,
+    last_tick: Instant,
 }
 
 impl<S> Engine<S> {
@@ -477,6 +526,10 @@ impl<S> Engine<S> {
             custom_budget: MAX_CUSTOM_EVENTS_PER_FRAME,
             text_input: None,
             text_input_active: false,
+            timers: TimerSchedule::default(),
+            timer_callbacks: HashMap::new(),
+            idle_callbacks: Vec::new(),
+            last_tick: Instant::now(),
         }
     }
 
@@ -529,10 +582,243 @@ impl<S> Engine<S> {
         self.event_mask
     }
 
-    /// Returns whether the run loop can block waiting for input: nothing needs repainting and
-    /// timer events are masked out.
+    /// Returns whether the run loop can block waiting for input: nothing needs repainting, timer
+    /// events are masked out, and no idle callbacks want to run.
     fn is_idle(&self) -> bool {
-        !self.event_mask.intersects(EventMask::TIMER) && !self.widget_cache.needs_draw()
+        !self.event_mask.intersects(EventMask::TIMER)
+            && !self.widget_cache.needs_draw()
+            && self.idle_callbacks.is_empty()
+    }
+
+    /// Returns how long an idle loop may block waiting for input: [`IDLE_WAIT_MS`], or less when
+    /// a timer is due sooner, so timers still fire on time while the loop sleeps.
+    ///
+    /// # Arguments
+    ///
+    /// * `now` - The current time.
+    ///
+    /// # Returns
+    ///
+    /// The wait in milliseconds.
+    fn idle_wait_ms(&self, now: Instant) -> u32 {
+        match self.timers.next_wait(now) {
+            Some(wait) => (wait.as_micros().div_ceil(1000) as u32).min(IDLE_WAIT_MS),
+            None => IDLE_WAIT_MS,
+        }
+    }
+
+    /// Starts a timer.
+    ///
+    /// The callback runs from the run loop (or [`Engine::next_event_with`]) once `interval` has
+    /// passed, within one frame of it.  A repeating timer runs again every `interval`; if the
+    /// application falls behind it runs once and keeps its rhythm instead of catching up in a
+    /// burst.  Each firing emits [`EngineEvent::TimerFired`].  The callback receives the
+    /// application state and a [`Ui`]; call [`Ui::cancel_timer`] to stop a timer, even from its
+    /// own callback.
+    ///
+    /// # Arguments
+    ///
+    /// * `interval` - The time until the timer fires, and between firings if it repeats.
+    /// * `repeat` - `true` to fire every `interval`; `false` to fire once.
+    /// * `callback` - Runs each time the timer fires.
+    ///
+    /// # Returns
+    ///
+    /// The timer's [`TimerId`], for cancelling it.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::engine::Engine;
+    /// use pushrod::geometry::size;
+    /// use std::time::Duration;
+    ///
+    /// let mut engine: Engine<u32> = Engine::new(size(320, 200), 60);
+    ///
+    /// // Counts seconds; the application reads the count from its state.
+    /// let clock = engine.on_timer(Duration::from_secs(1), true, |seconds, _ui| *seconds += 1);
+    ///
+    /// assert!(engine.cancel_timer(clock));
+    /// ```
+    pub fn on_timer<F>(&mut self, interval: Duration, repeat: bool, callback: F) -> TimerId
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        let id = self.timers.add(Instant::now(), interval, repeat);
+
+        self.timer_callbacks.insert(id, Box::new(callback));
+
+        id
+    }
+
+    /// Cancels a timer started with [`Engine::on_timer`].  Emits [`EngineEvent::TimerCancelled`]
+    /// when a waiting timer was stopped.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The timer to cancel.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the timer was still scheduled.
+    pub fn cancel_timer(&mut self, id: TimerId) -> bool {
+        let cancelled = self.timers.cancel(id);
+
+        if cancelled {
+            self.timer_callbacks.remove(&id);
+            self.widget_cache
+                .queue_event(Event::Engine(EngineEvent::TimerCancelled { id }));
+        }
+
+        cancelled
+    }
+
+    /// Registers a callback that runs when the loop is idle: once per loop iteration in which no
+    /// events were waiting.  Use it for work that should yield to input, such as deferred layout
+    /// or incremental loading.  While any idle callback is registered the loop polls once per
+    /// frame instead of blocking, so keep the callback short.  Each run emits
+    /// [`EngineEvent::IdleRan`].
+    ///
+    /// # Arguments
+    ///
+    /// * `callback` - Receives the application state and a [`Ui`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::engine::Engine;
+    /// use pushrod::geometry::size;
+    ///
+    /// let mut engine: Engine<Vec<u32>> = Engine::new(size(320, 200), 60);
+    ///
+    /// // Loads one item per idle iteration.
+    /// engine.on_idle(|loaded, _ui| loaded.push(loaded.len() as u32));
+    /// ```
+    pub fn on_idle<F>(&mut self, callback: F)
+    where
+        F: FnMut(&mut S, &mut Ui) + 'static,
+    {
+        self.idle_callbacks.push(Box::new(callback));
+    }
+
+    /// Runs the timers that are due at `now`, in due order.  Events they cause are queued, not
+    /// delivered.
+    ///
+    /// # Arguments
+    ///
+    /// * `now` - The current time.
+    /// * `state` - The application state passed to the callbacks.
+    fn run_due_timers(&mut self, now: Instant, state: &mut S) {
+        for id in self.timers.due(now) {
+            // Skip a timer an earlier callback cancelled in this same pass.
+            let Some(repeat) = self.timers.complete(id, now) else {
+                continue;
+            };
+
+            self.widget_cache
+                .queue_event(Event::Engine(EngineEvent::TimerFired { id, repeat }));
+
+            let Some(mut callback) = self.timer_callbacks.remove(&id) else {
+                continue;
+            };
+            let mut ui = Ui {
+                widgets: &mut self.widget_cache,
+                running: &mut self.running,
+                event_mask: &mut self.event_mask,
+                posted: &mut self.posted,
+                timers: &mut self.timers,
+            };
+
+            callback(state, &mut ui);
+
+            if repeat && self.timers.contains(id) {
+                self.timer_callbacks.insert(id, callback);
+            }
+        }
+
+        let timers = &self.timers;
+
+        self.timer_callbacks.retain(|id, _| timers.contains(*id));
+    }
+
+    /// Runs the idle callbacks, if there are any.  Queues [`EngineEvent::IdleRan`].
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The application state passed to the callbacks.
+    fn run_idle_callbacks(&mut self, state: &mut S) {
+        if self.idle_callbacks.is_empty() {
+            return;
+        }
+
+        let mut ui = Ui {
+            widgets: &mut self.widget_cache,
+            running: &mut self.running,
+            event_mask: &mut self.event_mask,
+            posted: &mut self.posted,
+            timers: &mut self.timers,
+        };
+
+        for callback in self.idle_callbacks.iter_mut() {
+            callback(state, &mut ui);
+        }
+
+        let callbacks = self.idle_callbacks.len();
+
+        self.widget_cache
+            .queue_event(Event::Engine(EngineEvent::IdleRan { callbacks }));
+    }
+
+    /// Delivers [`Event::Tick`] to the `Widget`s that requested animation, measuring the time
+    /// since the previous call.
+    ///
+    /// # Arguments
+    ///
+    /// * `now` - The current time.
+    ///
+    /// # Returns
+    ///
+    /// The events the `Widget`s generated while handling the tick.
+    fn tick_widgets(&mut self, now: Instant) -> Vec<Event> {
+        let elapsed = now.saturating_duration_since(self.last_tick);
+
+        self.last_tick = now;
+
+        let generated = self.widget_cache.tick(elapsed);
+
+        self.expand_custom(generated)
+    }
+
+    /// Advances the engine's clock to `now`: runs the timers that are due, then delivers one
+    /// [`Event::Tick`] to the `Widget`s that requested animation, and delivers everything they
+    /// cause to the callbacks.  [`Engine::run`] calls this once per frame; call it directly to
+    /// test an application's timers headless, with times of your own choosing.
+    ///
+    /// # Arguments
+    ///
+    /// * `now` - The current time.
+    /// * `state` - The application state passed to the callbacks.
+    pub fn advance(&mut self, now: Instant, state: &mut S) {
+        self.custom_budget = MAX_CUSTOM_EVENTS_PER_FRAME;
+        self.run_due_timers(now, state);
+
+        for event in self.tick_widgets(now) {
+            self.fire(&event, state);
+        }
+
+        self.flush_pending(state);
+    }
+
+    /// Runs the idle callbacks and delivers the events they cause.  [`Engine::run`] calls this
+    /// when a frame had no events to process; call it directly to test idle callbacks headless.
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The application state passed to the callbacks.
+    pub fn run_idle(&mut self, state: &mut S) {
+        self.custom_budget = MAX_CUSTOM_EVENTS_PER_FRAME;
+        self.run_idle_callbacks(state);
+        self.flush_pending(state);
     }
 
     /// Takes the engine events queued by internal actions and broadcasts each to the `Widget`s
@@ -1270,6 +1556,7 @@ impl<S> Engine<S> {
             running: &mut self.running,
             event_mask: &mut self.event_mask,
             posted: &mut self.posted,
+            timers: &mut self.timers,
         };
 
         if let Event::Custom(custom) = event {
@@ -1367,13 +1654,23 @@ impl<S> Engine<S> {
             let mut batch: Vec<SdlEvent> = Vec::new();
 
             if idle {
-                batch.extend(event_pump.wait_event_timeout(IDLE_WAIT_MS));
+                batch.extend(event_pump.wait_event_timeout(self.idle_wait_ms(Instant::now())));
             }
 
             batch.extend(event_pump.poll_iter());
 
+            let had_events = !batch.is_empty();
+
             for event in batch {
                 self.dispatch(event, &mut state);
+            }
+
+            // Timers and animation ticks run every frame; idle callbacks only when no events
+            // were waiting.
+            self.advance(Instant::now(), &mut state);
+
+            if !had_events {
+                self.run_idle(&mut state);
             }
 
             if !self.running {
@@ -1484,6 +1781,25 @@ impl<S> Engine<S> {
     /// The next event, or `None` once the window has been closed or [`shutdown`](Engine::shutdown)
     /// has been called.
     pub fn next_event(&mut self, events: &mut EventLoop) -> Option<Event> {
+        self.next_event_inner(events, None)
+    }
+
+    /// The loop behind [`Engine::next_event`] and [`Engine::next_event_with`].  Timers and idle
+    /// callbacks need the application state, so they run only when `state` is given.
+    ///
+    /// # Arguments
+    ///
+    /// * `events` - The loop state returned by [`Engine::event_loop`].
+    /// * `state` - The application state, if callbacks may run.
+    ///
+    /// # Returns
+    ///
+    /// The next event, or `None` once the engine has stopped.
+    fn next_event_inner(
+        &mut self,
+        events: &mut EventLoop,
+        mut state: Option<&mut S>,
+    ) -> Option<Event> {
         loop {
             if let Some(event) = self.next_queued(&mut events.queue) {
                 return Some(event);
@@ -1503,10 +1819,33 @@ impl<S> Engine<S> {
                 self.event_mask,
             );
 
-            // Wait for one event, then take whatever else is queued.  An idle loop waits long;
-            // otherwise it wakes at most once per frame.
+            // Animation ticks, and (with state) due timers, run once per pass.
+            let now = Instant::now();
+            let ticked = self.tick_widgets(now);
+
+            events.queue.pending.extend(ticked);
+
+            if let Some(state) = state.as_deref_mut() {
+                self.custom_budget = MAX_CUSTOM_EVENTS_PER_FRAME;
+                self.run_due_timers(now, state);
+            }
+
+            if !events.queue.pending.is_empty() || self.widget_cache.has_pending_events() {
+                continue;
+            }
+
+            // Idle callbacks run only when nothing is waiting, and then the loop waits, so a
+            // callback cannot spin the loop faster than a frame.
+            if let Some(state) = state.as_deref_mut()
+                && events.queue.raw.is_empty()
+            {
+                self.run_idle_callbacks(state);
+            }
+
+            // Wait for one event, then take whatever else is queued.  An idle loop waits long
+            // (but not past the next timer); otherwise it wakes at most once per frame.
             let timeout = if self.is_idle() {
-                IDLE_WAIT_MS
+                self.idle_wait_ms(now)
             } else {
                 events.frame_time.as_millis().max(1) as u32
             };
@@ -1557,7 +1896,7 @@ impl<S> Engine<S> {
     /// }
     /// ```
     pub fn next_event_with(&mut self, events: &mut EventLoop, state: &mut S) -> Option<Event> {
-        let event = self.next_event(events)?;
+        let event = self.next_event_inner(events, Some(&mut *state))?;
 
         self.fire(&event, state);
 

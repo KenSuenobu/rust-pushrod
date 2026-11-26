@@ -167,6 +167,10 @@ Inside `handle_event`, call `ctx.emit(...)` to queue an event for the callbacks.
 
 Post your own typed events with `ui.post(target, payload)` (callbacks), `ctx.post(target, payload)` (widgets), or `engine.sender()` (other threads), and receive them with `engine.on_custom::<T, _>(|state, ui, source, payload| ..)`. See [Custom Events](../events/custom-events.md).
 
+## Timers
+
+`engine.on_timer(interval, repeat, |state, ui| ..)` runs a callback after a delay or on a schedule and returns a `TimerId`; `ui.cancel_timer(id)` stops it. `engine.on_idle(|state, ui| ..)` runs when no events are waiting, and a widget that animates calls `ctx.request_animation()` to receive `Tick`. See [Timers and idle callbacks](../concepts/timers-and-idle-callbacks.md).
+
 ## Testing without a window
 
 `Engine::dispatch(event, &mut state)` processes one SDL2 event exactly as the run loop would, including callbacks, so you can test event handling without opening a window. See [Testing a widget](./creating-widgets.md#testing-a-widget).

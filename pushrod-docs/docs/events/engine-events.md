@@ -34,6 +34,10 @@ flowchart TD
 | `GlyphAtlasPageAdded { pages }` | A glyph atlas texture was created. `pages` is how many exist now. |
 | `FocusChanged { old, new }` | The keyboard focus moved, by click, Tab, arrow key, or `set_focus`. `old` and `new` are widget IDs, or `None`. See [Keyboard and focus](../guides/keyboard-and-focus.md). |
 | `ActionTriggered { id, cancel }` | Return or Escape activated a form's default (`cancel` is `false`) or cancel (`true`) widget. |
+| `TimerFired { id, repeat }` | A timer's callback ran. See [Timers and idle callbacks](../concepts/timers-and-idle-callbacks.md). |
+| `TimerCancelled { id }` | A waiting timer was cancelled with `cancel_timer`. |
+| `AnimationTicked { recipients, elapsed }` | `Tick` was delivered to the `recipients` widgets that asked for animation. |
+| `IdleRan { callbacks }` | The idle callbacks ran because no events were waiting. |
 
 More variants are added by the features that need them (dialogs, menus, timers, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
 

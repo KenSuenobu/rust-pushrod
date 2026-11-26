@@ -46,6 +46,7 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::any::Any;
 use std::collections::HashMap;
+use std::time::Duration;
 
 mod focus;
 
@@ -82,6 +83,7 @@ pub struct WidgetCache {
     fonts: FontCache,
     focused_widget_id: Option<WidgetId>,
     text_input_wanted: bool,
+    animating: Vec<WidgetId>,
 }
 
 impl WidgetCache {
@@ -106,6 +108,7 @@ impl WidgetCache {
             fonts: FontCache::new(),
             focused_widget_id: None,
             text_input_wanted: false,
+            animating: Vec::new(),
         }
     }
 
@@ -494,7 +497,7 @@ impl WidgetCache {
             }
         }
 
-        ctx.into_events()
+        self.finish(ctx)
     }
 
     /// Broadcasts an event to every `Widget` that wants it, in drawing order.
@@ -542,7 +545,7 @@ impl WidgetCache {
                 recipients,
             }));
 
-        ctx.into_events()
+        self.finish(ctx)
     }
 
     /// Sets the run loop's event mask, which `Widget`s must also pass.  The `Engine` calls this
@@ -564,6 +567,90 @@ impl WidgetCache {
         self.pending_events.push(event);
     }
 
+    /// Ends a round of event handling: records the animation requests the `Widget`s made and
+    /// returns the events they generated.
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - The context the `Widget`s handled events with.
+    ///
+    /// # Returns
+    ///
+    /// The events the `Widget`s generated, in the order emitted.
+    pub(crate) fn finish(&mut self, mut ctx: EventCtx) -> Vec<Event> {
+        self.animating.extend(ctx.take_animation_requests());
+
+        ctx.into_events()
+    }
+
+    /// Asks for an [`Event::Tick`] for a `Widget` on the next frame, from outside event handling,
+    /// for example to start an animation from a callback.  Inside `handle_event`, use
+    /// [`EventCtx::request_animation`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget` to tick.  Unknown IDs are ignored.
+    pub fn request_animation(&mut self, id: WidgetId) {
+        if (id as usize) < self.cache.len() {
+            self.animating.push(id);
+        }
+    }
+
+    /// Returns whether any `Widget` has asked for a tick on the next frame.
+    ///
+    /// # Returns
+    ///
+    /// `true` while an animation request is waiting.
+    pub fn animation_requested(&self) -> bool {
+        !self.animating.is_empty()
+    }
+
+    /// Delivers [`Event::Tick`] to the `Widget`s that requested animation since the last tick,
+    /// and only to those.  The requests are consumed: a `Widget` that keeps animating requests
+    /// again while handling the tick.  A `Widget` also needs [`EventMask::TIMER`] in its mask (and
+    /// the run loop's), and must be enabled and visible.  Queues [`EngineEvent::AnimationTicked`]
+    /// when at least one `Widget` received the tick.
+    ///
+    /// # Arguments
+    ///
+    /// * `elapsed` - The time since the previous frame, carried by the tick.
+    ///
+    /// # Returns
+    ///
+    /// The events the `Widget`s generated while handling the tick, in order.
+    pub fn tick(&mut self, elapsed: Duration) -> Vec<Event> {
+        let requested = std::mem::take(&mut self.animating);
+        let mut ctx = EventCtx::default();
+        let mut recipients = 0;
+
+        if !requested.is_empty() && self.loop_mask.intersects(EventMask::TIMER) {
+            let event = Event::Tick { elapsed };
+
+            for id in self.draw_order() {
+                let widget = &mut self.cache[id as usize];
+
+                if requested.contains(&id)
+                    && widget.is_enabled()
+                    && widget.event_mask().intersects(EventMask::TIMER)
+                {
+                    ctx.set_source(Some(id));
+                    widget.handle_event(&event, &mut ctx);
+                    recipients += 1;
+                }
+            }
+        }
+
+        if recipients > 0 {
+            self.pending_events
+                .push(Event::Engine(EngineEvent::AnimationTicked {
+                    recipients,
+                    elapsed,
+                }));
+        }
+
+        self.finish(ctx)
+    }
+
     /// Removes and returns the engine events queued by the cache itself, in order.
     ///
     /// # Returns
@@ -571,6 +658,15 @@ impl WidgetCache {
     /// The queued events; empty if there are none.
     pub fn take_pending_events(&mut self) -> Vec<Event> {
         std::mem::take(&mut self.pending_events)
+    }
+
+    /// Returns whether engine events are waiting for [`WidgetCache::take_pending_events`].
+    ///
+    /// # Returns
+    ///
+    /// `true` if at least one event is queued.
+    pub(crate) fn has_pending_events(&self) -> bool {
+        !self.pending_events.is_empty()
     }
 
     /// Returns whether the next [`draw_loop`](WidgetCache::draw_loop) has anything to do.
@@ -712,7 +808,7 @@ impl WidgetCache {
         let mut ctx = EventCtx::default();
 
         self.propagate_with(target, event, &mut ctx);
-        ctx.into_events()
+        self.finish(ctx)
     }
 
     /// Delivers a custom event to the `Widget`s its target names.
@@ -735,7 +831,7 @@ impl WidgetCache {
         let mut ctx = EventCtx::default();
 
         if !self.loop_mask.intersects(EventMask::CUSTOM) {
-            return ctx.into_events();
+            return self.finish(ctx);
         }
 
         let recipients = match custom.target {
@@ -767,7 +863,7 @@ impl WidgetCache {
             }
         }
 
-        ctx.into_events()
+        self.finish(ctx)
     }
 
     /// Routes a raw input event to the `Widget`s.
@@ -801,7 +897,7 @@ impl WidgetCache {
         let mut ctx = EventCtx::default();
 
         if self.cache.is_empty() {
-            return ctx.into_events();
+            return self.finish(ctx);
         }
 
         match event {
@@ -939,7 +1035,7 @@ impl WidgetCache {
             _ => {}
         }
 
-        ctx.into_events()
+        self.finish(ctx)
     }
 
     /// Sets or clears one [`VisualState`] flag on a `Widget`, repainting it only if its look

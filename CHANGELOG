@@ -28,3 +28,4 @@
 [0] Roadmap: Chassis AI assistant through MCP (Epic 9, nine issues, v2) [kenji]
 [#289] Text truncation with an ellipsis: End, Start, Middle [kenji]
 [#290] Wrapped text: Word/Anywhere wrap, max_lines, height_for_width [kenji]
+[#21] Timers and idle callbacks: on_timer, on_idle, cancel_timer, Tick [kenji]
