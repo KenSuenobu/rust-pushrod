@@ -153,7 +153,7 @@ Instead of tracking presses, drags, and timing yourself, attach a controller wit
 ## Using the widget
 
 ```rust
-fn main() {
+fn main() -> Result<(), pushrod::error::Error> {
     let mut engine: Engine<()> = Engine::new(size(200, 140), 60);
 
     let swatch = engine.add_widget(SwatchWidget::new(
@@ -168,7 +168,9 @@ fn main() {
         println!("Swatch is now {:?}", color);
     });
 
-    pushrod_sdl2::run(engine, WindowSettings::new("Swatch", size(200, 140)), ());
+    pushrod_sdl2::run(engine, WindowSettings::new("Swatch", size(200, 140)), ())?;
+
+    Ok(())
 }
 ```
 

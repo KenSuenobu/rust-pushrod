@@ -22,7 +22,7 @@ Both styles deliver every event in the same order: semantic events, engine event
 ### Event-loop style
 
 ```rust
-let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Events", size(320, 200)));
+let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Events", size(320, 200)))?;
 
 while let Some(event) = engine.next_event(&mut events) {
     match event {

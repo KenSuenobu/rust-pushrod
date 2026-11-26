@@ -33,6 +33,7 @@
 
 use crate::backend::Backend;
 use crate::color::Color;
+use crate::error::{Error, Result};
 use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventCtx, EventMask, EventPhase, EventTarget,
     MaskScope, Propagation, engine_filter_accepts,
@@ -162,17 +163,38 @@ impl WidgetCache {
     /// # Panics
     ///
     /// Panics if the cache is not empty and `parent` does not exist.
-    pub fn add_child(&mut self, parent: WidgetId, mut widget: Box<dyn Widget>) -> WidgetId {
+    pub fn add_child(&mut self, parent: WidgetId, widget: Box<dyn Widget>) -> WidgetId {
+        self.try_add_child(parent, widget)
+            .unwrap_or_else(|error| panic!("[WidgetCache::add_child] {error}"))
+    }
+
+    /// Adds a `Widget` as the last child of `parent`, reporting an unknown parent as an error
+    /// instead of panicking.  Behaves like [`add_child`](WidgetCache::add_child) otherwise.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent` - The ID of the parent `Widget`.
+    /// * `widget` - The `Widget` to add.
+    ///
+    /// # Returns
+    ///
+    /// The ID assigned to the `Widget`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::UnknownWidget`] if the cache is not empty and `parent` does not exist.
+    pub fn try_add_child(
+        &mut self,
+        parent: WidgetId,
+        mut widget: Box<dyn Widget>,
+    ) -> Result<WidgetId> {
         let id = self.cache.len() as WidgetId;
         let parent = if self.cache.is_empty() {
             id
-        } else {
-            assert!(
-                (parent as usize) < self.cache.len(),
-                "[WidgetCache::add_child] Parent widget ID {} does not exist",
-                parent
-            );
+        } else if (parent as usize) < self.cache.len() {
             parent
+        } else {
+            return Err(Error::UnknownWidget { id: parent });
         };
 
         widget.core_mut().id = id;
@@ -193,7 +215,7 @@ impl WidgetCache {
                 .push(Event::Engine(EngineEvent::WidgetAdded { id, parent }));
         }
 
-        id
+        Ok(id)
     }
 
     /// Returns the number of `Widget`s in the cache.
@@ -1232,6 +1254,23 @@ mod broadcast_tests {
         cache.broadcast(&focus());
 
         assert_eq!(*log.borrow(), vec![a, a_child, b]);
+    }
+
+    #[test]
+    fn an_unknown_parent_is_an_error_not_a_panic() {
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let mut cache = cache();
+        let before = cache.len();
+
+        let result = cache.try_add_child(99, recorder(&log, EventMask::WINDOW));
+
+        assert_eq!(result, Err(Error::UnknownWidget { id: 99 }));
+        assert_eq!(cache.len(), before);
+        assert!(
+            cache
+                .try_add_child(0, recorder(&log, EventMask::WINDOW))
+                .is_ok()
+        );
     }
 
     #[test]

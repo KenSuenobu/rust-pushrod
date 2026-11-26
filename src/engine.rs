@@ -63,6 +63,7 @@
 use crate::backend::{Backend, Waker};
 use crate::cache::WidgetCache;
 use crate::color::Color;
+use crate::error::Result;
 use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventKind, EventMask, EventTarget, MaskScope,
     engine_filter_accepts,
@@ -879,6 +880,29 @@ impl<S> Engine<S> {
     /// Panics if `parent` does not exist.
     pub fn add_child_widget<W: Widget>(&mut self, parent: WidgetId, widget: W) -> WidgetId {
         self.widget_cache.add_child(parent, Box::new(widget))
+    }
+
+    /// Adds a `Widget` as a child of another, reporting an unknown parent as an error instead of
+    /// panicking.  Behaves like [`add_child_widget`](Engine::add_child_widget) otherwise.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent` - The ID of the parent `Widget`.
+    /// * `widget` - The `Widget` to add.  Its origin is relative to the parent.
+    ///
+    /// # Returns
+    ///
+    /// The ID assigned to the `Widget`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::UnknownWidget`](crate::error::Error::UnknownWidget) if `parent` does not exist.
+    pub fn try_add_child_widget<W: Widget>(
+        &mut self,
+        parent: WidgetId,
+        widget: W,
+    ) -> Result<WidgetId> {
+        self.widget_cache.try_add_child(parent, Box::new(widget))
     }
 
     /// Returns the window's widget tree.

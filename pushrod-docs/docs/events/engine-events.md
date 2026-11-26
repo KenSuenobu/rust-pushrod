@@ -38,6 +38,7 @@ flowchart TD
 | `TimerCancelled { id }` | A waiting timer was cancelled with `cancel_timer`. |
 | `AnimationTicked { recipients, elapsed }` | `Tick` was delivered to the `recipients` widgets that asked for animation. |
 | `IdleRan { callbacks }` | The idle callbacks ran because no events were waiting. |
+| `Error { error }` | Something failed while the loop was running (a font would not load, a texture could not be created). The loop keeps going. See [Errors](../guides/creating-an-application.md#errors). |
 
 More variants are added by the features that need them (dialogs, menus, timers, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
 

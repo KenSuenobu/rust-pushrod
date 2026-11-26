@@ -123,15 +123,19 @@ fn button(origin: Point, text: &str) -> ButtonWidget {
 /// * `engine` - the engine holding the fully built gallery.
 /// * `settings` - how to create the window to draw into.
 /// * `path` - where to save the image; the format follows the extension (`.png`).
-fn save_screenshot(engine: &mut Engine<AppState>, settings: &WindowSettings, path: &str) {
-    let mut backend = Sdl2Backend::new(settings).expect("SDL2 must open the window");
+fn save_screenshot(
+    engine: &mut Engine<AppState>,
+    settings: &WindowSettings,
+    path: &str,
+) -> Result<(), pushrod::error::Error> {
+    let mut backend = Sdl2Backend::new(settings)?;
 
     engine.widgets().invalidate_all();
     engine.widgets().draw_loop(&mut backend);
-    backend.save_screenshot(path).unwrap();
+    backend.save_screenshot(path)
 }
 
-pub fn main() {
+pub fn main() -> Result<(), pushrod::error::Error> {
     let settings = WindowSettings::new("pushrod gallery", size(WINDOW_W, WINDOW_H));
     let mut engine: Engine<AppState> = Engine::new(size(WINDOW_W, WINDOW_H), 30);
 
@@ -250,9 +254,10 @@ pub fn main() {
         .position(|a| a == "--screenshot")
         .and_then(|i| args.get(i + 1))
     {
-        save_screenshot(&mut engine, &settings, path);
-        return;
+        return save_screenshot(&mut engine, &settings, path);
     }
 
-    pushrod_sdl2::run(engine, settings, AppState);
+    pushrod_sdl2::run(engine, settings, AppState)?;
+
+    Ok(())
 }

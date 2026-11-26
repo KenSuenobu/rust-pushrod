@@ -60,7 +60,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 21 | [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) | pushrod: [1.27] Wrapped text: multi-line labels that reflow (done) |
 | ✅ 22 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks (done) |
 | ✅ 23 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets (done) |
-| 24 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking |
+| ✅ 24 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking (done) |
 | 25 | [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) | pushrod: [1.24] Fonts: shared font handles and a built-in default font |
 | 26 | [#136](https://github.com/KenSuenobu/rust-pushrod/issues/136) | pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability |
 | 27 | [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) | pushrod: [2.10] Custom paint widget (closure-drawn) |
@@ -687,9 +687,9 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] No `unwrap`/`expect` in library code (lints enforced)
-- [ ] Missing font or image returns an error, not a panic
-- [ ] Error event delivered for failures during the run loop
+- [x] No `unwrap`/`expect` in library code (lints enforced)
+- [x] Missing font or image returns an error, not a panic
+- [x] Error event delivered for failures during the run loop
 
 ### Step 25: Fonts: shared font handles and a built-in default font
 

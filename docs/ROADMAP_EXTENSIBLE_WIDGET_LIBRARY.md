@@ -203,7 +203,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.22 (#131) | Widget libraries: extend or replace pushrod-widgets | Make it straightforward for a separate crate to add widgets alongside pushrod-widgets, or to replace it with a different look. | `architecture`, `chassis`, `enhancement`, `extensibility`, `parallelizable`, `size/M` | Y | N | M | `src/registry.rs`, `pushrod-widgets/src/lib.rs`, `examples/widget-library/ (new crate)` |
 | 1.23 (#136) | Public API polish before publishing: builders, prelude, and stability | Make the public API pleasant and stable before crates.io: builders with defaults, preludes, non-exhaustive enums, and consistent names. | `api`, `enhancement`, `mvp`, `parallelizable`, `size/M`, `usability` | Y | v0.1 | M | `src/lib.rs`, `pushrod-widgets (all widgets)` |
 | 1.24 (#137) | Fonts: shared font handles and a built-in default font | Replace per-widget font file paths with shared `Font` handles, and ship a default font so applications work without any font files. | `api`, `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `text`, `usability` | Y | v0.1 | S | `src/font.rs`, `assets/ (font and license)` |
-| 1.25 (#138) | Errors: return Result instead of panicking | Library code reports failures (fonts, images, windows, unknown widget IDs) as `Result` values instead of panicking. | `api`, `enhancement`, `mvp`, `parallelizable`, `reliability`, `size/S` | Y | v0.1 | S | `src/error.rs (new)`, `src/font.rs`, `src/engine.rs`, `src/cache.rs` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
@@ -846,6 +845,8 @@ Like every widget, it can also receive application-defined custom events in `han
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text-and-fonts.md` ("Text and fonts", Concepts, new). Guides: update the guide or concept page covering: a new Text and fonts page, quick start. Rustdoc: `Font`, `FontCache::load`, default font. Examples: examples drop font paths. Screenshots: n/a.
 
 ### 1.25 (#138): Errors: return Result instead of panicking
+
+**Status:** done (#138). `pushrod::error::Error` and `Result`; `Sdl2Backend::new`, `run`, `event_loop`, `Painter::image`, `FontCache::layout` and `draw`, and `WidgetCache::try_add_child` return `Result`; failures inside the run loop arrive as `EngineEvent::Error`. `clippy::unwrap_used` and `clippy::expect_used` are denied outside tests.
 
 **Problem Statement.** Library code calls `unwrap()` on font loading, texture creation, and SDL initialization, so a missing file or driver problem crashes the application instead of letting it recover or report the problem.
 

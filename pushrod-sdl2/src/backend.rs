@@ -23,6 +23,7 @@ use crate::texture::TextureStore;
 use pushrod::backend::{Backend, Waker};
 use pushrod::color::Color;
 use pushrod::engine::{Engine, EventLoop};
+use pushrod::error::Error;
 use pushrod::event::{EngineEvent, EventMask};
 use pushrod::geometry::{Rect, Size};
 use pushrod::input::InputEvent;
@@ -37,7 +38,7 @@ use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::Canvas;
 use sdl2::surface::Surface;
 use sdl2::video::Window;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -102,6 +103,11 @@ pub struct Sdl2Backend {
     textures: HashMap<WidgetId, TextureStore>,
     fonts: FontCache,
     applied_mask: EventMask,
+    /// Errors that happened since the last [`Backend::take_notices`].
+    errors: Vec<Error>,
+    /// Every error reported so far, so a failure that repeats on every repaint (a missing font)
+    /// is reported once.
+    reported: HashSet<Error>,
 }
 
 impl Sdl2Backend {
@@ -122,9 +128,26 @@ impl Sdl2Backend {
     ///
     /// # Errors
     ///
-    /// Returns the `SDL2` message if `SDL2`, its video subsystem, the window, the canvas or the
-    /// event pump cannot be created.
-    pub fn new(settings: &WindowSettings) -> Result<Self, String> {
+    /// Returns [`Error::Backend`] with the `SDL2` message if `SDL2`, its video subsystem, the
+    /// window, the canvas or the event pump cannot be created.
+    pub fn new(settings: &WindowSettings) -> Result<Self, Error> {
+        Self::open(settings).map_err(Error::backend)
+    }
+
+    /// Does the work of [`Sdl2Backend::new`], with `SDL2`'s own messages as errors.
+    ///
+    /// # Arguments
+    ///
+    /// * `settings` - How to create the window.
+    ///
+    /// # Returns
+    ///
+    /// The backend.
+    ///
+    /// # Errors
+    ///
+    /// Returns the `SDL2` message if anything cannot be created.
+    fn open(settings: &WindowSettings) -> Result<Self, String> {
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let mut builder = video.window(&settings.title, settings.size.w, settings.size.h);
@@ -179,6 +202,8 @@ impl Sdl2Backend {
             textures: HashMap::new(),
             fonts: FontCache::new(),
             applied_mask: EventMask::ALL,
+            errors: Vec::new(),
+            reported: HashSet::new(),
         })
     }
 
@@ -194,13 +219,32 @@ impl Sdl2Backend {
     ///
     /// # Errors
     ///
-    /// Returns the `SDL2` message if the pixels cannot be read or the file cannot be written.
-    pub fn save_screenshot(&mut self, path: &str) -> Result<(), String> {
-        let (w, h) = self.canvas.output_size()?;
-        let mut pixels = self.canvas.read_pixels(None, PixelFormatEnum::ABGR8888)?;
-        let surface = Surface::from_data(&mut pixels, w, h, w * 4, PixelFormatEnum::ABGR8888)?;
+    /// Returns [`Error::Image`] with the `SDL2` message if the pixels cannot be read or the file
+    /// cannot be written.
+    pub fn save_screenshot(&mut self, path: &str) -> Result<(), Error> {
+        let (w, h) = self
+            .canvas
+            .output_size()
+            .map_err(|m| Error::image(path, m))?;
+        let mut pixels = self
+            .canvas
+            .read_pixels(None, PixelFormatEnum::ABGR8888)
+            .map_err(|m| Error::image(path, m))?;
+        let surface = Surface::from_data(&mut pixels, w, h, w * 4, PixelFormatEnum::ABGR8888)
+            .map_err(|m| Error::image(path, m))?;
 
-        surface.save(path)
+        surface.save(path).map_err(|m| Error::image(path, m))
+    }
+
+    /// Queues an error for the engine, unless the same error was reported before.
+    ///
+    /// # Arguments
+    ///
+    /// * `error` - What failed.
+    fn report(&mut self, error: Error) {
+        if self.reported.insert(error.clone()) {
+            self.errors.push(error);
+        }
     }
 
     /// Returns the font cache the backend draws text with.
@@ -270,26 +314,43 @@ impl Backend for Sdl2Backend {
         self.waker.clone()
     }
 
-    /// # Panics
-    ///
-    /// Panics if `SDL2` cannot create the texture or draw into it.
+    /// Failures (a texture that cannot be created, a drawing call that fails) skip that
+    /// `Widget`'s painting and are reported through [`Backend::take_notices`].
     fn paint_widget(&mut self, id: WidgetId, size: Size, paint: &mut dyn FnMut(&mut dyn Painter)) {
         let store = self.textures.entry(id).or_default();
 
-        store.create_or_resize_texture(&mut self.canvas, size);
+        if let Err(error) = store.create_or_resize_texture(&mut self.canvas, size) {
+            self.report(error);
 
-        let mut texture = store.take().unwrap();
+            return;
+        }
+
+        let Some(mut texture) = store.take() else {
+            return;
+        };
         let fonts = &mut self.fonts;
-
-        self.canvas
+        let mut painted = Vec::new();
+        let result = self
+            .canvas
             .with_texture_canvas(&mut texture, |texture_canvas| {
                 let mut painter = Sdl2Painter::new(texture_canvas, fonts);
 
                 paint(&mut painter);
-            })
-            .unwrap();
+                painted = painter.take_errors();
+            });
 
-        store.restore(texture);
+        // The texture goes back even when drawing failed, so it is not leaked.
+        if let Some(store) = self.textures.get_mut(&id) {
+            store.restore(texture);
+        }
+
+        for error in painted {
+            self.report(error);
+        }
+
+        if let Err(error) = result {
+            self.report(Error::texture(error.to_string()));
+        }
     }
 
     fn begin_frame(&mut self, clear: Color) {
@@ -297,16 +358,13 @@ impl Backend for Sdl2Backend {
         self.canvas.clear();
     }
 
-    /// # Panics
-    ///
-    /// Panics if `SDL2` fails to copy the texture to the window.
+    /// A failed copy is reported through [`Backend::take_notices`] and the `Widget` is skipped.
     fn draw_widget(&mut self, id: WidgetId, bounds: Rect) {
         if let Some(store) = self.textures.get_mut(&id)
             && let Some(texture) = store.get_optional_ref()
+            && let Err(message) = self.canvas.copy(texture, None, to_sdl_rect(bounds))
         {
-            self.canvas
-                .copy(texture, None, to_sdl_rect(bounds))
-                .unwrap();
+            self.report(Error::texture(message));
         }
     }
 
@@ -315,6 +373,10 @@ impl Backend for Sdl2Backend {
     }
 
     fn take_notices(&mut self) -> Vec<EngineEvent> {
+        let errors = std::mem::take(&mut self.errors)
+            .into_iter()
+            .map(|error| EngineEvent::Error { error });
+
         self.fonts
             .take_notices()
             .into_iter()
@@ -328,6 +390,7 @@ impl Backend for Sdl2Backend {
                 },
                 FontNotice::AtlasPageAdded { pages } => EngineEvent::GlyphAtlasPageAdded { pages },
             })
+            .chain(errors)
             .collect()
     }
 
@@ -360,13 +423,15 @@ impl Backend for Sdl2Backend {
 ///
 /// The application state, after the last callback has run.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if the window cannot be created (see [`Sdl2Backend::new`]).
-pub fn run<S>(mut engine: Engine<S>, settings: WindowSettings, state: S) -> S {
-    let mut backend = Sdl2Backend::new(&settings).expect("SDL2 must open the window");
+/// Returns [`Error::Backend`] if the window cannot be created (see [`Sdl2Backend::new`]).
+/// Failures after that point do not stop the loop; they arrive as
+/// [`EngineEvent::Error`](pushrod::event::EngineEvent::Error).
+pub fn run<S>(mut engine: Engine<S>, settings: WindowSettings, state: S) -> Result<S, Error> {
+    let mut backend = Sdl2Backend::new(&settings)?;
 
-    engine.run(&mut backend, state)
+    Ok(engine.run(&mut backend, state))
 }
 
 /// Opens a window and starts an application-driven event loop, as an alternative to [`run`] and
@@ -381,11 +446,11 @@ pub fn run<S>(mut engine: Engine<S>, settings: WindowSettings, state: S) -> S {
 ///
 /// The [`EventLoop`] to pass to [`Engine::next_event`].
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if the window cannot be created (see [`Sdl2Backend::new`]).
-pub fn event_loop<S>(engine: &mut Engine<S>, settings: WindowSettings) -> EventLoop {
-    let backend = Sdl2Backend::new(&settings).expect("SDL2 must open the window");
+/// Returns [`Error::Backend`] if the window cannot be created (see [`Sdl2Backend::new`]).
+pub fn event_loop<S>(engine: &mut Engine<S>, settings: WindowSettings) -> Result<EventLoop, Error> {
+    let backend = Sdl2Backend::new(&settings)?;
 
-    engine.event_loop(Box::new(backend))
+    Ok(engine.event_loop(Box::new(backend)))
 }

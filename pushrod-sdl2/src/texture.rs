@@ -20,6 +20,7 @@
 //! The `Canvas` and `Texture` refer to the `sdl2::render` crate.  Please visit that crate for
 //! more information on the drawing features available.
 
+use pushrod::error::Error;
 use pushrod::geometry::Size;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
@@ -42,22 +43,23 @@ impl TextureStore {
     ///
     /// The texture.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if no texture has been created yet (see
+    /// Returns [`Error::Texture`] if no texture has been created yet (see
     /// [`create_or_resize_texture`](TextureStore::create_or_resize_texture)).
     ///
     /// # Examples
     ///
     /// ```rust,ignore
-    /// c.with_texture_canvas(texture_store.get_mut_ref(), |texture| {
+    /// c.with_texture_canvas(texture_store.get_mut_ref()?, |texture| {
     ///     texture.set_draw_color(base_color);
     ///     texture.clear();
-    /// })
-    /// .unwrap();
+    /// })?;
     /// ```
-    pub fn get_mut_ref(&mut self) -> &mut Texture {
-        self.store.as_mut().unwrap()
+    pub fn get_mut_ref(&mut self) -> Result<&mut Texture, Error> {
+        self.store
+            .as_mut()
+            .ok_or_else(|| Error::texture("no texture has been created yet"))
     }
 
     /// Returns the stored texture, if one has been created.
@@ -81,10 +83,15 @@ impl TextureStore {
     /// * `c` - The canvas whose renderer creates the texture.
     /// * `size` - The required width and height in pixels.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if `SDL2` cannot create the texture.
-    pub fn create_or_resize_texture(&mut self, c: &mut Canvas<Window>, size: Size) {
+    /// Returns [`Error::Texture`] if `SDL2` cannot create the texture.  The store then holds no
+    /// texture, and the next call tries again.
+    pub fn create_or_resize_texture(
+        &mut self,
+        c: &mut Canvas<Window>,
+        size: Size,
+    ) -> Result<(), Error> {
         if self.store.is_none() || self.size.w != size.w || self.size.h != size.h {
             self.size.w = size.w;
             self.size.h = size.h;
@@ -95,7 +102,10 @@ impl TextureStore {
                 unsafe { old_texture.destroy() };
             }
 
-            self.store = Some(c.create_texture_target(None, size.w, size.h).unwrap());
+            self.store = Some(
+                c.create_texture_target(None, size.w, size.h)
+                    .map_err(|e| Error::texture(e.to_string()))?,
+            );
 
             eprintln!(
                 "[create_or_resize_texture] Created texture: size={}x{} (memory={})",
@@ -106,6 +116,8 @@ impl TextureStore {
 
             self.set_invalidated(true);
         }
+
+        Ok(())
     }
 
     /// Removes the texture from the store, so it can be drawn into while the owning `Widget` is

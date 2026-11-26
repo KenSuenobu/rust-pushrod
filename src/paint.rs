@@ -34,6 +34,7 @@
 //! records calls for unit tests, without a window.
 
 use crate::color::{Color, FontStyle};
+use crate::error::Error;
 use crate::geometry::{Point, Rect, Size};
 use crate::widget::VisualState;
 use unicode_segmentation::UnicodeSegmentation;
@@ -251,8 +252,8 @@ pub trait Painter {
     ///
     /// # Errors
     ///
-    /// Returns a message if the image cannot be loaded or drawn.
-    fn image(&mut self, path: &str, bounds: Rect) -> Result<(), String>;
+    /// Returns [`Error::Image`] if the image cannot be loaded or drawn.
+    fn image(&mut self, path: &str, bounds: Rect) -> Result<(), Error>;
 
     /// Fills a rectangle with a 50% checkerboard of two colors, for backends and displays with few
     /// colors.  The pixel at the rectangle's upper left-hand corner is `first`.

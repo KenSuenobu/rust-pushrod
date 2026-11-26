@@ -22,6 +22,7 @@
 
 use crate::font::ttf_context;
 use crate::painter::to_sdl_font_style;
+use pushrod::error::Error;
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::TextStyle;
 use pushrod::text::layout::{LaidOut, Line, TextGeometry, TextLayout};
@@ -99,11 +100,13 @@ struct LtrGeometry {
 
 impl LtrGeometry {
     /// The line containing a byte index (the last line for indexes past the end).
-    fn line_of(&self, index: usize) -> &LineCarets {
+    ///
+    /// Returns `None` only for a layout with no lines.
+    fn line_of(&self, index: usize) -> Option<&LineCarets> {
         self.lines
             .iter()
             .find(|l| index <= l.range.end)
-            .unwrap_or_else(|| self.lines.last().expect("a layout always has a line"))
+            .or_else(|| self.lines.last())
     }
 
     /// The x of a byte index on a line.
@@ -128,12 +131,19 @@ impl TextGeometry for LtrGeometry {
     ///
     /// A one-pixel-wide rectangle as tall as the line.
     fn caret_rect(&self, index: usize) -> Rect {
-        let line = self.line_of(index);
-        Rect {
-            x: Self::x_of(line, index),
-            y: line.y,
-            w: 1,
-            h: self.line_height,
+        match self.line_of(index) {
+            Some(line) => Rect {
+                x: Self::x_of(line, index),
+                y: line.y,
+                w: 1,
+                h: self.line_height,
+            },
+            None => Rect {
+                x: 0,
+                y: 0,
+                w: 1,
+                h: self.line_height,
+            },
         }
     }
 
@@ -179,7 +189,9 @@ impl TextGeometry for LtrGeometry {
     /// A byte index on a character boundary.
     fn hit_test(&self, point: Point) -> usize {
         let row = (point.y.max(0) as u32 / self.line_height.max(1)) as usize;
-        let line = &self.lines[row.min(self.lines.len() - 1)];
+        let Some(line) = self.lines.get(row).or_else(|| self.lines.last()) else {
+            return 0;
+        };
 
         line.carets
             .iter()
@@ -192,6 +204,7 @@ impl TextGeometry for LtrGeometry {
 #[derive(Default)]
 pub struct TtfLayout {
     fonts: HashMap<(String, u16), Font<'static, 'static>>,
+    errors: Vec<Error>,
 }
 
 impl TtfLayout {
@@ -202,6 +215,66 @@ impl TtfLayout {
     /// The new `TtfLayout`.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Removes and returns the errors [`TextLayout::layout`] recorded since the last call.
+    ///
+    /// `layout` cannot fail (its trait has no error), so when a font will not load it records the
+    /// error here and returns an empty layout.  Call [`try_layout`](TtfLayout::try_layout)
+    /// instead to get the error directly.
+    ///
+    /// # Returns
+    ///
+    /// The errors, in order; empty if every layout succeeded.
+    pub fn take_errors(&mut self) -> Vec<Error> {
+        std::mem::take(&mut self.errors)
+    }
+
+    /// Lays out `text`, loading the font on first use.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The text to lay out.
+    /// * `style` - The font, size and style.
+    /// * `max_width` - The width in pixels at which to wrap, or `None` for no wrapping.
+    ///
+    /// # Returns
+    ///
+    /// The size, lines and geometry of the text; there are no glyph runs.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Backend`] if SDL2_ttf cannot be initialized, or [`Error::Font`] if the
+    /// font file cannot be loaded.
+    pub fn try_layout(
+        &mut self,
+        text: &str,
+        style: &TextStyle,
+        max_width: Option<u32>,
+    ) -> Result<LaidOut, Error> {
+        let key = (style.font_name.clone(), style.font_size);
+
+        if !self.fonts.contains_key(&key) {
+            let font = ttf_context()
+                .map_err(Error::backend)?
+                .load_font(&style.font_name, style.font_size)
+                .map_err(|message| Error::font(&style.font_name, message))?;
+
+            self.fonts.insert(key.clone(), font);
+        }
+
+        let font = self
+            .fonts
+            .get_mut(&key)
+            .ok_or_else(|| Error::font(&style.font_name, "the font is not loaded"))?;
+
+        font.set_style(to_sdl_font_style(style.font_style));
+
+        let line_height = font.height().max(1) as u32;
+
+        Ok(lay_out(text, max_width, line_height, &mut |s: &str| {
+            font.size_of(s).map_or(0, |(w, _)| w)
+        }))
     }
 }
 
@@ -218,75 +291,89 @@ impl TextLayout for TtfLayout {
     ///
     /// The size, lines and geometry of the text; there are no glyph runs.
     ///
-    /// # Panics
-    ///
-    /// Panics if SDL2_ttf cannot be initialized or the font file cannot be loaded.
+    /// A font that cannot be loaded gives an empty layout, and the error is kept for
+    /// [`TtfLayout::take_errors`].
     fn layout(&mut self, text: &str, style: &TextStyle, max_width: Option<u32>) -> LaidOut {
-        let font = self
-            .fonts
-            .entry((style.font_name.clone(), style.font_size))
-            .or_insert_with(|| {
-                ttf_context()
-                    .expect("SDL2_ttf must initialize")
-                    .load_font(&style.font_name, style.font_size)
-                    .expect("the font file must load")
-            });
-        font.set_style(to_sdl_font_style(style.font_style));
+        match self.try_layout(text, style, max_width) {
+            Ok(laid) => laid,
+            Err(error) => {
+                self.errors.push(error);
 
-        let mut width_of = |s: &str| font.size_of(s).map_or(0, |(w, _)| w);
-        let line_height = font.height().max(1) as u32;
-        let ranges = wrap_lines(text, max_width, &mut width_of);
+                lay_out(text, max_width, 1, &mut |_: &str| 0)
+            }
+        }
+    }
+}
 
-        let mut lines = Vec::new();
-        let mut carets_by_line = Vec::new();
-        let mut width = 0;
+/// Lays out text from a width measurer, so a missing font can fall back to zero widths.
+///
+/// # Arguments
+///
+/// * `text` - The text to lay out.
+/// * `max_width` - The width in pixels at which to wrap, or `None` for no wrapping.
+/// * `line_height` - The height of one line in pixels; at least 1.
+/// * `width_of` - Returns the width in pixels of a piece of text.
+///
+/// # Returns
+///
+/// The size, lines and geometry of the text; there are no glyph runs.
+fn lay_out(
+    text: &str,
+    max_width: Option<u32>,
+    line_height: u32,
+    width_of: &mut dyn FnMut(&str) -> u32,
+) -> LaidOut {
+    let ranges = wrap_lines(text, max_width, &mut *width_of);
 
-        for (row, range) in ranges.iter().enumerate() {
-            let slice = &text[range.clone()];
-            let mut carets: Vec<(usize, i32)> = slice
-                .char_indices()
-                .map(|(i, _)| (range.start + i, width_of(&slice[..i]) as i32))
-                .collect();
-            let line_width = width_of(slice);
-            carets.push((range.end, line_width as i32));
+    let mut lines = Vec::new();
+    let mut carets_by_line = Vec::new();
+    let mut width = 0;
 
-            width = width.max(line_width);
-            let y = row as i32 * line_height as i32;
-            lines.push(Line {
-                text_range: range.clone(),
-                bounds: Rect {
-                    x: 0,
-                    y,
-                    w: line_width,
-                    h: line_height,
-                },
-            });
-            carets_by_line.push(LineCarets {
-                range: range.clone(),
+    for (row, range) in ranges.iter().enumerate() {
+        let slice = &text[range.clone()];
+        let mut carets: Vec<(usize, i32)> = slice
+            .char_indices()
+            .map(|(i, _)| (range.start + i, width_of(&slice[..i]) as i32))
+            .collect();
+        let line_width = width_of(slice);
+        carets.push((range.end, line_width as i32));
+
+        width = width.max(line_width);
+        let y = row as i32 * line_height as i32;
+        lines.push(Line {
+            text_range: range.clone(),
+            bounds: Rect {
+                x: 0,
                 y,
-                carets,
-            });
-        }
-
-        let min_width = text
-            .split_whitespace()
-            .map(&mut width_of)
-            .max()
-            .unwrap_or(0);
-
-        LaidOut {
-            size: Size {
-                w: width,
-                h: line_height * lines.len() as u32,
+                w: line_width,
+                h: line_height,
             },
-            min_width,
-            lines,
-            runs: Vec::new(),
-            geometry: Box::new(LtrGeometry {
-                lines: carets_by_line,
-                line_height,
-            }),
-        }
+        });
+        carets_by_line.push(LineCarets {
+            range: range.clone(),
+            y,
+            carets,
+        });
+    }
+
+    let min_width = text
+        .split_whitespace()
+        .map(&mut *width_of)
+        .max()
+        .unwrap_or(0);
+
+    LaidOut {
+        size: Size {
+            w: width,
+            h: line_height * lines.len() as u32,
+        },
+        min_width,
+        lines,
+        runs: Vec::new(),
+        geometry: Box::new(LtrGeometry {
+            lines: carets_by_line,
+            line_height,
+        }),
     }
 }
 
@@ -334,6 +421,33 @@ mod tests {
     fn empty_text_is_one_empty_line() {
         assert_eq!(wrap_lines("", Some(50), &mut ten), vec![0..0]);
         assert_eq!(wrap_lines("a\n", None, &mut ten), vec![0..1, 2..2]);
+    }
+
+    #[test]
+    fn a_missing_font_is_an_error_and_layout_falls_back_to_empty() {
+        use pushrod::color::{Color, FontStyle};
+        use pushrod::paint::TextJustify;
+
+        let style = TextStyle {
+            font_name: "no/such/font.ttf".into(),
+            font_style: FontStyle::NORMAL,
+            font_size: 16,
+            font_color: Color::BLACK,
+            justification: TextJustify::Left,
+        };
+        let mut engine = TtfLayout::new();
+
+        assert!(matches!(
+            engine.try_layout("hello", &style, None),
+            Err(Error::Font { .. })
+        ));
+
+        let laid = engine.layout("hello", &style, None);
+
+        assert_eq!(laid.size.w, 0);
+        assert_eq!(laid.lines.len(), 1);
+        assert_eq!(engine.take_errors().len(), 1);
+        assert!(engine.take_errors().is_empty());
     }
 
     #[test]
