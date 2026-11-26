@@ -76,6 +76,29 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
+  golden:
+    name: Golden-image rendering tests (Xvfb)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SDL2 and Xvfb
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev xvfb
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Render every widget and compare with tests/golden
+        env:
+          SDL_VIDEODRIVER: x11
+          PUSHROD_GOLDEN: "1"
+          PUSHROD_GOLDEN_DIFF_DIR: ${{ github.workspace }}/golden-diff
+        run: xvfb-run -a cargo test -p pushrod-sdl2 --test visual
+      - name: Upload diff images
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-diff
+          path: golden-diff/
+          if-no-files-found: ignore
+
   semver:
     name: Semver checks (published crates)
     # Runs once the crates have a published release to compare against: set the repository

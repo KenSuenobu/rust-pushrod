@@ -1961,7 +1961,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 7.2 (#70) | Golden-image rendering tests | Render each widget and state and compare with reference PNGs. | `chassis`, `ci`, `enhancement`, `mvp`, `size/M` | N | v0.1 | M | `tests/visual.rs (new)`, `tests/golden/ (new)` |
 | 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-sdl2/examples/gallery.rs (new)` |
 | 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
@@ -1992,6 +1991,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/ci.md` ("CI", Contributing, new). Guides: CI badge. Rustdoc: n/a. Examples: n/a. Screenshots: n/a.
 
 ### 7.2 (#70): Golden-image rendering tests
+
+**Status:** done (#70). `pushrod-sdl2/tests/visual.rs` paints every widget in each visual state with SDL's software renderer (dummy video driver, or Xvfb in CI), reads the pixels, and compares them with `pushrod-sdl2/tests/golden/*.png` (3 per channel, 0.2% of pixels); `UPDATE_GOLDEN=1` regenerates; mismatches write actual, expected, and diff PNGs to `target/golden-diff`, which CI uploads. The harness lives in the SDL backend crate because the core crate has no SDL dependency.
 
 **Problem Statement.** Rendering was verified by hand in PR #10; it should be automatic.
 
