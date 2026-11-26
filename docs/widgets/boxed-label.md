@@ -52,8 +52,8 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Renders background, centered text, border
-- [ ] Display only (empty event mask)
+- [x] Renders background, centered text, border
+- [x] Display only (empty event mask)
 
 ## Depends on
 

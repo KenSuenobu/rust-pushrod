@@ -21,6 +21,7 @@
 //! let _ = (Button::new("OK").at(20, 60), Text::new("Hello"), Frame::new(), Panel::new());
 //! ```
 
+pub use crate::boxed_label::BoxedLabel;
 pub use crate::button::Button;
 pub use crate::custom_paint::CustomPaint;
 pub use crate::frame::Frame;

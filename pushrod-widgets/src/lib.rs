@@ -57,6 +57,7 @@
 )]
 #![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
+pub mod boxed_label;
 pub mod button;
 pub mod custom_paint;
 pub mod frame;
