@@ -24,13 +24,14 @@ use pushrod_widgets::glyph_button::GlyphButton;
 use pushrod_widgets::group_box::GroupBox;
 use pushrod_widgets::image_widget::{FitMode, ImageWidget};
 use pushrod_widgets::panel::Panel;
+use pushrod_widgets::progress_bar::ProgressBar;
 use pushrod_widgets::radio_button::RadioGroup;
 use pushrod_widgets::separator::Separator;
 use pushrod_widgets::text::{Text, TextJustify};
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 1250;
+const WINDOW_H: u32 = 1380;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -368,6 +369,24 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     for id in disabled {
         engine.widgets().get_mut(id).unwrap().set_enabled(false);
     }
+
+    // ProgressBar: empty, 40%, busy (animated), and busy in outline mode (static stripes).
+    let progress_tile = add_tile(&mut engine, panel_id, 0, 7, "Progress Bar");
+    for (row, value) in [0.0, 40.0].into_iter().enumerate() {
+        let bar = ProgressBar::new(100.0)
+            .at(10, 40 + row as i32 * 24)
+            .size(270, 16)
+            .value(value);
+        engine.add_child_widget(progress_tile, bar);
+    }
+    let busy = engine.add_child_widget(
+        progress_tile,
+        ProgressBar::indeterminate().at(10, 88).size(270, 16),
+    );
+    engine.widgets().request_animation(busy);
+    let mut outline = ProgressBar::indeterminate().at(10, 112).size(270, 16);
+    outline.set_outline_mode(true);
+    engine.add_child_widget(progress_tile, outline);
 
     // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.
     let glyph_tile = add_tile(&mut engine, panel_id, 1, 5, "Glyph Button");
