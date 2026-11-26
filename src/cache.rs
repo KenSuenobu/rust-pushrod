@@ -616,7 +616,9 @@ impl WidgetCache {
     pub(crate) fn finish(&mut self, mut ctx: EventCtx) -> Vec<Event> {
         self.animating.extend(ctx.take_animation_requests());
 
-        ctx.into_events()
+        let events = ctx.into_events();
+
+        self.apply_exclusive(events)
     }
 
     /// Asks for an [`Event::Tick`] for a `Widget` on the next frame, from outside event handling,

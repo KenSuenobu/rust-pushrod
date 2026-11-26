@@ -24,6 +24,7 @@ use pushrod_widgets::glyph_button::GlyphButton;
 use pushrod_widgets::group_box::GroupBox;
 use pushrod_widgets::image_widget::{FitMode, ImageWidget};
 use pushrod_widgets::panel::Panel;
+use pushrod_widgets::radio_button::RadioGroup;
 use pushrod_widgets::separator::Separator;
 use pushrod_widgets::text::{Text, TextJustify};
 
@@ -351,6 +352,22 @@ pub fn main() -> Result<(), pushrod::error::Error> {
             .indeterminate(),
     );
     engine.add_child_widget(check_tile, disabled_box);
+
+    // RadioButton: a size picker (Medium checked) and a disabled pair (fictional options).
+    let radio_tile = add_tile(&mut engine, panel_id, 1, 6, "Radio Button");
+    RadioGroup::new(["Small", "Medium", "Large"])
+        .at(10, 40)
+        .item_size(130, 20)
+        .selected(1)
+        .add_to(engine.widgets(), radio_tile);
+    let disabled = RadioGroup::new(["Disabled", "Disabled"])
+        .at(150, 40)
+        .item_size(130, 20)
+        .selected(0)
+        .add_to(engine.widgets(), radio_tile);
+    for id in disabled {
+        engine.widgets().get_mut(id).unwrap().set_enabled(false);
+    }
 
     // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.
     let glyph_tile = add_tile(&mut engine, panel_id, 1, 5, "Glyph Button");

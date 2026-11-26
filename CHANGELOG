@@ -41,3 +41,4 @@
 [#28] GlyphButton widget: one-character button, activate-on-press repeat [kenji]
 [#29] Button behaviors: default ring, cancel, toggle, press, dismiss [kenji]
 [#30] CheckBox widget: toggle by click or Space, indeterminate state [kenji]
+[#31] RadioButton and RadioGroup: exclusive checking, arrow-key selection [kenji]

@@ -938,7 +938,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/radio_button.rs (new)`, `src/cache.rs` |
 | 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `chassis`, `enhancement`, `mvp`, `size/L`, `widget` | N | v0.1 | L | `pushrod-widgets/src/text_field.rs (new)`, `src/paint.rs` |
 | 2.8 (#34) | Icon widget (picture with caption) | Picture with a caption, selectable and double-clickable, like desktop icons. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/icon_widget.rs (new)` |
 | 2.9 (#35) | Alert dialog | One-call modal alert with icon, message, and up to three buttons. | `enhancement`, `forms`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/alert.rs (new)`, `src/engine.rs` |
@@ -989,6 +988,8 @@ Box with a check mark and label; toggles checked; optional mixed state. **Widget
 **Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.5 (#31): Radio buttons and radio groups
+
+**Status:** done (#31). `pushrod_widgets::radio_button::{RadioButton, RadioGroup}`: `RadioButton::new(label)` has the core's `EXCLUSIVE` behavior; the core clears the checked siblings when one emits `Toggled { checked: true }` (and emits `Toggled { checked: false }` for each), so it works for any `EXCLUSIVE` widget; `RadioGroup::new(labels)` with `at`, `item_size`, `gap`, `selected`, `none_selected` and `add_to(cache, parent)`; `ui.checked_in_group(parent)`; arrow keys move the focus within the group and check the member that receives it; the gallery shows it.
 
 One-of-many selection among sibling widgets. **Widget roadmap:** [`docs/widgets/radio-button.md`](widgets/radio-button.md) (look, behavior, events, acceptance criteria).
 
