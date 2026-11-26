@@ -68,3 +68,4 @@ To compile SDL2 instead of using the SDL2 zip, install [CMake](https://cmake.org
 | `linker 'link.exe' not found` | The C++ build tools are missing. Do step 1. |
 | The program exits at once with *The code execution cannot proceed because SDL2.dll was not found* | `PATH` doesn't include the `lib\x64` folders, or the `.dll` files aren't next to the `.exe`. |
 | `is cmake not installed?` | You enabled `bundled` without CMake on `PATH`. Install CMake, or remove the feature. |
+| `Compatibility with CMake < 3.5 has been removed from CMake` | You use CMake 4 with `bundled`. Run `$env:CMAKE_POLICY_VERSION_MINIMUM = "3.5"`, or set it [in `.cargo/config.toml`](./installation.md#building-sdl2-from-source-the-bundled-feature). |

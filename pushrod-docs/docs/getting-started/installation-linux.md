@@ -54,4 +54,5 @@ To compile SDL2 instead of using the system package, install CMake (`sudo apt in
 |---|---|
 | `unable to find library -lSDL2` (or `-lSDL2_ttf`, `-lSDL2_image`) | The `-dev`/`-devel` package for that library is missing. Install it as in step 2. |
 | `is cmake not installed?` | You enabled `bundled` without CMake. Install CMake, or remove the feature. |
+| `Compatibility with CMake < 3.5 has been removed from CMake` | You use CMake 4 with `bundled`. Run `export CMAKE_POLICY_VERSION_MINIMUM=3.5`, or set it [in `.cargo/config.toml`](./installation.md#building-sdl2-from-source-the-bundled-feature). |
 | `No available video device` | There is no display, for example over SSH. Run from a desktop session, or under `xvfb-run`. |

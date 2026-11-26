@@ -92,6 +92,9 @@ jobs:
     env:
       # Windows only: where the SDL2_ttf and SDL2_image development libraries are unpacked.
       SDL_DIR: ${{ github.workspace }}/sdl
+      # The SDL2 source in sdl2-sys 0.38 declares a CMake minimum below 3.5, which CMake 4
+      # rejects unless this policy floor is set.
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
     steps:
       - uses: actions/checkout@v4
       - name: CMake and a C compiler (preinstalled on the runner)

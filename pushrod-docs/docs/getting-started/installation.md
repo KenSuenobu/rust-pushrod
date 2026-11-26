@@ -66,6 +66,13 @@ pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod", features = 
 
 CI builds `pushrod-sdl2` this way on macOS and Windows on every pull request.
 
+With CMake 4 or newer, set `CMAKE_POLICY_VERSION_MINIMUM=3.5` before building. The SDL2 source that `bundled` compiles declares an older CMake minimum, which CMake 4 otherwise rejects with *Compatibility with CMake < 3.5 has been removed*. To set it for every build of the project, add it to `.cargo/config.toml`:
+
+```toml
+[env]
+CMAKE_POLICY_VERSION_MINIMUM = "3.5"
+```
+
 :::caution[`bundled` is not yet self-contained]
 `bundled` covers SDL2 only. The `sdl2` crate doesn't build SDL2_ttf or SDL2_image from source, so you still install those from the system. The system SDL2_ttf and SDL2_image are themselves linked against the system SDL2, so on macOS and Windows a `bundled` build still loads a system SDL2 at run time. Until Pushrod draws text and decodes images without SDL2_ttf and SDL2_image (a follow-up to [10.6 (#134)](https://github.com/KenSuenobu/rust-pushrod/issues/134)), installing all three libraries from your platform guide is the simplest route.
 :::
