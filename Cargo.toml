@@ -1,6 +1,6 @@
 [package]
 name = "pushrod"
-version = "0.0.17"
+version = "0.0.18"
 authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
 edition.workspace = true
 rust-version.workspace = true
@@ -17,7 +17,7 @@ include = [
 ]
 
 [workspace]
-members = ["pushrod-widgets", "pushrod-doc-samples"]
+members = ["pushrod-widgets", "pushrod-sdl2", "pushrod-doc-samples"]
 
 [workspace.package]
 edition = "2024"
@@ -36,23 +36,7 @@ parley = { version = "0.13", optional = true }
 swash = { version = "0.2", optional = true }
 unicode-segmentation = "1"
 
-# sdl2 0.39.0 doesn't compile with `unsafe_textures`; stay on 0.38 until a fixed release.
-[dependencies.sdl2]
-version = "0.38"
-features = ["ttf", "image", "unsafe_textures"]
-
 [features]
 default = []
-# Build SDL2 from source instead of using the system library (SDL2_ttf and SDL2_image
-# still come from the system; the sdl2 crate doesn't bundle them).
-bundled = ["sdl2/bundled"]
-# Link SDL2 statically.
-static-link = ["sdl2/static-link"]
 # Lay out text with Parley and rasterize glyphs with swash instead of SDL2_ttf.
 parley = ["dep:parley", "dep:swash"]
-
-[[example]]
-name = "parley_spike"
-path = "examples/parley_spike.rs"
-required-features = ["parley"]
-

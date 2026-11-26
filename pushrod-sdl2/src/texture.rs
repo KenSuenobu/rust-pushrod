@@ -20,13 +20,13 @@
 //! The `Canvas` and `Texture` refer to the `sdl2::render` crate.  Please visit that crate for
 //! more information on the drawing features available.
 
-use crate::geometry::Size;
+use pushrod::geometry::Size;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
 /// Holds the GPU texture a `Widget` paints into.
 ///
-/// Each `Widget`'s [`WidgetCore`](crate::widget::WidgetCore) owns one.  The texture is created
+/// The [`Sdl2Backend`](crate::Sdl2Backend) keeps one per `Widget`.  The texture is created
 /// the first time the `Widget` is painted and recreated whenever its size changes.
 #[derive(Default)]
 pub struct TextureStore {

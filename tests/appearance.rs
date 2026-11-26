@@ -20,11 +20,11 @@ use pushrod::cache::WidgetCache;
 use pushrod::color::Color;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{point, size};
+use pushrod::input::InputEvent;
+use pushrod::input::MouseButton;
 use pushrod::paint::Painter;
 use pushrod::root_widget::RootWidget;
 use pushrod::widget::{VisualState, Widget, WidgetCore, WidgetId};
-use sdl2::event::Event as SdlEvent;
-use sdl2::mouse::{MouseButton, MouseState};
 
 /// A widget that draws nothing and has a full event mask.
 struct Plain {
@@ -66,38 +66,23 @@ fn form() -> (WidgetCache, WidgetId, WidgetId) {
 }
 
 fn motion(cache: &mut WidgetCache, x: i32) {
-    cache.handle_event(SdlEvent::MouseMotion {
-        timestamp: 0,
-        window_id: 0,
-        which: 0,
-        mousestate: MouseState::from_sdl_state(0),
-        x,
-        y: 5,
-        xrel: 0,
-        yrel: 0,
+    cache.handle_event(InputEvent::MouseMove {
+        position: point(x, 5),
     });
 }
 
 fn button(cache: &mut WidgetCache, x: i32, down: bool) {
     let event = if down {
-        SdlEvent::MouseButtonDown {
-            timestamp: 0,
-            window_id: 0,
-            which: 0,
-            mouse_btn: MouseButton::Left,
+        InputEvent::MouseDown {
+            position: point(x, 5),
+            button: MouseButton::Left,
             clicks: 1,
-            x,
-            y: 5,
         }
     } else {
-        SdlEvent::MouseButtonUp {
-            timestamp: 0,
-            window_id: 0,
-            which: 0,
-            mouse_btn: MouseButton::Left,
+        InputEvent::MouseUp {
+            position: point(x, 5),
+            button: MouseButton::Left,
             clicks: 1,
-            x,
-            y: 5,
         }
     };
 

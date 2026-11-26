@@ -788,7 +788,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust, Cargo workspace
 
-**Documentation.** Docusaurus page: `pushrod-docs/docs/getting-started/installation.md` ("Installation", Getting started, update). Guides: update the guide or concept page covering: installation (two crates), Widget libraries. Rustdoc: crate-level docs for both crates; `RootWidget`, `Engine::set_background`. Examples: `cargo run -p pushrod-widgets --example base`. Screenshots: n/a.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/getting-started/installation.md` ("Installation", Getting started, update). Guides: update the guide or concept page covering: installation (two crates), Widget libraries. Rustdoc: crate-level docs for both crates; `RootWidget`, `Engine::set_background`. Examples: `cargo run -p pushrod-sdl2 --example base`. Screenshots: n/a.
 
 ### 1.22 (#131): Widget libraries: extend or replace pushrod-widgets
 
@@ -1938,7 +1938,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 7.2 (#70) | Golden-image rendering tests | Render each widget and state and compare with reference PNGs. | `chassis`, `ci`, `enhancement`, `mvp`, `size/M` | N | v0.1 | M | `tests/visual.rs (new)`, `tests/golden/ (new)` |
-| 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-widgets/examples/gallery.rs (new)` |
+| 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-sdl2/examples/gallery.rs (new)` |
 | 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
 | 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
@@ -1989,9 +1989,9 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 **Problem Statement.** There is no single place to see every widget.
 
-**Solution / Scope.** `pushrod-widgets/examples/gallery.rs` with labeled tiles; each widget issue adds its tile; README screenshot comes from it. All sample data in the gallery is fictional (CONTRIBUTING.md).
+**Solution / Scope.** `pushrod-sdl2/examples/gallery.rs` with labeled tiles; each widget issue adds its tile; README screenshot comes from it. All sample data in the gallery is fictional (CONTRIBUTING.md).
 
-**Status:** done (#71). `cargo run -p pushrod-widgets --example gallery`; `-- --screenshot <file.png>` saves the frame used in the README and docs.
+**Status:** done (#71). `cargo run -p pushrod-sdl2 --example gallery`; `-- --screenshot <file.png>` saves the frame used in the README and docs.
 
 **Acceptance Criteria.**
 
@@ -2504,7 +2504,6 @@ Backend crates (SDL2 now, SDL3 later) with no SDL in the core, a backend-neutral
 | 10.1 (#105) | Drawing modes: live or outline feedback while moving and resizing | Live mode redraws content as things move; outline mode shows only a dotted rectangle until the move ends. Switchable at run time, with a system-wide event. | `chassis`, `core`, `enhancement`, `parallelizable`, `performance`, `portability`, `size/M` | Y | N | M | `src/engine.rs`, `src/cache.rs`, `src/controllers.rs` |
 | 10.3 (#107) | no_std + alloc core crate | Split the widget tree, events, and widgets into a core crate that builds without the standard library. | `core`, `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `src/lib.rs`, `Cargo.toml`, `pushrod-widgets/Cargo.toml` |
 | 10.4 (#108) | Experimental: Atari ST / TOS backend | Run Pushrod applications on an Atari ST: 68000 target, TOS input, monochrome or low-color drawing, outline mode, direct drawing. | `enhancement`, `future`, `parallelizable`, `portability`, `size/L` | Y | N | L | `pushrod-tos (new crate)` |
-| 10.6 (#134) | Backend crates: keep SDL out of the core and the widgets | Move everything SDL-specific into a `pushrod-sdl2` backend crate, so `pushrod` and `pushrod-widgets` have no SDL dependency and a future SDL3 backend is a drop-in swap. | `architecture`, `chassis`, `enhancement`, `mvp`, `parallelizable`, `rendering`, `size/L` | Y | v0.1 | L | `src/backend.rs (new)`, `src/engine.rs`, `src/event.rs`, `src/geometry.rs`, `pushrod-sdl2/ (new crate)`, `pushrod-widgets (all widgets)` |
 | 10.5 (#135) | SDL3 backend (pushrod-sdl3) | A second backend crate on SDL3, a drop-in replacement for pushrod-sdl2. | `enhancement`, `parallelizable`, `platform`, `rendering`, `size/M` | Y | N | M | `pushrod-sdl3/ (new crate)` |
 
 ### 10.1 (#105): Drawing modes: live or outline feedback while moving and resizing
@@ -2610,6 +2609,8 @@ Like every widget, it can also receive application-defined custom events in `han
 **Sources.** [Rust platform support: m68k-unknown-none-elf](https://doc.rust-lang.org/rustc/platform-support/m68k-unknown-none-elf.html); [RuST: Rust 'hello world' for Atari TOS / EmuTOS (toslibc toslink)](https://github.com/DominoTree/RuST); [SDL 1.2 README.MiNT (Atari TOS/MiNT video, keyboard, mouse drivers)](https://sources.debian.org/src/libsdl1.2/1.2.15%2Bdfsg2-6/README.MiNT)
 
 ### 10.6 (#134): Backend crates: keep SDL out of the core and the widgets
+
+**Status:** done (#134). `pushrod-sdl2` holds `Sdl2Backend`, `Sdl2Painter`, `run` and `event_loop`; the core has the `Backend` trait, `pushrod::input` types and `HeadlessBackend`. SDL2_ttf and SDL2_image stay in `pushrod-sdl2`; moving to swash and Rust image decoding is a follow-up.
 
 **Problem Statement.** SDL2 types appear throughout the public API: `Widget::paint` takes `&mut Canvas<Window>`, `PushrodEvent::SystemEvent` wraps `sdl2::event::Event`, `Engine::run` takes `Sdl` and `Window`, and widgets use `sdl2::pixels::Color`. Every widget library would compile against SDL2 directly, so moving to SDL3 (or to the Atari ST, 10.4 (#108)) would break all of them. The Rust SDL3 bindings are still being migrated, so the switch isn't urgent, but the API has to be ready before v1 freezes it.
 

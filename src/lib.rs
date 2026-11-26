@@ -14,30 +14,26 @@
 
 //! # rust-pushrod
 //!
-//! Pushrod is a library written entirely in Rust, utilizing the SDL2 later for drawing interactive
-//! elements to the screen via OpenGL.
+//! Pushrod is a library written entirely in Rust for drawing interactive elements to a window.
 //!
 //! It is an event-based GUI library that utilizes an event loop to handle the event, dispatch, and
 //! draw loop.
 //!
-//! # Core and widgets
+//! # Core, widgets, and backends
 //!
-//! This crate is the core: the engine, the `Widget` trait and widget tree, events, the backend-neutral
-//! `Painter` API and `paint` helpers, and texture and font caches.  It contains no widgets except the window's
-//! [`RootWidget`](root_widget::RootWidget).  The standard widgets (buttons, text, boxes, and
-//! the rest) live in the `pushrod-widgets` crate.  A different widget library can extend or
-//! replace `pushrod-widgets`, using the same public API.
+//! This crate is the core: the engine, the `Widget` trait and widget tree, events, input types,
+//! the [`Backend`](backend::Backend) trait, the backend-neutral `Painter` API and `paint`
+//! helpers.  It has no windowing-library dependency.  It contains no widgets except the
+//! window's [`RootWidget`](root_widget::RootWidget).  The standard widgets (buttons, text, boxes,
+//! and the rest) live in the `pushrod-widgets` crate, which depends on this crate only.
 //!
-//! # Dependencies
+//! An application picks a backend crate.  `pushrod-sdl2` draws with `SDL2`:
 //!
-//! Pushrod uses the following dependency:
 //! ```ignore
-//! [dependencies.sdl2]
-//! version = "0.38"
-//! features = ["ttf", "image", "unsafe_textures"]
+//! pushrod_sdl2::run(engine, pushrod_sdl2::WindowSettings::new("App", size(400, 300)), state);
 //! ```
 //!
-//! Note, the `unsafe_textures` feature is required for OpenGL functionality.
+//! For tests, [`HeadlessBackend`](backend::headless::HeadlessBackend) needs no display.
 
 // Every public item is documented, including `# Panics` and `# Errors` sections where they
 // apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").
@@ -50,11 +46,10 @@ pub mod color;
 pub mod controllers;
 pub mod engine;
 pub mod event;
-pub mod font;
 pub mod geometry;
+pub mod input;
 pub mod paint;
 pub mod root_widget;
 pub mod text;
-pub mod texture;
 pub mod timer;
 pub mod widget;

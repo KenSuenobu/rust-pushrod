@@ -31,19 +31,16 @@
 //! A flat list addressed by ID avoids reference-counted parent pointers entirely, and allows a
 //! form to be stored and reloaded by ID.
 
-use crate::backend::sdl2::{Sdl2Painter, to_sdl_rect};
+use crate::backend::Backend;
+use crate::color::Color;
 use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventCtx, EventMask, EventPhase, EventTarget,
     MaskScope, Propagation, engine_filter_accepts,
 };
-use crate::font::{FontCache, FontNotice};
 use crate::geometry::{Point, make_rect, point};
+use crate::input::InputEvent;
 use crate::paint::{self, CachePolicy};
 use crate::widget::{ROOT_WIDGET_ID, VisualState, Widget, WidgetId};
-use sdl2::event::Event as SdlEvent;
-use sdl2::pixels::Color;
-use sdl2::render::Canvas;
-use sdl2::video::Window;
 use std::any::Any;
 use std::collections::HashMap;
 use std::time::Duration;
@@ -80,7 +77,6 @@ pub struct WidgetCache {
     pending_events: Vec<Event>,
     loop_mask: EventMask,
     engine_filters: HashMap<WidgetId, Vec<EngineEventKind>>,
-    fonts: FontCache,
     focused_widget_id: Option<WidgetId>,
     text_input_wanted: bool,
     animating: Vec<WidgetId>,
@@ -101,11 +97,10 @@ impl WidgetCache {
             current_widget_id: ROOT_WIDGET_ID,
             captured_widget_id: None,
             needs_full_redraw: true,
-            cache_policy: Sdl2Painter::CACHE_POLICY,
+            cache_policy: CachePolicy::TextureCache,
             pending_events: Vec::new(),
             loop_mask: EventMask::ALL,
             engine_filters: HashMap::new(),
-            fonts: FontCache::new(),
             focused_widget_id: None,
             text_input_wanted: false,
             animating: Vec::new(),
@@ -114,9 +109,9 @@ impl WidgetCache {
 
     /// Returns the cache policy of the backend the cache paints with.
     ///
-    /// Defaults to the `SDL2` backend's [`CachePolicy::TextureCache`].  `draw_loop` implements
-    /// `TextureCache` only; [`CachePolicy::DirectDraw`] is declared for backends that paint
-    /// straight to the screen with clipping, and is not rendered by the `SDL2` path.
+    /// Defaults to [`CachePolicy::TextureCache`].  `draw_loop` implements `TextureCache` only;
+    /// [`CachePolicy::DirectDraw`] is declared for backends that paint straight to the screen
+    /// with clipping, and is not rendered by `draw_loop`.
     ///
     /// # Returns
     ///
@@ -888,12 +883,12 @@ impl WidgetCache {
     ///
     /// # Arguments
     ///
-    /// * `event` - The raw `SDL2` event.
+    /// * `event` - The input event from the backend.
     ///
     /// # Returns
     ///
     /// The `Event`s the `Widget`s generated while handling the event, in the order emitted.
-    pub fn handle_event(&mut self, event: SdlEvent) -> Vec<Event> {
+    pub fn handle_event(&mut self, event: InputEvent) -> Vec<Event> {
         let mut ctx = EventCtx::default();
 
         if self.cache.is_empty() {
@@ -901,12 +896,10 @@ impl WidgetCache {
         }
 
         match event {
-            SdlEvent::MouseButtonDown {
-                x,
-                y,
-                mouse_btn,
+            InputEvent::MouseDown {
+                position: Point { x, y },
+                button: mouse_btn,
                 clicks,
-                ..
             } => {
                 self.current_widget_id = self.widget_at(x, y);
 
@@ -927,12 +920,10 @@ impl WidgetCache {
                 );
             }
 
-            SdlEvent::MouseButtonUp {
-                x,
-                y,
-                mouse_btn,
+            InputEvent::MouseUp {
+                position: Point { x, y },
+                button: mouse_btn,
                 clicks,
-                ..
             } => {
                 self.current_widget_id = self.widget_at(x, y);
 
@@ -954,7 +945,9 @@ impl WidgetCache {
                 );
             }
 
-            SdlEvent::MouseMotion { x, y, .. } => {
+            InputEvent::MouseMove {
+                position: Point { x, y },
+            } => {
                 let previous_widget_id = self.current_widget_id;
 
                 self.current_widget_id = self.widget_at(x, y);
@@ -1001,17 +994,15 @@ impl WidgetCache {
                 );
             }
 
-            SdlEvent::KeyDown {
-                keycode: Some(key),
-                keymod,
+            InputEvent::KeyDown {
+                key,
+                modifiers: keymod,
                 repeat,
-                ..
             } => self.handle_key_down(key, keymod, repeat, &mut ctx),
 
-            SdlEvent::KeyUp {
-                keycode: Some(key),
-                keymod,
-                ..
+            InputEvent::KeyUp {
+                key,
+                modifiers: keymod,
             } => {
                 let target = self.key_target();
 
@@ -1026,7 +1017,7 @@ impl WidgetCache {
                 );
             }
 
-            SdlEvent::TextInput { text, .. } => {
+            InputEvent::Text(text) => {
                 if let Some(target) = self.focused_widget_id {
                     self.propagate_with(target, &Event::TextEntered { id: target, text }, &mut ctx);
                 }
@@ -1055,8 +1046,8 @@ impl WidgetCache {
         }
     }
 
-    /// Paints a single `Widget` into its texture.
-    fn paint(&mut self, id: WidgetId, c: &mut Canvas<Window>) {
+    /// Paints a single `Widget` into its texture through the backend.
+    fn paint(&mut self, id: WidgetId, backend: &mut dyn Backend) {
         let widget = &mut self.cache[id as usize];
         let size = widget.get_size();
 
@@ -1064,49 +1055,20 @@ impl WidgetCache {
             return;
         }
 
-        widget.core_mut().texture.create_or_resize_texture(c, size);
-
-        let mut texture = widget.core_mut().texture.take().unwrap();
         let painter: &dyn Widget = widget.as_ref();
-        let fonts = &mut self.fonts;
 
-        c.with_texture_canvas(&mut texture, |texture_canvas| {
-            let mut sdl_painter = Sdl2Painter::new(texture_canvas, fonts);
-
-            painter.paint(&mut sdl_painter);
-            paint::state_overlay(&mut sdl_painter, size, painter.state());
-        })
-        .unwrap();
-
-        widget.core_mut().texture.restore(texture);
+        backend.paint_widget(id, size, &mut |p| {
+            painter.paint(p);
+            paint::state_overlay(p, size, painter.state());
+        });
     }
 
-    /// Queues an engine event for each font loaded and atlas page created while painting.
-    fn queue_font_events(&mut self) {
-        for notice in self.fonts.take_notices() {
-            let event = match notice {
-                FontNotice::FontLoaded {
-                    font_name,
-                    font_size,
-                } => EngineEvent::FontLoaded {
-                    font_name,
-                    font_size,
-                },
-                FontNotice::AtlasPageAdded { pages } => EngineEvent::GlyphAtlasPageAdded { pages },
-            };
-
+    /// Queues the engine events the backend produced while painting (fonts loaded, glyph atlas
+    /// pages added).
+    fn queue_backend_notices(&mut self, backend: &mut dyn Backend) {
+        for event in backend.take_notices() {
             self.queue_event(Event::Engine(event));
         }
-    }
-
-    /// Returns the font cache the cache's widgets draw text with.
-    ///
-    /// # Returns
-    ///
-    /// The `FontCache`; its [`stats`](FontCache::stats) show how many fonts and glyphs it has
-    /// loaded.
-    pub fn fonts(&self) -> &FontCache {
-        &self.fonts
     }
 
     /// Repaints changed `Widget`s and redraws the window if anything changed.
@@ -1118,17 +1080,13 @@ impl WidgetCache {
     ///
     /// # Arguments
     ///
-    /// * `c` - The window's canvas.
+    /// * `backend` - The backend that owns the window and the `Widget` textures.
     ///
     /// # Returns
     ///
-    /// `true` if the window was redrawn and the canvas needs to be presented, `false` if nothing
+    /// `true` if a frame was drawn and the backend should present it, `false` if nothing
     /// changed.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `SDL2` fails to render into a `Widget`'s texture or copy it to the window.
-    pub fn draw_loop(&mut self, c: &mut Canvas<Window>) -> bool {
+    pub fn draw_loop(&mut self, backend: &mut dyn Backend) -> bool {
         let order = self.draw_order();
         let mut visible = vec![false; self.cache.len()];
         let mut redraw = self.needs_full_redraw;
@@ -1140,7 +1098,7 @@ impl WidgetCache {
         for (id, is_visible) in visible.into_iter().enumerate() {
             if self.cache[id].is_invalidated() {
                 if is_visible {
-                    self.paint(id as WidgetId, c);
+                    self.paint(id as WidgetId, backend);
                 }
 
                 self.cache[id].set_invalidated(false);
@@ -1148,24 +1106,19 @@ impl WidgetCache {
             }
         }
 
-        self.queue_font_events();
+        self.queue_backend_notices(backend);
 
         if !redraw {
             return false;
         }
 
-        c.set_draw_color(Color::RGBA(255, 255, 255, 255));
-        c.clear();
+        backend.begin_frame(Color::WHITE);
 
         for id in order {
             let origin = self.absolute_origin(id);
-            let widget = &mut self.cache[id as usize];
-            let size = widget.get_size();
+            let size = self.cache[id as usize].get_size();
 
-            if let Some(texture) = widget.core_mut().texture.get_optional_ref() {
-                c.copy(texture, None, to_sdl_rect(make_rect(origin, size)))
-                    .unwrap();
-            }
+            backend.draw_widget(id, make_rect(origin, size));
         }
 
         self.needs_full_redraw = false;
@@ -1435,8 +1388,8 @@ mod broadcast_tests {
     fn key_press(id: WidgetId) -> Event {
         Event::KeyPressed {
             id,
-            key: sdl2::keyboard::Keycode::Return,
-            modifiers: sdl2::keyboard::Mod::NOMOD,
+            key: crate::input::Key::Return,
+            modifiers: crate::input::Modifiers::empty(),
             repeat: false,
         }
     }
@@ -1546,7 +1499,7 @@ mod broadcast_tests {
             child,
             &Event::Clicked {
                 id: child,
-                button: sdl2::mouse::MouseButton::Left,
+                button: crate::input::MouseButton::Left,
                 count: 1,
             },
         );
@@ -1565,14 +1518,10 @@ mod broadcast_tests {
         let parent = probe(&mut cache, 0, "parent", false, None, &log);
         probe(&mut cache, parent, "child", false, None, &log);
 
-        cache.handle_event(SdlEvent::MouseButtonDown {
-            timestamp: 0,
-            window_id: 0,
-            which: 0,
-            mouse_btn: sdl2::mouse::MouseButton::Left,
+        cache.handle_event(InputEvent::MouseDown {
+            position: point(5, 5),
+            button: crate::input::MouseButton::Left,
             clicks: 1,
-            x: 5,
-            y: 5,
         });
 
         let names: Vec<_> = log.borrow().iter().map(|(n, _)| *n).collect();

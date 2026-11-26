@@ -59,7 +59,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 20 | [#289](https://github.com/KenSuenobu/rust-pushrod/issues/289) | pushrod: [1.26] Text truncation: shorten text that doesn't fit with an ellipsis (done) |
 | ✅ 21 | [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) | pushrod: [1.27] Wrapped text: multi-line labels that reflow (done) |
 | ✅ 22 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks (done) |
-| 23 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
+| ✅ 23 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets (done) |
 | 24 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking |
 | 25 | [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) | pushrod: [1.24] Fonts: shared font handles and a built-in default font |
 | 26 | [#136](https://github.com/KenSuenobu/rust-pushrod/issues/136) | pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability |
@@ -672,10 +672,10 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] `cargo tree -p pushrod` and `cargo tree -p pushrod-widgets` show no `sdl2`
-- [ ] No SDL type in any public signature of the core or the widgets
-- [ ] `pushrod-sdl2` reproduces today's rendering (golden images unchanged)
-- [ ] Tests run on the headless backend without a display
+- [x] `cargo tree -p pushrod` and `cargo tree -p pushrod-widgets` show no `sdl2`
+- [x] No SDL type in any public signature of the core or the widgets
+- [x] `pushrod-sdl2` reproduces today's rendering (golden images unchanged)
+- [x] Tests run on the headless backend without a display
 
 ### Step 24: Errors: return Result instead of panicking
 

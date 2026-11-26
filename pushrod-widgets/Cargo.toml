@@ -1,11 +1,11 @@
 [package]
 name = "pushrod-widgets"
-version = "0.0.17"
+version = "0.0.18"
 authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
 description = "Standard widgets for the Pushrod UI library: simple, flat, and predictable"
 readme = "README.md"
 documentation = "https://docs.rs/pushrod-widgets"
-keywords = ["sdl", "sdl2", "pushrod", "ui", "gui"]
+keywords = ["pushrod", "ui", "gui"]
 categories = ["gui", "graphics"]
 edition.workspace = true
 rust-version.workspace = true
@@ -17,14 +17,8 @@ name = "pushrod_widgets"
 path = "src/lib.rs"
 
 [dependencies]
-pushrod = { path = "..", version = "0.0.17" }
-
-[dependencies.sdl2]
-version = "0.38"
-features = ["ttf", "image", "unsafe_textures"]
+pushrod = { path = "..", version = "0.0.18" }
 
 [features]
 default = []
-bundled = ["pushrod/bundled"]
-static-link = ["pushrod/static-link"]
 parley = ["pushrod/parley"]

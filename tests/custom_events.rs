@@ -4,9 +4,9 @@
 use pushrod::engine::{Engine, MAX_CUSTOM_EVENTS_PER_FRAME};
 use pushrod::event::{EngineEvent, Event, EventCtx, EventMask, EventTarget, Propagation};
 use pushrod::geometry::{point, size};
+use pushrod::input::InputEvent;
 use pushrod::paint::Painter;
 use pushrod::widget::{Widget, WidgetCore, WidgetId};
-use sdl2::event::Event as SdlEvent;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -88,13 +88,7 @@ fn engine() -> (Engine<Log>, Log) {
 
 /// Delivers any queued events by dispatching an event nothing handles.
 fn pump(engine: &mut Engine<Log>, log: &mut Log) {
-    engine.dispatch(
-        SdlEvent::Unknown {
-            timestamp: 0,
-            type_: 0,
-        },
-        log,
-    );
+    engine.dispatch(InputEvent::Wake, log);
 }
 
 #[test]

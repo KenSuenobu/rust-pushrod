@@ -2,4 +2,4 @@
 #
 # Runs the example application
 
-cargo run -p pushrod-widgets --example base
+cargo run -p pushrod-sdl2 --example base

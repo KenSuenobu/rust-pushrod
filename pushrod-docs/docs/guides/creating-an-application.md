@@ -20,17 +20,10 @@ let mut engine: Engine<AppState> = Engine::new(size(320, 200), 60);
 
 `Engine::new(size, frame_rate)` creates the window's root widget (ID `0`, white) at the given size. The second argument is the target frames per second. `AppState` is any type you like; use `()` if you don't need state.
 
-Run the engine with an SDL2 context and window. `run` blocks until the window closes (or a callback calls `ui.shutdown()`) and then returns your state:
+Run the engine on a [backend](../platforms/backends.md): `pushrod_sdl2::run` opens a window from `WindowSettings` (title and size) and drives the engine. `run` blocks until the window closes (or a callback calls `ui.shutdown()`) and then returns your state:
 
 ```rust
-let sdl = sdl2::init().unwrap();
-let window = sdl.video().unwrap()
-    .window("Events", 320, 200)
-    .position_centered()
-    .build()
-    .unwrap();
-
-let state = engine.run(sdl, window, AppState::default());
+let state = pushrod_sdl2::run(engine, WindowSettings::new("Events", size(320, 200)), AppState::default());
 ```
 
 ## Adding widgets
@@ -73,6 +66,7 @@ use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
+use pushrod_sdl2::WindowSettings;
 use pushrod::event::Event;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::TextJustify;
@@ -87,8 +81,6 @@ struct AppState {
 }
 
 fn main() {
-    let sdl = sdl2::init().unwrap();
-    let window = sdl.video().unwrap().window("Events", 320, 200).position_centered().build().unwrap();
     let mut engine: Engine<AppState> = Engine::new(size(320, 200), 60);
 
     // A gray panel; its children are positioned relative to it.
@@ -125,7 +117,7 @@ fn main() {
         }
     });
 
-    let state = engine.run(sdl, window, AppState::default());
+    let state = pushrod_sdl2::run(engine, WindowSettings::new("Events", size(320, 200)), AppState::default());
     println!("saved {} time(s)", state.saves);
 }
 ```

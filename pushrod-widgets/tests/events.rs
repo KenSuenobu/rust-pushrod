@@ -5,12 +5,12 @@ use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, EngineEventKind, Event, EventKind, EventMask, MaskScope};
 use pushrod::geometry::{point, size};
+use pushrod::input::InputEvent;
+use pushrod::input::MouseButton;
 use pushrod::widget::{Behavior, VisualState, Widget};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use sdl2::event::Event as SdlEvent;
-use sdl2::mouse::{MouseButton, MouseState};
 
 const FONT: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -31,40 +31,25 @@ fn button(x: i32, y: i32) -> ButtonWidget {
     )
 }
 
-fn down(x: i32, y: i32) -> SdlEvent {
-    SdlEvent::MouseButtonDown {
-        timestamp: 0,
-        window_id: 0,
-        which: 0,
-        mouse_btn: MouseButton::Left,
+fn down(x: i32, y: i32) -> InputEvent {
+    InputEvent::MouseDown {
+        position: point(x, y),
+        button: MouseButton::Left,
         clicks: 1,
-        x,
-        y,
     }
 }
 
-fn up(x: i32, y: i32) -> SdlEvent {
-    SdlEvent::MouseButtonUp {
-        timestamp: 0,
-        window_id: 0,
-        which: 0,
-        mouse_btn: MouseButton::Left,
+fn up(x: i32, y: i32) -> InputEvent {
+    InputEvent::MouseUp {
+        position: point(x, y),
+        button: MouseButton::Left,
         clicks: 1,
-        x,
-        y,
     }
 }
 
-fn motion(x: i32, y: i32) -> SdlEvent {
-    SdlEvent::MouseMotion {
-        timestamp: 0,
-        window_id: 0,
-        which: 0,
-        mousestate: MouseState::from_sdl_state(0),
-        x,
-        y,
-        xrel: 0,
-        yrel: 0,
+fn motion(x: i32, y: i32) -> InputEvent {
+    InputEvent::MouseMove {
+        position: point(x, y),
     }
 }
 
@@ -524,7 +509,7 @@ fn the_run_loop_mask_filters_before_widgets_and_close_is_always_delivered() {
     );
 
     engine.set_event_mask(EventMask::NONE);
-    engine.dispatch(SdlEvent::Quit { timestamp: 0 }, &mut seen);
+    engine.dispatch(InputEvent::Quit, &mut seen);
 
     assert!(!engine.is_running());
 }

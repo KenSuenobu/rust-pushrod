@@ -28,7 +28,7 @@
 //!   ButtonWidget = fill + text + border   (+ pressed state)
 //! ```
 //!
-//! The default backend is [`Sdl2Painter`](crate::backend::sdl2::Sdl2Painter): each `Widget` paints
+//! The `pushrod-sdl2` crate's `Sdl2Painter` is the default backend: each `Widget` paints
 //! into its own GPU texture only when invalidated, and frames are blits of cached textures.  A
 //! backend declares its [`CachePolicy`].  The [`RecordingPainter`](crate::backend::headless::RecordingPainter)
 //! records calls for unit tests, without a window.

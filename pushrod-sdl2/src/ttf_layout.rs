@@ -20,11 +20,11 @@
 //! the `parley` feature for those), and no glyph runs are produced because the SDL2 painter draws
 //! the text with SDL2_ttf.
 
-use super::layout::{LaidOut, Line, TextGeometry, TextLayout};
-use crate::backend::sdl2::to_sdl_font_style;
 use crate::font::ttf_context;
-use crate::geometry::{Point, Rect, Size};
-use crate::paint::TextStyle;
+use crate::painter::to_sdl_font_style;
+use pushrod::geometry::{Point, Rect, Size};
+use pushrod::paint::TextStyle;
+use pushrod::text::layout::{LaidOut, Line, TextGeometry, TextLayout};
 use sdl2::ttf::Font;
 use std::collections::HashMap;
 use std::ops::Range;
@@ -338,11 +338,15 @@ mod tests {
 
     #[test]
     fn measures_with_a_real_font() {
-        use crate::color::{Color, FontStyle};
-        use crate::paint::TextJustify;
+        use pushrod::color::{Color, FontStyle};
+        use pushrod::paint::TextJustify;
 
         let style = TextStyle {
-            font_name: concat!(env!("CARGO_MANIFEST_DIR"), "/assets/OpenSans-Regular.ttf").into(),
+            font_name: concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../assets/OpenSans-Regular.ttf"
+            )
+            .into(),
             font_style: FontStyle::NORMAL,
             font_size: 16,
             font_color: Color::BLACK,

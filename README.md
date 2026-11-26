@@ -41,10 +41,12 @@ Pushrod is a Cargo workspace with two crates:
 [dependencies]
 pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 ```
 
-SDL2 support is moving into its own backend crate, `pushrod-sdl2` (roadmap 10.6), so the core and
-the widgets won't depend on SDL at all and an SDL3 backend can drop in later.
+SDL2 lives in its own backend crate, `pushrod-sdl2`, so the core and the widgets don't depend on
+SDL at all and an SDL3 backend can drop in later. Tests can use the core's `HeadlessBackend`, which
+needs no display.
 
 `pushrod-widgets` uses only the core's public API, so another widget library can extend it or
 replace it entirely: drop shadows, gradients, tree and graph views, 3D containers, whatever an
@@ -70,13 +72,17 @@ engine.on_click(button, move |state, ui| {
         .set_text(format!("Clicked {} times", state.clicks));
 });
 
-let state = engine.run(sdl_context, window, AppState::default());
+let state = pushrod_sdl2::run(
+    engine,
+    WindowSettings::new("Clicks", size(800, 600)),
+    AppState::default(),
+);
 ```
 
 Prefer to run the loop yourself? Ask the engine for each event instead of registering callbacks:
 
 ```rust
-let mut events = engine.event_loop(&sdl_context, window);
+let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Clicks", size(800, 600)));
 
 while let Some(event) = engine.next_event(&mut events) {
     if let Event::Clicked { id, .. } = event {
@@ -85,12 +91,12 @@ while let Some(event) = engine.next_event(&mut events) {
 }
 ```
 
-See [`pushrod-widgets/examples/base.rs`](pushrod-widgets/examples/base.rs) for a complete application, and the
+See [`pushrod-sdl2/examples/base.rs`](pushrod-sdl2/examples/base.rs) for a complete application, and the
 [quick start](pushrod-docs/docs/getting-started/quick-start.mdx) for both styles side by side.
 
 ## Writing a widget
 
-A `Widget` stores a `WidgetCore` (ID, origin, size, color, visibility, texture) and implements
+A `Widget` stores a `WidgetCore` (ID, origin, size, color, visibility) and implements
 three functions.  Everything else has a default implementation.  Appearance is composed from the
 functions in the `paint` module (`fill`, `border`, `text`):
 
@@ -158,17 +164,17 @@ export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
 ```
 
 And you should be able to not only build the application, but you should be able to run the
-examples (`cargo run -p pushrod-widgets --example base`).
+examples (`cargo run -p pushrod-sdl2 --example base`).
 
 ### Widget gallery
 
 The gallery shows every built-in widget, and its states, on a labeled tile
-(`cargo run -p pushrod-widgets --example gallery`).  Each new widget adds its tile.
+(`cargo run -p pushrod-sdl2 --example gallery`).  Each new widget adds its tile.
 
 ![Widget gallery](pushrod-docs/static/img/screenshots/gallery.png)
 
 To retake the screenshot, run
-`cargo run -p pushrod-widgets --example gallery -- --screenshot pushrod-docs/static/img/screenshots/gallery.png`.
+`cargo run -p pushrod-sdl2 --example gallery -- --screenshot pushrod-docs/static/img/screenshots/gallery.png`.
 
 ## Contributing
 

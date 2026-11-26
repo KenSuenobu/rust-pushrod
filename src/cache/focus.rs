@@ -24,18 +24,11 @@
 
 use super::WidgetCache;
 use crate::event::{EngineEvent, Event, EventCtx, EventPhase, Propagation};
+use crate::input::{Key, Modifiers};
 use crate::widget::{Behavior, ROOT_WIDGET_ID, VisualState, WidgetId};
-use sdl2::keyboard::{Keycode, Mod};
 
 /// The modifier keys that stop a Tab or arrow key from moving focus (Shift is allowed).
-const COMMAND_MODS: Mod = Mod::from_bits_truncate(
-    Mod::LCTRLMOD.bits()
-        | Mod::RCTRLMOD.bits()
-        | Mod::LALTMOD.bits()
-        | Mod::RALTMOD.bits()
-        | Mod::LGUIMOD.bits()
-        | Mod::RGUIMOD.bits(),
-);
+const COMMAND_MODS: Modifiers = Modifiers::CTRL.union(Modifiers::ALT).union(Modifiers::GUI);
 
 impl WidgetCache {
     /// Returns the `Widget` that has the keyboard focus.
@@ -363,8 +356,8 @@ impl WidgetCache {
     /// * `ctx` - The context collecting generated events.
     pub(super) fn handle_key_down(
         &mut self,
-        key: Keycode,
-        modifiers: Mod,
+        key: Key,
+        modifiers: Modifiers,
         repeat: bool,
         ctx: &mut EventCtx,
     ) {
@@ -381,28 +374,26 @@ impl WidgetCache {
         }
 
         let command = modifiers.intersects(COMMAND_MODS);
-        let shift = modifiers.intersects(Mod::LSHIFTMOD | Mod::RSHIFTMOD);
+        let shift = modifiers.intersects(Modifiers::SHIFT);
 
         match key {
-            Keycode::Tab if !command => {
+            Key::Tab if !command => {
                 self.focus_next(shift);
             }
-            Keycode::Right | Keycode::Down if !command => {
+            Key::Right | Key::Down if !command => {
                 self.focus_in_group(true);
             }
-            Keycode::Left | Keycode::Up if !command => {
+            Key::Left | Key::Up if !command => {
                 self.focus_in_group(false);
             }
-            Keycode::Return | Keycode::KpEnter if !repeat && !command => {
+            Key::Return | Key::KpEnter if !repeat && !command => {
                 self.trigger_action(false, ctx);
             }
-            Keycode::Escape if !repeat && !command => {
+            Key::Escape if !repeat && !command => {
                 self.trigger_action(true, ctx);
             }
-            Keycode::Period
-                if cfg!(target_os = "macos")
-                    && !repeat
-                    && modifiers.intersects(Mod::LGUIMOD | Mod::RGUIMOD) =>
+            Key::Char('.')
+                if cfg!(target_os = "macos") && !repeat && modifiers.intersects(Modifiers::GUI) =>
             {
                 self.trigger_action(true, ctx);
             }

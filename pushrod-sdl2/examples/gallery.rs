@@ -1,6 +1,6 @@
 //! The widget gallery: one window showing every merged widget, each on a labeled tile.
 //!
-//! Run it from the repository root with `cargo run -p pushrod-widgets --example gallery`.
+//! Run it from the repository root with `cargo run -p pushrod-sdl2 --example gallery`.
 //! Click **Quit** (or close the window) to exit.  Pass `--screenshot <file.png>` to draw one frame,
 //! save it, and exit without waiting for input; this is how the documentation screenshot is made.
 //!
@@ -13,13 +13,11 @@ use pushrod::engine::Engine;
 use pushrod::geometry::{Point, point, size};
 use pushrod::paint::{Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
+use pushrod_sdl2::{Sdl2Backend, WindowSettings};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use sdl2::image::SaveSurface;
-use sdl2::pixels::PixelFormatEnum;
-use sdl2::video::Window;
 
 const FONT: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -120,46 +118,21 @@ fn button(origin: Point, text: &str) -> ButtonWidget {
     )
 }
 
-/// Draws one frame of the widget tree into a fresh canvas and saves it as an image.
+/// Draws one frame of the widget tree into a fresh window and saves it as an image.
 ///
 /// * `engine` - the engine holding the fully built gallery.
-/// * `window` - the window to draw into (consumed).
+/// * `settings` - how to create the window to draw into.
 /// * `path` - where to save the image; the format follows the extension (`.png`).
-fn save_screenshot(engine: &mut Engine<AppState>, window: Window, path: &str) {
-    // The engine uses the OpenGL renderer on macOS; do the same so the capture matches the app.
-    #[cfg(target_os = "macos")]
-    if std::env::var_os("SDL_RENDER_DRIVER").is_none() {
-        sdl2::hint::set("SDL_RENDER_DRIVER", "opengl");
-    }
-
-    let mut canvas = window
-        .into_canvas()
-        .target_texture()
-        .accelerated()
-        .build()
-        .unwrap();
+fn save_screenshot(engine: &mut Engine<AppState>, settings: &WindowSettings, path: &str) {
+    let mut backend = Sdl2Backend::new(settings).expect("SDL2 must open the window");
 
     engine.widgets().invalidate_all();
-    engine.widgets().draw_loop(&mut canvas);
-
-    let (w, h) = canvas.output_size().unwrap();
-    let mut pixels = canvas.read_pixels(None, PixelFormatEnum::ABGR8888).unwrap();
-    let surface =
-        sdl2::surface::Surface::from_data(&mut pixels, w, h, w * 4, PixelFormatEnum::ABGR8888)
-            .unwrap();
-    surface.save(path).unwrap();
-    canvas.present();
+    engine.widgets().draw_loop(&mut backend);
+    backend.save_screenshot(path).unwrap();
 }
 
 pub fn main() {
-    let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
-    let window = video_subsystem
-        .window("pushrod gallery", WINDOW_W, WINDOW_H)
-        .position_centered()
-        .opengl()
-        .build()
-        .unwrap();
+    let settings = WindowSettings::new("pushrod gallery", size(WINDOW_W, WINDOW_H));
     let mut engine: Engine<AppState> = Engine::new(size(WINDOW_W, WINDOW_H), 30);
 
     let mut panel = BaseWidget::new(point(0, 0), size(WINDOW_W, WINDOW_H));
@@ -277,9 +250,9 @@ pub fn main() {
         .position(|a| a == "--screenshot")
         .and_then(|i| args.get(i + 1))
     {
-        save_screenshot(&mut engine, window, path);
+        save_screenshot(&mut engine, &settings, path);
         return;
     }
 
-    engine.run(sdl_context, window, AppState);
+    pushrod_sdl2::run(engine, settings, AppState);
 }

@@ -22,7 +22,7 @@
 //! only texture copies and never rasterizes again.
 //!
 //! The `WidgetCache` owns the one `FontCache` and hands it to each `Sdl2Painter` while a widget
-//! paints.  The glyph runs a [`TextLayout`](crate::text::TextLayout) engine produces stay separate:
+//! paints.  The glyph runs a [`TextLayout`](pushrod::text::TextLayout) engine produces stay separate:
 //! this module is the drawing path for the SDL2 backend.
 //!
 //! SDL2_ttf is initialized once per process, the first time text is drawn, and never shut down
@@ -32,8 +32,8 @@
 //! Atlas textures are owned by the renderer that created them and are released with it; a
 //! `FontCache` must not be reused with a different canvas.
 
-use crate::geometry::{Point, Rect, Size};
-use crate::text::ttf_layout::wrap_lines;
+use crate::ttf_layout::wrap_lines;
+use pushrod::geometry::{Point, Rect, Size};
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::{BlendMode, Canvas, Texture, TextureAccess};
 use sdl2::ttf::{Font, FontStyle, Sdl2TtfContext};
@@ -178,7 +178,7 @@ pub(crate) enum FontNotice {
 
 /// Loads fonts once and draws text from a glyph atlas on the GPU.
 ///
-/// The [`WidgetCache`](crate::cache::WidgetCache) owns one and passes it to each painter.
+/// The [`Sdl2Backend`](crate::Sdl2Backend) owns one and passes it to each painter.
 #[derive(Default)]
 pub struct FontCache {
     faces: HashMap<FaceKey, Face>,

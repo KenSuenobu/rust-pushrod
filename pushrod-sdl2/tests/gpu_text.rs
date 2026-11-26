@@ -4,15 +4,17 @@
 //!
 //! The checks share one test function because SDL's video subsystem is initialized once.
 
-use pushrod::cache::WidgetCache;
-use pushrod::font::FontCache;
 use pushrod::geometry::Point;
+use pushrod_sdl2::font::FontCache;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::Canvas;
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
 
-const FONT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/OpenSans-Regular.ttf");
+const FONT: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../assets/OpenSans-Regular.ttf"
+);
 
 /// Counts the pixels on the canvas that are not the white background.
 fn inked_pixels(canvas: &Canvas<Window>) -> Vec<Color> {
@@ -123,9 +125,9 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
 }
 
 #[test]
-fn the_widget_cache_owns_the_font_cache() {
-    let cache = WidgetCache::new();
+fn a_new_font_cache_has_loaded_nothing() {
+    let fonts = FontCache::new();
 
-    assert_eq!(cache.fonts().stats().fonts_loaded, 0);
-    assert_eq!(cache.fonts().stats().glyphs_rasterized, 0);
+    assert_eq!(fonts.stats().fonts_loaded, 0);
+    assert_eq!(fonts.stats().glyphs_rasterized, 0);
 }

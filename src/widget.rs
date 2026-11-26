@@ -19,7 +19,7 @@
 //! alternatively generates events.
 //!
 //! Every `Widget` owns a [`WidgetCore`], which stores the state that all `Widget`s share: the
-//! ID, parent ID, origin, size, color, visibility, invalidation flag, and GPU texture.  The
+//! ID, parent ID, origin, size, color, visibility, and invalidation flag.  The
 //! `Widget` trait provides default implementations for all of the getters and setters against
 //! the `WidgetCore`, so a new `Widget` only needs to implement three functions:
 //!
@@ -50,7 +50,6 @@ use crate::controllers::{Controller, ControllerEvent, Controllers};
 use crate::event::{Event, EventCtx, EventMask, Propagation};
 use crate::geometry::{Point, Size};
 use crate::paint::Painter;
-use crate::texture::TextureStore;
 use bitflags::bitflags;
 use std::any::Any;
 
@@ -143,7 +142,7 @@ bitflags! {
 /// [`Widget::core_mut`]; every getter and setter on the `Widget` trait works against it.  It holds
 /// the `Widget`'s ID and parent ID (assigned by the `WidgetCache`), its origin relative to its
 /// parent, its size, its background color, its [`Behavior`] flags (including hidden) and [`VisualState`] flags, its [`Appearance`] (a style per state), its [`EventMask`], whether it needs repainting, and
-/// the GPU texture it paints into.
+/// the texture its backend paints it into.
 ///
 /// # Examples
 ///
@@ -167,8 +166,6 @@ pub struct WidgetCore {
     event_mask: EventMask,
     invalidated: bool,
     controllers: Controllers,
-    /// The GPU texture the `Widget` paints into, created and resized by the `WidgetCache`.
-    pub(crate) texture: TextureStore,
 }
 
 impl WidgetCore {
@@ -225,7 +222,6 @@ impl WidgetCore {
             event_mask: EventMask::NONE,
             invalidated: true,
             controllers: Controllers::default(),
-            texture: TextureStore::default(),
         }
     }
 }

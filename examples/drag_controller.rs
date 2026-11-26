@@ -22,10 +22,10 @@ use pushrod::cache::WidgetCache;
 use pushrod::controllers::{ControllerEvent, DragController};
 use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::geometry::{point, size};
+use pushrod::input::MouseButton;
 use pushrod::paint::Painter;
 use pushrod::root_widget::RootWidget;
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::mouse::MouseButton;
 
 /// A handle that follows a drag and keeps its offset.
 struct Handle {

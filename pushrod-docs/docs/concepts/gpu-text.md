@@ -37,9 +37,9 @@ After warm-up, repainting text is only texture copies:
 
 ## Who owns the cache
 
-The [`WidgetCache`](../concepts/widget-tree-and-ids.md) owns the one `FontCache`. A widget never touches it: it calls `paint::text`, and the `Sdl2Painter` the engine hands to `paint` uses the cache. A widget that is not drawn never loads a font.
+The `Sdl2Backend` (in the `pushrod-sdl2` crate) owns the one `FontCache`. A widget never touches it: it calls `paint::text`, and the `Sdl2Painter` the backend hands to `paint` uses the cache. A widget that is not drawn never loads a font.
 
-`WidgetCache::fonts()` returns the cache, and `FontCache::stats()` reports what it has done:
+`Sdl2Backend::fonts()` returns the cache, and `FontCache::stats()` reports what it has done:
 
 | Field | Counts |
 | --- | --- |
@@ -53,11 +53,11 @@ Loading a font and adding an atlas page are internal actions, so each emits an [
 
 ## Using the cache directly
 
-Most code uses `paint::text`. Tools that draw into their own SDL2 canvas can use the cache directly, as the `gpu_text` example does (`cargo run --example gpu_text`), which prints the counters after the first and second frame: the second frame loads and rasterizes nothing.
+Most code uses `paint::text`. Tools that draw into their own SDL2 canvas can use the cache directly, as the `gpu_text` example does (`cargo run -p pushrod-sdl2 --example gpu_text`), which prints the counters after the first and second frame: the second frame loads and rasterizes nothing.
 
 ```rust checked
-use pushrod::font::FontCache;
 use pushrod::geometry::Point;
+use pushrod_sdl2::font::FontCache;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::ttf::FontStyle;

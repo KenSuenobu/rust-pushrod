@@ -82,4 +82,4 @@ fn main() {
 }
 ```
 
-A widget that wants the same event implements `handle_event`, sets `EventMask::CUSTOM` in its mask, and reads `event.payload::<DownloadProgress>()`. The `base` example in `pushrod-widgets/examples/` shows the thread and an `on_custom` callback updating a label.
+A widget that wants the same event implements `handle_event`, sets `EventMask::CUSTOM` in its mask, and reads `event.payload::<DownloadProgress>()`. The `base` example in `pushrod-sdl2/examples/` shows the thread and an `on_custom` callback updating a label.

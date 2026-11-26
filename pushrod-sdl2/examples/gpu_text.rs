@@ -4,15 +4,18 @@
 //! cache counters after warm-up and after repainting: the second report must show no new fonts
 //! loaded and no new glyphs rasterized.
 //!
-//! Run it with `cargo run --example gpu_text`.  Set `SDL_VIDEODRIVER=dummy` to run without a
+//! Run it with `cargo run -p pushrod-sdl2 --example gpu_text`.  Set `SDL_VIDEODRIVER=dummy` to run without a
 //! display.
 
-use pushrod::font::FontCache;
 use pushrod::geometry::Point;
+use pushrod_sdl2::font::FontCache;
 use sdl2::pixels::Color;
 use sdl2::ttf::FontStyle;
 
-const FONT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/OpenSans-Regular.ttf");
+const FONT: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../assets/OpenSans-Regular.ttf"
+);
 
 fn main() {
     let sdl = sdl2::init().expect("SDL2 must initialize");

@@ -122,4 +122,4 @@ Read `self.style()` in `paint` and use the field if it is set, otherwise your de
 
 ## Try it
 
-`pushrod-widgets/examples/base.rs` has a **Hover me** button that turns blue on hover and dark blue when pressed. Run it with `cargo run -p pushrod-widgets --example base`.
+`pushrod-sdl2/examples/base.rs` has a **Hover me** button that turns blue on hover and dark blue when pressed. Run it with `cargo run -p pushrod-sdl2 --example base`.
