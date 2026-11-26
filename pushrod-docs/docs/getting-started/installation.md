@@ -1,43 +1,27 @@
 ---
 sidebar_position: 2
 title: Installation
+description: What Pushrod needs, how to add it to a project, and the Cargo features that change how SDL2 is built.
 ---
 
 # Installation
 
-Pushrod needs Rust 1.100 or newer (edition 2024) and the SDL2, SDL2_ttf, and SDL2_image libraries. Install them from your system's package manager as below. The [`bundled` feature](#building-sdl2-from-source-the-bundled-feature) of `pushrod-sdl2` can build SDL2 itself from source.
+Pushrod needs Rust 1.100 or newer (edition 2024) and three system libraries: SDL2, SDL2_ttf, and SDL2_image. Follow the step-by-step guide for your platform:
 
-## Linux
+| Platform | Guide | Libraries come from |
+|---|---|---|
+| Linux | [Installing on Linux](./installation-linux.md) | `apt` or `dnf` |
+| macOS | [Installing on macOS](./installation-macos.md) | Homebrew |
+| Windows | [Installing on Windows](./installation-windows.md) | The SDL2 development zips (MSVC) |
 
-Ubuntu/Debian:
+Each guide ends with a check: it runs the `base` example from the repository. If that example opens a window, everything Pushrod needs is installed.
 
-```bash
-sudo apt install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+```mermaid
+flowchart LR
+  rust[Install Rust 1.100+] --> libs[Install SDL2, SDL2_ttf, SDL2_image]
+  libs --> env[Point the linker at the libraries]
+  env --> check[cargo run -p pushrod-sdl2 --example base]
 ```
-
-Fedora/Red Hat:
-
-```bash
-sudo dnf install SDL2-devel SDL2_ttf-devel SDL2_image-devel
-```
-
-## macOS
-
-Install [Homebrew](https://brew.sh), then:
-
-```bash
-brew install sdl2 sdl2_image sdl2_ttf
-```
-
-On Apple Silicon, add Homebrew's library path to your shell profile so the linker finds SDL2:
-
-```bash
-export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
-```
-
-## Windows
-
-Follow the [rust-sdl2 Windows instructions](https://github.com/Rust-SDL2/rust-sdl2#windows-msvc) to install the SDL2, SDL2_ttf, and SDL2_image development libraries for your toolchain.
 
 ## Adding Pushrod to a project
 
@@ -60,9 +44,18 @@ pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 
 Your application does not depend on the `sdl2` crate; `pushrod-sdl2` does.
 
-## Building SDL2 from source: the `bundled` feature
+## Cargo features of `pushrod-sdl2`
 
-Enable `bundled` and Cargo compiles SDL2 from source instead of using the system library. You need a C compiler and CMake.
+| Feature | What it does | What the build machine needs |
+|---|---|---|
+| *(none)* | Links the system SDL2, SDL2_ttf, and SDL2_image. | The three libraries, from the platform guide |
+| `bundled` | Compiles SDL2 from source instead of using the system SDL2. | CMake and a C compiler, plus SDL2_ttf and SDL2_image from the system |
+| `static-link` | Links SDL2, SDL2_ttf, and SDL2_image into your executable instead of loading them at run time. | Static builds of all three libraries on the system. Not with `bundled`: see below |
+| `parley` | Lays out text with Parley and rasterizes glyphs with swash. | Nothing extra |
+
+### Building SDL2 from source: the `bundled` feature
+
+Enable `bundled` and Cargo compiles SDL2 from source instead of using the system library:
 
 ```toml
 [dependencies]
@@ -71,7 +64,20 @@ pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod", features = ["bundled"] }
 ```
 
-`bundled` covers SDL2 only: SDL2_ttf and SDL2_image still come from the system (the `sdl2` crate doesn't build them from source). Add `static-link` as well (`features = ["bundled", "static-link"]`) to link SDL2 into your executable.
+CI builds `pushrod-sdl2` this way on macOS and Windows on every pull request.
+
+Don't combine `bundled` with `static-link`. With both enabled, the `sdl2-sys` 0.38 crate links SDL2 only and leaves out SDL2_ttf and SDL2_image, so the build stops with undefined `TTF_` and `IMG_` symbols.
+
+With CMake 4 or newer, set `CMAKE_POLICY_VERSION_MINIMUM=3.5` before building. The SDL2 source that `bundled` compiles declares an older CMake minimum, which CMake 4 otherwise rejects with *Compatibility with CMake < 3.5 has been removed*. To set it for every build of the project, add it to `.cargo/config.toml`:
+
+```toml
+[env]
+CMAKE_POLICY_VERSION_MINIMUM = "3.5"
+```
+
+:::caution[`bundled` is not yet self-contained]
+`bundled` covers SDL2 only. The `sdl2` crate doesn't build SDL2_ttf or SDL2_image from source, so you still install those from the system. The system SDL2_ttf and SDL2_image are themselves linked against the system SDL2, so on macOS and Windows a `bundled` build still loads a system SDL2 at run time. Until Pushrod draws text and decodes images without SDL2_ttf and SDL2_image (a follow-up to [10.6 (#134)](https://github.com/KenSuenobu/rust-pushrod/issues/134)), installing all three libraries from your platform guide is the simplest route.
+:::
 
 :::note
 `pushrod-sdl2` uses the `sdl2` crate's 0.38 series. Version 0.39.0 doesn't compile with the `unsafe_textures` feature that Pushrod needs, so stay on 0.38 if you also depend on `sdl2` directly.

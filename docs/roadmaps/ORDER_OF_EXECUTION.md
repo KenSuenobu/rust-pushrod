@@ -85,7 +85,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 46 | [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) | pushrod: [7.2] Golden-image rendering tests (done) |
 | ✅ 47 | [#115](https://github.com/KenSuenobu/rust-pushrod/issues/115) | pushrod: [7.7] Performance benchmarks and budgets (done) |
 | ✅ 48 | [#25](https://github.com/KenSuenobu/rust-pushrod/issues/25) | pushrod: [1.10] High-DPI rendering and window resize (done) |
-| 49 | [#139](https://github.com/KenSuenobu/rust-pushrod/issues/139) | pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides |
+| ✅ 49 | [#139](https://github.com/KenSuenobu/rust-pushrod/issues/139) | pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides (done) |
 | 50 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder |
 | 51 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen |
 | 52 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog |
@@ -1087,8 +1087,8 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] CI builds with `bundled` on macOS and Windows
-- [ ] Installation pages for Linux, macOS, and Windows tested from a clean machine
+- [x] CI builds with `bundled` on macOS and Windows
+- [x] Installation pages for Linux, macOS, and Windows tested from a clean machine
 - [ ] With 10.6 complete, `bundled` needs no system libraries
 
 ### Step 50: Edit the widget tree at run time: remove, reparent, reorder

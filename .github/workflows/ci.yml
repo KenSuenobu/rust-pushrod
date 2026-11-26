@@ -76,6 +76,55 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
+  bundled:
+    # SDL2 built from source (`bundled`), the route the installation guides offer on macOS and
+    # Windows. SDL2_ttf and SDL2_image still come from the system: the sdl2 crate doesn't build
+    # them from source. `bundled` with `static-link` isn't built: sdl2-sys 0.38 then links no
+    # SDL2_ttf or SDL2_image, so Pushrod can't link.
+    name: Bundled SDL2 build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    env:
+      # Windows only: where the SDL2_ttf and SDL2_image development libraries are unpacked.
+      SDL_DIR: ${{ github.workspace }}/sdl
+      # The SDL2 source in sdl2-sys 0.38 declares a CMake minimum below 3.5, which CMake 4
+      # rejects unless this policy floor is set.
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+    steps:
+      - uses: actions/checkout@v4
+      - name: CMake and a C compiler (preinstalled on the runner)
+        run: cmake --version
+      - name: Install SDL2_ttf and SDL2_image (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install sdl2_image sdl2_ttf
+          echo "LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
+      - name: Install SDL2_ttf and SDL2_image (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mkdir -p "$SDL_DIR" && cd "$SDL_DIR"
+          base=https://github.com/libsdl-org
+          curl -fsSL -o ttf.zip "$base/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-devel-2.22.0-VC.zip"
+          curl -fsSL -o image.zip "$base/SDL_image/releases/download/release-2.8.2/SDL2_image-devel-2.8.2-VC.zip"
+          for z in ttf image; do unzip -q -o "$z.zip"; done
+          libs=""
+          for d in SDL2_ttf-2.22.0 SDL2_image-2.8.2; do
+            dir=$(cygpath -w "$SDL_DIR/$d/lib/x64")
+            echo "$dir" >> "$GITHUB_PATH"
+            libs="$libs$dir;"
+          done
+          echo "LIB=$libs${LIB:-}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build with bundled
+        run: cargo build -p pushrod-sdl2 --all-targets --features bundled
+
   golden:
     name: Golden-image rendering tests (Xvfb)
     runs-on: ubuntu-latest
