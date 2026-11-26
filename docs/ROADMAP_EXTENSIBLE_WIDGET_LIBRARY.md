@@ -938,7 +938,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `chassis`, `enhancement`, `mvp`, `size/L`, `widget` | N | v0.1 | L | `pushrod-widgets/src/text_field.rs (new)`, `src/paint.rs` |
 | 2.8 (#34) | Icon widget (picture with caption) | Picture with a caption, selectable and double-clickable, like desktop icons. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/icon_widget.rs (new)` |
 | 2.9 (#35) | Alert dialog | One-call modal alert with icon, message, and up to three buttons. | `enhancement`, `forms`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/alert.rs (new)`, `src/engine.rs` |
 | 2.11 (#37) | Menu bar and drop-down menus (drawn by Pushrod) | Menu bar with drop-down menus, separators, check marks, submenus, shortcuts, and mnemonics. | `chassis`, `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/menu.rs (new)`, `src/cache.rs`, `src/engine.rs` |
@@ -996,6 +995,8 @@ One-of-many selection among sibling widgets. **Widget roadmap:** [`docs/widgets/
 **Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.6 (#32): Text field: single-line entry with input masks, validation, and numeric mode
+
+**Status:** done (#32). `pushrod_widgets::text_field::TextField`: caret (blinks on `Event::Tick`), selection (Shift+arrows, mouse drag, double and triple click), word movement, clipboard through `EventCtx::clipboard_text` / `set_clipboard_text` (the engine syncs it with the backend), `max_length`, `placeholder`, `password`, `with_label`, `with_mask`, and `with_validator` (`text_field::validate`: `Validator`, `Validity`, `Mask`, `IntegerValidator`, `NumberValidator`); `IntegerField::range` / `NumberField::range` presets; accessories `Clear`, `Search`, `RevealPassword`, `Custom(char)` via `with_leading` / `with_trailing`, and `TextField::search()`. It emits `TextChanged`, `EditingFinished` (Return, focus loss) and the new core event `AccessoryClicked { id, which: AccessorySide }`; the gallery shows it.
 
 Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. **Widget roadmap:** [`docs/widgets/text-field.md`](widgets/text-field.md) (look, behavior, events, acceptance criteria).
 

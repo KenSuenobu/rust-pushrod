@@ -81,6 +81,8 @@ pub struct WidgetCache {
     focused_widget_id: Option<WidgetId>,
     text_input_wanted: bool,
     animating: Vec<WidgetId>,
+    clipboard_snapshot: Option<String>,
+    clipboard_write: Option<String>,
 }
 
 impl std::fmt::Debug for WidgetCache {
@@ -124,7 +126,28 @@ impl WidgetCache {
             focused_widget_id: None,
             text_input_wanted: false,
             animating: Vec::new(),
+            clipboard_snapshot: None,
+            clipboard_write: None,
         }
+    }
+
+    /// Records a copy of the system clipboard for `Widget`s that paste.  The engine calls this
+    /// while a text editor has the focus.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The clipboard text, if any.
+    pub fn set_clipboard_snapshot(&mut self, text: Option<String>) {
+        self.clipboard_snapshot = text;
+    }
+
+    /// Takes the text a `Widget` asked to place on the clipboard since the last call.
+    ///
+    /// # Returns
+    ///
+    /// The text, or `None` if nothing was copied.
+    pub fn take_clipboard_write(&mut self) -> Option<String> {
+        self.clipboard_write.take()
     }
 
     /// Returns the cache policy of the backend the cache paints with.
@@ -616,6 +639,12 @@ impl WidgetCache {
     pub(crate) fn finish(&mut self, mut ctx: EventCtx) -> Vec<Event> {
         self.animating.extend(ctx.take_animation_requests());
 
+        if let Some(text) = ctx.take_clipboard_write() {
+            // A paste right after a copy sees the copied text, before the backend has it.
+            self.clipboard_snapshot = Some(text.clone());
+            self.clipboard_write = Some(text);
+        }
+
         let events = ctx.into_events();
 
         self.apply_exclusive(events)
@@ -935,6 +964,8 @@ impl WidgetCache {
     /// The `Event`s the `Widget`s generated while handling the event, in the order emitted.
     pub fn handle_event(&mut self, event: InputEvent) -> Vec<Event> {
         let mut ctx = EventCtx::default();
+
+        ctx.set_clipboard_snapshot(self.clipboard_snapshot.clone());
 
         if self.cache.is_empty() {
             return self.finish(ctx);
