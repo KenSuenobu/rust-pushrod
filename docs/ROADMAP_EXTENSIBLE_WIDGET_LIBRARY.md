@@ -938,7 +938,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | v0.1 | S | `pushrod-widgets/src/button.rs`, `src/paint.rs` |
 | 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/check_box.rs (new)` |
 | 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/radio_button.rs (new)`, `src/cache.rs` |
 | 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `chassis`, `enhancement`, `mvp`, `size/L`, `widget` | N | v0.1 | L | `pushrod-widgets/src/text_field.rs (new)`, `src/paint.rs` |
@@ -975,6 +974,8 @@ A small box with an arrow or symbol, used for scroll arrows, close boxes, and sp
 **Dependencies.** Requires 1.1 (#19), 1.5 (#21).
 
 ### 2.3 (#29): Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog
+
+**Status:** done (#29). `Button` builders `default_action`, `cancel_action`, `toggle`, `activate_on_press`, `dismisses_dialog`; the core delivers `Activated` to the widget Return/Escape picks; `EngineEvent::DialogDismissRequested` is emitted for dismissing buttons (modal dialogs, 6.7 (#66), will consume it); pressed colors come from `paint::pressed_colors`; the gallery shows it.
 
 A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. **Widget roadmap:** [`docs/widgets/button.md`](widgets/button.md) (look, behavior, events, acceptance criteria).
 

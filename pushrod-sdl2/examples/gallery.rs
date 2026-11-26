@@ -191,6 +191,22 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     disabled.set_enabled(false);
     engine.add_child_widget(button_tile, disabled);
 
+    // Behavior flags: a default (ring) and a cancel button, and a toggle that is checked.
+    let small = |label: &str, x: i32, y: i32| Button::new(label).at(x, y).size(80, 24);
+    engine.add_child_widget(button_tile, small("OK", 10, 76).default_action());
+    engine.add_child_widget(button_tile, small("Cancel", 100, 76).cancel_action());
+
+    let mut bold = small("Bold", 190, 76).toggle();
+    bold.set_checked(true);
+    engine.add_child_widget(button_tile, bold);
+    add_label(
+        &mut engine,
+        button_tile,
+        point(10, 110),
+        TILE_W - 20,
+        "Default, cancel, toggle",
+    );
+
     // Text: left, centered, and right justified labels (fictional sample text).
     let text_tile = add_tile(&mut engine, panel_id, 1, 1, "Text");
     for (i, (justify, text)) in [

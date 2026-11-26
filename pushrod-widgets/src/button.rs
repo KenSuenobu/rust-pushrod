@@ -23,14 +23,29 @@
 //! button selects (inverts) it; dragging out of the bounds deselects it, and dragging back in
 //! selects it again.  `Clicked` is only generated if the mouse button is released while the
 //! button is still selected.
+//!
+//! # Behavior flags
+//!
+//! A button's other behaviors come from the core's [`Behavior`] flags, set with the builders below
+//! or `Widget::set_behavior`:
+//!
+//! | Flag (builder) | Look | When activated | Emits |
+//! |---|---|---|---|
+//! | none | normal | release inside the button | `Clicked` |
+//! | `DEFAULT_ACTION` ([`Button::default_action`]) | 2 px border ring | also by Return | `Clicked` |
+//! | `CANCEL_ACTION` ([`Button::cancel_action`]) | normal | also by Escape | `Clicked` |
+//! | `TOGGLE` ([`Button::toggle`]) | inverted while checked | each activation flips it | `Toggled` |
+//! | `ACTIVATE_ON_PRESS` ([`Button::activate_on_press`]) | normal | on press, not on release | as above |
+//! | `DISMISSES_DIALOG` ([`Button::dismisses_dialog`]) | normal | as above, then asks to close | also `EngineEvent::DialogDismissRequested` |
 
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
-use pushrod::event::{Event, EventCtx, Propagation};
+use pushrod::event::{EngineEvent, Event, EventCtx, Propagation};
 use pushrod::font::Font;
 use pushrod::geometry::{Rect, point, size};
+use pushrod::input::MouseButton;
 use pushrod::paint::{self, Painter, TextJustify, TextStyle, Truncate};
-use pushrod::widget::{VisualState, Widget, WidgetCore};
+use pushrod::widget::{Behavior, VisualState, Widget, WidgetCore};
 use std::cell::Cell;
 
 /// A push button with a text label.
@@ -45,6 +60,7 @@ pub struct Button {
     msg: String,
     border_width: u8,
     selected: bool,
+    checked: bool,
     truncate: Truncate,
     truncated: Cell<bool>,
 }
@@ -79,11 +95,11 @@ impl Widget for Button {
     fn paint(&self, p: &mut dyn Painter) {
         let size = self.get_size();
         let style = self.style();
-        let (background, foreground) = if self.selected {
-            (Color::BLACK, Color::WHITE)
-        } else {
-            (self.get_color(), self.style.font_color)
-        };
+        let (background, foreground) = paint::pressed_colors(
+            self.selected || self.checked,
+            self.get_color(),
+            self.style.font_color,
+        );
         let (background, foreground) = (
             style.background.unwrap_or(background),
             style.foreground.unwrap_or(foreground),
@@ -112,7 +128,7 @@ impl Widget for Button {
             p,
             size,
             style.border_color.unwrap_or(Color::BLACK),
-            style.border_width.unwrap_or(1),
+            style.border_width.unwrap_or(self.ring_width()),
         );
     }
 
@@ -135,6 +151,15 @@ impl Widget for Button {
     /// `PointerEntered` and `PointerExited` so the application's `on_press`, `on_release` and
     /// `on_hover` callbacks run (each is emitted after `Clicked`, when there is one).
     fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
+        // Return or Escape activated this button (it is the form's default or cancel button).
+        if let Event::Activated { id } = event {
+            if *id == self.get_id() {
+                self.activate(ctx, MouseButton::Left, 1);
+            }
+
+            return Propagation::Continue;
+        }
+
         self.feed_controllers(event, ctx);
 
         if matches!(
@@ -153,9 +178,10 @@ impl Widget for Button {
 
     /// Updates the selected state from the click controller, emitting `Clicked` on a click.
     ///
-    /// - `ClickPressed`: selects (inverts) the button.
+    /// - `ClickPressed`: selects (inverts) the button; with `ACTIVATE_ON_PRESS`, also activates it.
     /// - `ClickArmed`: selects or deselects it as the pointer re-enters or leaves while pressed.
-    /// - `Clicked`: emits `Clicked { id, button, count }`, then deselects.
+    /// - `Clicked`: activates the button (a toggle flips and emits `Toggled`; any other button emits `Clicked`) unless it activates on press,
+    ///   then deselects.
     /// - `ClickCancelled`: deselects.
     ///
     /// # Arguments
@@ -168,14 +194,19 @@ impl Widget for Button {
     /// Always [`Propagation::Continue`]; `handle_event` decides what stops.
     fn on_controller_event(&mut self, event: &ControllerEvent, ctx: &mut EventCtx) -> Propagation {
         match event {
-            ControllerEvent::ClickPressed => self.set_selected(true),
+            ControllerEvent::ClickPressed => {
+                self.set_selected(true);
+
+                if self.behavior().contains(Behavior::ACTIVATE_ON_PRESS) {
+                    self.activate(ctx, MouseButton::Left, 1);
+                }
+            }
             ControllerEvent::ClickArmed(armed) => self.set_selected(*armed),
             ControllerEvent::Clicked { button, count } => {
-                ctx.emit(Event::Clicked {
-                    id: self.get_id(),
-                    button: *button,
-                    count: *count,
-                });
+                if !self.behavior().contains(Behavior::ACTIVATE_ON_PRESS) {
+                    self.activate(ctx, *button, *count);
+                }
+
                 self.set_selected(false);
             }
             ControllerEvent::ClickCancelled => self.set_selected(false),
@@ -219,8 +250,90 @@ impl Button {
             msg: label.into(),
             border_width: 2,
             selected: false,
+            checked: false,
             truncate: Truncate::End,
             truncated: Cell::new(false),
+        }
+    }
+
+    /// Makes this the form's default button: drawn with a 2 px border ring, and activated by
+    /// Return (sets [`Behavior::DEFAULT_ACTION`]).
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn default_action(self) -> Self {
+        self.with_behavior(Behavior::DEFAULT_ACTION)
+    }
+
+    /// Makes this the form's cancel button: activated by Escape (sets
+    /// [`Behavior::CANCEL_ACTION`]).
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn cancel_action(self) -> Self {
+        self.with_behavior(Behavior::CANCEL_ACTION)
+    }
+
+    /// Makes this a toggle button: each activation flips it between checked (drawn inverted) and
+    /// unchecked, and emits `Toggled { id, checked }` instead of `Clicked` (sets
+    /// [`Behavior::TOGGLE`]).
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn toggle(self) -> Self {
+        self.with_behavior(Behavior::TOGGLE)
+    }
+
+    /// Makes the button activate when the mouse button goes down, not when it is released (sets
+    /// [`Behavior::ACTIVATE_ON_PRESS`]).
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn activate_on_press(self) -> Self {
+        self.with_behavior(Behavior::ACTIVATE_ON_PRESS)
+    }
+
+    /// Makes activating the button ask the enclosing modal dialog to close: it also emits
+    /// `EngineEvent::DialogDismissRequested { id }` (sets [`Behavior::DISMISSES_DIALOG`]).
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn dismisses_dialog(self) -> Self {
+        self.with_behavior(Behavior::DISMISSES_DIALOG)
+    }
+
+    /// Returns whether a toggle button is checked.
+    ///
+    /// # Returns
+    ///
+    /// `true` while the button is checked; always `false` for a button that is not a toggle.
+    pub fn is_checked(&self) -> bool {
+        self.checked
+    }
+
+    /// Checks or unchecks a toggle button without emitting `Toggled`, and invalidates it.
+    ///
+    /// # Arguments
+    ///
+    /// * `checked` - The new state.
+    pub fn set_checked(&mut self, checked: bool) {
+        if self.checked != checked {
+            let mut visual = self.state();
+
+            visual.set(VisualState::CHECKED, checked);
+            self.checked = checked;
+            self.set_state(visual);
+            self.set_invalidated(true);
         }
     }
 
@@ -402,6 +515,49 @@ impl Button {
             self.selected = state;
             self.set_state(visual);
             self.set_invalidated(true);
+        }
+    }
+
+    /// Adds a behavior flag to the ones already set.
+    fn with_behavior(mut self, flag: Behavior) -> Self {
+        let behavior = self.behavior() | flag;
+
+        self.set_behavior(behavior);
+        self
+    }
+
+    /// The border width used when the style sets none: 2 px for a default button, else 1 px.
+    fn ring_width(&self) -> u8 {
+        if self.behavior().contains(Behavior::DEFAULT_ACTION) {
+            2
+        } else {
+            1
+        }
+    }
+
+    /// Performs the button's action: flips a toggle button and emits `Toggled`, or emits
+    /// `Clicked`; then, for a dialog-dismissing button, emits `DialogDismissRequested`.
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - The context used to emit events.
+    /// * `button` - The mouse button reported in `Clicked`.
+    /// * `count` - The click count reported in `Clicked`.
+    fn activate(&mut self, ctx: &mut EventCtx, button: MouseButton, count: u8) {
+        let id = self.get_id();
+
+        if self.behavior().contains(Behavior::TOGGLE) {
+            self.set_checked(!self.checked);
+            ctx.emit(Event::Toggled {
+                id,
+                checked: self.checked,
+            });
+        } else {
+            ctx.emit(Event::Clicked { id, button, count });
+        }
+
+        if self.behavior().contains(Behavior::DISMISSES_DIALOG) {
+            ctx.emit(Event::Engine(EngineEvent::DialogDismissRequested { id }));
         }
     }
 }

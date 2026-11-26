@@ -337,6 +337,8 @@ pub enum EngineEventKind {
     FocusChanged,
     /// See [`EngineEvent::ActionTriggered`].
     ActionTriggered,
+    /// See [`EngineEvent::DialogDismissRequested`].
+    DialogDismissRequested,
     /// See [`EngineEvent::TimerFired`].
     TimerFired,
     /// See [`EngineEvent::TimerCancelled`].
@@ -416,6 +418,13 @@ pub enum EngineEvent {
         /// `false` for the default action (Return), `true` for the cancel action (Escape).
         cancel: bool,
     },
+    /// A `Widget` with [`Behavior::DISMISSES_DIALOG`](crate::widget::Behavior::DISMISSES_DIALOG)
+    /// was activated, so the modal dialog that holds it should close.  Modal dialogs consume this
+    /// event; until they exist, an application can listen for it with `Engine::on_event`.
+    DialogDismissRequested {
+        /// The `Widget` that asked for the dismissal.
+        id: WidgetId,
+    },
     /// A timer registered with `Engine::on_timer` fired and its callback ran.
     TimerFired {
         /// The timer that fired.
@@ -465,6 +474,7 @@ impl EngineEvent {
             EngineEvent::GlyphAtlasPageAdded { .. } => EngineEventKind::GlyphAtlasPageAdded,
             EngineEvent::FocusChanged { .. } => EngineEventKind::FocusChanged,
             EngineEvent::ActionTriggered { .. } => EngineEventKind::ActionTriggered,
+            EngineEvent::DialogDismissRequested { .. } => EngineEventKind::DialogDismissRequested,
             EngineEvent::TimerFired { .. } => EngineEventKind::TimerFired,
             EngineEvent::TimerCancelled { .. } => EngineEventKind::TimerCancelled,
             EngineEvent::IdleRan { .. } => EngineEventKind::IdleRan,
@@ -1242,6 +1252,21 @@ mod mask_tests {
         assert!(!engine_filter_accepts(
             Some(&[EngineEventKind::FontLoaded]),
             &failed
+        ));
+    }
+
+    #[test]
+    fn dismiss_requests_have_their_own_engine_kind() {
+        let dismiss = EngineEvent::DialogDismissRequested { id: 3 };
+
+        assert_eq!(dismiss.kind(), EngineEventKind::DialogDismissRequested);
+        assert!(engine_filter_accepts(
+            Some(&[EngineEventKind::DialogDismissRequested]),
+            &dismiss
+        ));
+        assert!(!engine_filter_accepts(
+            Some(&[EngineEventKind::ActionTriggered]),
+            &dismiss
         ));
     }
 
