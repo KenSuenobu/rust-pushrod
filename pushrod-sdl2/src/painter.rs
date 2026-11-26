@@ -19,12 +19,21 @@
 //! paints into its own texture only when it changes, and frames are blits of cached textures.
 //! This is the only module (with the engine, caches, and font renderer) that touches `SDL2` types
 //! for drawing.
+//!
+//! On a high-DPI window the painter is given the window's scale factor
+//! ([`Sdl2Painter::with_scale`]): every logical coordinate is converted to physical pixels, text
+//! is rasterized at the scaled font size, and one-pixel lines become whole physical pixels thick
+//! (see [`crate::scale`]).  At 1x every call draws exactly as it would without scaling.
 
 use crate::font::FontCache;
 use crate::image_cache::ImageCache;
+use crate::scale::{diagonal_offsets, dither_cells, outline_bars, scaled_font_size, straight_line};
 use pushrod::color::{Color, FontStyle};
 use pushrod::error::Error;
-use pushrod::geometry::{Point, Rect, Size};
+use pushrod::geometry::{
+    Point, Rect, Size, sanitize_scale, stroke_width, to_logical_length, to_physical,
+    to_physical_point,
+};
 use pushrod::paint::{self, CachePolicy, Painter, TextStyle};
 use sdl2::image::LoadTexture;
 use sdl2::pixels::Color as SdlColor;
@@ -78,6 +87,8 @@ pub struct Sdl2Painter<'a> {
     fonts: &'a mut FontCache,
     images: Option<&'a mut ImageCache>,
     errors: Vec<Error>,
+    /// Physical pixels per logical pixel.
+    scale: f32,
 }
 
 impl<'a> std::fmt::Debug for Sdl2Painter<'a> {
@@ -117,7 +128,66 @@ impl<'a> Sdl2Painter<'a> {
             fonts,
             images: None,
             errors: Vec::new(),
+            scale: 1.0,
         }
+    }
+
+    /// Sets the scale factor: how many physical pixels of the canvas make one logical pixel.
+    ///
+    /// # Arguments
+    ///
+    /// * `scale` - The window's scale factor; an unusable value (zero, negative, not finite)
+    ///   reads as `1.0`.
+    ///
+    /// # Returns
+    ///
+    /// The painter, for chaining.
+    #[must_use]
+    pub fn with_scale(mut self, scale: f32) -> Self {
+        self.scale = sanitize_scale(scale);
+        self
+    }
+
+    /// Returns whether the painter draws at 1x, where logical and physical pixels are the same.
+    ///
+    /// # Returns
+    ///
+    /// `true` at a scale factor of exactly `1.0`.
+    fn is_unscaled(&self) -> bool {
+        self.scale == 1.0
+    }
+
+    /// Returns a text style whose font is rasterized at physical resolution.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The style the `Widget` asked for.
+    ///
+    /// # Returns
+    ///
+    /// The style with its font size multiplied by the scale.
+    fn physical_style(&self, style: &TextStyle) -> TextStyle {
+        let mut scaled = style.clone();
+
+        scaled.font = style
+            .font
+            .with_size(scaled_font_size(style.font.size(), self.scale));
+        scaled
+    }
+
+    /// Fills physical rectangles with a color, recording any failure.
+    ///
+    /// # Arguments
+    ///
+    /// * `rects` - The rectangles, in physical pixels.
+    /// * `color` - The fill color.
+    fn fill_physical(&mut self, rects: &[Rect], color: Color) {
+        let rects: Vec<SdlRect> = rects.iter().map(|r| to_sdl_rect(*r)).collect();
+
+        self.canvas.set_draw_color(to_sdl_color(color));
+        let result = self.canvas.fill_rects(&rects);
+
+        self.check(result);
     }
 
     /// Gives the painter the shared image cache used by [`Painter::image_size`] and
@@ -171,6 +241,15 @@ impl Painter for Sdl2Painter<'_> {
         Self::CACHE_POLICY
     }
 
+    /// Returns the scale factor the painter draws at.
+    ///
+    /// # Returns
+    ///
+    /// Physical pixels per logical pixel; `1.0` unless [`Sdl2Painter::with_scale`] set one.
+    fn scale_factor(&self) -> f32 {
+        self.scale
+    }
+
     /// Fills the whole canvas.
     ///
     /// # Arguments
@@ -189,7 +268,9 @@ impl Painter for Sdl2Painter<'_> {
     /// * `color` - The fill color.
     fn fill_rect(&mut self, bounds: Rect, color: Color) {
         self.canvas.set_draw_color(to_sdl_color(color));
-        let result = self.canvas.fill_rect(to_sdl_rect(bounds));
+        let result = self
+            .canvas
+            .fill_rect(to_sdl_rect(to_physical(bounds, self.scale)));
 
         self.check(result);
     }
@@ -201,6 +282,14 @@ impl Painter for Sdl2Painter<'_> {
     /// * `bounds` - The rectangle.
     /// * `color` - The line color.
     fn rect(&mut self, bounds: Rect, color: Color) {
+        if !self.is_unscaled() {
+            let bars = outline_bars(to_physical(bounds, self.scale), stroke_width(self.scale));
+
+            self.fill_physical(&bars, color);
+
+            return;
+        }
+
         self.canvas.set_draw_color(to_sdl_color(color));
         let result = self.canvas.draw_rect(to_sdl_rect(bounds));
 
@@ -215,6 +304,32 @@ impl Painter for Sdl2Painter<'_> {
     /// * `to` - The end point.
     /// * `color` - The line color.
     fn line(&mut self, from: Point, to: Point, color: Color) {
+        if !self.is_unscaled() {
+            if let Some(bar) = straight_line(from, to, self.scale) {
+                self.fill_physical(&[bar], color);
+
+                return;
+            }
+
+            let (a, b) = (
+                to_physical_point(from, self.scale),
+                to_physical_point(to, self.scale),
+            );
+
+            self.canvas.set_draw_color(to_sdl_color(color));
+
+            for offset in diagonal_offsets(a, b, self.scale) {
+                let result = self.canvas.draw_line(
+                    SdlPoint::new(a.x + offset.x, a.y + offset.y),
+                    SdlPoint::new(b.x + offset.x, b.y + offset.y),
+                );
+
+                self.check(result);
+            }
+
+            return;
+        }
+
         self.canvas.set_draw_color(to_sdl_color(color));
         let result = self
             .canvas
@@ -237,6 +352,9 @@ impl Painter for Sdl2Painter<'_> {
     /// The size of the text drawn; zero if the font could not be loaded or the text could not be
     /// drawn (the failure is recorded, see [`Sdl2Painter::take_errors`]).
     fn text(&mut self, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size {
+        let scale = self.scale;
+        let style = &self.physical_style(style);
+        let bounds = to_physical(bounds, scale);
         let block = match self.fonts.layout(self.canvas, &style.font, msg, bounds.w) {
             Ok(block) => block,
             Err(error) => {
@@ -257,7 +375,10 @@ impl Painter for Sdl2Painter<'_> {
             self.errors.push(error);
         }
 
-        text_size
+        Size::new(
+            to_logical_length(text_size.w, scale),
+            to_logical_length(text_size.h, scale),
+        )
     }
 
     /// Returns the height of one line, as the font cache lays out a single line.
@@ -274,8 +395,10 @@ impl Painter for Sdl2Painter<'_> {
     /// Zero if the font cannot be loaded (the failure is recorded, see
     /// [`Sdl2Painter::take_errors`]).
     fn line_height(&mut self, style: &TextStyle) -> u32 {
+        let style = self.physical_style(style);
+
         match self.fonts.layout(self.canvas, &style.font, "A", u32::MAX) {
-            Ok(block) => block.size.h,
+            Ok(block) => to_logical_length(block.size.h, self.scale),
             Err(error) => {
                 self.errors.push(error);
 
@@ -299,8 +422,10 @@ impl Painter for Sdl2Painter<'_> {
     /// Zero if the font cannot be loaded (the failure is recorded, see
     /// [`Sdl2Painter::take_errors`]).
     fn text_width(&mut self, style: &TextStyle, msg: &str) -> u32 {
+        let style = self.physical_style(style);
+
         match self.fonts.layout(self.canvas, &style.font, msg, u32::MAX) {
-            Ok(block) => block.size.w,
+            Ok(block) => to_logical_length(block.size.w, self.scale),
             Err(error) => {
                 self.errors.push(error);
 
@@ -329,7 +454,9 @@ impl Painter for Sdl2Painter<'_> {
             .texture_creator()
             .load_texture(path)
             .map_err(|message| Error::image(path, message))?;
-        let result = self.canvas.copy(&texture, None, to_sdl_rect(bounds));
+        let result = self
+            .canvas
+            .copy(&texture, None, to_sdl_rect(to_physical(bounds, self.scale)));
 
         unsafe { texture.destroy() };
 
@@ -390,7 +517,11 @@ impl Painter for Sdl2Painter<'_> {
             .ok_or_else(|| Error::image(path, "image not cached"))?;
 
         self.canvas
-            .copy(texture, source.map(to_sdl_rect), to_sdl_rect(bounds))
+            .copy(
+                texture,
+                source.map(to_sdl_rect),
+                to_sdl_rect(to_physical(bounds, self.scale)),
+            )
             .map_err(|message| Error::image(path, message))
     }
 
@@ -403,6 +534,12 @@ impl Painter for Sdl2Painter<'_> {
     /// * `second` - The other color.
     fn dither(&mut self, bounds: Rect, first: Color, second: Color) {
         self.fill_rect(bounds, second);
+
+        if !self.is_unscaled() {
+            self.fill_physical(&dither_cells(bounds, self.scale), first);
+
+            return;
+        }
 
         let points: Vec<SdlPoint> = (0..bounds.h as i32)
             .flat_map(|y| {
@@ -425,6 +562,14 @@ impl Painter for Sdl2Painter<'_> {
     /// * `bounds` - The rectangle.
     /// * `color` - The color to blend; its alpha sets the strength.
     fn dither_overlay(&mut self, bounds: Rect, color: Color) {
+        if !self.is_unscaled() {
+            self.canvas.set_blend_mode(BlendMode::Blend);
+            self.fill_physical(&dither_cells(bounds, self.scale), color);
+            self.canvas.set_blend_mode(BlendMode::None);
+
+            return;
+        }
+
         let points: Vec<SdlPoint> = (0..bounds.h as i32)
             .flat_map(|y| {
                 (0..bounds.w as i32)
@@ -447,7 +592,10 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// * `bounds` - The rectangle, or `None` to remove the limit.
     fn clip(&mut self, bounds: Option<Rect>) {
-        self.canvas.set_clip_rect(bounds.map(to_sdl_rect));
+        let scale = self.scale;
+
+        self.canvas
+            .set_clip_rect(bounds.map(|b| to_sdl_rect(to_physical(b, scale))));
     }
 }
 

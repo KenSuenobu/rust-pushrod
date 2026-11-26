@@ -356,6 +356,10 @@ pub enum EngineEventKind {
     AnimationTicked,
     /// See [`EngineEvent::Error`].
     Error,
+    /// See [`EngineEvent::ScaleFactorChanged`].
+    ScaleFactorChanged,
+    /// See [`EngineEvent::MinimumWindowSizeChanged`].
+    MinimumWindowSizeChanged,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -486,6 +490,21 @@ pub enum EngineEvent {
         /// What failed.
         error: Error,
     },
+    /// The window's scale factor changed (it moved to a display with a different pixel density),
+    /// so every `Widget` was invalidated to repaint at the new resolution.  Scales are whole
+    /// percentages: `100` is 1x, `150` is 1.5x, `200` is 2x.
+    ScaleFactorChanged {
+        /// The scale before the change, in percent.
+        old_percent: u32,
+        /// The scale now, in percent.
+        new_percent: u32,
+    },
+    /// The root layout's minimum size changed, and the engine gave it to the backend as the
+    /// window's minimum size.
+    MinimumWindowSizeChanged {
+        /// The new minimum size, in logical pixels.
+        size: Size,
+    },
 }
 
 impl EngineEvent {
@@ -513,6 +532,10 @@ impl EngineEvent {
             EngineEvent::IdleRan { .. } => EngineEventKind::IdleRan,
             EngineEvent::AnimationTicked { .. } => EngineEventKind::AnimationTicked,
             EngineEvent::Error { .. } => EngineEventKind::Error,
+            EngineEvent::ScaleFactorChanged { .. } => EngineEventKind::ScaleFactorChanged,
+            EngineEvent::MinimumWindowSizeChanged { .. } => {
+                EngineEventKind::MinimumWindowSizeChanged
+            }
         }
     }
 }

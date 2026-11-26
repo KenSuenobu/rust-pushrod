@@ -151,6 +151,10 @@ impl TextStyle {
 ///
 /// Coordinates are relative to the `Widget`'s own upper left-hand corner.  A backend decides where
 /// the pixels go (a GPU texture, a memory buffer, the screen with clipping).
+///
+/// Coordinates and sizes are in logical pixels.  On a high-DPI display the backend draws at
+/// physical resolution ([`Painter::scale_factor`] physical pixels per logical pixel), so text is
+/// rasterized at the larger size and one-pixel lines cover whole physical pixels.
 pub trait Painter {
     /// Returns how this backend caches painted `Widget`s.
     ///
@@ -158,6 +162,18 @@ pub trait Painter {
     ///
     /// The backend's [`CachePolicy`].
     fn cache_policy(&self) -> CachePolicy;
+
+    /// Returns how many physical pixels the backend draws per logical pixel.  A `Widget` rarely
+    /// needs it, since every call is already scaled, but it can use it to pick a sharper image
+    /// for a 2x display.
+    ///
+    /// # Returns
+    ///
+    /// The scale factor: `1.0` on a standard display (the default), `2.0` on a typical high-DPI
+    /// display.
+    fn scale_factor(&self) -> f32 {
+        1.0
+    }
 
     /// Fills the whole drawing surface with a color.
     ///

@@ -19,6 +19,21 @@
 //! method calls.
 //!
 //! `X` and `Y` positions are from the upper left-hand corner of the widget.
+//!
+//! ## Logical and physical pixels
+//!
+//! Every position and size in Pushrod is in *logical* pixels.  On a high-DPI display a backend
+//! draws at *physical* resolution: one logical pixel covers `scale` physical pixels (2 at 2x).
+//! [`to_physical`], [`to_physical_size`] and [`stroke_width`] do the conversion, so text and
+//! lines stay sharp at any scale factor.
+//!
+//! ```rust
+//! use pushrod::geometry::{Rect, size, stroke_width, to_physical, to_physical_size};
+//!
+//! assert_eq!(to_physical(Rect::new(10, 10, 100, 20), 2.0), Rect::new(20, 20, 200, 40));
+//! assert_eq!(to_physical_size(size(3, 3), 1.5), size(5, 5));
+//! assert_eq!(stroke_width(1.5), 2);
+//! ```
 
 /// A position in pixels: `x` from left to right, `y` from top to bottom.
 ///
@@ -233,9 +248,204 @@ pub fn origin_point() -> Point {
     Point { x: 0, y: 0 }
 }
 
+/// The smallest scale factor accepted; smaller (or non-finite) values are treated as `1.0`.
+pub const MIN_SCALE_FACTOR: f32 = 0.25;
+
+/// Returns a usable scale factor: `scale` itself, or `1.0` if it is not finite or is below
+/// [`MIN_SCALE_FACTOR`].
+///
+/// # Arguments
+///
+/// * `scale` - Physical pixels per logical pixel, as a backend reports it.
+///
+/// # Returns
+///
+/// The scale factor to draw with.
+pub fn sanitize_scale(scale: f32) -> f32 {
+    if scale.is_finite() && scale >= MIN_SCALE_FACTOR {
+        scale
+    } else {
+        1.0
+    }
+}
+
+/// Converts one logical coordinate to physical pixels, rounding to the nearest pixel.
+///
+/// # Arguments
+///
+/// * `value` - The logical coordinate.
+/// * `scale` - Physical pixels per logical pixel.
+///
+/// # Returns
+///
+/// The physical coordinate.
+pub fn to_physical_coord(value: i32, scale: f32) -> i32 {
+    (value as f64 * sanitize_scale(scale) as f64).round() as i32
+}
+
+/// Converts a logical point to physical pixels.
+///
+/// # Arguments
+///
+/// * `p` - The logical point.
+/// * `scale` - Physical pixels per logical pixel.
+///
+/// # Returns
+///
+/// The physical point.
+pub fn to_physical_point(p: Point, scale: f32) -> Point {
+    Point::new(to_physical_coord(p.x, scale), to_physical_coord(p.y, scale))
+}
+
+/// Converts a logical rectangle to physical pixels.
+///
+/// Each edge is rounded on its own, so rectangles that touch in logical pixels still touch in
+/// physical pixels, with no gap or overlap, at any scale factor.
+///
+/// # Arguments
+///
+/// * `r` - The logical rectangle.
+/// * `scale` - Physical pixels per logical pixel.
+///
+/// # Returns
+///
+/// The physical rectangle.
+pub fn to_physical(r: Rect, scale: f32) -> Rect {
+    let x0 = to_physical_coord(r.x, scale);
+    let y0 = to_physical_coord(r.y, scale);
+    let x1 = to_physical_coord(r.x.saturating_add_unsigned(r.w), scale);
+    let y1 = to_physical_coord(r.y.saturating_add_unsigned(r.h), scale);
+
+    Rect::new(x0, y0, x1.abs_diff(x0), y1.abs_diff(y0))
+}
+
+/// Converts a logical size to physical pixels, rounding up so the result covers every physical
+/// pixel the logical area touches.  A backend sizes each `Widget`'s texture with it.
+///
+/// # Arguments
+///
+/// * `s` - The logical size.
+/// * `scale` - Physical pixels per logical pixel.
+///
+/// # Returns
+///
+/// The physical size.
+pub fn to_physical_size(s: Size, scale: f32) -> Size {
+    let scale = sanitize_scale(scale) as f64;
+
+    Size::new(
+        (s.w as f64 * scale).ceil() as u32,
+        (s.h as f64 * scale).ceil() as u32,
+    )
+}
+
+/// Converts a physical length back to logical pixels, rounding up so the logical length always
+/// holds the physical one.  Used to report text sizes measured at physical resolution.
+///
+/// # Arguments
+///
+/// * `value` - The physical length.
+/// * `scale` - Physical pixels per logical pixel.
+///
+/// # Returns
+///
+/// The logical length.
+pub fn to_logical_length(value: u32, scale: f32) -> u32 {
+    (value as f64 / sanitize_scale(scale) as f64).ceil() as u32
+}
+
+/// Returns how many whole physical pixels a one-pixel line or border covers.
+///
+/// # Arguments
+///
+/// * `scale` - Physical pixels per logical pixel.
+///
+/// # Returns
+///
+/// The scale rounded to the nearest whole pixel, at least `1`: `1` at 1x, `2` at 1.5x and 2x,
+/// `3` at 3x.
+pub fn stroke_width(scale: f32) -> u32 {
+    (sanitize_scale(scale).round() as u32).max(1)
+}
+
+/// Converts a scale factor to a whole percentage, as engine events carry it.
+///
+/// # Arguments
+///
+/// * `scale` - Physical pixels per logical pixel.
+///
+/// # Returns
+///
+/// The scale in percent: `100` for 1x, `150` for 1.5x.
+pub fn scale_percent(scale: f32) -> u32 {
+    (sanitize_scale(scale) * 100.0).round() as u32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn one_x_is_the_identity() {
+        let r = Rect::new(-3, 7, 41, 9);
+
+        assert_eq!(to_physical(r, 1.0), r);
+        assert_eq!(to_physical_size(size(41, 9), 1.0), size(41, 9));
+        assert_eq!(to_physical_point(point(-3, 7), 1.0), point(-3, 7));
+        assert_eq!(to_logical_length(41, 1.0), 41);
+    }
+
+    #[test]
+    fn two_x_doubles_everything() {
+        assert_eq!(
+            to_physical(Rect::new(5, 6, 10, 20), 2.0),
+            Rect::new(10, 12, 20, 40)
+        );
+        assert_eq!(to_physical_size(size(10, 20), 2.0), size(20, 40));
+        assert_eq!(to_logical_length(41, 2.0), 21);
+    }
+
+    #[test]
+    fn touching_rects_still_touch_at_fractional_scales() {
+        for scale in [1.25, 1.5, 1.75, 2.5] {
+            let left = to_physical(Rect::new(0, 0, 3, 1), scale);
+            let right = to_physical(Rect::new(3, 0, 3, 1), scale);
+
+            assert_eq!(left.x + left.w as i32, right.x, "scale {scale}");
+        }
+    }
+
+    #[test]
+    fn physical_sizes_cover_any_placement() {
+        let scale = 1.5;
+        let s = size(7, 3);
+        let texture = to_physical_size(s, scale);
+
+        for x in 0..8 {
+            let placed = to_physical(Rect::new(x, x, s.w, s.h), scale);
+
+            assert!(placed.w <= texture.w && placed.h <= texture.h);
+        }
+    }
+
+    #[test]
+    fn strokes_are_whole_pixels() {
+        assert_eq!(stroke_width(1.0), 1);
+        assert_eq!(stroke_width(1.5), 2);
+        assert_eq!(stroke_width(2.0), 2);
+        assert_eq!(stroke_width(3.0), 3);
+        assert_eq!(stroke_width(0.5), 1);
+    }
+
+    #[test]
+    fn bad_scales_fall_back_to_one() {
+        assert_eq!(sanitize_scale(f32::NAN), 1.0);
+        assert_eq!(sanitize_scale(0.0), 1.0);
+        assert_eq!(sanitize_scale(-2.0), 1.0);
+        assert_eq!(sanitize_scale(f32::INFINITY), 1.0);
+        assert_eq!(scale_percent(1.5), 150);
+        assert_eq!(scale_percent(f32::NAN), 100);
+    }
 
     #[test]
     fn overlapping_rects_intersect() {
