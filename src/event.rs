@@ -326,6 +326,10 @@ pub enum EngineEventKind {
     EventMaskChanged,
     /// See [`EngineEvent::WidgetAdded`].
     WidgetAdded,
+    /// See [`EngineEvent::WidgetRemoved`].
+    WidgetRemoved,
+    /// See [`EngineEvent::PartsArranged`].
+    PartsArranged,
     /// See [`EngineEvent::EventBroadcast`].
     EventBroadcast,
     /// See [`EngineEvent::CustomEventDropped`].
@@ -369,6 +373,23 @@ pub enum EngineEvent {
         id: WidgetId,
         /// The ID of its parent.
         parent: WidgetId,
+    },
+    /// A `Widget` was removed from the window, such as a composite part removed with
+    /// `WidgetCache::remove_part`.  Sent once for each `Widget` in the removed subtree.  The ID
+    /// is never reused.
+    WidgetRemoved {
+        /// The ID of the removed `Widget`.
+        id: WidgetId,
+        /// The ID of its parent.
+        parent: WidgetId,
+    },
+    /// A composite `Widget` laid its parts out again, after it was built or a part was added,
+    /// inserted, or removed.  See [`Composite::layout_parts`](crate::composite::Composite::layout_parts).
+    PartsArranged {
+        /// The ID of the composite `Widget`.
+        id: WidgetId,
+        /// How many parts it placed.
+        placed: usize,
     },
     /// An event mask changed.
     EventMaskChanged {
@@ -469,6 +490,8 @@ impl EngineEvent {
         match self {
             EngineEvent::EventMaskChanged { .. } => EngineEventKind::EventMaskChanged,
             EngineEvent::WidgetAdded { .. } => EngineEventKind::WidgetAdded,
+            EngineEvent::WidgetRemoved { .. } => EngineEventKind::WidgetRemoved,
+            EngineEvent::PartsArranged { .. } => EngineEventKind::PartsArranged,
             EngineEvent::EventBroadcast { .. } => EngineEventKind::EventBroadcast,
             EngineEvent::CustomEventDropped { .. } => EngineEventKind::CustomEventDropped,
             EngineEvent::FontLoaded { .. } => EngineEventKind::FontLoaded,

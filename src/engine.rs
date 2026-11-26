@@ -875,6 +875,8 @@ impl<S> Engine<S> {
 
     /// Delivers every custom event in `events` to its target `Widget`s, in order.
     ///
+    /// Each event from a composite's part is followed by the events the composite translated it
+    /// into ([`Composite::handle_part_event`](crate::composite::Composite::handle_part_event)).
     /// Each custom event is followed in the result by nothing of its own; the events the `Widget`s
     /// generate while handling it join the back of the queue, so custom events posted during
     /// delivery are delivered after the ones already waiting.  Once the frame's budget of
@@ -894,7 +896,20 @@ impl<S> Engine<S> {
 
         while let Some(event) = queue.pop_front() {
             let Event::Custom(custom) = &event else {
+                // A composite sees its parts' events right after them; its own custom events
+                // wait their turn like any other.
+                let translated = self.widget_cache.translate_part_event(&event);
+
                 out.push(event);
+
+                for generated in translated {
+                    if matches!(generated, Event::Custom(_)) {
+                        queue.push_back(generated);
+                    } else {
+                        out.push(generated);
+                    }
+                }
+
                 continue;
             };
 

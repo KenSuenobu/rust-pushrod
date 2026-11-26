@@ -50,6 +50,7 @@ pub mod appearance;
 pub mod backend;
 pub mod cache;
 pub mod color;
+pub mod composite;
 pub mod controllers;
 pub mod engine;
 pub mod error;

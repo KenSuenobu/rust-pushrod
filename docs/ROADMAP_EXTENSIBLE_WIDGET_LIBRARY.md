@@ -1358,7 +1358,6 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/widget.rs`, `src/cache.rs`, `src/composite.rs (new)` |
 | 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `chassis`, `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | v0.1 | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
 | 5.5 (#116) | Layout manager foundation: Layout trait, size hints, measure and arrange | A small Layout trait any container can use; widgets report minimum, preferred, and maximum sizes; containers measure then arrange their children. | `chassis`, `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | v0.1 | M | `layout/mod.rs (new)`, `src/widget.rs`, `src/cache.rs` |
@@ -1389,6 +1388,8 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/clip-children-to-their-parent-s-bounds.md` ("Clip children to their parent's bounds", Concepts, new). Guides: Tree section. Rustdoc: Draw/hit rules in `cache` docs. Examples: n/a. Screenshots: n/a.
 
 ### 5.2 (#57): Composite widgets: build widgets from parts that applications can retrieve and modify
+
+**Status:** done (#57). `pushrod::composite::Composite` (`build`, `part_list`, `parts`, `part`, `layout_parts`, `handle_part_event`) and `TypedParts`; parts are ordinary children named in a `PartList`; `WidgetCache::add_part`, `insert_part`, `remove_part`, `insert_list_part`, `remove_list_part`, and `arrange_parts` change and re-lay them out, emitting `WidgetAdded`, `WidgetRemoved`, and `PartsArranged`; part events reach the composite before the application; `pushrod-sdl2/examples/composite.rs` demonstrates it. The scroll bar (step 44) and alert (step 52) are built on it later, and the form round trip of part overrides is completed with the form writer (6.6, step 65).
 
 **Problem Statement.** Complex controls (alert, scroll bar, spin box, combo box, menu, file chooser) are naturally made from simpler widgets. `paint` made drawing reusable, but interactive widgets can't yet be reused as parts of another widget. And because every widget that displays elements must be customizable, an application must be able to reach those elements: change the font or color of an alert's message, add a Help button to an alert, restyle one menu item, or recolor a scroll bar's thumb.
 
@@ -1422,13 +1423,13 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Acceptance Criteria.**
 
-- Composites create parts as ordinary widgets with IDs
-- `parts()`, `part(name)`, and typed part accessors exist on every built-in composite
-- Changing a part's font, color, or text through `ui.get_mut` repaints it
-- List-structured composites support add/insert/remove of parts with automatic re-layout
-- Composite translates part events; callbacks on part IDs also work
-- Form round trip preserves part overrides and added/removed parts
-- Scroll bar and alert built on it
+- [x] Composites create parts as ordinary widgets with IDs
+- [ ] `parts()`, `part(name)`, and typed part accessors exist on every built-in composite (deferred: the trait provides them; the scroll bar and alert get theirs in steps 44 and 52)
+- [x] Changing a part's font, color, or text through `ui.get_mut` repaints it
+- [x] List-structured composites support add/insert/remove of parts with automatic re-layout
+- [x] Composite translates part events; callbacks on part IDs also work
+- [ ] Form round trip preserves part overrides and added/removed parts (deferred to the form writer, step 65)
+- [ ] Scroll bar and alert built on it (deferred to steps 44 and 52)
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 9.2 (#94).
 

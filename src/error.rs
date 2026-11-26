@@ -68,6 +68,14 @@ pub enum Error {
         /// The ID that was not found.
         id: WidgetId,
     },
+    /// A composite `Widget` operation failed: the `Widget` is not a composite, or a part name
+    /// is unknown or already used.
+    Composite {
+        /// The ID of the composite `Widget`.
+        id: WidgetId,
+        /// What went wrong.
+        message: String,
+    },
     /// A form file could not be read or is not valid.
     FormFile {
         /// The path of the form file.
@@ -145,6 +153,23 @@ impl Error {
         }
     }
 
+    /// Creates a [`Error::Composite`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the composite `Widget`.
+    /// * `message` - What went wrong.
+    ///
+    /// # Returns
+    ///
+    /// The error.
+    pub fn composite(id: WidgetId, message: impl Into<String>) -> Self {
+        Error::Composite {
+            id,
+            message: message.into(),
+        }
+    }
+
     /// Creates a [`Error::FormFile`].
     ///
     /// # Arguments
@@ -180,6 +205,7 @@ impl fmt::Display for Error {
             Error::Image { path, message } => write!(f, "image \"{path}\": {message}"),
             Error::Texture { message } => write!(f, "texture: {message}"),
             Error::UnknownWidget { id } => write!(f, "widget {id} does not exist"),
+            Error::Composite { id, message } => write!(f, "composite {id}: {message}"),
             Error::FormFile { path, message } => write!(f, "form file \"{path}\": {message}"),
         }
     }
@@ -209,6 +235,10 @@ mod tests {
         assert_eq!(
             Error::UnknownWidget { id: 7 }.to_string(),
             "widget 7 does not exist"
+        );
+        assert_eq!(
+            Error::composite(3, "no part named \"x\"").to_string(),
+            "composite 3: no part named \"x\""
         );
         assert_eq!(
             Error::form_file("f.form", "syntax").to_string(),

@@ -76,7 +76,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 37 | [#40](https://github.com/KenSuenobu/rust-pushrod/issues/40) | pushrod: [3.2] Slider (done) |
 | ✅ 38 | [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) | pushrod: [2.6] Text field: single-line entry with input masks, validation, and numeric mode (done) |
 | ✅ 39 | [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) | pushrod: [5.1] Clip children to their parent's bounds (done) |
-| 40 | [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) | pushrod: [5.2] Composite widgets: build widgets from parts that applications can retrieve and modify |
+| ✅ 40 | [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) | pushrod: [5.2] Composite widgets: build widgets from parts that applications can retrieve and modify (done) |
 | 41 | [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) | pushrod: [5.5] Layout manager foundation: Layout trait, size hints, measure and arrange |
 | 42 | [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) | pushrod: [5.6] Row and column layouts |
 | 43 | [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) | pushrod: [5.7] Form layout: aligned label and field rows |
@@ -938,13 +938,13 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Composites create parts as ordinary widgets with IDs
-- [ ] `parts()`, `part(name)`, and typed part accessors exist on every built-in composite
-- [ ] Changing a part's font, color, or text through `ui.get_mut` repaints it
-- [ ] List-structured composites support add/insert/remove of parts with automatic re-layout
-- [ ] Composite translates part events; callbacks on part IDs also work
-- [ ] Form round trip preserves part overrides and added/removed parts
-- [ ] Scroll bar and alert built on it
+- [x] Composites create parts as ordinary widgets with IDs
+- [x] `parts()`, `part(name)`, and typed part accessors exist on the `Composite` trait, with an example composite
+- [x] Changing a part's font, color, or text through `ui.get_mut` repaints it
+- [x] List-structured composites support add/insert/remove of parts with automatic re-layout
+- [x] Composite translates part events; callbacks on part IDs also work
+- [ ] Deferred: the scroll bar is built on it in step 44 and the alert in step 52, so typed accessors on every built-in composite are completed there
+- [ ] Deferred: form round trip of part overrides and added/removed parts is completed in step 65 (form writer), once forms exist
 
 ### Step 41: Layout manager foundation: Layout trait, size hints, measure and arrange
 
@@ -1010,6 +1010,7 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 - [ ] Drag, arrows with repeat, track paging
 - [ ] Thumb size reflects proportion
+- [ ] Built on the step 40 `Composite` trait: `parts()`, `part(name)`, and typed accessors for the arrows and thumb
 - [ ] Parts are retrievable and modifiable as described
 
 ### Step 45: Container: a scrollable viewport onto fixed-size content
@@ -1136,6 +1137,7 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 - [ ] Modal: nothing else receives input while open
 - [ ] Return/Escape behave as described
 - [ ] Completion closure gets the index
+- [ ] Built on the step 40 `Composite` trait: `AlertParts`, plus `add_button` for extra buttons
 - [ ] Parts are retrievable and modifiable as described
 
 ### Step 53: Reference application: a real app built only with Pushrod
@@ -1318,7 +1320,7 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 **Show on video:**
 
 - [ ] Round trip preserves properties and pixels
-- [ ] Composite parts not written
+- [ ] Composite part overrides and added/removed parts round trip (completes step 40)
 
 ### Step 66: Generate ID constants from a form file
 

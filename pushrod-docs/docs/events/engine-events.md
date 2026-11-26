@@ -28,6 +28,8 @@ flowchart TD
 |---|---|
 | `EventMaskChanged { scope, old, new }` | The run-loop mask or a widget's mask changes to a different value. `scope` is `MaskScope::RunLoop` or `MaskScope::Widget(id)`. |
 | `WidgetAdded { id, parent }` | A widget is added to the window. Not sent for the root widget the engine creates. |
+| `WidgetRemoved { id, parent }` | A widget was removed, such as a [composite](../guides/composite-widgets.md) part removed with `remove_part`. Sent for each widget in the removed subtree; the ID is never reused. |
+| `PartsArranged { id, placed }` | A [composite](../guides/composite-widgets.md) laid its parts out, after it was built or a part was added, inserted, or removed. `placed` is how many parts it placed. |
 | `EventBroadcast { kind, recipients }` | An event was [broadcast](../concepts/broadcast-events-to-all-interested-widgets.md) to every interested widget. `recipients` is how many received it. |
 | `CustomEventDropped { target }` | A [custom event](./custom-events.md) was discarded because the per-frame limit was reached. |
 | `FontLoaded { font_name, font_size }` | A font family was loaded, the first time text was drawn with it; `font_name` is the family name. See [Text and fonts](../concepts/text-and-fonts.md) and [GPU text](../concepts/gpu-text.md). |
