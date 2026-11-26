@@ -53,9 +53,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Drag/click set value within range
-- [ ] Ticks and snapping
-- [ ] Keyboard adjusts
+- [x] Drag/click set value within range
+- [x] Ticks and snapping
+- [x] Keyboard adjusts
 
 ## Depends on
 

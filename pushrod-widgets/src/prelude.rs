@@ -33,4 +33,5 @@ pub use crate::panel::Panel;
 pub use crate::progress_bar::ProgressBar;
 pub use crate::radio_button::{RadioButton, RadioGroup};
 pub use crate::separator::Separator;
+pub use crate::slider::Slider;
 pub use crate::text::Text;

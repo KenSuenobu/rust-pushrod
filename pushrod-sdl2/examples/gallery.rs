@@ -27,6 +27,7 @@ use pushrod_widgets::panel::Panel;
 use pushrod_widgets::progress_bar::ProgressBar;
 use pushrod_widgets::radio_button::RadioGroup;
 use pushrod_widgets::separator::Separator;
+use pushrod_widgets::slider::Slider;
 use pushrod_widgets::text::{Text, TextJustify};
 
 /// Window size in pixels.
@@ -387,6 +388,50 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut outline = ProgressBar::indeterminate().at(10, 112).size(270, 16);
     outline.set_outline_mode(true);
     engine.add_child_widget(progress_tile, outline);
+
+    // Slider: a volume slider with its value, one with ticks and snapping, a disabled one, and a
+    // vertical one.
+    let slider_tile = add_tile(&mut engine, panel_id, 1, 7, "Slider");
+    engine.add_child_widget(
+        slider_tile,
+        Slider::new(0.0, 100.0)
+            .at(10, 36)
+            .size(210, 24)
+            .value(40.0)
+            .show_value(true),
+    );
+    engine.add_child_widget(
+        slider_tile,
+        Slider::new(0.0, 100.0)
+            .at(10, 68)
+            .size(210, 28)
+            .value(50.0)
+            .step(10.0)
+            .ticks(10.0)
+            .show_value(true),
+    );
+    let disabled = engine.add_child_widget(
+        slider_tile,
+        Slider::new(0.0, 100.0)
+            .at(10, 104)
+            .size(210, 24)
+            .value(40.0)
+            .show_value(true),
+    );
+    engine
+        .widgets()
+        .get_mut(disabled)
+        .unwrap()
+        .set_enabled(false);
+    engine.add_child_widget(
+        slider_tile,
+        Slider::new(0.0, 100.0)
+            .vertical()
+            .at(240, 32)
+            .size(30, 108)
+            .value(75.0)
+            .show_value(true),
+    );
 
     // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.
     let glyph_tile = add_tile(&mut engine, panel_id, 1, 5, "Glyph Button");
