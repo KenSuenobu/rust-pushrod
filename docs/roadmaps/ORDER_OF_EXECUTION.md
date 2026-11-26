@@ -77,7 +77,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 38 | [#32](https://github.com/KenSuenobu/rust-pushrod/issues/32) | pushrod: [2.6] Text field: single-line entry with input masks, validation, and numeric mode (done) |
 | ✅ 39 | [#56](https://github.com/KenSuenobu/rust-pushrod/issues/56) | pushrod: [5.1] Clip children to their parent's bounds (done) |
 | ✅ 40 | [#57](https://github.com/KenSuenobu/rust-pushrod/issues/57) | pushrod: [5.2] Composite widgets: build widgets from parts that applications can retrieve and modify (done) |
-| 41 | [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) | pushrod: [5.5] Layout manager foundation: Layout trait, size hints, measure and arrange |
+| ✅ 41 | [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) | pushrod: [5.5] Layout manager foundation: Layout trait, size hints, measure and arrange (done) |
 | 42 | [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) | pushrod: [5.6] Row and column layouts |
 | 43 | [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) | pushrod: [5.7] Form layout: aligned label and field rows |
 | 44 | [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) | pushrod: [3.1] Scroll bar |
@@ -956,12 +956,12 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] `SizeHint`, `LayoutParams`, and the `Layout` trait
-- [ ] Containers with a layout are measured and arranged once per frame when dirty
-- [ ] Layout invalidation stops at containers whose size doesn't change
-- [ ] Moving without resizing doesn't repaint
-- [ ] Absolute positioning unchanged when no layout is set
-- [ ] An application-defined layout works
+- [x] `SizeHint`, `LayoutParams`, and the `Layout` trait
+- [x] Containers with a layout are measured and arranged once per frame when dirty
+- [x] Layout invalidation stops at containers whose size doesn't change
+- [x] Moving without resizing doesn't repaint
+- [x] Absolute positioning unchanged when no layout is set
+- [x] An application-defined layout works
 
 ### Step 42: Row and column layouts
 

@@ -359,3 +359,66 @@ fn wrap_and_max_lines_invalidate_only_on_change() {
     t.set_wrap(Wrap::Anywhere);
     assert!(t.is_invalidated());
 }
+
+#[test]
+fn text_reports_a_size_hint_from_its_content() {
+    let mut p = RecordingPainter::default();
+    let mut t = Text::new("abcd\nab");
+    let hint = t.size_hint(&mut p);
+
+    // The recording painter is half the font size wide per character, one font size tall.
+    let font = Font::default().size() as u32;
+
+    assert_eq!(hint.preferred, size(4 * (font / 2), 2 * font));
+    assert_eq!(
+        hint.max,
+        size(pushrod::layout::UNBOUNDED, pushrod::layout::UNBOUNDED)
+    );
+    // Truncating text can shrink to an ellipsis; text that never truncates cannot shrink.
+    assert!(hint.min.w < hint.preferred.w);
+
+    t.set_truncate(Truncate::None);
+    assert_eq!(t.size_hint(&mut p).min.w, hint.preferred.w);
+}
+
+#[test]
+fn wrapped_text_can_shrink_to_its_widest_word() {
+    let mut p = RecordingPainter::default();
+    let mut t = Text::new("one three");
+
+    t.set_wrap(Wrap::Word);
+
+    let font = Font::default().size() as u32;
+
+    assert_eq!(t.size_hint(&mut p).min.w, 5 * (font / 2));
+    t.set_max_lines(Some(1));
+    assert_eq!(t.size_hint(&mut p).preferred.h, font);
+}
+
+#[test]
+fn an_explicit_hint_wins_and_text_changes_ask_for_layout() {
+    use pushrod::layout::SizeHint;
+
+    let mut p = RecordingPainter::default();
+    let mut t = Text::new("hello");
+
+    t.set_size_hint(SizeHint::fixed(size(70, 15)));
+    assert_eq!(t.size_hint(&mut p).preferred, size(70, 15));
+
+    let mut cache = pushrod::cache::WidgetCache::new();
+    let mut backend = pushrod::backend::headless::HeadlessBackend::new(size(100, 100));
+
+    cache.add(Box::new(pushrod::root_widget::RootWidget::new(size(
+        100, 100,
+    ))));
+
+    let id = cache.add_child(0, Box::new(Text::new("hi")));
+
+    cache.draw_loop(&mut backend);
+    assert!(!cache.needs_draw());
+    cache
+        .get_as_mut::<Text>(id)
+        .unwrap()
+        .set_text("hello".to_string());
+    assert!(cache.needs_draw());
+}

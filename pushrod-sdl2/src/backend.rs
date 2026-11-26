@@ -338,6 +338,14 @@ impl Backend for Sdl2Backend {
         self.waker.clone()
     }
 
+    fn measure(&mut self, measure: &mut dyn FnMut(&mut dyn Painter)) {
+        let mut painter = Sdl2Painter::new(&mut self.canvas, &mut self.fonts);
+
+        measure(&mut painter);
+        // Measuring draws nothing, so any error it found is reported when the text is painted.
+        let _ = painter.take_errors();
+    }
+
     /// Failures (a texture that cannot be created, a drawing call that fails) skip that
     /// `Widget`'s painting and are reported through [`Backend::take_notices`].
     fn paint_widget(&mut self, id: WidgetId, size: Size, paint: &mut dyn FnMut(&mut dyn Painter)) {

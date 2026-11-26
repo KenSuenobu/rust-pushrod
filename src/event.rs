@@ -330,6 +330,8 @@ pub enum EngineEventKind {
     WidgetRemoved,
     /// See [`EngineEvent::PartsArranged`].
     PartsArranged,
+    /// See [`EngineEvent::LayoutChanged`].
+    LayoutChanged,
     /// See [`EngineEvent::EventBroadcast`].
     EventBroadcast,
     /// See [`EngineEvent::CustomEventDropped`].
@@ -390,6 +392,12 @@ pub enum EngineEvent {
         id: WidgetId,
         /// How many parts it placed.
         placed: usize,
+    },
+    /// A container's layout manager measured and arranged its children before a frame.  See
+    /// [`Layout`](crate::layout::Layout).
+    LayoutChanged {
+        /// The ID of the container that was arranged.
+        container: WidgetId,
     },
     /// An event mask changed.
     EventMaskChanged {
@@ -492,6 +500,7 @@ impl EngineEvent {
             EngineEvent::WidgetAdded { .. } => EngineEventKind::WidgetAdded,
             EngineEvent::WidgetRemoved { .. } => EngineEventKind::WidgetRemoved,
             EngineEvent::PartsArranged { .. } => EngineEventKind::PartsArranged,
+            EngineEvent::LayoutChanged { .. } => EngineEventKind::LayoutChanged,
             EngineEvent::EventBroadcast { .. } => EngineEventKind::EventBroadcast,
             EngineEvent::CustomEventDropped { .. } => EngineEventKind::CustomEventDropped,
             EngineEvent::FontLoaded { .. } => EngineEventKind::FontLoaded,

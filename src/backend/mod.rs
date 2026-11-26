@@ -124,6 +124,14 @@ pub trait Backend {
     /// * `paint` - Draws the `Widget`, given the backend's [`Painter`].
     fn paint_widget(&mut self, id: WidgetId, size: Size, paint: &mut dyn FnMut(&mut dyn Painter));
 
+    /// Gives `measure` a [`Painter`] that only measures text: nothing is drawn.  Layout calls it
+    /// to ask `Widget`s for their size hints.
+    ///
+    /// # Arguments
+    ///
+    /// * `measure` - Called once with a painter whose `text_width` and `line_height` are accurate.
+    fn measure(&mut self, measure: &mut dyn FnMut(&mut dyn Painter));
+
     /// Starts a frame by clearing the window.
     ///
     /// # Arguments
