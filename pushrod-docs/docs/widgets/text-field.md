@@ -180,10 +180,12 @@ An `Accessory` is a square button drawn inside the edit area. The text is clippe
 
 | Accessory | Looks like | Clicking it |
 |---|---|---|
-| `Clear` | A cross, shown only while the field has text | Clears the text and emits `TextChanged`. |
-| `Search` | A magnifier | Emits `AccessoryClicked`; ignore it to leave the magnifier decorative. |
-| `RevealPassword` | An eye (struck through while revealed) | Shows or hides a password field's characters. |
+| `Clear` | A white cross on a light gray disc, shown only while the field has text | Clears the text and emits `TextChanged`. |
+| `Search` | A magnifier: a ring with a thick handle | Emits `AccessoryClicked`; ignore it to leave the magnifier decorative. |
+| `RevealPassword` | An almond-shaped eye with a dark iris (struck through while revealed) | Shows or hides a password field's characters. |
 | `Custom(char)` | The character | Emits `AccessoryClicked`. |
+
+The pictures are drawn by hand from fills and lines (module `text_field::glyphs`), so they look the same in every font.
 
 ## How editing works
 

@@ -11,6 +11,7 @@ use pushrod::input::{InputEvent, Key, Modifiers, MouseButton};
 use pushrod::widget::Widget;
 use pushrod_widgets::panel::Panel;
 use pushrod_widgets::prelude::TextField as PreludeField;
+use pushrod_widgets::text_field::glyphs::CLEAR_DISC;
 use pushrod_widgets::text_field::validate::Validity;
 use pushrod_widgets::text_field::{Accessory, IntegerField, NumberField, TextField};
 use std::time::Duration;
@@ -595,25 +596,83 @@ fn a_password_is_drawn_masked_until_revealed() {
 fn the_clear_accessory_appears_with_text_and_clears_it() {
     let (mut cache, id) = focused(TextField::search());
     let trailing = (10 + 200 - 12, 22);
-    let crosses = |cache: &WidgetCache| {
+    // The clear button is a light gray disc; nothing else is drawn in that color.
+    let discs = |cache: &WidgetCache| {
+        painted(get(cache, id))
+            .iter()
+            .filter(|c| matches!(c, PaintCall::FillRect(_, color) if *color == CLEAR_DISC))
+            .count()
+    };
+
+    assert_eq!(discs(&cache), 0, "hidden while empty");
+    let events = cache.handle_event(down(trailing.0, trailing.1, 1));
+    assert_eq!(changes(&events), 0, "a hidden clear button does nothing");
+
+    typed(&mut cache, id, "widgets");
+    assert!(discs(&cache) > 0, "the disc is drawn");
+
+    let events = cache.handle_event(down(trailing.0, trailing.1, 1));
+
+    assert_eq!(get(&cache, id).text(), "");
+    assert_eq!(changes(&events), 1);
+}
+
+#[test]
+fn the_accessory_pictures_match_the_mockup() {
+    use pushrod_widgets::text_field::glyphs::{CLEAR_DISC, SOFT_INK};
+
+    let white = |calls: &[PaintCall]| {
+        calls
+            .iter()
+            .any(|c| matches!(c, PaintCall::Line(_, _, color) if *color == Color::WHITE))
+    };
+    let (cache, id) = unfocused(
+        TextField::new()
+            .with_text("x")
+            .with_trailing(Accessory::Clear),
+    );
+    let calls = painted(get(&cache, id));
+
+    // A gray disc with a white cross.
+    assert!(
+        calls
+            .iter()
+            .any(|c| matches!(c, PaintCall::FillRect(_, color) if *color == CLEAR_DISC))
+    );
+    assert!(white(&calls));
+
+    // The magnifier: a ring (fills) and a handle (lines), both in the soft ink.
+    let (cache, id) = unfocused(TextField::new().with_leading(Accessory::Search));
+    let calls = painted(get(&cache, id));
+
+    assert!(
+        calls
+            .iter()
+            .any(|c| matches!(c, PaintCall::FillRect(_, color) if *color == SOFT_INK))
+    );
+    assert!(
+        calls
+            .iter()
+            .any(|c| matches!(c, PaintCall::Line(_, _, color) if *color == SOFT_INK))
+    );
+
+    // The eye is an outline with a dark iris; struck through only while revealed.
+    let (mut cache, id) = unfocused(
+        TextField::new()
+            .with_text("x")
+            .password()
+            .with_trailing(Accessory::RevealPassword),
+    );
+    let lines = |cache: &WidgetCache| {
         painted(get(cache, id))
             .iter()
             .filter(|c| matches!(c, PaintCall::Line(..)))
             .count()
     };
 
-    // Empty: the magnifier's handle is the only line.
-    assert_eq!(crosses(&cache), 1);
-    let events = cache.handle_event(down(trailing.0, trailing.1, 1));
-    assert_eq!(changes(&events), 0, "a hidden clear button does nothing");
-
-    typed(&mut cache, id, "widgets");
-    assert_eq!(crosses(&cache), 3, "the cross is drawn");
-
-    let events = cache.handle_event(down(trailing.0, trailing.1, 1));
-
-    assert_eq!(get(&cache, id).text(), "");
-    assert_eq!(changes(&events), 1);
+    assert_eq!(lines(&cache), 0);
+    cache.handle_event(down(10 + 200 - 12, 22, 1));
+    assert!(lines(&cache) > 0, "struck through while revealed");
 }
 
 #[test]

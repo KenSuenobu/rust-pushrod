@@ -49,6 +49,7 @@ use pushrod::widget::{Behavior, Widget, WidgetCore};
 use std::cell::{Cell, RefCell};
 use std::time::Duration;
 
+pub mod glyphs;
 pub mod validate;
 
 use validate::{IntegerValidator, Mask, NumberValidator, Validator, Validity};
@@ -788,44 +789,12 @@ impl TextField {
         ink: Color,
         font: &TextStyle,
     ) {
-        let (cx, cy) = (area.x + area.w as i32 / 2, area.y + area.h as i32 / 2);
-        let r = (area.w.min(area.h) as i32 / 4).max(2);
+        let soft = self.style().border_color.unwrap_or(glyphs::SOFT_INK);
 
         match accessory {
-            Accessory::Clear => {
-                p.line(point(cx - r, cy - r), point(cx + r, cy + r), ink);
-                p.line(point(cx - r, cy + r), point(cx + r, cy - r), ink);
-            }
-            Accessory::Search => {
-                p.rect(
-                    Rect::new(cx - r, cy - r, (r * 2 - 1) as u32, (r * 2 - 1) as u32),
-                    ink,
-                );
-                p.line(
-                    point(cx + r - 2, cy + r - 2),
-                    point(cx + r + 2, cy + r + 2),
-                    ink,
-                );
-            }
-            Accessory::RevealPassword => {
-                p.rect(
-                    Rect::new(
-                        cx - r - 2,
-                        cy - r / 2 - 1,
-                        (r * 2 + 5) as u32,
-                        (r + 2) as u32,
-                    ),
-                    ink,
-                );
-                p.fill_rect(
-                    Rect::new(cx - 1, cy - r / 2 + 1, 3, (r - 2).max(1) as u32),
-                    ink,
-                );
-
-                if self.revealed {
-                    p.line(point(cx - r - 2, cy + r), point(cx + r + 2, cy - r), ink);
-                }
-            }
+            Accessory::Clear => glyphs::clear(p, area),
+            Accessory::Search => glyphs::search(p, area, soft),
+            Accessory::RevealPassword => glyphs::eye(p, area, soft, self.revealed),
             Accessory::Custom(glyph) => {
                 paint::text(
                     p,
