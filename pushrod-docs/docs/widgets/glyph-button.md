@@ -8,7 +8,7 @@ description: A small button showing one character, such as an arrow, that can fi
 
 `GlyphButton` (module `pushrod_widgets::glyph_button`): a small button showing one character, used for scroll arrows, close boxes, and spin buttons. It fills its background, draws the glyph centered, and draws a one-pixel border; while pressed, its colors are inverted.
 
-![A Glyph Button tile: four small buttons with arrow glyphs, the last two marked as repeating](/img/screenshots/glyph-button.png)
+![A Glyph Button tile: four small buttons with left, right, up and down arrows, the last two marked as repeating](/img/screenshots/glyph-button.png)
 
 ## Creating it
 
@@ -17,8 +17,8 @@ use pushrod_widgets::glyph_button::GlyphButton;
 
 /// A fictional spin control: an up arrow and a down arrow that repeat while held.
 pub fn spin_arrows() -> (GlyphButton, GlyphButton) {
-    let up = GlyphButton::new('^').at(20, 20).size(20, 20).activate_on_press();
-    let down = GlyphButton::new('v').at(20, 42).size(20, 20).activate_on_press();
+    let up = GlyphButton::new('↑').at(20, 20).size(20, 20).activate_on_press();
+    let down = GlyphButton::new('↓').at(20, 42).size(20, 20).activate_on_press();
     (up, down)
 }
 ```
@@ -76,6 +76,7 @@ sequenceDiagram
 - Pressing selects (inverts) the button. Dragging out of its bounds deselects it and **pauses** the repeat; dragging back in selects it and resumes it.
 - The repeat is driven by the core's animation ticks (`Event::Tick`), so the application needs no timer. The delay and interval are the public constants `REPEAT_DELAY` (400 ms) and `REPEAT_INTERVAL` (100 ms).
 - Without `activate_on_press` it behaves like a [Button](button.md): `Clicked` is emitted when the mouse button is released inside it.
+- The arrow characters `←` `↑` `→` `↓` (U+2190 to U+2193) are drawn as flat filled triangles, so they look the same whatever font is loaded (the built-in font has no arrows). Any other character is drawn with the font.
 - The fill is transparent until set with `set_color`.
 
 ## Planned

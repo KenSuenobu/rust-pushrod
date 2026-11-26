@@ -23,6 +23,9 @@
 //! is emitted when the mouse button is released inside it.  With
 //! [`Behavior::ACTIVATE_ON_PRESS`] it emits `Clicked` as soon as it is pressed, then repeats
 //! after 400 ms and every 100 ms after that for as long as it is held with the pointer inside.
+//! The arrow characters `←` `↑` `→` `↓` (U+2190 to U+2193) are drawn as flat filled triangles, so
+//! they look the same whatever font is loaded; any other character is drawn with the font.
+//!
 //! The repeat is driven by the core's animation ticks (`Event::Tick`), so it needs no timer from
 //! the application.
 
@@ -41,6 +44,63 @@ pub const REPEAT_DELAY: Duration = Duration::from_millis(400);
 
 /// The time between repeats once a held button has started repeating.
 pub const REPEAT_INTERVAL: Duration = Duration::from_millis(100);
+
+/// The four arrow characters a `GlyphButton` draws itself.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Arrow {
+    Left,
+    Up,
+    Right,
+    Down,
+}
+
+impl Arrow {
+    /// Maps `←` `↑` `→` `↓` to an arrow.
+    ///
+    /// # Arguments
+    ///
+    /// * `glyph` - The character to look up.
+    ///
+    /// # Returns
+    ///
+    /// The arrow, or `None` for any other character.
+    fn from_glyph(glyph: char) -> Option<Self> {
+        match glyph {
+            '\u{2190}' => Some(Self::Left),
+            '\u{2191}' => Some(Self::Up),
+            '\u{2192}' => Some(Self::Right),
+            '\u{2193}' => Some(Self::Down),
+            _ => None,
+        }
+    }
+
+    /// Draws the arrow as a triangle, centered in a `size` surface, one pixel row (or column)
+    /// at a time.  Its depth is a quarter of the smaller side, plus one.
+    ///
+    /// # Arguments
+    ///
+    /// * `p` - The painter.
+    /// * `size` - The button's size.
+    /// * `color` - The fill color.
+    fn paint(self, p: &mut dyn Painter, size: pushrod::geometry::Size, color: Color) {
+        let depth = (size.w.min(size.h) / 4 + 1) as i32;
+        let (cx, cy) = (size.w as i32 / 2, size.h as i32 / 2);
+
+        for step in 0..depth {
+            let len = (step * 2 + 1) as u32;
+            // `step` counts from the tip; the tip is `depth / 2` before the center.
+            let along = step - depth / 2;
+            let bounds = match self {
+                Self::Up => Rect::new(cx - step, cy + along, len, 1),
+                Self::Down => Rect::new(cx - step, cy - along - 1, len, 1),
+                Self::Left => Rect::new(cx + along, cy - step, 1, len),
+                Self::Right => Rect::new(cx - along - 1, cy - step, 1, len),
+            };
+
+            p.fill_rect(bounds, color);
+        }
+    }
+}
 
 /// A small push button showing a single character.
 ///
@@ -104,14 +164,22 @@ impl Widget for GlyphButton {
         let border = style.border_width.unwrap_or(1);
 
         paint::fill(p, background);
-        paint::text(
-            p,
-            Rect::new(0, 0, size.w, size.h),
-            font,
-            foreground,
-            &self.glyph.to_string(),
-            Truncate::None,
-        );
+
+        // The built-in font has no arrows, so the four arrow characters are drawn as shapes.
+        match Arrow::from_glyph(self.glyph) {
+            Some(arrow) => arrow.paint(p, size, foreground),
+            None => {
+                paint::text(
+                    p,
+                    Rect::new(0, 0, size.w, size.h),
+                    font,
+                    foreground,
+                    &self.glyph.to_string(),
+                    Truncate::None,
+                );
+            }
+        }
+
         paint::border(p, size, style.border_color.unwrap_or(Color::BLACK), border);
     }
 
@@ -211,7 +279,7 @@ impl GlyphButton {
     /// ```rust
     /// use pushrod_widgets::glyph_button::GlyphButton;
     ///
-    /// let up = GlyphButton::new('^').at(20, 60).size(20, 20);
+    /// let up = GlyphButton::new('↑').at(20, 60).size(20, 20);
     /// ```
     ///
     /// # Arguments

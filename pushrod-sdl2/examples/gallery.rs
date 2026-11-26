@@ -311,10 +311,10 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.
     let glyph_tile = add_tile(&mut engine, panel_id, 1, 5, "Glyph Button");
     let glyphs = [
-        ('<', "Click", false),
-        ('>', "Click", false),
-        ('^', "Repeats", true),
-        ('v', "Repeats", true),
+        ('←', "Click", false),
+        ('→', "Click", false),
+        ('↑', "Repeats", true),
+        ('↓', "Repeats", true),
     ];
 
     for (column, (glyph, note, repeats)) in glyphs.into_iter().enumerate() {

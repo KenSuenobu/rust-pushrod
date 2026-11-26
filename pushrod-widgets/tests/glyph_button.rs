@@ -241,3 +241,54 @@ fn builders_and_setters() {
     let on_press = PreludeGlyphButton::new('z').activate_on_press();
     assert!(on_press.behavior().contains(Behavior::ACTIVATE_ON_PRESS));
 }
+
+/// The widths of the rows (or heights of the columns) an arrow is drawn with.
+fn arrow_extent(glyph: char, horizontal: bool) -> Vec<u32> {
+    let button = GlyphButton::new(glyph).size(24, 24);
+
+    painted(&button)
+        .iter()
+        .filter_map(|c| match c {
+            PaintCall::FillRect(r, _) => Some(if horizontal { r.w } else { r.h }),
+            _ => None,
+        })
+        .collect()
+}
+
+#[test]
+fn arrow_characters_are_drawn_as_triangles_not_text() {
+    for glyph in ['←', '↑', '→', '↓'] {
+        let button = GlyphButton::new(glyph).size(24, 24);
+        let calls = painted(&button);
+
+        assert!(
+            !calls.iter().any(|c| matches!(c, PaintCall::Text(..))),
+            "{glyph}"
+        );
+        assert!(
+            calls.iter().any(|c| matches!(c, PaintCall::FillRect(..))),
+            "{glyph}"
+        );
+    }
+
+    // Up grows from a one-pixel tip; down shrinks to one.
+    assert_eq!(arrow_extent('↑', true), vec![1, 3, 5, 7, 9, 11, 13]);
+    assert_eq!(arrow_extent('←', false), vec![1, 3, 5, 7, 9, 11, 13]);
+}
+
+#[test]
+fn arrow_points_the_right_way() {
+    let first = |glyph| {
+        painted(&GlyphButton::new(glyph).size(24, 24))
+            .iter()
+            .find_map(|c| match c {
+                PaintCall::FillRect(r, _) => Some(*r),
+                _ => None,
+            })
+            .unwrap()
+    };
+
+    // The first rectangle is the tip: above center for up, below for down, and so on.
+    assert!(first('↑').y < 12 && first('↓').y >= 12);
+    assert!(first('←').x < 12 && first('→').x >= 12);
+}
