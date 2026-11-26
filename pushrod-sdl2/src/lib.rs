@@ -20,6 +20,9 @@
 //! [`Painter`](pushrod::paint::Painter) with `SDL2`: one GPU texture per `Widget`, repainted only
 //! when invalidated, frames composed by blitting, and text from a glyph atlas.
 //!
+//! The documentation site, <https://pushrod.nobudata.com>, has step-by-step guides for installing
+//! Pushrod and SDL2 on each platform, writing applications, and writing widgets, with many examples.
+//!
 //! An application starts the loop through this crate:
 //!
 //! ```rust,no_run

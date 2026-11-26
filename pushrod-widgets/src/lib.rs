@@ -19,6 +19,9 @@
 //! text), following Pushrod's design philosophy: no glass, no bevels, no gradients, no shadows,
 //! no rounded corners.
 //!
+//! The documentation site, <https://pushrod.nobudata.com>, has step-by-step guides for installing
+//! Pushrod, writing applications, and writing widgets, and a page for every widget.
+//!
 //! This crate uses only the public API of the `pushrod` core, so another widget library can do
 //! everything it does: extend it with new widgets, or replace it with a more graphically
 //! ambitious set, without changing the core.

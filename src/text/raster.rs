@@ -57,6 +57,24 @@ pub struct GlyphCache {
     rasterized: usize,
 }
 
+impl std::fmt::Debug for GlyphCache {
+    /// Shows the cache's counts; swash's `ScaleContext` has no `Debug`.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatter's result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GlyphCache")
+            .field("bitmaps", &self.bitmaps.len())
+            .field("rasterized", &self.rasterized)
+            .finish_non_exhaustive()
+    }
+}
+
 impl GlyphCache {
     /// Creates an empty cache.
     ///
@@ -143,6 +161,7 @@ pub struct AtlasSlot {
 }
 
 /// Packs rectangles into an atlas of a fixed size, in rows ("shelves").
+#[derive(Debug)]
 pub struct ShelfPacker {
     width: u32,
     height: u32,

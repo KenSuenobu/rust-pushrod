@@ -91,7 +91,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 52 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog (done) |
 | ✅ 53 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod (done for v0.1; form-file version waits for #63) |
 | ✅ 54 | [#72](https://github.com/KenSuenobu/rust-pushrod/issues/72) | pushrod: [7.4] Guide: writing widgets and composites (done; registry chapter waits for #61) |
-| 55 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release |
+| ✅ 55 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release (done; publishing runs when v0.1.0 is tagged) |
 | **56** | checkpoint | **Pushrod v0.1 released** |
 | 57 | [#114](https://github.com/KenSuenobu/rust-pushrod/issues/114) | pushrod: [7.6] Module boundaries and written specs with conformance tests |
 | 58 | [#112](https://github.com/KenSuenobu/rust-pushrod/issues/112) | pushrod: [1.19] Input method (IME) support: composition text and candidate window |
@@ -1178,9 +1178,9 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Metadata correct
-- [ ] Changelog complete
-- [ ] docs.rs builds
+- [x] Metadata correct
+- [x] Changelog complete
+- [x] docs.rs builds
 
 ### Step 56: Checkpoint: Pushrod v0.1 released
 

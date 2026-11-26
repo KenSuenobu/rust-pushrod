@@ -1966,7 +1966,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-sdl2/examples/gallery.rs (new)` |
-| 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
 | 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
@@ -2049,6 +2048,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Documentation.** Docusaurus page: `pushrod-docs/docs/guides/creating-widgets.md` ("Creating widgets", Guides, update). Guides: Link. Rustdoc: Crate docs link. Examples: n/a. Screenshots: n/a.
 
 ### 7.5 (#73): Changelog, Cargo metadata, and crates.io release
+
+**Status:** done (#73). All three crates are at 0.1.0 with `homepage` set to the documentation site and docs.rs metadata; `CHANGELOG.md` (Keep a Changelog) starts at #10; CI runs `scripts/check_release.py` and `cargo publish --workspace --dry-run` on every pull request; the Release workflow publishes on a `v*` tag with `CARGO_REGISTRY_TOKEN`. `cargo publish --workspace` uploads `pushrod`, `pushrod-widgets`, then `pushrod-sdl2` (its dev-dependency on the widgets sets the order). `pushrod-sdl2` is reserved by the first release; `pushrod-sdl3` waits for the SDL3 backend.
 
 **Problem Statement.** #1 and #8 asked about crates.io; metadata points at the old crate; no changelog.
 

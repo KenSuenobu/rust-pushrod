@@ -19,6 +19,9 @@
 //! It is an event-based GUI library that utilizes an event loop to handle the event, dispatch, and
 //! draw loop.
 //!
+//! The documentation site, <https://pushrod.nobudata.com>, has step-by-step guides for installing
+//! Pushrod, writing applications, and writing widgets, with many examples.
+//!
 //! # Core, widgets, and backends
 //!
 //! This crate is the core: the engine, the `Widget` trait and widget tree, events, input types,
