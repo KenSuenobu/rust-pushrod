@@ -31,8 +31,18 @@
 //! let clicks = run(engine, WindowSettings::new("My app", size(400, 300)), 0);
 //! ```
 //!
-//! The `bundled` and `static-link` Cargo features live here.  Pushrod uses the following
-//! dependency, and the `unsafe_textures` feature is required:
+//! ## Cargo features
+//!
+//! | Feature | Effect | Needs on the build machine |
+//! |---|---|---|
+//! | `bundled` | Builds `SDL2` from source instead of linking the system library. | `CMake` and a C compiler; `SDL2_ttf` and `SDL2_image` from the system |
+//! | `static-link` | Links `SDL2` into the executable instead of loading it at run time. | The static `SDL2` library, or `bundled` |
+//! | `parley` | Lays out text with Parley and rasterizes glyphs with swash. | Nothing extra |
+//!
+//! `bundled` does not yet give a fully self-contained build: the `sdl2` crate builds `SDL2`
+//! only, and text and images still use `SDL2_ttf` and `SDL2_image`.
+//!
+//! Pushrod uses the following dependency, and the `unsafe_textures` feature is required:
 //!
 //! ```ignore
 //! [dependencies.sdl2]
