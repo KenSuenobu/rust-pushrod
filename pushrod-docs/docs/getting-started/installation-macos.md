@@ -62,6 +62,7 @@ To compile SDL2 instead of using Homebrew's, install CMake (`brew install cmake`
 | Error | Fix |
 |---|---|
 | `ld: library 'SDL2' not found` (or `SDL2_ttf`, `SDL2_image`) | `LIBRARY_PATH` doesn't include `$(brew --prefix)/lib`. Do step 4, then open a new terminal. |
+| `Undefined symbols` for `_TTF_…` or `_IMG_…` | You enabled `bundled` together with `static-link`. Use `bundled` alone; see [the `bundled` feature](./installation.md#building-sdl2-from-source-the-bundled-feature). |
 | `xcrun: error: invalid active developer path` | The command-line tools are missing. Do step 1. |
 | `is cmake not installed?` | You enabled `bundled` without CMake. Run `brew install cmake`, or remove the feature. |
 | `Compatibility with CMake < 3.5 has been removed from CMake` | You use CMake 4 (Homebrew's default) with `bundled`. Run `export CMAKE_POLICY_VERSION_MINIMUM=3.5`, or set it [in `.cargo/config.toml`](./installation.md#building-sdl2-from-source-the-bundled-feature). |

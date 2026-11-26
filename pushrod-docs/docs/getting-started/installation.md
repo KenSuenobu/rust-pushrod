@@ -50,21 +50,23 @@ Your application does not depend on the `sdl2` crate; `pushrod-sdl2` does.
 |---|---|---|
 | *(none)* | Links the system SDL2, SDL2_ttf, and SDL2_image. | The three libraries, from the platform guide |
 | `bundled` | Compiles SDL2 from source instead of using the system SDL2. | CMake and a C compiler, plus SDL2_ttf and SDL2_image from the system |
-| `static-link` | Links SDL2 into your executable instead of loading it at run time. | `bundled`, or a static SDL2 library on the system |
+| `static-link` | Links SDL2, SDL2_ttf, and SDL2_image into your executable instead of loading them at run time. | Static builds of all three libraries on the system. Not with `bundled`: see below |
 | `parley` | Lays out text with Parley and rasterizes glyphs with swash. | Nothing extra |
 
 ### Building SDL2 from source: the `bundled` feature
 
-Enable `bundled` and Cargo compiles SDL2 from source instead of using the system library. Add `static-link` to link it into your executable:
+Enable `bundled` and Cargo compiles SDL2 from source instead of using the system library:
 
 ```toml
 [dependencies]
 pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod", features = ["bundled", "static-link"] }
+pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod", features = ["bundled"] }
 ```
 
 CI builds `pushrod-sdl2` this way on macOS and Windows on every pull request.
+
+Don't combine `bundled` with `static-link`. With both enabled, the `sdl2-sys` 0.38 crate links SDL2 only and leaves out SDL2_ttf and SDL2_image, so the build stops with undefined `TTF_` and `IMG_` symbols.
 
 With CMake 4 or newer, set `CMAKE_POLICY_VERSION_MINIMUM=3.5` before building. The SDL2 source that `bundled` compiles declares an older CMake minimum, which CMake 4 otherwise rejects with *Compatibility with CMake < 3.5 has been removed*. To set it for every build of the project, add it to `.cargo/config.toml`:
 

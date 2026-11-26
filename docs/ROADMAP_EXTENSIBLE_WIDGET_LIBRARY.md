@@ -2129,7 +2129,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 ### 7.9 (#139): Easy installation: bundled SDL, static linking, and platform guides
 
-**Status:** done (#139). The CI `bundled` job builds `pushrod-sdl2` with `bundled` and with `bundled,static-link` on macOS and Windows. `getting-started/installation.md` is the overview and feature table; `installation-linux.md`, `installation-macos.md`, and `installation-windows.md` are step-by-step guides with a check and troubleshooting. `bundled` is still not self-contained: SDL2_ttf and SDL2_image come from the system (and load a system SDL2), so a follow-up must replace them (swash text, Rust image decoding) before the third criterion holds.
+**Status:** done (#139). The CI `bundled` job builds `pushrod-sdl2` with `bundled` on macOS and Windows (with `CMAKE_POLICY_VERSION_MINIMUM=3.5` for CMake 4). `bundled` with `static-link` doesn't link: `sdl2-sys` 0.38 then links no SDL2_ttf or SDL2_image, which the docs note. `getting-started/installation.md` is the overview and feature table; `installation-linux.md`, `installation-macos.md`, and `installation-windows.md` are step-by-step guides with a check and troubleshooting. `bundled` is still not self-contained: SDL2_ttf and SDL2_image come from the system (and load a system SDL2), so a follow-up must replace them (swash text, Rust image decoding) before the third criterion holds.
 
 **Problem Statement.** Installing the SDL2, SDL2_ttf, and SDL2_image system libraries is the biggest hurdle for new users, especially on Windows and macOS.
 

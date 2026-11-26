@@ -65,6 +65,7 @@ To compile SDL2 instead of using the SDL2 zip, install [CMake](https://cmake.org
 | Error | Fix |
 |---|---|
 | `LINK : fatal error LNK1181: cannot open input file 'SDL2.lib'` (or `SDL2_ttf.lib`, `SDL2_image.lib`) | `LIB` doesn't include that library's `lib\x64` folder. Check step 3, then open a new terminal. |
+| `error LNK2019: unresolved external symbol` for `TTF_…` or `IMG_…` | You enabled `bundled` together with `static-link`. Use `bundled` alone; see [the `bundled` feature](./installation.md#building-sdl2-from-source-the-bundled-feature). |
 | `linker 'link.exe' not found` | The C++ build tools are missing. Do step 1. |
 | The program exits at once with *The code execution cannot proceed because SDL2.dll was not found* | `PATH` doesn't include the `lib\x64` folders, or the `.dll` files aren't next to the `.exe`. |
 | `is cmake not installed?` | You enabled `bundled` without CMake on `PATH`. Install CMake, or remove the feature. |

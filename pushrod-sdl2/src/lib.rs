@@ -36,11 +36,13 @@
 //! | Feature | Effect | Needs on the build machine |
 //! |---|---|---|
 //! | `bundled` | Builds `SDL2` from source instead of linking the system library. | `CMake` and a C compiler; `SDL2_ttf` and `SDL2_image` from the system |
-//! | `static-link` | Links `SDL2` into the executable instead of loading it at run time. | The static `SDL2` library, or `bundled` |
+//! | `static-link` | Links `SDL2`, `SDL2_ttf`, and `SDL2_image` into the executable instead of loading them at run time. | Static builds of all three libraries; not with `bundled` |
 //! | `parley` | Lays out text with Parley and rasterizes glyphs with swash. | Nothing extra |
 //!
 //! `bundled` does not yet give a fully self-contained build: the `sdl2` crate builds `SDL2`
-//! only, and text and images still use `SDL2_ttf` and `SDL2_image`.
+//! only, and text and images still use `SDL2_ttf` and `SDL2_image`.  Don't combine `bundled`
+//! with `static-link`: `sdl2-sys` 0.38 then links no `SDL2_ttf` or `SDL2_image`, so the build
+//! fails with undefined symbols.
 //!
 //! Pushrod uses the following dependency, and the `unsafe_textures` feature is required:
 //!
