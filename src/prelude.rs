@@ -26,6 +26,7 @@
 //! ```
 
 pub use crate::color::{Color, FontStyle};
+pub use crate::composite::{Composite, PartList, PartName, PartsBuilder, TypedParts};
 pub use crate::engine::{Engine, Ui};
 pub use crate::error::Error;
 pub use crate::event::{Event, EventMask};

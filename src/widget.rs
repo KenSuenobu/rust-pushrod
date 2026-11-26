@@ -46,6 +46,7 @@
 
 use crate::appearance::{Appearance, StateStyle};
 use crate::color::Color;
+use crate::composite::Composite;
 use crate::controllers::{Controller, ControllerEvent, Controllers};
 use crate::event::{Event, EventCtx, EventMask, Propagation};
 use crate::geometry::{Point, Size};
@@ -649,5 +650,28 @@ pub trait Widget: Any {
     /// * `state` - `true` to repaint the `Widget` on the next frame.
     fn set_invalidated(&mut self, state: bool) {
         self.core_mut().invalidated = state;
+    }
+
+    /// Returns this `Widget` as a [`Composite`], if it is one.
+    ///
+    /// The `WidgetCache` calls this to build a composite's parts when it is added, and to route
+    /// its parts' events to it.  A composite overrides it to return `Some(self)`; see the
+    /// [`composite`](crate::composite) module.
+    ///
+    /// # Returns
+    ///
+    /// `None` by default.
+    fn as_composite(&self) -> Option<&dyn Composite> {
+        None
+    }
+
+    /// Returns this `Widget` as a mutable [`Composite`], if it is one.  A composite overrides it
+    /// to return `Some(self)`, like [`Widget::as_composite`].
+    ///
+    /// # Returns
+    ///
+    /// `None` by default.
+    fn as_composite_mut(&mut self) -> Option<&mut dyn Composite> {
+        None
     }
 }

@@ -43,10 +43,11 @@ use crate::input::InputEvent;
 use crate::paint::{self, CachePolicy};
 use crate::widget::{Behavior, ROOT_WIDGET_ID, VisualState, Widget, WidgetId};
 use std::any::Any;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::time::Duration;
 
 mod focus;
+mod parts;
 
 /// The tree of `Widget`s in a window.
 ///
@@ -83,6 +84,7 @@ pub struct WidgetCache {
     animating: Vec<WidgetId>,
     clipboard_snapshot: Option<String>,
     clipboard_write: Option<String>,
+    removed: HashSet<WidgetId>,
 }
 
 impl std::fmt::Debug for WidgetCache {
@@ -128,6 +130,7 @@ impl WidgetCache {
             animating: Vec::new(),
             clipboard_snapshot: None,
             clipboard_write: None,
+            removed: HashSet::new(),
         }
     }
 
@@ -190,7 +193,8 @@ impl WidgetCache {
     /// Adds a `Widget` as a child of another `Widget`.
     ///
     /// The `Widget`'s origin is relative to its parent's origin, and it is drawn after (on top of)
-    /// the parent's existing children.  If the cache is empty, the `Widget` becomes the root `Widget`
+    /// the parent's existing children.  If the `Widget` is a [`Composite`](crate::composite::Composite), its
+    /// parts are built right after it, with the next IDs, and laid out.  If the cache is empty, the `Widget` becomes the root `Widget`
     /// and `parent` is ignored.
     ///
     /// # Arguments
@@ -224,7 +228,8 @@ impl WidgetCache {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::UnknownWidget`] if the cache is not empty and `parent` does not exist.
+    /// Returns [`Error::UnknownWidget`] if the cache is not empty and `parent` does not exist or
+    /// was removed.
     pub fn try_add_child(
         &mut self,
         parent: WidgetId,
@@ -233,7 +238,7 @@ impl WidgetCache {
         let id = self.cache.len() as WidgetId;
         let parent = if self.cache.is_empty() {
             id
-        } else if (parent as usize) < self.cache.len() {
+        } else if (parent as usize) < self.cache.len() && !self.removed.contains(&parent) {
             parent
         } else {
             return Err(Error::UnknownWidget { id: parent });
@@ -256,6 +261,9 @@ impl WidgetCache {
             self.pending_events
                 .push(Event::Engine(EngineEvent::WidgetAdded { id, parent }));
         }
+
+        // A composite creates its parts now, so they follow it in ID order.
+        self.build_composite(id);
 
         Ok(id)
     }
@@ -286,8 +294,13 @@ impl WidgetCache {
     ///
     /// # Returns
     ///
-    /// The `Widget` as a trait object, or `None` if the ID does not exist.
+    /// The `Widget` as a trait object, or `None` if the ID does not exist or the `Widget` was
+    /// removed.
     pub fn get(&self, id: WidgetId) -> Option<&dyn Widget> {
+        if self.removed.contains(&id) {
+            return None;
+        }
+
         self.cache.get(id as usize).map(|widget| widget.as_ref())
     }
 
@@ -299,8 +312,13 @@ impl WidgetCache {
     ///
     /// # Returns
     ///
-    /// The `Widget` as a mutable trait object, or `None` if the ID does not exist.
+    /// The `Widget` as a mutable trait object, or `None` if the ID does not exist or the `Widget`
+    /// was removed.
     pub fn get_mut(&mut self, id: WidgetId) -> Option<&mut dyn Widget> {
+        if self.removed.contains(&id) {
+            return None;
+        }
+
         match self.cache.get_mut(id as usize) {
             Some(widget) => Some(widget.as_mut()),
             None => None,

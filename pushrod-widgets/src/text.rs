@@ -196,6 +196,25 @@ impl Text {
         self
     }
 
+    /// Sets the font, and invalidates the widget.
+    ///
+    /// # Arguments
+    ///
+    /// * `font` - The font, such as `Font::new("Body", 14, FontStyle::BOLD)`.
+    pub fn set_font(&mut self, font: Font) {
+        self.style.font = font;
+        self.set_invalidated(true);
+    }
+
+    /// Returns the font.
+    ///
+    /// # Returns
+    ///
+    /// A copy of the font.
+    pub fn get_font(&self) -> Font {
+        self.style.font.clone()
+    }
+
     /// Sets the text color, and invalidates the widget.
     ///
     /// # Arguments

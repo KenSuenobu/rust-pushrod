@@ -39,6 +39,7 @@ let label = engine.add_widget(
 | Method | Does |
 |---|---|
 | `set_text(text)` / `get_text()` | The text shown. |
+| `set_font(font)` / `get_font()` | The font; changing it repaints the text. |
 | `set_font_color(color)` / `get_font_color()` | Text color. |
 | `set_color(color)` | Background color (default transparent white). |
 
