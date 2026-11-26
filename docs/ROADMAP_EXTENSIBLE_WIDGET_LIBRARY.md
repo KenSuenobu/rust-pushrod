@@ -188,7 +188,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.4 (#20) | Keyboard focus, Tab order, and Return/Escape | Focusable widgets take keyboard focus; Tab moves it; Return and Escape trigger the default and cancel buttons. | `chassis`, `core`, `enhancement`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/cache.rs`, `src/engine.rs`, `src/widget.rs` |
 | 1.6 (#22) | Callback registry for every widget event | on_click, on_press, on_release, on_hover, on_toggle, on_value_change, on_selection_change, on_text_change, on_editing_finished, on_activate, on_key_press, on_focus_change. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `src/engine.rs` |
 | 1.7 (#3) | GPU text: font cache with a glyph atlas texture | Load each font once, rasterize glyphs once into a GPU atlas, and draw text by blitting glyphs. | `core`, `enhancement`, `mvp`, `parallelizable`, `performance`, `size/M` | Y | v0.1 | M | `src/font.rs`, `src/paint.rs`, `src/cache.rs`, `src/engine.rs` |
-| 1.8 (#23) | Edit the widget tree at run time: remove, reparent, reorder | Remove widgets and change parent or stacking order without breaking IDs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/cache.rs`, `src/engine.rs` |
 | 1.9 (#24) | Dirty-rectangle redraw | Only re-blit the screen regions that changed. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `src/cache.rs`, `src/engine.rs` |
 | 1.11 (#26) | Application lifecycle: startup and close-request callbacks | Run code before the first frame; confirm or veto closing the window. | `core`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/engine.rs` |
 | 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | v0.2 | S | `src/paint.rs`, `src/cache.rs`, `pushrod-widgets/src/button.rs`, `pushrod-widgets/src/text.rs` |
@@ -406,6 +405,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/gpu-text.md` ("GPU text", Concepts, new). Guides: n/a. Rustdoc: `font::FontCache`, atlas notes. Examples: n/a. Screenshots: n/a.
 
 ### 1.8 (#23): Edit the widget tree at run time: remove, reparent, reorder
+
+**Status:** done (#23). `WidgetCache::remove(id)` removes a subtree and leaves tombstones, so other IDs never change; each removed widget emits `EngineEvent::WidgetRemoved` and `Event::Removed`, its texture is destroyed through `Backend::release_widget` before the next frame, and focus, hover, capture, and its callbacks are cleared. `reparent(id, parent)` emits `WidgetReparented`; `set_stacking_index(id, index)` emits `WidgetRestacked`; invalid edits return `Error::Tree`. Docs: `pushrod-docs/docs/concepts/edit-the-widget-tree-at-run-time.md`; example: `pushrod-sdl2/examples/tree_editing.rs`.
 
 **Problem Statement.** Widgets can only be added. Opening and closing dialogs, list rows, and Chassis editing need removal, reparenting, and stacking-order changes.
 

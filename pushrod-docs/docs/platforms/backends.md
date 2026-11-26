@@ -61,6 +61,7 @@ fn main() -> Result<(), pushrod::error::Error> {
 | `waker()` | A function other threads call to wake the loop. |
 | `now()` | The clock. |
 | `paint_widget(id, size, paint)` | Paints one widget into its own texture, only when it was invalidated. A high-DPI backend makes the texture `size` times the scale factor. |
+| `release_widget(id)` | Destroys the texture of a widget that was [removed](../concepts/edit-the-widget-tree-at-run-time.md), before the next frame. Does nothing by default. |
 | `begin_frame(color)`, `draw_widget(id, source, dest)`, `present()` | Composes a frame by blitting cached textures; `source` and `dest` are logical and converted to physical pixels. |
 | `take_notices()` | Engine events the backend produced (fonts loaded, atlas pages added). |
 | `clipboard_text()`, `set_clipboard_text(text)` | The clipboard. |

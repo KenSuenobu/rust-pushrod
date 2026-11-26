@@ -14,9 +14,9 @@ name = "pushrod_doc_samples"
 path = "src/lib.rs"
 
 [dependencies]
-pushrod = { path = "..", version = "0.0.38" }
+pushrod = { path = "..", version = "0.0.39" }
 pushrod-widgets = { path = "../pushrod-widgets", version = "0.0.39" }
-pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.0.44" }
+pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.0.45" }
 
 [dependencies.sdl2]
 version = "0.38"

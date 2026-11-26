@@ -17,10 +17,10 @@ flowchart TD
 
 Origins are relative to the parent. Later siblings draw on top of earlier ones, so the button (ID 3) draws above the label (ID 2).
 
-- **IDs are stable.** They're assigned in the order widgets are added and never change. Callbacks capture them, and in the future, form files will use them to connect designed forms to code. A removed widget's ID is never reused (see [Composite Widgets](../guides/composite-widgets.md)).
+- **IDs are stable.** They're assigned in the order widgets are added and never change. Callbacks capture them, and in the future, form files will use them to connect designed forms to code. A removed widget leaves a tombstone, and its ID is never reused (see [Edit the widget tree at run time](edit-the-widget-tree-at-run-time.md)).
 - **Composites are subtrees.** A [composite widget](../guides/composite-widgets.md)'s parts are its children, with the IDs right after its own.
 - **Origins are relative to the parent.** `WidgetCache::absolute_origin(id)` gives window coordinates.
-- **Stacking follows insertion order.** Children draw after (on top of) their parent; later siblings draw on top of earlier ones. The pointer always targets the top-most visible widget under it.
+- **Stacking follows insertion order.** Children draw after (on top of) their parent; later siblings draw on top of earlier ones. The pointer always targets the top-most visible widget under it. `widgets.set_stacking_index(id, index)` changes the order, and `widgets.reparent(id, parent)` moves a widget to another parent.
 - **Children are clipped to their parent.** A child that sticks out of its parent is cropped and cannot be clicked outside the parent; see [Clip children to their parent's bounds](clip-children-to-their-parent-s-bounds.md).
 - **A container's children use content coordinates.** A scrolling [Container](../widgets/container.md) shows its children through a viewport; see [Content coordinates](#content-coordinates).
 - **Hiding hides the subtree.** `set_hidden(true)` stops a widget and all its children from drawing or receiving the mouse. Disabled widgets also receive no input; see [Widget behavior flags and visual states](widget-behavior-flags-and-visual-states.md).

@@ -328,8 +328,11 @@ pub struct HeadlessBackend {
     scale: f32,
     /// The minimum window size the engine last set.
     pub minimum_size: Option<Size>,
-    /// The physical size of each `Widget`'s pretend texture, as of its latest paint.
+    /// The physical size of each `Widget`'s pretend texture, as of its latest paint.  A removed
+    /// `Widget`'s entry is dropped when its texture is released.
     pub texture_sizes: HashMap<WidgetId, Size>,
+    /// Every `Widget` whose texture was released ([`Backend::release_widget`]), in order.
+    pub released: Vec<WidgetId>,
 }
 
 impl HeadlessBackend {
@@ -508,6 +511,16 @@ impl Backend for HeadlessBackend {
         self.texture_sizes.insert(id, to_physical_size(size, scale));
         paint(&mut painter);
         self.painted.push((id, painter.calls));
+    }
+
+    /// Drops the `Widget`'s pretend texture and records it in [`HeadlessBackend::released`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The removed `Widget`.
+    fn release_widget(&mut self, id: WidgetId) {
+        self.texture_sizes.remove(&id);
+        self.released.push(id);
     }
 
     /// Measures with a [`RecordingPainter`], whose text sizes are deterministic.

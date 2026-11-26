@@ -328,6 +328,10 @@ pub enum EngineEventKind {
     WidgetAdded,
     /// See [`EngineEvent::WidgetRemoved`].
     WidgetRemoved,
+    /// See [`EngineEvent::WidgetReparented`].
+    WidgetReparented,
+    /// See [`EngineEvent::WidgetRestacked`].
+    WidgetRestacked,
     /// See [`EngineEvent::PartsArranged`].
     PartsArranged,
     /// See [`EngineEvent::LayoutChanged`].
@@ -380,14 +384,36 @@ pub enum EngineEvent {
         /// The ID of its parent.
         parent: WidgetId,
     },
-    /// A `Widget` was removed from the window, such as a composite part removed with
-    /// `WidgetCache::remove_part`.  Sent once for each `Widget` in the removed subtree.  The ID
-    /// is never reused.
+    /// A `Widget` was removed from the window with `WidgetCache::remove` or
+    /// `WidgetCache::remove_part`.  Sent once for each `Widget` in the removed subtree, parents
+    /// first.  The ID is never reused.
     WidgetRemoved {
         /// The ID of the removed `Widget`.
         id: WidgetId,
         /// The ID of its parent.
         parent: WidgetId,
+    },
+    /// A `Widget` was moved to a new parent with `WidgetCache::reparent`, together with its
+    /// descendants.  It is now the new parent's top-most child.
+    WidgetReparented {
+        /// The ID of the moved `Widget`.
+        id: WidgetId,
+        /// The ID of its previous parent.
+        old_parent: WidgetId,
+        /// The ID of its new parent.
+        new_parent: WidgetId,
+    },
+    /// A `Widget` moved to a new place in its parent's stacking order with
+    /// `WidgetCache::set_stacking_index`.  Index `0` is drawn first (bottom-most).
+    WidgetRestacked {
+        /// The ID of the moved `Widget`.
+        id: WidgetId,
+        /// The ID of its parent.
+        parent: WidgetId,
+        /// Its previous position among its siblings.
+        old_index: usize,
+        /// Its new position among its siblings.
+        new_index: usize,
     },
     /// A composite `Widget` laid its parts out again, after it was built or a part was added,
     /// inserted, or removed.  See [`Composite::layout_parts`](crate::composite::Composite::layout_parts).
@@ -518,6 +544,8 @@ impl EngineEvent {
             EngineEvent::EventMaskChanged { .. } => EngineEventKind::EventMaskChanged,
             EngineEvent::WidgetAdded { .. } => EngineEventKind::WidgetAdded,
             EngineEvent::WidgetRemoved { .. } => EngineEventKind::WidgetRemoved,
+            EngineEvent::WidgetReparented { .. } => EngineEventKind::WidgetReparented,
+            EngineEvent::WidgetRestacked { .. } => EngineEventKind::WidgetRestacked,
             EngineEvent::PartsArranged { .. } => EngineEventKind::PartsArranged,
             EngineEvent::LayoutChanged { .. } => EngineEventKind::LayoutChanged,
             EngineEvent::EventBroadcast { .. } => EngineEventKind::EventBroadcast,
@@ -1429,6 +1457,21 @@ mod mask_tests {
             Some(&[EngineEventKind::EventMaskChanged]),
             &added
         ));
+
+        let reparented = EngineEvent::WidgetReparented {
+            id: 2,
+            old_parent: 1,
+            new_parent: 0,
+        };
+        let restacked = EngineEvent::WidgetRestacked {
+            id: 2,
+            parent: 0,
+            old_index: 0,
+            new_index: 1,
+        };
+
+        assert_eq!(reparented.kind(), EngineEventKind::WidgetReparented);
+        assert_eq!(restacked.kind(), EngineEventKind::WidgetRestacked);
     }
 }
 

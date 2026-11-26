@@ -1710,6 +1710,12 @@ impl<S> Engine<S> {
         for callback in self.event_callbacks.iter_mut() {
             callback(state, &mut ui, event);
         }
+
+        // `Removed` is the last event about a removed `Widget`, and its ID is never reused, so
+        // the callbacks registered on it can never run again.
+        if let Event::Removed { id } = event {
+            self.registry.retain(|(widget, _), _| widget != id);
+        }
     }
 
     /// Runs the application on a backend until the window is closed or a callback calls `shutdown`.
