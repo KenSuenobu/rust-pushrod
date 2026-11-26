@@ -21,6 +21,7 @@
 use pushrod::color::Color;
 use pushrod::font::Font;
 use pushrod::geometry::{Rect, point, size};
+use pushrod::layout::SizeHint;
 use pushrod::paint::{self, Painter, TextStyle, Truncate, Wrap};
 use pushrod::widget::{Widget, WidgetCore};
 use std::cell::Cell;
@@ -62,6 +63,60 @@ impl Widget for Text {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Measures the text for a layout manager, through the painter's text layout.
+    ///
+    /// The preferred size is the text on its natural lines (one per `\n`, at most
+    /// [`max_lines`](Text::set_max_lines) when set) at the font's line height.  The minimum
+    /// height is the same.  The minimum width is the whole width without truncation or wrapping;
+    /// with truncation it is the width of an ellipsis, and with wrapping the widest word (or one
+    /// character for [`Wrap::Anywhere`]).  A hint set with `set_size_hint` wins.
+    ///
+    /// # Arguments
+    ///
+    /// * `p` - The measuring painter.
+    ///
+    /// # Returns
+    ///
+    /// The widget's [`SizeHint`].
+    fn size_hint(&self, p: &mut dyn Painter) -> SizeHint {
+        if let Some(hint) = self.explicit_size_hint() {
+            return hint;
+        }
+
+        let style = self.style();
+        let font = style.font.as_ref().unwrap_or(&self.style);
+        let line_height = p.line_height(font);
+        let mut lines = self.msg.split('\n').count();
+        let mut width = 0;
+
+        for line in self.msg.split('\n') {
+            width = width.max(p.text_width(font, line));
+        }
+
+        if let Some(max_lines) = self.max_lines {
+            lines = lines.min(max_lines.max(1));
+        }
+
+        let height = line_height * lines as u32;
+        let min_width = match self.wrap {
+            Wrap::Word => self
+                .msg
+                .split_whitespace()
+                .map(|word| p.text_width(font, word))
+                .max()
+                .unwrap_or(0),
+            Wrap::Anywhere => p.text_width(font, "W"),
+            Wrap::None if self.truncate != Truncate::None => p.text_width(font, "\u{2026}"),
+            _ => width,
+        };
+
+        SizeHint::new(
+            size(min_width.min(width), height),
+            size(width, height),
+            size(pushrod::layout::UNBOUNDED, pushrod::layout::UNBOUNDED),
+        )
     }
 
     /// Fills the background with the widget's color, then draws the text.
@@ -203,6 +258,7 @@ impl Text {
     /// * `font` - The font, such as `Font::new("Body", 14, FontStyle::BOLD)`.
     pub fn set_font(&mut self, font: Font) {
         self.style.font = font;
+        self.request_layout();
         self.set_invalidated(true);
     }
 
@@ -232,6 +288,7 @@ impl Text {
     /// * `msg` - The new text.
     pub fn set_text(&mut self, msg: String) {
         self.msg = msg;
+        self.request_layout();
         self.set_invalidated(true);
     }
 
@@ -261,6 +318,7 @@ impl Text {
     pub fn set_truncate(&mut self, truncate: Truncate) {
         if self.truncate != truncate {
             self.truncate = truncate;
+            self.request_layout();
             self.set_invalidated(true);
         }
     }
@@ -293,6 +351,7 @@ impl Text {
     pub fn set_wrap(&mut self, wrap: Wrap) {
         if self.wrap != wrap {
             self.wrap = wrap;
+            self.request_layout();
             self.set_invalidated(true);
         }
     }
@@ -316,6 +375,7 @@ impl Text {
     pub fn set_max_lines(&mut self, max_lines: Option<usize>) {
         if self.max_lines != max_lines {
             self.max_lines = max_lines;
+            self.request_layout();
             self.set_invalidated(true);
         }
     }

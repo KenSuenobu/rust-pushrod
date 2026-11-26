@@ -1360,7 +1360,6 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 |---|---|---|---|---|---|---|---|
 | 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `chassis`, `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | v0.1 | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
-| 5.5 (#116) | Layout manager foundation: Layout trait, size hints, measure and arrange | A small Layout trait any container can use; widgets report minimum, preferred, and maximum sizes; containers measure then arrange their children. | `chassis`, `core`, `enhancement`, `layout`, `mvp`, `size/M` | N | v0.1 | M | `layout/mod.rs (new)`, `src/widget.rs`, `src/cache.rs` |
 | 5.6 (#117) | Row and column layouts | Arrange children in a horizontal row or vertical column with spacing, margins, alignment, and stretch. | `chassis`, `enhancement`, `layout`, `mvp`, `size/S` | N | v0.1 | S | `layout/linear.rs (new)` |
 | 5.7 (#118) | Form layout: aligned label and field rows | Two-column 'Label: field' rows with labels aligned and fields stretching to the available width. | `chassis`, `enhancement`, `layout`, `mvp`, `size/S`, `usability` | N | v0.1 | S | `layout/form.rs (new)` |
 | 5.8 (#119) | Grid layout | Rows and columns of cells with spans, per-row/column stretch, and alignment. | `enhancement`, `layout`, `parallelizable`, `size/M` | Y | N | M | `layout/grid.rs (new)` |
@@ -1463,6 +1462,8 @@ A widget whose children live on a content area with its own size and 0,0 origin;
 **Sources.** [Motif reference: form attachments](https://man.archlinux.org/man/XmForm.3.en)
 
 ### 5.5 (#116): Layout manager foundation: Layout trait, size hints, measure and arrange
+
+**Status:** done (#116). `pushrod::layout` has `SizeHint`, `LayoutParams` (`stretch`, `Alignment`, `Margin`), `ChildInfo`, the `Layout` trait (`measure`, `arrange`), and `place_in_slot`; `Widget::set_layout`, `remove_layout`, `size_hint`, `set_size_hint`, `set_layout_params`, and `request_layout` give any container a layout; `WidgetCache::draw_loop` measures bottom-up (stopping at containers whose hint is unchanged) and arranges top-down once per frame, a move re-blits without repainting, and `LayoutChanged { container }` is emitted; `Text` measures through the painter; `pushrod-sdl2/examples/custom_layout.rs` shows an application-defined layout. Window resize does not resize the root yet.
 
 **Problem Statement.** Pushrod only supports absolute positions. Resizable windows, translated text of different lengths, user font sizes, and dialogs that size themselves to their content all need layout managers. Classic Atari and Amiga forms couldn't resize at all, which is a big part of why their dialogs felt rigid.
 

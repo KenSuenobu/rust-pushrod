@@ -49,7 +49,8 @@ use crate::color::Color;
 use crate::composite::Composite;
 use crate::controllers::{Controller, ControllerEvent, Controllers};
 use crate::event::{Event, EventCtx, EventMask, Propagation};
-use crate::geometry::{Point, Size};
+use crate::geometry::{Point, Rect, Size};
+use crate::layout::{Layout, LayoutParams, SizeHint};
 use crate::paint::Painter;
 use bitflags::bitflags;
 use std::any::Any;
@@ -171,9 +172,91 @@ pub struct WidgetCore {
     event_mask: EventMask,
     invalidated: bool,
     controllers: Controllers,
+    /// The size the application asked for; unlike `size`, a layout never changes it, so the
+    /// default size hint does not depend on where a layout placed the `Widget`.
+    requested_size: Size,
+    hint_override: Option<SizeHint>,
+    layout_params: LayoutParams,
+    layout: Option<LayoutSlot>,
+    layout_dirty: bool,
+}
+
+/// Holds a container's layout manager, so `WidgetCore` can still derive `Debug`.
+struct LayoutSlot(Box<dyn Layout>);
+
+impl std::fmt::Debug for LayoutSlot {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Layout")
+    }
 }
 
 impl WidgetCore {
+    /// Applies a rectangle chosen by a layout manager.
+    ///
+    /// A move alone does not invalidate the `Widget`: its texture is still good, and the cache
+    /// only copies it to the new place.  A resize invalidates it, so it is repainted at the new
+    /// size, and marks it for layout if it is a container.  The size the application asked for
+    /// is left alone.
+    ///
+    /// # Arguments
+    ///
+    /// * `rect` - The new origin and size, relative to the parent.
+    ///
+    /// # Returns
+    ///
+    /// `(moved, resized)`: whether the origin and the size changed.
+    pub(crate) fn place(&mut self, rect: Rect) -> (bool, bool) {
+        let origin = Point::new(rect.x, rect.y);
+        let size = Size::new(rect.w, rect.h);
+        let moved = self.origin != origin;
+        let resized = self.size != size;
+
+        self.origin = origin;
+        self.size = size;
+
+        if resized {
+            self.invalidated = true;
+        }
+
+        (moved, resized)
+    }
+
+    /// Returns the container's layout manager, if it has one.
+    ///
+    /// # Returns
+    ///
+    /// The layout, or `None` for absolute positioning.
+    pub(crate) fn layout_ref(&self) -> Option<&dyn Layout> {
+        self.layout.as_ref().map(|slot| slot.0.as_ref())
+    }
+
+    /// Returns whether the `Widget` changed in a way that needs layout again.
+    ///
+    /// # Returns
+    ///
+    /// `true` if layout must run for this `Widget` or its container.
+    pub(crate) fn layout_dirty(&self) -> bool {
+        self.layout_dirty
+    }
+
+    /// Sets or clears the layout-needed flag.
+    ///
+    /// # Arguments
+    ///
+    /// * `dirty` - `true` if layout must run.
+    pub(crate) fn set_layout_dirty(&mut self, dirty: bool) {
+        self.layout_dirty = dirty;
+    }
+
     /// Sets the event mask the `Widget` reports from [`Widget::event_mask`].
     ///
     /// Use it while building a `Widget`.  To change a mask after the `Widget` is in a window, use
@@ -227,6 +310,11 @@ impl WidgetCore {
             event_mask: EventMask::NONE,
             invalidated: true,
             controllers: Controllers::default(),
+            requested_size: size,
+            hint_override: None,
+            layout_params: LayoutParams::default(),
+            layout: None,
+            layout_dirty: false,
         }
     }
 }
@@ -428,12 +516,18 @@ pub trait Widget: Any {
     }
 
     /// Resizes the `Widget`, and invalidates it.  Its texture is resized on the next repaint.
+    /// The new size is also the `Widget`'s default [`size_hint`](Widget::size_hint), and marks
+    /// layout as needed.
     ///
     /// # Arguments
     ///
     /// * `size` - The new width and height in pixels.
     fn set_size(&mut self, size: Size) {
-        self.core_mut().size = size;
+        let core = self.core_mut();
+
+        core.size = size;
+        core.requested_size = size;
+        core.layout_dirty = true;
         self.set_invalidated(true);
     }
 
@@ -464,7 +558,10 @@ pub trait Widget: Any {
     ///
     /// * `state` - `true` to hide the `Widget`, `false` to show it.
     fn set_hidden(&mut self, state: bool) {
-        self.core_mut().behavior.set(Behavior::HIDDEN, state);
+        let core = self.core_mut();
+
+        core.behavior.set(Behavior::HIDDEN, state);
+        core.layout_dirty = true;
         self.set_invalidated(true);
     }
 
@@ -650,6 +747,109 @@ pub trait Widget: Any {
     /// * `state` - `true` to repaint the `Widget` on the next frame.
     fn set_invalidated(&mut self, state: bool) {
         self.core_mut().invalidated = state;
+    }
+
+    /// Reports the `Widget`'s smallest, preferred, and largest size to a layout manager.
+    ///
+    /// The default is the override from [`Widget::set_size_hint`] if there is one; otherwise the
+    /// size the application asked for ([`Widget::set_size`]) as the minimum and preferred size,
+    /// with no maximum.  `Widget`s whose size depends on their content, such as text, override
+    /// this and measure with the painter.
+    ///
+    /// # Arguments
+    ///
+    /// * `p` - A painter used only to measure text; nothing is drawn.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget`'s [`SizeHint`].
+    fn size_hint(&self, p: &mut dyn Painter) -> SizeHint {
+        let _ = p;
+
+        self.explicit_size_hint()
+            .unwrap_or_else(|| SizeHint::fixed(self.core().requested_size))
+    }
+
+    /// Returns the hint set with [`Widget::set_size_hint`].  An overriding
+    /// [`size_hint`](Widget::size_hint) returns it in preference to a measured one, so the
+    /// application can always have the last word.
+    ///
+    /// # Returns
+    ///
+    /// The fixed hint, or `None` if none was set.
+    fn explicit_size_hint(&self) -> Option<SizeHint> {
+        self.core().hint_override
+    }
+
+    /// Sets a fixed [`SizeHint`], replacing the default one, and marks layout as needed.
+    ///
+    /// # Arguments
+    ///
+    /// * `hint` - The hint to report from now on.
+    fn set_size_hint(&mut self, hint: SizeHint) {
+        let core = self.core_mut();
+
+        core.hint_override = Some(hint);
+        core.layout_dirty = true;
+    }
+
+    /// Returns what the `Widget` asks of its container's layout.
+    ///
+    /// # Returns
+    ///
+    /// The [`LayoutParams`]; no stretch, start alignment, and no margin by default.
+    fn layout_params(&self) -> LayoutParams {
+        self.core().layout_params
+    }
+
+    /// Sets what the `Widget` asks of its container's layout, and marks layout as needed.
+    ///
+    /// # Arguments
+    ///
+    /// * `params` - The stretch, alignment, and margin.
+    fn set_layout_params(&mut self, params: LayoutParams) {
+        let core = self.core_mut();
+
+        core.layout_params = params;
+        core.layout_dirty = true;
+    }
+
+    /// Gives the `Widget` a layout manager, so it places its children instead of the application,
+    /// and marks layout as needed.  Any container can have one.
+    ///
+    /// # Arguments
+    ///
+    /// * `layout` - The layout manager, such as one an application wrote.
+    fn set_layout(&mut self, layout: Box<dyn Layout>) {
+        let core = self.core_mut();
+
+        core.layout = Some(LayoutSlot(layout));
+        core.layout_dirty = true;
+    }
+
+    /// Removes the `Widget`'s layout manager.  Its children keep the places they have, and from now
+    /// on are positioned absolutely.
+    fn remove_layout(&mut self) {
+        let core = self.core_mut();
+
+        core.layout = None;
+        core.layout_dirty = true;
+    }
+
+    /// Returns whether the `Widget` has a layout manager.
+    ///
+    /// # Returns
+    ///
+    /// `true` if [`Widget::set_layout`] was called and the layout was not removed.
+    fn has_layout(&self) -> bool {
+        self.core().layout.is_some()
+    }
+
+    /// Tells the engine that something changed the `Widget`'s size hint, such as its text or font.
+    /// Layout runs for the nearest container that has a layout before the next frame is painted.
+    /// Setters that change a hint call it automatically.
+    fn request_layout(&mut self) {
+        self.core_mut().layout_dirty = true;
     }
 
     /// Returns this `Widget` as a [`Composite`], if it is one.

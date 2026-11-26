@@ -47,3 +47,4 @@
 [#32] TextField: caret, selection, clipboard, masks, validators [kenji]
 [#56] Children are clipped to their parent: cropped blits and hit tests [kenji]
 [#57] Composite widgets: named parts, add/insert/remove, part events [kenji]
+[#116] Layout trait, SizeHint, LayoutParams; measure/arrange per frame [kenji]

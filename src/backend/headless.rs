@@ -438,6 +438,15 @@ impl Backend for HeadlessBackend {
         self.painted.push((id, painter.calls));
     }
 
+    /// Measures with a [`RecordingPainter`], whose text sizes are deterministic.
+    ///
+    /// # Arguments
+    ///
+    /// * `measure` - Receives the painter.
+    fn measure(&mut self, measure: &mut dyn FnMut(&mut dyn Painter)) {
+        measure(&mut RecordingPainter::default());
+    }
+
     /// Starts a frame; nothing to clear.
     ///
     /// # Arguments

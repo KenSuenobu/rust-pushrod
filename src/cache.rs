@@ -40,6 +40,7 @@ use crate::event::{
 };
 use crate::geometry::{Point, Rect, make_rect, point};
 use crate::input::InputEvent;
+use crate::layout::SizeHint;
 use crate::paint::{self, CachePolicy};
 use crate::widget::{Behavior, ROOT_WIDGET_ID, VisualState, Widget, WidgetId};
 use std::any::Any;
@@ -47,6 +48,7 @@ use std::collections::{HashMap, HashSet};
 use std::time::Duration;
 
 mod focus;
+mod layout;
 mod parts;
 
 /// The tree of `Widget`s in a window.
@@ -85,6 +87,7 @@ pub struct WidgetCache {
     clipboard_snapshot: Option<String>,
     clipboard_write: Option<String>,
     removed: HashSet<WidgetId>,
+    layout_hints: HashMap<WidgetId, SizeHint>,
 }
 
 impl std::fmt::Debug for WidgetCache {
@@ -131,6 +134,7 @@ impl WidgetCache {
             clipboard_snapshot: None,
             clipboard_write: None,
             removed: HashSet::new(),
+            layout_hints: HashMap::new(),
         }
     }
 
@@ -247,6 +251,7 @@ impl WidgetCache {
         widget.core_mut().id = id;
         widget.core_mut().parent = parent;
         widget.set_invalidated(true);
+        widget.request_layout();
 
         self.cache.push(widget);
         self.children.push(Vec::new());
@@ -798,9 +803,13 @@ impl WidgetCache {
     ///
     /// # Returns
     ///
-    /// `true` if a full redraw is pending or any `Widget` is invalidated.
+    /// `true` if a full redraw is pending, any `Widget` is invalidated, or layout is needed.
     pub fn needs_draw(&self) -> bool {
-        self.needs_full_redraw || self.cache.iter().any(|w| w.is_invalidated())
+        self.needs_full_redraw
+            || self
+                .cache
+                .iter()
+                .any(|w| w.is_invalidated() || w.core().layout_dirty())
     }
 
     /// Sends an event to a `Widget`.  Disabled and hidden `Widget`s, and `Widget`s whose event mask
@@ -1207,6 +1216,9 @@ impl WidgetCache {
 
     /// Repaints changed `Widget`s and redraws the window if anything changed.
     ///
+    /// Containers whose layout is out of date are measured and arranged first, once, so painting
+    /// sees the final sizes (see the [`layout`](crate::layout) module).
+    ///
     /// Every invalidated, visible `Widget` is repainted into its texture.  If any `Widget` changed (or
     /// a full redraw was requested), the window is cleared and every visible `Widget`'s texture is
     /// copied to the screen in drawing order.  Copying cached textures is cheap; repainting only
@@ -1221,6 +1233,8 @@ impl WidgetCache {
     /// `true` if a frame was drawn and the backend should present it, `false` if nothing
     /// changed.
     pub fn draw_loop(&mut self, backend: &mut dyn Backend) -> bool {
+        self.run_layout(backend);
+
         let order = self.draw_order();
         let mut visible = vec![false; self.cache.len()];
         let mut redraw = self.needs_full_redraw;

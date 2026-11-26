@@ -499,6 +499,7 @@ impl WidgetCache {
         let parent = self.cache[id as usize].get_parent();
 
         self.children[parent as usize].retain(|&child| child != id);
+        self.cache[parent as usize].request_layout();
 
         let mut stack = vec![id];
         let mut removed = Vec::new();

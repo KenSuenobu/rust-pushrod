@@ -58,6 +58,7 @@ pub mod event;
 pub mod font;
 pub mod geometry;
 pub mod input;
+pub mod layout;
 pub mod paint;
 pub mod prelude;
 pub mod root_widget;
