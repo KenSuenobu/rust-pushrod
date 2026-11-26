@@ -213,6 +213,17 @@ fn swatch_toggles_and_reports_clicks() {
 }
 ```
 
+## High-DPI notes
+
+Write `paint` in **logical pixels** and let the backend handle the display: on a 2x screen the widget's texture is twice the size, text is rasterized at twice the font size, and a one-pixel `rect` or `line` becomes two physical pixels thick. So:
+
+- Do not multiply coordinates or font sizes by the scale yourself; every `Painter` call is already scaled.
+- Size the widget from `text_width` and `line_height`; they answer in logical pixels at any scale.
+- To pick a sharper image on a high-DPI display, check `p.scale_factor()` (`1.0`, `1.5`, `2.0`, ...).
+- When the window moves to another display, every widget is repainted; nothing in the widget needs to listen for it.
+
+See [Window resize and high-DPI rendering](../concepts/window-resize-and-high-dpi-rendering.md) for the details.
+
 ## Checklist for a new widget
 
 - Store a `WidgetCore`; create it with `WidgetCore::new(origin, size)`.

@@ -61,15 +61,40 @@ pub trait Backend {
     ///
     /// # Returns
     ///
-    /// The window's size in pixels.
+    /// The window's size in logical pixels.
     fn window_size(&self) -> Size;
 
     /// Resizes the window.
     ///
     /// # Arguments
     ///
-    /// * `size` - The new size in pixels.
+    /// * `size` - The new size in logical pixels.
     fn resize_window(&mut self, size: Size);
+
+    /// Returns how many physical pixels the window has per logical pixel.
+    ///
+    /// A backend that supports high-DPI displays sizes each `Widget`'s texture at physical
+    /// resolution (see [`to_physical_size`](crate::geometry::to_physical_size)), draws with a
+    /// [`Painter`] whose [`scale_factor`](Painter::scale_factor) matches, and reports a change
+    /// (the window moved to another display) with [`InputEvent::ScaleChanged`].
+    ///
+    /// # Returns
+    ///
+    /// The scale factor; `1.0` by default.
+    fn scale_factor(&self) -> f32 {
+        1.0
+    }
+
+    /// Sets the smallest size the user can resize the window to.  The engine calls it with the
+    /// root layout's minimum size whenever that changes.  A backend without resizable windows
+    /// ignores it (the default).
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The minimum size in logical pixels.
+    fn set_minimum_window_size(&mut self, size: Size) {
+        let _ = size;
+    }
 
     /// Tells the backend which input classes the application wants, so it can stop delivering the
     /// rest.  A backend may ignore this; the engine filters as well.
@@ -120,7 +145,9 @@ pub trait Backend {
     /// # Arguments
     ///
     /// * `id` - The `Widget` the texture belongs to.
-    /// * `size` - The `Widget`'s size in pixels; never zero in either dimension.
+    /// * `size` - The `Widget`'s size in logical pixels; never zero in either dimension.  A
+    ///   high-DPI backend makes the texture [`to_physical_size`](crate::geometry::to_physical_size)
+    ///   of it.
     /// * `paint` - Draws the `Widget`, given the backend's [`Painter`].
     fn paint_widget(&mut self, id: WidgetId, size: Size, paint: &mut dyn FnMut(&mut dyn Painter));
 
@@ -148,8 +175,9 @@ pub trait Backend {
     ///
     /// * `id` - The `Widget` to draw.
     /// * `source` - The part of the `Widget`'s texture to copy, relative to its upper left-hand
-    ///   corner.
-    /// * `dest` - Where to draw it, in window coordinates.
+    ///   corner, in logical pixels.
+    /// * `dest` - Where to draw it, in logical window coordinates.  A high-DPI backend converts
+    ///   both with [`to_physical`](crate::geometry::to_physical).
     fn draw_widget(&mut self, id: WidgetId, source: Rect, dest: Rect);
 
     /// Finishes the frame and shows it.

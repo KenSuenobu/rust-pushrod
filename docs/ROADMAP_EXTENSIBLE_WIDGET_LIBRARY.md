@@ -190,7 +190,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.7 (#3) | GPU text: font cache with a glyph atlas texture | Load each font once, rasterize glyphs once into a GPU atlas, and draw text by blitting glyphs. | `core`, `enhancement`, `mvp`, `parallelizable`, `performance`, `size/M` | Y | v0.1 | M | `src/font.rs`, `src/paint.rs`, `src/cache.rs`, `src/engine.rs` |
 | 1.8 (#23) | Edit the widget tree at run time: remove, reparent, reorder | Remove widgets and change parent or stacking order without breaking IDs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/cache.rs`, `src/engine.rs` |
 | 1.9 (#24) | Dirty-rectangle redraw | Only re-blit the screen regions that changed. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `src/cache.rs`, `src/engine.rs` |
-| 1.10 (#25) | High-DPI rendering and window resize | The root widget follows the window size; crisp rendering on high-DPI displays. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/engine.rs`, `src/cache.rs`, `src/geometry.rs` |
 | 1.11 (#26) | Application lifecycle: startup and close-request callbacks | Run code before the first frame; confirm or veto closing the window. | `core`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/engine.rs` |
 | 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | v0.2 | S | `src/paint.rs`, `src/cache.rs`, `pushrod-widgets/src/button.rs`, `pushrod-widgets/src/text.rs` |
 | 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
@@ -445,6 +444,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/dirty-rectangle-redraw.md` ("Dirty-rectangle redraw", Concepts, new). Guides: n/a. Rustdoc: `draw_loop` docs. Examples: n/a. Screenshots: n/a.
 
 ### 1.10 (#25): High-DPI rendering and window resize
+
+**Status:** done (#25). Widgets stay in logical pixels; `pushrod-sdl2` opens high-DPI aware windows, sizes each widget texture at logical size times the scale (`geometry::to_physical_size`), rasterizes text at the scaled font size, and draws one-pixel lines and borders `geometry::stroke_width` physical pixels thick. `Painter::scale_factor` and `Engine::scale_factor` expose the scale; `InputEvent::ScaleChanged` repaints every widget and emits `EngineEvent::ScaleFactorChanged`. A window resize resizes the root so its layout re-arranges, and the root layout's minimum size goes to `Backend::set_minimum_window_size` with `EngineEvent::MinimumWindowSizeChanged`. Docs: `pushrod-docs/docs/concepts/window-resize-and-high-dpi-rendering.md`; example: `pushrod-sdl2/examples/resizable.rs`.
 
 **Problem Statement.** The root widget keeps its initial size when the window is resized, and high-DPI displays get a scaled, blurry image.
 

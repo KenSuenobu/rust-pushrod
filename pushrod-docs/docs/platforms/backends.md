@@ -45,21 +45,23 @@ fn main() -> Result<(), pushrod::error::Error> {
 }
 ```
 
-`WindowSettings` has a `title`, a `size`, `centered` (default `true`) and `resizable` (default `false`). For your own event loop, use `pushrod_sdl2::event_loop(&mut engine, settings)` and `engine.next_event(&mut events)`; see [Handling events](../guides/handling-events.md).
+`WindowSettings` has a `title`, a `size` in logical pixels, `centered` (default `true`) and `resizable` (default `false`). Every window is high-DPI aware; see [Window resize and high-DPI rendering](../concepts/window-resize-and-high-dpi-rendering.md). For your own event loop, use `pushrod_sdl2::event_loop(&mut engine, settings)` and `engine.next_event(&mut events)`; see [Handling events](../guides/handling-events.md).
 
 ## The `Backend` trait
 
 | Method | Does |
 |---|---|
 | `cache_policy()` | How painted widgets are kept; the SDL2 backend uses `TextureCache`. |
-| `window_size()`, `resize_window(size)` | Reads and changes the window size. The window is created when the backend is built. |
+| `window_size()`, `resize_window(size)` | Reads and changes the window size, in logical pixels. The window is created when the backend is built. |
+| `scale_factor()` | Physical pixels per logical pixel; `1.0` by default. |
+| `set_minimum_window_size(size)` | The smallest size the user can resize the window to; the engine passes the root layout's minimum. Ignored by default. |
 | `set_event_mask(mask)` | Tells the backend which input classes the application wants. |
 | `set_text_input(active)` | Starts or stops text input while a text editor has focus. |
 | `poll_events(wait)` | Returns waiting `InputEvent`s, optionally blocking for the first one. |
 | `waker()` | A function other threads call to wake the loop. |
 | `now()` | The clock. |
-| `paint_widget(id, size, paint)` | Paints one widget into its own texture, only when it was invalidated. |
-| `begin_frame(color)`, `draw_widget(id, bounds)`, `present()` | Composes a frame by blitting cached textures. |
+| `paint_widget(id, size, paint)` | Paints one widget into its own texture, only when it was invalidated. A high-DPI backend makes the texture `size` times the scale factor. |
+| `begin_frame(color)`, `draw_widget(id, source, dest)`, `present()` | Composes a frame by blitting cached textures; `source` and `dest` are logical and converted to physical pixels. |
 | `take_notices()` | Engine events the backend produced (fonts loaded, atlas pages added). |
 | `clipboard_text()`, `set_clipboard_text(text)` | The clipboard. |
 | `open_url(url)` | Opens a URL in the default handler. |
@@ -74,7 +76,7 @@ Input uses Pushrod's own types, so no SDL type appears in a public signature of 
 | `Modifiers` | `SHIFT`, `CTRL`, `ALT`, `GUI` (left and right keys are not distinguished) |
 | `MouseButton` | `Left`, `Middle`, `Right`, `Other(n)` |
 
-The backend converts what the windowing library reports into an `InputEvent` (`MouseDown`, `MouseUp`, `MouseMove`, `Wheel`, `KeyDown`, `KeyUp`, `Text`, `Resized`, `FocusChanged`, `Exposed`, `Quit`, `Wake`).
+The backend converts what the windowing library reports into an `InputEvent` (`MouseDown`, `MouseUp`, `MouseMove`, `Wheel`, `KeyDown`, `KeyUp`, `Text`, `Resized`, `ScaleChanged`, `FocusChanged`, `Exposed`, `Quit`, `Wake`). Positions and sizes are in logical pixels.
 
 ## Testing without a display
 
@@ -101,8 +103,8 @@ engine.run(&mut backend, 0);
 assert!(backend.frames > 0);
 ```
 
-`backend.painted` lists every widget paint and its `PaintCall`s, `backend.draws` the textures composed into each frame, and `backend.frames` the frames presented. To dispatch one event without a loop, call `engine.dispatch(event, &mut state)`.
+`backend.painted` lists every widget paint and its `PaintCall`s, `backend.draws` the textures composed into each frame, and `backend.frames` the frames presented. `HeadlessBackend::with_scale_factor(size, 2.0)` and `backend.set_scale_factor(scale)` pretend to be a high-DPI window; `backend.texture_sizes` and `backend.minimum_size` record the physical texture sizes and the minimum window size. To dispatch one event without a loop, call `engine.dispatch(event, &mut state)`.
 
 ## Rendering rules
 
-The SDL2 backend keeps today's design: one GPU texture per widget, repainted only when the widget is invalidated, frames composed by blitting, and text from the glyph atlas (see [GPU text](../concepts/gpu-text.md)). Pushrod never uses OS-native menus, dialogs, or controls.
+The SDL2 backend keeps today's design: one GPU texture per widget, repainted only when the widget is invalidated, frames composed by blitting, and text from the glyph atlas (see [GPU text](../concepts/gpu-text.md)). Pushrod never uses OS-native menus, dialogs, or controls. On a high-DPI display each texture is rendered at physical resolution and the glyphs are rasterized at the scaled font size, so nothing is stretched; see [Window resize and high-DPI rendering](../concepts/window-resize-and-high-dpi-rendering.md).

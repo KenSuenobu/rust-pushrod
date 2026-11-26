@@ -53,6 +53,7 @@ pub mod font;
 pub mod image_cache;
 mod input;
 pub mod painter;
+pub mod scale;
 pub mod texture;
 pub mod ttf_layout;
 

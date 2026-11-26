@@ -100,8 +100,11 @@ pub enum InputEvent {
     Quit,
     /// The window needs repainting.
     Exposed,
-    /// The window changed size.
+    /// The window changed size, in logical pixels.
     Resized(Size),
+    /// The window's scale factor changed (it moved to a display with a different pixel
+    /// density): the new number of physical pixels per logical pixel.
+    ScaleChanged(f32),
     /// The window gained or lost keyboard focus.
     FocusChanged(bool),
     /// A mouse button went down.
@@ -160,10 +163,13 @@ impl InputEvent {
     /// # Returns
     ///
     /// The class, or `None` for events that are never filtered: close requests, exposure and
-    /// resizing keep the window alive and up to date.
+    /// resizing (and scale changes) keep the window alive and up to date.
     pub fn class(&self) -> Option<EventMask> {
         match self {
-            InputEvent::Quit | InputEvent::Exposed | InputEvent::Resized(_) => None,
+            InputEvent::Quit
+            | InputEvent::Exposed
+            | InputEvent::Resized(_)
+            | InputEvent::ScaleChanged(_) => None,
             InputEvent::MouseDown { .. } | InputEvent::MouseUp { .. } => {
                 Some(EventMask::POINTER_BUTTONS)
             }
@@ -186,6 +192,7 @@ mod tests {
         assert!(InputEvent::Quit.class().is_none());
         assert!(InputEvent::Exposed.class().is_none());
         assert!(InputEvent::Resized(Size { w: 1, h: 1 }).class().is_none());
+        assert!(InputEvent::ScaleChanged(2.0).class().is_none());
     }
 
     #[test]

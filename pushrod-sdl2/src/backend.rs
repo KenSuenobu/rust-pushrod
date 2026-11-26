@@ -20,13 +20,14 @@ use crate::font::{FontCache, FontNotice};
 use crate::image_cache::ImageCache;
 use crate::input::{Wake, to_input_event, types_to_disable};
 use crate::painter::{Sdl2Painter, to_sdl_color, to_sdl_rect};
+use crate::scale::{blit_rects, window_scale};
 use crate::texture::TextureStore;
 use pushrod::backend::{Backend, Waker};
 use pushrod::color::Color;
 use pushrod::engine::{Engine, EventLoop};
 use pushrod::error::Error;
 use pushrod::event::{EngineEvent, EventMask};
-use pushrod::geometry::{Rect, Size};
+use pushrod::geometry::{Rect, Size, to_physical_size};
 use pushrod::input::InputEvent;
 use pushrod::paint::{CachePolicy, Painter};
 use pushrod::widget::WidgetId;
@@ -61,11 +62,13 @@ use std::time::Duration;
 pub struct WindowSettings {
     /// The window title.
     pub title: String,
-    /// The size of the window's drawing area, in pixels.
+    /// The size of the window's drawing area, in logical pixels.  On a high-DPI display the
+    /// drawing area has this size times the scale factor in physical pixels.
     pub size: Size,
     /// Whether the window opens centered on the screen.
     pub centered: bool,
-    /// Whether the user can resize the window.
+    /// Whether the user can resize the window.  The root `Widget` follows the window's size,
+    /// and the root layout's minimum size becomes the window's minimum size.
     pub resizable: bool,
 }
 
@@ -112,6 +115,8 @@ pub struct Sdl2Backend {
     /// Every error reported so far, so a failure that repeats on every repaint (a missing font)
     /// is reported once.
     reported: HashSet<Error>,
+    /// Physical pixels per logical pixel, as of the last poll.
+    scale: f32,
 }
 
 impl std::fmt::Debug for Sdl2Backend {
@@ -130,7 +135,12 @@ impl std::fmt::Debug for Sdl2Backend {
 }
 
 impl Sdl2Backend {
-    /// Initializes `SDL2` and opens a window.
+    /// Initializes `SDL2` and opens a high-DPI aware window.
+    ///
+    /// The window's size is in logical pixels; its drawing area has the display's full physical
+    /// resolution, and every `Widget` texture is created at that resolution (see
+    /// [`Backend::scale_factor`]).  On Windows the `SDL_WINDOWS_DPI_SCALING` hint is turned on
+    /// (unless that environment variable is set) so Windows reports logical sizes as macOS does.
     ///
     /// On macOS the OpenGL renderer is requested unless the `SDL_RENDER_DRIVER` environment
     /// variable is set: with the Metal and software renderers the whole window appears to move
@@ -167,9 +177,16 @@ impl Sdl2Backend {
     ///
     /// Returns the `SDL2` message if anything cannot be created.
     fn open(settings: &WindowSettings) -> Result<Self, String> {
+        #[cfg(target_os = "windows")]
+        if std::env::var_os("SDL_WINDOWS_DPI_SCALING").is_none() {
+            sdl2::hint::set("SDL_WINDOWS_DPI_SCALING", "1");
+        }
+
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let mut builder = video.window(&settings.title, settings.size.w, settings.size.h);
+
+        builder.allow_highdpi();
 
         if settings.centered {
             builder.position_centered();
@@ -211,7 +228,10 @@ impl Sdl2Backend {
             None
         };
 
+        let scale = Self::read_scale(&canvas);
+
         Ok(Self {
+            scale,
             pump: sdl.event_pump()?,
             text_input: video.text_input(),
             clipboard: video.clipboard(),
@@ -256,6 +276,24 @@ impl Sdl2Backend {
         surface.save(path).map_err(|m| Error::image(path, m))
     }
 
+    /// Reads a window's scale factor from its renderer.
+    ///
+    /// # Arguments
+    ///
+    /// * `canvas` - The window's canvas.
+    ///
+    /// # Returns
+    ///
+    /// Drawable pixels over window pixels; `1.0` if the renderer cannot report its size.
+    fn read_scale(canvas: &Canvas<Window>) -> f32 {
+        let (w, h) = canvas.window().size();
+
+        match canvas.output_size() {
+            Ok((dw, dh)) => window_scale(Size::new(w, h), Size::new(dw, dh)),
+            Err(_) => 1.0,
+        }
+    }
+
     /// Queues an error for the engine, unless the same error was reported before.
     ///
     /// # Arguments
@@ -293,6 +331,21 @@ impl Backend for Sdl2Backend {
         let _ = self.canvas.window_mut().set_size(size.w, size.h);
     }
 
+    fn scale_factor(&self) -> f32 {
+        self.scale
+    }
+
+    /// A failure is reported through [`Backend::take_notices`].
+    fn set_minimum_window_size(&mut self, size: Size) {
+        if let Err(error) = self
+            .canvas
+            .window_mut()
+            .set_minimum_size(size.w.max(1), size.h.max(1))
+        {
+            self.report(Error::backend(error.to_string()));
+        }
+    }
+
     fn set_event_mask(&mut self, mask: EventMask) {
         let before = types_to_disable(self.applied_mask);
         let after = types_to_disable(mask);
@@ -327,7 +380,18 @@ impl Backend for Sdl2Backend {
 
         raw.extend(self.pump.poll_iter());
 
-        raw.into_iter().filter_map(to_input_event).collect()
+        let mut events: Vec<InputEvent> = raw.into_iter().filter_map(to_input_event).collect();
+
+        // SDL2 has no scale-change event: moving the window to a display with another pixel
+        // density changes its drawable size, so the scale is compared after every poll.
+        let scale = Self::read_scale(&self.canvas);
+
+        if scale != self.scale {
+            self.scale = scale;
+            events.push(InputEvent::ScaleChanged(scale));
+        }
+
+        events
     }
 
     fn set_fonts(&mut self, fonts: pushrod::font::FontRegistry) {
@@ -339,7 +403,8 @@ impl Backend for Sdl2Backend {
     }
 
     fn measure(&mut self, measure: &mut dyn FnMut(&mut dyn Painter)) {
-        let mut painter = Sdl2Painter::new(&mut self.canvas, &mut self.fonts);
+        let scale = self.scale;
+        let mut painter = Sdl2Painter::new(&mut self.canvas, &mut self.fonts).with_scale(scale);
 
         measure(&mut painter);
         // Measuring draws nothing, so any error it found is reported when the text is painted.
@@ -347,11 +412,15 @@ impl Backend for Sdl2Backend {
     }
 
     /// Failures (a texture that cannot be created, a drawing call that fails) skip that
-    /// `Widget`'s painting and are reported through [`Backend::take_notices`].
+    /// `Widget`'s painting and are reported through [`Backend::take_notices`].  The texture has
+    /// the `Widget`'s size times the scale factor, so it is drawn at physical resolution.
     fn paint_widget(&mut self, id: WidgetId, size: Size, paint: &mut dyn FnMut(&mut dyn Painter)) {
+        let scale = self.scale;
         let store = self.textures.entry(id).or_default();
 
-        if let Err(error) = store.create_or_resize_texture(&mut self.canvas, size) {
+        if let Err(error) =
+            store.create_or_resize_texture(&mut self.canvas, to_physical_size(size, scale))
+        {
             self.report(error);
 
             return;
@@ -366,7 +435,9 @@ impl Backend for Sdl2Backend {
         let result = self
             .canvas
             .with_texture_canvas(&mut texture, |texture_canvas| {
-                let mut painter = Sdl2Painter::new(texture_canvas, fonts).with_images(images);
+                let mut painter = Sdl2Painter::new(texture_canvas, fonts)
+                    .with_images(images)
+                    .with_scale(scale);
 
                 paint(&mut painter);
                 painted = painter.take_errors();
@@ -392,8 +463,12 @@ impl Backend for Sdl2Backend {
     }
 
     /// A failed copy is reported through [`Backend::take_notices`] and the `Widget` is skipped.
+    /// Both rectangles are converted to physical pixels.
     fn draw_widget(&mut self, id: WidgetId, source: Rect, dest: Rect) {
+        let scale = self.scale;
+
         if let Some(store) = self.textures.get_mut(&id)
+            && let (source, dest) = blit_rects(source, dest, store.size(), scale)
             && let Some(texture) = store.get_optional_ref()
             && let Err(message) = self
                 .canvas

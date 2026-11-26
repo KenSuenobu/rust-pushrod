@@ -87,6 +87,16 @@ impl TextureStore {
         self.store.as_ref()
     }
 
+    /// Returns the size of the stored texture.
+    ///
+    /// # Returns
+    ///
+    /// The width and height in physical pixels, as last given to
+    /// [`create_or_resize_texture`](TextureStore::create_or_resize_texture); zero before then.
+    pub fn size(&self) -> Size {
+        self.size
+    }
+
     /// Makes sure a texture of the given size exists.
     ///
     /// Creates a texture if there is none, or replaces it if the size changed (destroying the old one,

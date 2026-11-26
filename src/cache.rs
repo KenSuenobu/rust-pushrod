@@ -413,6 +413,17 @@ impl WidgetCache {
         self.needs_full_redraw = true;
     }
 
+    /// Invalidates every `Widget`, so each is repainted into its texture on the next frame, and
+    /// the whole window is redrawn.  Used when the scale factor changes: every texture has to be
+    /// rendered again at the new physical resolution.
+    pub fn repaint_all(&mut self) {
+        for widget in &mut self.cache {
+            widget.set_invalidated(true);
+        }
+
+        self.needs_full_redraw = true;
+    }
+
     /// Returns the origin of a `Widget` in window coordinates.
     ///
     /// # Arguments

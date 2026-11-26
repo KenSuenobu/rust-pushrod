@@ -41,6 +41,8 @@ flowchart TD
 | `TimerCancelled { id }` | A waiting timer was cancelled with `cancel_timer`. |
 | `AnimationTicked { recipients, elapsed }` | `Tick` was delivered to the `recipients` widgets that asked for animation. |
 | `IdleRan { callbacks }` | The idle callbacks ran because no events were waiting. |
+| `ScaleFactorChanged { old_percent, new_percent }` | The window's scale factor changed (it moved to a display with another pixel density, or opened on a high-DPI one), and every widget was invalidated to repaint at the new resolution. `100` is 1x, `200` is 2x. See [Window resize and high-DPI rendering](../concepts/window-resize-and-high-dpi-rendering.md). |
+| `MinimumWindowSizeChanged { size }` | The root layout's minimum size changed and was given to the backend as the window's minimum size. |
 | `Error { error }` | Something failed while the loop was running (a font would not load, a texture could not be created). The loop keeps going. See [Errors](../guides/creating-an-application.md#errors). |
 
 More variants are added by the features that need them (dialogs, menus, timers, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.

@@ -60,7 +60,7 @@ Call `set_layout` on the container, and `set_layout_params` on a child to change
 | `widget.set_size_hint(hint)` | A fixed hint that replaces the widget's own. |
 | `widget.request_layout()` | Ask for layout after changing something that affects the hint. Built-in setters do this for you. |
 | `cache.invalidate_layout(id)` | The same, through the cache. |
-| `cache.measured_hint(id)` | The hint a container's layout last measured; the root's minimum is the window's minimum size. |
+| `cache.measured_hint(id)` | The hint a container's layout last measured; the engine gives the root's minimum to the backend as the window's minimum size (see [Window resize and high-DPI rendering](../concepts/window-resize-and-high-dpi-rendering.md)). |
 
 A widget with no hint of its own reports the size the application gave it (`set_size`) as its minimum and preferred size, with no maximum. A layout changing a widget's size does not change that.
 

@@ -428,6 +428,10 @@ pub struct Engine<S = ()> {
     idle_callbacks: Vec<IdleCallback<S>>,
     last_tick: Instant,
     fonts: FontRegistry,
+    /// Physical pixels per logical pixel, as the backend last reported it.
+    scale_factor: f32,
+    /// The minimum window size last given to the backend, from the root layout.
+    minimum_size: Option<Size>,
 }
 
 impl<S> std::fmt::Debug for Engine<S> {
@@ -489,6 +493,8 @@ impl<S> Engine<S> {
             idle_callbacks: Vec::new(),
             last_tick: Instant::now(),
             fonts: FontRegistry::new(),
+            scale_factor: 1.0,
+            minimum_size: None,
         }
     }
 
@@ -1496,9 +1502,110 @@ impl<S> Engine<S> {
     ///
     /// # Returns
     ///
-    /// The window size given to [`Engine::new`].
+    /// The window size in logical pixels: the size given to [`Engine::new`], or the latest size
+    /// after the window was resized.
     pub fn get_size(&self) -> Size {
         self.size
+    }
+
+    /// Returns the window's scale factor.
+    ///
+    /// # Returns
+    ///
+    /// Physical pixels per logical pixel: `1.0` until a run loop starts, then the backend's
+    /// [`scale_factor`](Backend::scale_factor), updated when the window moves to another
+    /// display.
+    pub fn scale_factor(&self) -> f32 {
+        self.scale_factor
+    }
+
+    /// Returns the minimum window size the engine last gave the backend.
+    ///
+    /// # Returns
+    ///
+    /// The root layout's minimum size, or `None` if the root has no layout or has not been
+    /// measured yet.
+    pub fn minimum_window_size(&self) -> Option<Size> {
+        self.minimum_size
+    }
+
+    /// Resizes the root `Widget` to fill a resized window.  The root's layout, if it has one,
+    /// arranges its children again before the next frame.
+    ///
+    /// # Arguments
+    ///
+    /// * `new_size` - The window's new size in logical pixels.
+    fn resize_root(&mut self, new_size: Size) {
+        self.size = new_size;
+
+        if let Some(root) = self.widget_cache.get_mut(crate::widget::ROOT_WIDGET_ID)
+            && root.get_size() != new_size
+        {
+            root.set_size(new_size);
+        }
+    }
+
+    /// Records a new scale factor and invalidates every `Widget` so each repaints at the new
+    /// resolution.
+    ///
+    /// # Arguments
+    ///
+    /// * `scale` - The new physical pixels per logical pixel.
+    ///
+    /// Queues [`EngineEvent::ScaleFactorChanged`] when the whole-percent scale changed.
+    fn change_scale(&mut self, scale: f32) {
+        let scale = crate::geometry::sanitize_scale(scale);
+        let old_percent = crate::geometry::scale_percent(self.scale_factor);
+        let new_percent = crate::geometry::scale_percent(scale);
+
+        self.scale_factor = scale;
+
+        if old_percent == new_percent {
+            return;
+        }
+
+        self.widget_cache.repaint_all();
+        self.widget_cache
+            .queue_event(Event::Engine(EngineEvent::ScaleFactorChanged {
+                old_percent,
+                new_percent,
+            }));
+    }
+
+    /// Takes the backend's scale factor when a run loop starts.  A window opened on a high-DPI
+    /// display starts above 1x, which emits [`EngineEvent::ScaleFactorChanged`] from `100`.
+    ///
+    /// # Arguments
+    ///
+    /// * `backend` - The backend that owns the window.
+    fn adopt_backend_scale(&mut self, backend: &dyn Backend) {
+        self.change_scale(backend.scale_factor());
+    }
+
+    /// Gives the backend the root layout's minimum size as the window's minimum size, when it
+    /// changed, and queues [`EngineEvent::MinimumWindowSizeChanged`].
+    ///
+    /// # Arguments
+    ///
+    /// * `backend` - The backend that owns the window.
+    fn sync_minimum_size(&mut self, backend: &mut dyn Backend) {
+        let Some(hint) = self
+            .widget_cache
+            .measured_hint(crate::widget::ROOT_WIDGET_ID)
+        else {
+            return;
+        };
+
+        if self.minimum_size == Some(hint.min) {
+            return;
+        }
+
+        self.minimum_size = Some(hint.min);
+        backend.set_minimum_window_size(hint.min);
+        self.widget_cache
+            .queue_event(Event::Engine(EngineEvent::MinimumWindowSizeChanged {
+                size: hint.min,
+            }));
     }
 
     /// Processes one raw input event, as the run loop does.
@@ -1543,11 +1650,18 @@ impl<S> Engine<S> {
                 Vec::new()
             }
 
-            // Only a resize is broadcast; exposure just repaints.
+            // Only a resize is broadcast; exposure just repaints.  The root follows the window,
+            // so its layout re-arranges the children.
             InputEvent::Resized(new_size) => {
+                self.resize_root(new_size);
                 self.widget_cache.invalidate_all();
                 self.widget_cache
                     .broadcast(&Event::WindowResized { size: new_size })
+            }
+
+            InputEvent::ScaleChanged(scale) => {
+                self.change_scale(scale);
+                Vec::new()
             }
 
             InputEvent::FocusChanged(focused) => self
@@ -1629,6 +1743,7 @@ impl<S> Engine<S> {
     /// ```
     pub fn run(&mut self, backend: &mut dyn Backend, mut state: S) -> S {
         self.connect_sender(backend);
+        self.adopt_backend_scale(backend);
 
         // Determines the amount of time to wait between frames.
         let frame_time = Duration::from_millis((1000.0 / self.frame_rate.max(1) as f64) as u64);
@@ -1694,6 +1809,8 @@ impl<S> Engine<S> {
                 backend.present();
             }
 
+            self.sync_minimum_size(backend);
+
             let elapsed = backend.now().saturating_duration_since(start);
 
             if !idle && elapsed < frame_time {
@@ -1737,6 +1854,7 @@ impl<S> Engine<S> {
     pub fn event_loop(&mut self, mut backend: Box<dyn Backend>) -> EventLoop {
         self.widget_cache.invalidate_all();
         self.connect_sender(backend.as_mut());
+        self.adopt_backend_scale(backend.as_ref());
 
         EventLoop {
             backend,
@@ -1795,6 +1913,8 @@ impl<S> Engine<S> {
             if self.widget_cache.draw_loop(events.backend.as_mut()) {
                 events.backend.present();
             }
+
+            self.sync_minimum_size(events.backend.as_mut());
 
             // Animation ticks, and (with state) due timers, run once per pass.
             let now = Instant::now();

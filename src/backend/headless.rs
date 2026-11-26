@@ -34,7 +34,7 @@ use crate::color::Color;
 use crate::error::Error;
 use crate::event::{EngineEvent, EventMask};
 use crate::font::FontRegistry;
-use crate::geometry::{Point, Rect, Size};
+use crate::geometry::{Point, Rect, Size, sanitize_scale, to_physical_size};
 use crate::input::InputEvent;
 use crate::paint::{CachePolicy, Painter, TextStyle};
 use crate::widget::WidgetId;
@@ -76,6 +76,8 @@ pub struct RecordingPainter {
     /// listed behaves like a missing file: [`Painter::image_size`] and [`Painter::image_part`]
     /// fail with [`Error::Image`].
     pub images: HashMap<String, Size>,
+    /// The scale factor [`Painter::scale_factor`] reports; `0.0` (the default) reads as `1.0`.
+    pub scale: f32,
 }
 
 impl Painter for RecordingPainter {
@@ -86,6 +88,15 @@ impl Painter for RecordingPainter {
     /// [`CachePolicy::DirectDraw`], since nothing is cached.
     fn cache_policy(&self) -> CachePolicy {
         CachePolicy::DirectDraw
+    }
+
+    /// Returns the recorded scale factor.
+    ///
+    /// # Returns
+    ///
+    /// [`RecordingPainter::scale`], or `1.0` if it is not a usable scale.
+    fn scale_factor(&self) -> f32 {
+        sanitize_scale(self.scale)
     }
 
     /// Records a fill.
@@ -312,6 +323,13 @@ pub struct HeadlessBackend {
     pub opened_urls: Vec<String>,
     /// The font registry the engine gave the backend when the run loop started.
     pub fonts: Option<FontRegistry>,
+    /// The pretend window's scale factor; `0.0` (the default) reads as `1.0`.  Change it with
+    /// [`HeadlessBackend::set_scale_factor`].
+    scale: f32,
+    /// The minimum window size the engine last set.
+    pub minimum_size: Option<Size>,
+    /// The physical size of each `Widget`'s pretend texture, as of its latest paint.
+    pub texture_sizes: HashMap<WidgetId, Size>,
 }
 
 impl HeadlessBackend {
@@ -338,6 +356,35 @@ impl HeadlessBackend {
     /// * `event` - The event to deliver.
     pub fn push_event(&mut self, event: InputEvent) {
         self.script.push_back(event);
+    }
+
+    /// Sets the pretend window's scale factor and queues [`InputEvent::ScaleChanged`], as a real
+    /// backend does when its window moves to a display with a different pixel density.
+    ///
+    /// # Arguments
+    ///
+    /// * `scale` - Physical pixels per logical pixel; an unusable value reads as `1.0`.
+    pub fn set_scale_factor(&mut self, scale: f32) {
+        self.scale = sanitize_scale(scale);
+        self.push_event(InputEvent::ScaleChanged(self.scale));
+    }
+
+    /// Creates a headless backend whose window starts at a scale factor, like a window opened on a
+    /// high-DPI display.
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The size of the pretend window, in logical pixels.
+    /// * `scale` - Physical pixels per logical pixel.
+    ///
+    /// # Returns
+    ///
+    /// A new `HeadlessBackend` with no scripted input.
+    pub fn with_scale_factor(size: Size, scale: f32) -> Self {
+        Self {
+            scale: sanitize_scale(scale),
+            ..Self::new(size)
+        }
     }
 }
 
@@ -376,6 +423,25 @@ impl Backend for HeadlessBackend {
     /// * `size` - The new size.
     fn resize_window(&mut self, size: Size) {
         self.size = size;
+    }
+
+    /// Returns the pretend window's scale factor.
+    ///
+    /// # Returns
+    ///
+    /// The scale set by [`HeadlessBackend::with_scale_factor`] or
+    /// [`HeadlessBackend::set_scale_factor`]; `1.0` by default.
+    fn scale_factor(&self) -> f32 {
+        sanitize_scale(self.scale)
+    }
+
+    /// Records the minimum size in [`HeadlessBackend::minimum_size`].
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The minimum size in logical pixels.
+    fn set_minimum_window_size(&mut self, size: Size) {
+        self.minimum_size = Some(size);
     }
 
     /// Records the event mask in [`HeadlessBackend::mask`].
@@ -423,17 +489,23 @@ impl Backend for HeadlessBackend {
         None
     }
 
-    /// Paints the `Widget` with a [`RecordingPainter`] and stores the calls in
-    /// [`HeadlessBackend::painted`].
+    /// Paints the `Widget` with a [`RecordingPainter`] at the window's scale factor, stores the
+    /// calls in [`HeadlessBackend::painted`] and the physical texture size in
+    /// [`HeadlessBackend::texture_sizes`].
     ///
     /// # Arguments
     ///
     /// * `id` - The `Widget`.
-    /// * `_size` - The `Widget`'s size; not needed to record.
+    /// * `size` - The `Widget`'s size in logical pixels.
     /// * `paint` - Draws the `Widget`.
-    fn paint_widget(&mut self, id: WidgetId, _size: Size, paint: &mut dyn FnMut(&mut dyn Painter)) {
-        let mut painter = RecordingPainter::default();
+    fn paint_widget(&mut self, id: WidgetId, size: Size, paint: &mut dyn FnMut(&mut dyn Painter)) {
+        let scale = self.scale_factor();
+        let mut painter = RecordingPainter {
+            scale,
+            ..RecordingPainter::default()
+        };
 
+        self.texture_sizes.insert(id, to_physical_size(size, scale));
         paint(&mut painter);
         self.painted.push((id, painter.calls));
     }
@@ -444,7 +516,10 @@ impl Backend for HeadlessBackend {
     ///
     /// * `measure` - Receives the painter.
     fn measure(&mut self, measure: &mut dyn FnMut(&mut dyn Painter)) {
-        measure(&mut RecordingPainter::default());
+        measure(&mut RecordingPainter {
+            scale: self.scale_factor(),
+            ..RecordingPainter::default()
+        });
     }
 
     /// Starts a frame; nothing to clear.
@@ -536,6 +611,27 @@ mod tests {
         assert!(shared.families().contains(&String::from("Mem")));
     }
     use crate::paint::TextJustify;
+
+    #[test]
+    fn scale_factor_sizes_textures_and_reaches_the_painter() {
+        let mut backend = HeadlessBackend::with_scale_factor(Size::new(10, 10), 2.0);
+        let mut seen = 0.0;
+
+        backend.paint_widget(4, Size::new(30, 7), &mut |p| seen = p.scale_factor());
+
+        assert_eq!(backend.scale_factor(), 2.0);
+        assert_eq!(seen, 2.0);
+        assert_eq!(backend.texture_sizes[&4], Size::new(60, 14));
+
+        backend.set_scale_factor(1.5);
+        assert_eq!(
+            backend.poll_events(None),
+            vec![InputEvent::ScaleChanged(1.5)]
+        );
+        backend.set_minimum_window_size(Size::new(5, 6));
+        assert_eq!(backend.minimum_size, Some(Size::new(5, 6)));
+        assert_eq!(RecordingPainter::default().scale_factor(), 1.0);
+    }
 
     #[test]
     fn records_every_call_in_order() {
