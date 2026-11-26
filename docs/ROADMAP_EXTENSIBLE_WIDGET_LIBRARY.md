@@ -974,7 +974,7 @@ A small box with an arrow or symbol, used for scroll arrows, close boxes, and sp
 
 ### 2.3 (#29): Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog
 
-**Status:** done (#29). `Button` builders `default_action`, `cancel_action`, `toggle`, `activate_on_press`, `dismisses_dialog`; the core delivers `Activated` to the widget Return/Escape picks; `EngineEvent::DialogDismissRequested` is emitted for dismissing buttons (modal dialogs, 6.7 (#66), will consume it); pressed colors come from `paint::pressed_colors`; the gallery shows it.
+**Status:** done (#29). `Button` builders `default_action`, `cancel_action`, `toggle`, `activate_on_press`, `dismisses_dialog`; the core delivers `Activated` to the widget Return/Escape picks; `EngineEvent::DialogDismissRequested` is emitted for dismissing buttons, and closes the enclosing modal dialog (6.7 (#66)); pressed colors come from `paint::pressed_colors`; the gallery shows it.
 
 A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. **Widget roadmap:** [`docs/widgets/button.md`](widgets/button.md) (look, behavior, events, acceptance criteria).
 
@@ -1654,7 +1654,6 @@ Widget registry, property introspection, a binary form file format, loader and w
 | 6.4 (#63) | Form loader: build a form from a file with stable IDs | Load a form and attach callbacks by ID or name. | `chassis`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.2 | M | `form/loader.rs (new)`, `src/engine.rs` |
 | 6.5 (#64) | Form writer: save a widget subtree to a file | Serialize any subtree into the form format. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `form/writer.rs (new)` |
 | 6.6 (#65) | Generate ID constants from a form file | build.rs helper and CLI that emit Rust constants for named objects. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `size/S` | Y | v0.2 | S | `form/codegen.rs (new)` |
-| 6.7 (#66) | Modal dialogs: run a form until a dismissing control is chosen | Open a form modally; the result is the ID of the control that dismissed it. | `core`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.1 | M | `src/engine.rs`, `src/cache.rs` |
 | 6.8 (#67) | Bind actions by name from form files | Form files name the action a control triggers; applications register handlers by name. | `chassis`, `enhancement`, `forms`, `parallelizable`, `size/S` | Y | N | S | `src/engine.rs`, `form/loader.rs` |
 | 6.9 (#68) | Design-mode hooks for Chassis | Select, move, resize, and edit widgets without triggering their behavior. | `chassis`, `enhancement`, `forms`, `parallelizable`, `size/L` | Y | N | L | `src/cache.rs`, `src/engine.rs`, `src/design.rs (new)` |
 | 6.10 (#153) | Resource manager: load resource sets and get resources by ID | Load a resource file (from disk or embedded in the executable) and get its forms, strings, images, icons, files, menus, and alerts by ID. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `resources`, `size/M` | Y | v0.2 | M | `src/resource/mod.rs (new)`, `src/resource/set.rs (new)`, `src/engine.rs` |
@@ -1793,6 +1792,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 **Sources.** [Shift Interface resource editor (Atari)](https://atariuptodate.de/en/1277/interface)
 
 ### 6.7 (#66): Modal dialogs: run a form until a dismissing control is chosen
+
+**Status:** done (#66). `ui.open_modal(root, |state, ui, dismissed_by| ..)` shows and raises the dialog's root; while open, widgets outside the top modal are drawn but inert (no input, hover, or focus; `WidgetCache::is_inert`), focus starts on the dialog's first focusable widget, and Return/Escape search only the dialog. Clicking or activating a `DISMISSES_DIALOG` widget inside it hides the dialog, restores focus, and runs the callback with the dismissing ID. Modals nest. Emits `EngineEvent::ModalOpened`, `DialogDismissRequested`, and `ModalClosed`. `Ui` takes the state type as a defaulted parameter (`Ui<'a, S = ()>`). Docs: `pushrod-docs/docs/forms/modal-dialogs.md`; example: `pushrod-sdl2/examples/settings_dialog.rs`.
 
 **Problem Statement.** Alerts, file choosers, and settings dialogs need modal behavior: input goes only to the dialog until it is dismissed.
 

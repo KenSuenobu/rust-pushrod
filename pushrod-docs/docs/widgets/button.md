@@ -100,7 +100,7 @@ Every widget also has the methods of the `Widget` trait: `get_id`, `get_parent`,
 |---|---|---|
 | `Event::Clicked { id, button, count }` | The left button is released over the button while it is still pressed; with `activate_on_press`, when it goes down; for a default or cancel button, also on Return or Escape. | `engine.on_click(id, ..)` |
 | `Event::Toggled { id, checked }` | A toggle button is activated; `checked` is the new state. | `engine.on_toggle(id, ..)` |
-| `EngineEvent::DialogDismissRequested { id }` | A `dismisses_dialog` button is activated. Modal dialogs will consume it; until then, listen with `engine.on_event`. | `engine.on_event(..)` |
+| `EngineEvent::DialogDismissRequested { id }` | A `dismisses_dialog` button is activated. Inside an open [modal dialog](../forms/modal-dialogs.md) it closes the dialog, and the `open_modal` callback receives the button's ID. | `ui.open_modal(..)`, `engine.on_engine_event(..)` |
 
 The application also still receives `Event::Activated { id }` when Return or Escape picks the button.
 
@@ -110,4 +110,4 @@ Behavior: pressing the mouse button inverts the button (black background, white 
 
 ## Planned
 
-Modal dialogs that close on `DialogDismissRequested`, per-state colors, and keyboard mnemonics are planned; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).
+Per-state colors and keyboard mnemonics are planned; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).

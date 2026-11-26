@@ -288,7 +288,7 @@ impl WidgetCache {
     /// # Returns
     ///
     /// `id` first, then its descendants in drawing order (parents before children).
-    fn subtree(&self, id: WidgetId) -> Vec<WidgetId> {
+    pub(super) fn subtree(&self, id: WidgetId) -> Vec<WidgetId> {
         let mut stack = vec![id];
         let mut ids = Vec::new();
 

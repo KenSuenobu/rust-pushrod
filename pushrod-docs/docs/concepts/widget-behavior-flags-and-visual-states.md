@@ -18,7 +18,7 @@ Because the flags live on the widget itself, selection, default buttons, and dis
 | `TOGGLE` (stays pressed after a click) | `CHECKED` |
 | `DEFAULT_ACTION` (Return) | `INDETERMINATE` (mixed / tri-state) |
 | `CANCEL_ACTION` (Escape) | `DISABLED` |
-| `DISMISSES_DIALOG` | `FOCUSED` |
+| `DISMISSES_DIALOG` (closes its [modal dialog](../forms/modal-dialogs.md)) | `FOCUSED` |
 | `ACTIVATE_ON_PRESS` (fires on press, not release) | `HOVERED` (pointer inside) |
 | `EXCLUSIVE` (one-of-many among siblings) | `DRAG_OVER` (a drag is over it) |
 | `HIDDEN` | |

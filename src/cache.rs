@@ -49,6 +49,7 @@ use std::time::Duration;
 
 mod focus;
 mod layout;
+mod modal;
 mod parts;
 mod scroll;
 mod tree;
@@ -96,6 +97,7 @@ pub struct WidgetCache {
     removed: HashSet<WidgetId>,
     released_textures: Vec<WidgetId>,
     layout_hints: HashMap<WidgetId, SizeHint>,
+    modals: Vec<modal::ModalFrame>,
 }
 
 impl std::fmt::Debug for WidgetCache {
@@ -144,6 +146,7 @@ impl WidgetCache {
             removed: HashSet::new(),
             released_textures: Vec::new(),
             layout_hints: HashMap::new(),
+            modals: Vec::new(),
         }
     }
 
@@ -736,9 +739,11 @@ impl WidgetCache {
             self.clipboard_write = Some(text);
         }
 
-        let events = ctx.into_events();
+        let events = self.apply_exclusive(ctx.into_events());
 
-        self.apply_exclusive(events)
+        self.dismiss_on(&events);
+
+        events
     }
 
     /// Asks for an [`Event::Tick`] for a `Widget` on the next frame, from outside event handling,
@@ -883,6 +888,33 @@ impl WidgetCache {
         Propagation::Continue
     }
 
+    /// Sends an input event to a `Widget`, unless a modal dialog makes it inert.  See
+    /// [`WidgetCache::send`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The receiving `Widget`.
+    /// * `event` - The input event.
+    /// * `phase` - The phase of delivery.
+    /// * `ctx` - The context collecting generated events.
+    ///
+    /// # Returns
+    ///
+    /// What the `Widget` returned, or [`Propagation::Continue`] if it received nothing.
+    fn send_input(
+        &mut self,
+        id: WidgetId,
+        event: &Event,
+        phase: EventPhase,
+        ctx: &mut EventCtx,
+    ) -> Propagation {
+        if self.is_inert(id) {
+            return Propagation::Continue;
+        }
+
+        self.send(id, event, phase, ctx)
+    }
+
     /// Returns the ancestors of a `Widget`, nearest parent first, ending at the root.
     fn ancestors(&self, id: WidgetId) -> Vec<WidgetId> {
         let mut path = Vec::new();
@@ -909,8 +941,9 @@ impl WidgetCache {
     /// 2. **Target:** the `Widget` itself.
     /// 3. **Bubble:** from the target's parent up to the root.
     ///
-    /// [`Propagation::Stop`] from any `Widget` ends delivery.  Disabled and hidden `Widget`s, and
-    /// those whose mask excludes the event, are skipped.  Events that do not propagate (see
+    /// [`Propagation::Stop`] from any `Widget` ends delivery.  Disabled and hidden `Widget`s,
+    /// those whose mask excludes the event, and those a modal dialog makes inert (see
+    /// [`WidgetCache::is_inert`]) are skipped.  Events that do not propagate (see
     /// [`EventKind::propagates`](crate::event::EventKind::propagates)) go to the target only.
     ///
     /// # Arguments
@@ -930,25 +963,25 @@ impl WidgetCache {
         ctx: &mut EventCtx,
     ) -> Propagation {
         if !event.kind().propagates() {
-            return self.send(target, event, EventPhase::Target, ctx);
+            return self.send_input(target, event, EventPhase::Target, ctx);
         }
 
         let ancestors = self.ancestors(target);
 
         for &id in ancestors.iter().rev() {
             if self.get(id).is_some_and(|w| w.handles_capture())
-                && self.send(id, event, EventPhase::Capture, ctx) == Propagation::Stop
+                && self.send_input(id, event, EventPhase::Capture, ctx) == Propagation::Stop
             {
                 return Propagation::Stop;
             }
         }
 
-        if self.send(target, event, EventPhase::Target, ctx) == Propagation::Stop {
+        if self.send_input(target, event, EventPhase::Target, ctx) == Propagation::Stop {
             return Propagation::Stop;
         }
 
         for &id in &ancestors {
-            if self.send(id, event, EventPhase::Bubble, ctx) == Propagation::Stop {
+            if self.send_input(id, event, EventPhase::Bubble, ctx) == Propagation::Stop {
                 return Propagation::Stop;
             }
         }
@@ -1135,7 +1168,7 @@ impl WidgetCache {
                         EventPhase::Target,
                         &mut ctx,
                     );
-                    self.send(
+                    self.send_input(
                         self.current_widget_id,
                         &Event::PointerEntered {
                             id: self.current_widget_id,
@@ -1208,7 +1241,8 @@ impl WidgetCache {
     }
 
     /// Sets or clears one [`VisualState`] flag on a `Widget`, repainting it only if its look
-    /// changes (see [`Widget::set_state`]).
+    /// changes (see [`Widget::set_state`]).  A `Widget` a modal dialog makes inert can have a
+    /// flag cleared but not set, so it never looks hovered or pressed.
     ///
     /// # Arguments
     ///
@@ -1216,6 +1250,10 @@ impl WidgetCache {
     /// * `flag` - The flag to change.
     /// * `on` - `true` to set the flag, `false` to clear it.
     pub(crate) fn set_state_flag(&mut self, id: WidgetId, flag: VisualState, on: bool) {
+        if on && self.is_inert(id) {
+            return;
+        }
+
         if let Some(widget) = self.get_mut(id) {
             let mut state = widget.state();
 

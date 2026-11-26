@@ -189,7 +189,7 @@ fn set_loop_mask(current: &mut EventMask, widgets: &mut WidgetCache, mask: Event
 pub struct CallbackId(pub u64);
 
 /// A callback stored in the registry; typed `on_*` methods wrap their closure into this form.
-type RegistryCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &Event)>;
+type RegistryCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>, &Event)>;
 
 /// The registry: callbacks per `(widget, event kind)`, in registration order.
 type Registry<S> = HashMap<(WidgetId, EventKind), Vec<(CallbackId, RegistryCallback<S>)>>;
@@ -198,37 +198,43 @@ type Registry<S> = HashMap<(WidgetId, EventKind), Vec<(CallbackId, RegistryCallb
 ///
 /// It receives the application state, a [`Ui`] handle for reaching the `Widget`s, and the event.
 /// Register one with [`Engine::on_event`].
-pub type EventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &Event)>;
+pub type EventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>, &Event)>;
 
 /// A callback that receives the engine events Pushrod emits after its internal actions.
 ///
 /// It receives the application state, a [`Ui`] handle, and the engine event.  Register one with
 /// [`Engine::on_engine_event`] or [`Engine::on_engine_event_filtered`].
-pub type EngineEventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &EngineEvent)>;
+pub type EngineEventCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>, &EngineEvent)>;
 
 /// A callback run by a timer; see [`Engine::on_timer`].
-type TimerCallback<S> = Box<dyn FnMut(&mut S, &mut Ui)>;
+type TimerCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>)>;
 
 /// A callback run when the loop is idle; see [`Engine::on_idle`].
-type IdleCallback<S> = Box<dyn FnMut(&mut S, &mut Ui)>;
+type IdleCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>)>;
 
 /// A callback for custom events carrying one payload type; see [`Engine::on_custom`].
-type CustomCallback<S> = Box<dyn FnMut(&mut S, &mut Ui, &CustomEvent)>;
+type CustomCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>, &CustomEvent)>;
+
+/// A callback run once when a modal dialog is dismissed; see [`Ui::open_modal`].  It receives
+/// the application state, a [`Ui`] handle, and the `Widget` that dismissed the dialog.
+type ModalCallback<S> = Box<dyn FnOnce(&mut S, &mut Ui<S>, WidgetId)>;
 
 /// The handle passed to callbacks.
 ///
 /// It gives callbacks access to the `Widget`s in the window, by ID and concrete type, and lets
 /// them stop the `Engine`.  It borrows the `Engine`'s widget tree only for the duration of the
-/// callback.
-pub struct Ui<'a> {
+/// callback.  `S` is the application state type of the [`Engine`]; closures never name it, so
+/// `|state, ui| ..` works as written.
+pub struct Ui<'a, S = ()> {
     widgets: &'a mut WidgetCache,
     running: &'a mut bool,
     event_mask: &'a mut EventMask,
     posted: &'a mut Vec<Event>,
     timers: &'a mut TimerSchedule,
+    modals: &'a mut Vec<(WidgetId, ModalCallback<S>)>,
 }
 
-impl std::fmt::Debug for Ui<'_> {
+impl<S> std::fmt::Debug for Ui<'_, S> {
     /// Formats the value for debugging.
     ///
     /// # Arguments
@@ -245,7 +251,77 @@ impl std::fmt::Debug for Ui<'_> {
     }
 }
 
-impl<'a> Ui<'a> {
+impl<'a, S> Ui<'a, S> {
+    /// Opens a modal dialog and runs `callback` once when it is dismissed.
+    ///
+    /// While the dialog is open, input goes only to `root` and its descendants: the rest of the
+    /// window is still drawn but is inert (no clicks, keys, hover, or focus).  The root is shown
+    /// and raised above its siblings, and focus starts on its first focusable `Widget`.  Return
+    /// and Escape activate the dialog's
+    /// [`Behavior::DEFAULT_ACTION`](crate::widget::Behavior::DEFAULT_ACTION) and
+    /// [`Behavior::CANCEL_ACTION`](crate::widget::Behavior::CANCEL_ACTION) `Widget`s.
+    ///
+    /// Clicking or activating a `Widget` with
+    /// [`Behavior::DISMISSES_DIALOG`](crate::widget::Behavior::DISMISSES_DIALOG) inside the dialog
+    /// closes it: the root is hidden again, focus returns to where it was, the `Widget`'s own
+    /// callbacks (such as `on_click`) run, then `callback` runs with the ID of the `Widget` that
+    /// dismissed it.
+    ///
+    /// Dialogs nest: a callback, including a dismissal callback, may open another dialog, which
+    /// takes the input until it closes.  Emits [`EngineEvent::ModalOpened`]; dismissal emits
+    /// [`EngineEvent::DialogDismissRequested`] then [`EngineEvent::ModalClosed`].  If the root
+    /// is removed from the tree while open, the dialog is forgotten and `callback` never runs.
+    ///
+    /// # Arguments
+    ///
+    /// * `root` - The root `Widget` of the dialog, usually a hidden `Panel` added when the window
+    ///   was built.
+    /// * `callback` - Runs once when the dialog is dismissed, with the application state, a
+    ///   [`Ui`], and the dismissing `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// `Ok(())` once the dialog is open.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::UnknownWidget`](crate::error::Error::UnknownWidget) if `root` does not exist;
+    /// [`Error::Tree`](crate::error::Error::Tree) if `root` is the window's root or is already
+    /// open.  `callback` is dropped without running.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::engine::Engine;
+    /// use pushrod::geometry::size;
+    /// use pushrod::root_widget::RootWidget;
+    ///
+    /// let mut engine: Engine<Option<u32>> = Engine::new(size(320, 200), 30);
+    /// let dialog = engine.add_widget(RootWidget::new(size(200, 100)));
+    ///
+    /// // Open the dialog from any callback; here, the first time the loop is idle.
+    /// engine.on_idle(move |_, ui| {
+    ///     if ui.widgets().top_modal().is_none() {
+    ///         ui.open_modal(dialog, |chosen, _ui, by| *chosen = Some(by)).unwrap();
+    ///     }
+    /// });
+    ///
+    /// let mut chosen = None;
+    ///
+    /// engine.run_idle(&mut chosen);
+    /// assert_eq!(engine.widgets().top_modal(), Some(dialog));
+    /// assert!(engine.widgets().is_inert(0));
+    /// ```
+    pub fn open_modal<F>(&mut self, root: WidgetId, callback: F) -> Result<()>
+    where
+        F: FnOnce(&mut S, &mut Ui<S>, WidgetId) + 'static,
+    {
+        self.widgets.open_modal(root)?;
+        self.modals.push((root, Box::new(callback)));
+
+        Ok(())
+    }
+
     /// Cancels a timer started with [`Engine::on_timer`].
     ///
     /// Safe to call from any callback, including the timer's own: a timer cancelled while the
@@ -432,6 +508,8 @@ pub struct Engine<S = ()> {
     scale_factor: f32,
     /// The minimum window size last given to the backend, from the root layout.
     minimum_size: Option<Size>,
+    /// The dismissal callbacks of the open modal dialogs, by dialog root, first opened first.
+    modal_callbacks: Vec<(WidgetId, ModalCallback<S>)>,
 }
 
 impl<S> std::fmt::Debug for Engine<S> {
@@ -495,6 +573,7 @@ impl<S> Engine<S> {
             fonts: FontRegistry::new(),
             scale_factor: 1.0,
             minimum_size: None,
+            modal_callbacks: Vec::new(),
         }
     }
 
@@ -619,7 +698,7 @@ impl<S> Engine<S> {
     /// ```
     pub fn on_timer<F>(&mut self, interval: Duration, repeat: bool, callback: F) -> TimerId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         let id = self.timers.add(Instant::now(), interval, repeat);
 
@@ -673,7 +752,7 @@ impl<S> Engine<S> {
     /// ```
     pub fn on_idle<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.idle_callbacks.push(Box::new(callback));
     }
@@ -704,6 +783,7 @@ impl<S> Engine<S> {
                 event_mask: &mut self.event_mask,
                 posted: &mut self.posted,
                 timers: &mut self.timers,
+                modals: &mut self.modal_callbacks,
             };
 
             callback(state, &mut ui);
@@ -734,6 +814,7 @@ impl<S> Engine<S> {
             event_mask: &mut self.event_mask,
             posted: &mut self.posted,
             timers: &mut self.timers,
+            modals: &mut self.modal_callbacks,
         };
 
         for callback in self.idle_callbacks.iter_mut() {
@@ -1072,7 +1153,7 @@ impl<S> Engine<S> {
     /// ```
     pub fn on_click<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1093,7 +1174,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_press<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1114,7 +1195,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_release<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1135,7 +1216,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_activate<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1156,7 +1237,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_value_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1177,7 +1258,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_selection_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1198,7 +1279,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_text_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1219,7 +1300,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_editing_finished<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.register(
             id,
@@ -1240,7 +1321,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_toggle<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, bool) + 'static,
     {
         self.register(
             id,
@@ -1265,7 +1346,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_viewport_change<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui, Point) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, Point) + 'static,
     {
         self.register(
             id,
@@ -1290,7 +1371,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_key_press<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui, Key, Modifiers) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, Key, Modifiers) + 'static,
     {
         self.register(
             id,
@@ -1315,7 +1396,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_focus_change<F>(&mut self, id: WidgetId, callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, bool) + 'static,
     {
         self.register_pair(id, EventKind::FocusGained, EventKind::FocusLost, callback)
     }
@@ -1332,7 +1413,7 @@ impl<S> Engine<S> {
     /// The [`CallbackId`] of the registered callback.
     pub fn on_hover<F>(&mut self, id: WidgetId, callback: F) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, bool) + 'static,
     {
         self.register_pair(
             id,
@@ -1351,7 +1432,7 @@ impl<S> Engine<S> {
         callback: F,
     ) -> CallbackId
     where
-        F: FnMut(&mut S, &mut Ui, bool) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, bool) + 'static,
     {
         let shared = Rc::new(RefCell::new(callback));
         let on_shared = shared.clone();
@@ -1377,7 +1458,7 @@ impl<S> Engine<S> {
     /// * `callback` - Called with the application state, a [`Ui`] handle, and the event.
     pub fn on_event<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut S, &mut Ui, &Event) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, &Event) + 'static,
     {
         self.event_callbacks.push(Box::new(callback));
     }
@@ -1405,7 +1486,7 @@ impl<S> Engine<S> {
     /// ```
     pub fn on_engine_event<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut S, &mut Ui, &EngineEvent) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, &EngineEvent) + 'static,
     {
         self.engine_callbacks.push((None, Box::new(callback)));
     }
@@ -1418,7 +1499,7 @@ impl<S> Engine<S> {
     /// * `callback` - Called with the application state, a [`Ui`] handle, and the engine event.
     pub fn on_engine_event_filtered<F>(&mut self, kinds: &[EngineEventKind], callback: F)
     where
-        F: FnMut(&mut S, &mut Ui, &EngineEvent) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, &EngineEvent) + 'static,
     {
         self.engine_callbacks
             .push((Some(kinds.to_vec()), Box::new(callback)));
@@ -1450,7 +1531,7 @@ impl<S> Engine<S> {
     pub fn on_custom<T, F>(&mut self, mut callback: F)
     where
         T: Any,
-        F: FnMut(&mut S, &mut Ui, Option<WidgetId>, &T) + 'static,
+        F: FnMut(&mut S, &mut Ui<S>, Option<WidgetId>, &T) + 'static,
     {
         self.custom_callbacks
             .push(Box::new(move |state, ui, custom| {
@@ -1675,14 +1756,50 @@ impl<S> Engine<S> {
         }
     }
 
+    /// Runs the dismissal callback of a modal dialog that just closed, before the other
+    /// callbacks see [`EngineEvent::ModalClosed`].  Forgets the callback of a dialog whose root
+    /// was removed.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event being delivered.
+    /// * `state` - The application state passed to the callback.
+    fn run_modal_callback(&mut self, event: &Event, state: &mut S) {
+        match event {
+            Event::Engine(EngineEvent::ModalClosed { root, dismissed_by }) => {
+                let Some(index) = self.modal_callbacks.iter().rposition(|(r, _)| r == root) else {
+                    return;
+                };
+                let (_, callback) = self.modal_callbacks.remove(index);
+                let mut ui = Ui {
+                    widgets: &mut self.widget_cache,
+                    running: &mut self.running,
+                    event_mask: &mut self.event_mask,
+                    posted: &mut self.posted,
+                    timers: &mut self.timers,
+                    modals: &mut self.modal_callbacks,
+                };
+
+                callback(state, &mut ui, *dismissed_by);
+            }
+            Event::Engine(EngineEvent::WidgetRemoved { id, .. }) => {
+                self.modal_callbacks.retain(|(root, _)| root != id);
+            }
+            _ => {}
+        }
+    }
+
     /// Delivers a generated `Event` to the callbacks.
     fn fire(&mut self, event: &Event, state: &mut S) {
+        self.run_modal_callback(event, state);
+
         let mut ui = Ui {
             widgets: &mut self.widget_cache,
             running: &mut self.running,
             event_mask: &mut self.event_mask,
             posted: &mut self.posted,
             timers: &mut self.timers,
+            modals: &mut self.modal_callbacks,
         };
 
         if let Event::Custom(custom) = event {

@@ -350,6 +350,10 @@ pub enum EngineEventKind {
     ActionTriggered,
     /// See [`EngineEvent::DialogDismissRequested`].
     DialogDismissRequested,
+    /// See [`EngineEvent::ModalOpened`].
+    ModalOpened,
+    /// See [`EngineEvent::ModalClosed`].
+    ModalClosed,
     /// See [`EngineEvent::TimerFired`].
     TimerFired,
     /// See [`EngineEvent::TimerCancelled`].
@@ -479,11 +483,27 @@ pub enum EngineEvent {
         cancel: bool,
     },
     /// A `Widget` with [`Behavior::DISMISSES_DIALOG`](crate::widget::Behavior::DISMISSES_DIALOG)
-    /// was activated, so the modal dialog that holds it should close.  Modal dialogs consume this
-    /// event; until they exist, an application can listen for it with `Engine::on_event`.
+    /// was clicked or activated (a `Button` emits it itself; for other `Widget`s the core does
+    /// when it closes a dialog).  Inside the top modal dialog it closes the dialog, followed by
+    /// [`EngineEvent::ModalClosed`]; outside any dialog it changes nothing.
     DialogDismissRequested {
         /// The `Widget` that asked for the dismissal.
         id: WidgetId,
+    },
+    /// A modal dialog opened with `Ui::open_modal` (or `WidgetCache::open_modal`): from now on
+    /// only its subtree receives input.
+    ModalOpened {
+        /// The root `Widget` of the dialog.
+        root: WidgetId,
+    },
+    /// A modal dialog closed because a dismissing `Widget` inside it was activated.  Its root
+    /// is hidden again, and the callback given to `Ui::open_modal` runs.
+    ModalClosed {
+        /// The root `Widget` of the dialog.
+        root: WidgetId,
+        /// The [`Behavior::DISMISSES_DIALOG`](crate::widget::Behavior::DISMISSES_DIALOG)
+        /// `Widget` that closed it.
+        dismissed_by: WidgetId,
     },
     /// A timer registered with `Engine::on_timer` fired and its callback ran.
     TimerFired {
@@ -555,6 +575,8 @@ impl EngineEvent {
             EngineEvent::FocusChanged { .. } => EngineEventKind::FocusChanged,
             EngineEvent::ActionTriggered { .. } => EngineEventKind::ActionTriggered,
             EngineEvent::DialogDismissRequested { .. } => EngineEventKind::DialogDismissRequested,
+            EngineEvent::ModalOpened { .. } => EngineEventKind::ModalOpened,
+            EngineEvent::ModalClosed { .. } => EngineEventKind::ModalClosed,
             EngineEvent::TimerFired { .. } => EngineEventKind::TimerFired,
             EngineEvent::TimerCancelled { .. } => EngineEventKind::TimerCancelled,
             EngineEvent::IdleRan { .. } => EngineEventKind::IdleRan,
@@ -1440,6 +1462,26 @@ mod mask_tests {
         assert!(!engine_filter_accepts(
             Some(&[EngineEventKind::ActionTriggered]),
             &dismiss
+        ));
+    }
+
+    #[test]
+    fn modal_events_have_their_own_engine_kinds() {
+        let opened = EngineEvent::ModalOpened { root: 4 };
+        let closed = EngineEvent::ModalClosed {
+            root: 4,
+            dismissed_by: 6,
+        };
+
+        assert_eq!(opened.kind(), EngineEventKind::ModalOpened);
+        assert_eq!(closed.kind(), EngineEventKind::ModalClosed);
+        assert!(engine_filter_accepts(
+            Some(&[EngineEventKind::ModalClosed]),
+            &closed
+        ));
+        assert!(!engine_filter_accepts(
+            Some(&[EngineEventKind::ModalClosed]),
+            &opened
         ));
     }
 
