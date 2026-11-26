@@ -8,11 +8,11 @@ use pushrod::controllers::{
 };
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{point, size};
+use pushrod::input::MouseButton;
+use pushrod::input::{Key, Modifiers};
 use pushrod::paint::Painter;
 use pushrod::root_widget::RootWidget;
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::keyboard::{Keycode, Mod};
-use sdl2::mouse::MouseButton;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Duration;
@@ -169,7 +169,7 @@ fn drag_through_the_cache_reports_start_updates_and_end() {
 fn scroll_and_key_controllers_report_through_the_hook() {
     let (mut cache, id, seen) = setup(false, |core| {
         core.add_controller(ScrollController::new());
-        core.add_controller(KeyController::for_keys(&[Keycode::Return]));
+        core.add_controller(KeyController::for_keys(&[Key::Return]));
     });
 
     cache.propagate(
@@ -183,8 +183,8 @@ fn scroll_and_key_controllers_report_through_the_hook() {
         id,
         &Event::KeyPressed {
             id,
-            key: Keycode::Return,
-            modifiers: Mod::NOMOD,
+            key: Key::Return,
+            modifiers: Modifiers::empty(),
             repeat: false,
         },
     );

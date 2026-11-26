@@ -216,7 +216,7 @@ pushrod = { version = "0.0.9", features = ["parley"] }
 Then lay out with `ParleyLayout` and draw the glyph runs. The `parley_spike` example does this end to end: Parley computes the runs, swash rasterizes each glyph once into a CPU bitmap, the bitmap is uploaded into an SDL2 atlas texture, and glyphs are drawn with `Canvas::copy` and color modulation (color glyphs such as emoji are copied unmodulated).
 
 ```bash
-cargo run --release --example parley_spike --features parley
+cargo run --release -p pushrod-sdl2 --example parley_spike --features parley
 ```
 
 ![The spike: Latin, Hebrew, Japanese and emoji text, and a text field with a selection and caret](/img/screenshots/parley-international-text.png)
@@ -233,6 +233,6 @@ The layout engine and the rasterizer pass the gate, but Parley adds a sizable de
 
 ## See also
 
-- The widget gallery shows the truncation and wrapping modes on `TextWidget` (`cargo run -p pushrod-widgets --example gallery`).
+- The widget gallery shows the truncation and wrapping modes on `TextWidget` (`cargo run -p pushrod-sdl2 --example gallery`).
 - [Drawing](drawing.md) for how widgets paint into cached textures.
 - [Backend-neutral paint API](../platforms/backend-neutral-paint-api.md) for the `Painter` trait.

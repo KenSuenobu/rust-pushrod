@@ -4,6 +4,7 @@ use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, EngineEventKind, Event, EventMask, EventTarget, MaskScope};
 use pushrod::geometry::{point, size};
 use pushrod::widget::{Behavior, VisualState, Widget};
+use pushrod_sdl2::WindowSettings;
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
@@ -27,14 +28,6 @@ struct AppState {
 }
 
 pub fn main() {
-    let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
-    let window = video_subsystem
-        .window("pushrod", 800, 600)
-        .position_centered()
-        .opengl()
-        .build()
-        .unwrap();
     let mut engine: Engine<AppState> = Engine::new(size(800, 600), 30);
 
     // A gray panel.  Every other widget is a child of the panel, so their origins are relative
@@ -294,9 +287,9 @@ pub fn main() {
         _ => {}
     });
 
-    let state = engine.run(
-        sdl_context,
-        window,
+    let state = pushrod_sdl2::run(
+        engine,
+        WindowSettings::new("pushrod", size(800, 600)),
         AppState {
             hover_enabled: true,
             ..AppState::default()

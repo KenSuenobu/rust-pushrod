@@ -21,11 +21,11 @@
 use pushrod::cache::WidgetCache;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{point, size};
+use pushrod::input::InputEvent;
+use pushrod::input::{Key, Modifiers};
 use pushrod::paint::{self, Painter};
 use pushrod::root_widget::RootWidget;
 use pushrod::widget::{Behavior, Widget, WidgetCore, WidgetId};
-use sdl2::event::Event as SdlEvent;
-use sdl2::keyboard::{Keycode, Mod, Scancode};
 
 /// A form control that draws a focus outline (through `state_overlay`) and does nothing else.
 struct Control {
@@ -71,13 +71,10 @@ fn control(cache: &mut WidgetCache, x: i32, behavior: Behavior) -> WidgetId {
 }
 
 /// Presses a key and prints what the application would hear.
-fn press(cache: &mut WidgetCache, name: &str, key: Keycode, modifiers: Mod) {
-    let events = cache.handle_event(SdlEvent::KeyDown {
-        timestamp: 0,
-        window_id: 0,
-        keycode: Some(key),
-        scancode: Some(Scancode::A),
-        keymod: modifiers,
+fn press(cache: &mut WidgetCache, name: &str, key: Key, modifiers: Modifiers) {
+    let events = cache.handle_event(InputEvent::KeyDown {
+        key,
+        modifiers,
         repeat: false,
     });
 
@@ -99,9 +96,9 @@ fn main() {
 
     println!("fields {first} and {second}, OK {ok}, Cancel {cancel}");
 
-    press(&mut cache, "Tab", Keycode::Tab, Mod::NOMOD);
-    press(&mut cache, "Tab", Keycode::Tab, Mod::NOMOD);
-    press(&mut cache, "Shift-Tab", Keycode::Tab, Mod::LSHIFTMOD);
-    press(&mut cache, "Return", Keycode::Return, Mod::NOMOD);
-    press(&mut cache, "Escape", Keycode::Escape, Mod::NOMOD);
+    press(&mut cache, "Tab", Key::Tab, Modifiers::empty());
+    press(&mut cache, "Tab", Key::Tab, Modifiers::empty());
+    press(&mut cache, "Shift-Tab", Key::Tab, Modifiers::SHIFT);
+    press(&mut cache, "Return", Key::Return, Modifiers::empty());
+    press(&mut cache, "Escape", Key::Escape, Modifiers::empty());
 }

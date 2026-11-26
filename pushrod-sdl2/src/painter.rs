@@ -20,16 +20,16 @@
 //! This is the only module (with the engine, caches, and font renderer) that touches `SDL2` types
 //! for drawing.
 
-use crate::color::{Color, FontStyle};
 use crate::font::FontCache;
-use crate::geometry::{Point, Rect, Size};
-use crate::paint::{self, CachePolicy, Painter, TextStyle};
-use ::sdl2::image::LoadTexture;
-use ::sdl2::pixels::Color as SdlColor;
-use ::sdl2::rect::{Point as SdlPoint, Rect as SdlRect};
-use ::sdl2::render::{BlendMode, Canvas};
-use ::sdl2::ttf::FontStyle as SdlFontStyle;
-use ::sdl2::video::Window;
+use pushrod::color::{Color, FontStyle};
+use pushrod::geometry::{Point, Rect, Size};
+use pushrod::paint::{self, CachePolicy, Painter, TextStyle};
+use sdl2::image::LoadTexture;
+use sdl2::pixels::Color as SdlColor;
+use sdl2::rect::{Point as SdlPoint, Rect as SdlRect};
+use sdl2::render::{BlendMode, Canvas};
+use sdl2::ttf::FontStyle as SdlFontStyle;
+use sdl2::video::Window;
 
 /// Converts a Pushrod [`Color`] to an `SDL2` color.
 ///

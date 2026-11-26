@@ -11,7 +11,7 @@ Pushrod supports two styles. Both route input through the same widgets and produ
 
 | | Callbacks | Your own event loop |
 |---|---|---|
-| Who runs the loop | Pushrod (`engine.run`) | You (`while let Some(event) = engine.next_event(&mut events)`) |
+| Who runs the loop | Pushrod (`pushrod_sdl2::run`) | You (`while let Some(event) = engine.next_event(&mut events)`) |
 | Where your code goes | `on_click`, `on_event` closures | A `match` on each returned `Event` |
 | Application state | Passed to callbacks as `&mut S` | Ordinary local variables |
 | Changing widgets | `ui.get_mut::<T>(id)` | `engine.widgets().get_as_mut::<T>(id)` |
@@ -22,7 +22,7 @@ Both styles deliver every event in the same order: semantic events, engine event
 ### Event-loop style
 
 ```rust
-let mut events = engine.event_loop(&sdl, window);
+let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Events", size(320, 200)));
 
 while let Some(event) = engine.next_event(&mut events) {
     match event {
@@ -65,7 +65,7 @@ In both styles:
 
 ```mermaid
 flowchart TD
-    A[SDL2 event] --> B[WidgetCache]
+    A[Backend input event] --> B[WidgetCache]
     A -- "window focus / resize" --> W["WidgetCache::broadcast<br/>(every interested widget, draw order)"]
     W --> C
     B --> C["Widget::handle_event(&mut self, &event, ctx)"]
@@ -73,7 +73,7 @@ flowchart TD
     D -- "no widget is borrowed any more" --> E["Your callbacks: on_click(id, ..), on_event(..)<br/>FnMut(&mut AppState, &mut Ui [, &event])"]
 ```
 
-1. Pushrod reads events from SDL2 and routes each one to a widget:
+1. Pushrod reads input events from the backend and routes each one to a widget:
    - **Mouse button down** sends `PointerPressed` to the top-most visible widget under the pointer, which then *captures* the mouse until the button is released.
    - **Mouse motion** sends `PointerExited` to the widget the pointer left and `PointerEntered` to the one it entered, then `PointerMoved` to the captured widget (or the one under the pointer).
    - **Mouse button up** sends `PointerReleased` to the captured widget, then releases the capture.
@@ -173,4 +173,4 @@ Post your own typed events with `ui.post(target, payload)` (callbacks), `ctx.pos
 
 ## Testing without a window
 
-`Engine::dispatch(event, &mut state)` processes one SDL2 event exactly as the run loop would, including callbacks, so you can test event handling without opening a window. See [Testing a widget](./creating-widgets.md#testing-a-widget).
+`Engine::dispatch(event, &mut state)` processes one `InputEvent` exactly as the run loop would, including callbacks, so you can test event handling without opening a window. See [Testing a widget](./creating-widgets.md#testing-a-widget).

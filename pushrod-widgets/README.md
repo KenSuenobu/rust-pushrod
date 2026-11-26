@@ -17,7 +17,7 @@ with new widgets or replace it with a different look, without changing the core.
 Run the example from the repository root:
 
 ```bash
-cargo run -p pushrod-widgets --example base
+cargo run -p pushrod-sdl2 --example base
 ```
 
 `--example gallery` shows every widget on a labeled tile.

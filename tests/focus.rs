@@ -6,12 +6,12 @@ use pushrod::cache::WidgetCache;
 use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{point, size};
+use pushrod::input::InputEvent;
+use pushrod::input::MouseButton;
+use pushrod::input::{Key, Modifiers};
 use pushrod::paint::Painter;
 use pushrod::root_widget::RootWidget;
 use pushrod::widget::{Behavior, VisualState, Widget, WidgetCore, WidgetId};
-use sdl2::event::Event as SdlEvent;
-use sdl2::keyboard::{Keycode, Mod, Scancode};
-use sdl2::mouse::MouseButton;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -91,13 +91,10 @@ impl Form {
         id
     }
 
-    fn key(&mut self, key: Keycode, modifiers: Mod) -> Vec<Event> {
-        self.cache.handle_event(SdlEvent::KeyDown {
-            timestamp: 0,
-            window_id: 0,
-            keycode: Some(key),
-            scancode: Some(Scancode::A),
-            keymod: modifiers,
+    fn key(&mut self, key: Key, modifiers: Modifiers) -> Vec<Event> {
+        self.cache.handle_event(InputEvent::KeyDown {
+            key,
+            modifiers,
             repeat: false,
         })
     }
@@ -105,24 +102,16 @@ impl Form {
     fn click(&mut self, x: i32) {
         for down in [true, false] {
             let event = if down {
-                SdlEvent::MouseButtonDown {
-                    timestamp: 0,
-                    window_id: 0,
-                    which: 0,
-                    mouse_btn: MouseButton::Left,
+                InputEvent::MouseDown {
+                    position: point(x, 5),
+                    button: MouseButton::Left,
                     clicks: 1,
-                    x,
-                    y: 5,
                 }
             } else {
-                SdlEvent::MouseButtonUp {
-                    timestamp: 0,
-                    window_id: 0,
-                    which: 0,
-                    mouse_btn: MouseButton::Left,
+                InputEvent::MouseUp {
+                    position: point(x, 5),
+                    button: MouseButton::Left,
                     clicks: 1,
-                    x,
-                    y: 5,
                 }
             };
 
@@ -274,13 +263,13 @@ fn tab_and_shift_tab_walk_in_id_order_and_wrap() {
 
     let c = form.add(0, 60, FOCUSABLE);
 
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(a));
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(c));
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(a));
-    form.key(Keycode::Tab, Mod::LSHIFTMOD);
+    form.key(Key::Tab, Modifiers::SHIFT);
     assert_eq!(form.cache.focused(), Some(c));
 }
 
@@ -292,7 +281,7 @@ fn shift_tab_with_no_focus_goes_to_the_last_widget() {
 
     let last = form.add(0, 30, FOCUSABLE);
 
-    form.key(Keycode::Tab, Mod::RSHIFTMOD);
+    form.key(Key::Tab, Modifiers::SHIFT);
 
     assert_eq!(form.cache.focused(), Some(last));
 }
@@ -306,11 +295,11 @@ fn tab_skips_disabled_and_hidden_widgets() {
 
     form.cache.get_mut(b).unwrap().set_enabled(false);
     form.cache.set_focus(a);
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(c));
 
     form.cache.get_mut(a).unwrap().set_hidden(true);
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(c));
 }
 
@@ -322,7 +311,7 @@ fn a_widget_that_stops_the_key_keeps_tab_from_moving_focus() {
     form.add(0, 30, FOCUSABLE);
     form.cache.get_as_mut::<Probe>(a).unwrap().stop_keys = true;
     form.cache.set_focus(a);
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
 
     assert_eq!(form.cache.focused(), Some(a));
 }
@@ -334,7 +323,7 @@ fn control_tab_does_not_move_focus() {
 
     form.add(0, 30, FOCUSABLE);
     form.cache.set_focus(a);
-    form.key(Keycode::Tab, Mod::LCTRLMOD);
+    form.key(Key::Tab, Modifiers::CTRL);
 
     assert_eq!(form.cache.focused(), Some(a));
 }
@@ -364,11 +353,11 @@ fn tab_visits_a_radio_group_once_at_its_checked_member() {
     let (mut form, field, radios, last) = radio_form();
 
     form.cache.set_focus(field);
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(radios[1]));
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(last));
-    form.key(Keycode::Tab, Mod::LSHIFTMOD);
+    form.key(Key::Tab, Modifiers::SHIFT);
     assert_eq!(form.cache.focused(), Some(radios[1]));
 }
 
@@ -377,7 +366,7 @@ fn tab_from_an_unchecked_radio_leaves_the_group() {
     let (mut form, _, radios, last) = radio_form();
 
     form.cache.set_focus(radios[2]);
-    form.key(Keycode::Tab, Mod::NOMOD);
+    form.key(Key::Tab, Modifiers::empty());
 
     assert_eq!(form.cache.focused(), Some(last));
 }
@@ -387,13 +376,13 @@ fn arrows_move_within_a_group_and_wrap() {
     let (mut form, _, radios, _) = radio_form();
 
     form.cache.set_focus(radios[1]);
-    form.key(Keycode::Down, Mod::NOMOD);
+    form.key(Key::Down, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(radios[2]));
-    form.key(Keycode::Right, Mod::NOMOD);
+    form.key(Key::Right, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(radios[0]));
-    form.key(Keycode::Up, Mod::NOMOD);
+    form.key(Key::Up, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(radios[2]));
-    form.key(Keycode::Left, Mod::NOMOD);
+    form.key(Key::Left, Modifiers::empty());
     assert_eq!(form.cache.focused(), Some(radios[1]));
 }
 
@@ -402,7 +391,7 @@ fn arrows_do_nothing_outside_a_group() {
     let (mut form, field, _, _) = radio_form();
 
     form.cache.set_focus(field);
-    form.key(Keycode::Down, Mod::NOMOD);
+    form.key(Key::Down, Modifiers::empty());
 
     assert_eq!(form.cache.focused(), Some(field));
 }
@@ -418,7 +407,7 @@ fn return_activates_the_default_widget_and_escape_the_cancel_widget() {
     form.cache.take_pending_events();
 
     assert_eq!(
-        text(form.key(Keycode::Return, Mod::NOMOD)),
+        text(form.key(Key::Return, Modifiers::empty())),
         text([Event::Activated { id: ok }])
     );
     assert_eq!(
@@ -429,11 +418,11 @@ fn return_activates_the_default_widget_and_escape_the_cancel_widget() {
         })])
     );
     assert_eq!(
-        text(form.key(Keycode::KpEnter, Mod::NOMOD)),
+        text(form.key(Key::KpEnter, Modifiers::empty())),
         text([Event::Activated { id: ok }])
     );
     assert_eq!(
-        text(form.key(Keycode::Escape, Mod::NOMOD)),
+        text(form.key(Key::Escape, Modifiers::empty())),
         text([Event::Activated { id: cancel }])
     );
     assert_eq!(
@@ -452,7 +441,7 @@ fn command_period_cancels_on_macos() {
     let cancel = form.add(0, 0, FOCUSABLE | Behavior::CANCEL_ACTION);
 
     assert_eq!(
-        text(form.key(Keycode::Period, Mod::LGUIMOD)),
+        text(form.key(Key::Char('.'), Modifiers::GUI)),
         text([Event::Activated { id: cancel }])
     );
 }
@@ -463,13 +452,13 @@ fn return_works_with_no_focus_and_skips_a_disabled_default() {
     let ok = form.add(0, 0, Behavior::DEFAULT_ACTION);
 
     assert_eq!(
-        text(form.key(Keycode::Return, Mod::NOMOD)),
+        text(form.key(Key::Return, Modifiers::empty())),
         text([Event::Activated { id: ok }])
     );
 
     form.cache.get_mut(ok).unwrap().set_enabled(false);
 
-    assert!(form.key(Keycode::Return, Mod::NOMOD).is_empty());
+    assert!(form.key(Key::Return, Modifiers::empty()).is_empty());
 }
 
 #[test]
@@ -483,14 +472,14 @@ fn the_nearest_form_wins_when_two_forms_have_default_buttons() {
     form.cache.set_focus(field);
 
     assert_eq!(
-        text(form.key(Keycode::Return, Mod::NOMOD)),
+        text(form.key(Key::Return, Modifiers::empty())),
         text([Event::Activated { id: inner_ok }])
     );
 
     form.cache.get_mut(inner_ok).unwrap().set_hidden(true);
 
     assert_eq!(
-        text(form.key(Keycode::Return, Mod::NOMOD)),
+        text(form.key(Key::Return, Modifiers::empty())),
         text([Event::Activated { id: outer_ok }])
     );
 }
@@ -504,7 +493,7 @@ fn a_widget_that_stops_return_keeps_the_default_from_firing() {
     form.cache.get_as_mut::<Probe>(field).unwrap().stop_keys = true;
     form.cache.set_focus(field);
 
-    assert!(form.key(Keycode::Return, Mod::NOMOD).is_empty());
+    assert!(form.key(Key::Return, Modifiers::empty()).is_empty());
 }
 
 #[test]
@@ -532,11 +521,7 @@ fn typed_text_goes_to_the_focused_widget_only() {
     form.add(0, 30, FOCUSABLE);
 
     let typed = |form: &mut Form| {
-        form.cache.handle_event(SdlEvent::TextInput {
-            timestamp: 0,
-            window_id: 0,
-            text: "hi".into(),
-        });
+        form.cache.handle_event(InputEvent::Text("hi".into()));
     };
 
     typed(&mut form);
@@ -602,13 +587,9 @@ fn ui_set_focus_and_focused_work_and_callbacks_fire() {
 
     // Any event flushes the queued focus events.
     engine.dispatch(
-        SdlEvent::KeyUp {
-            timestamp: 0,
-            window_id: 0,
-            keycode: Some(Keycode::A),
-            scancode: Some(Scancode::A),
-            keymod: Mod::NOMOD,
-            repeat: false,
+        InputEvent::KeyUp {
+            key: Key::Char('a'),
+            modifiers: Modifiers::empty(),
         },
         &mut log,
     );

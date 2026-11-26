@@ -93,4 +93,4 @@ The overlay uses `Painter::dither_overlay`, which blends a color over every othe
 
 ## Try it
 
-`pushrod-widgets/examples/base.rs` shows a disabled button below the **Quit** button. Run it with `cargo run -p pushrod-widgets --example base`: the dimmed button does nothing when clicked.
+`pushrod-sdl2/examples/base.rs` shows a disabled button below the **Quit** button. Run it with `cargo run -p pushrod-sdl2 --example base`: the dimmed button does nothing when clicked.

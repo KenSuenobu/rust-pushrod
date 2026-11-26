@@ -10,7 +10,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 :::tip[TL;DR]
-Install SDL2 (with SDL2_ttf and SDL2_image), add `pushrod` and `sdl2` to `Cargo.toml`, copy a font into `assets/`, paste one of the two programs below into `src/main.rs`, and run `cargo run`. Pick the style you prefer: **callbacks** (Pushrod runs the loop and calls your code) or **your own event loop** (you ask Pushrod for the next event and `match` on it).
+Install SDL2 (with SDL2_ttf and SDL2_image), add `pushrod`, `pushrod-widgets` and `pushrod-sdl2` to `Cargo.toml`, copy a font into `assets/`, paste one of the two programs below into `src/main.rs`, and run `cargo run`. Pick the style you prefer: **callbacks** (Pushrod runs the loop and calls your code) or **your own event loop** (you ask Pushrod for the next event and `match` on it).
 :::
 
 You'll build this: a label and a button; each click updates the label.
@@ -42,13 +42,10 @@ In `Cargo.toml`:
 [dependencies]
 pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-
-[dependencies.sdl2]
-version = "0.38"
-features = ["ttf", "image", "unsafe_textures"]
+pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod" }
 ```
 
-`pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets. Pushrod requires Rust 1.100 or newer (edition 2024). The `unsafe_textures` feature is required: it lets Pushrod keep one GPU texture per widget.
+`pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets; `pushrod-sdl2` is the SDL2 [backend](../platforms/backends.md) that opens the window and draws. Your application does not depend on `sdl2` itself. Pushrod requires Rust 1.100 or newer (edition 2024).
 
 ## 4. Add a font
 
@@ -71,6 +68,7 @@ Pushrod runs the event loop; you register a callback for the button.
 ```rust checked title="src/main.rs"
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
+use pushrod_sdl2::WindowSettings;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
 use pushrod::color::{Color, FontStyle};
@@ -84,14 +82,6 @@ struct Counter {
 }
 
 fn main() {
-    let sdl = sdl2::init().unwrap();
-    let window = sdl
-        .video()
-        .unwrap()
-        .window("Hello, Pushrod", 400, 140)
-        .position_centered()
-        .build()
-        .unwrap();
 
     let mut engine: Engine<Counter> = Engine::new(size(400, 140), 60);
 
@@ -126,7 +116,7 @@ fn main() {
         }
     });
 
-    let state = engine.run(sdl, window, Counter::default());
+    let state = pushrod_sdl2::run(engine, WindowSettings::new("Hello, Pushrod", size(400, 140)), Counter::default());
 
     println!("Clicked {} time(s) in total.", state.clicks);
 }
@@ -140,6 +130,7 @@ You run the loop: `next_event` waits for input, keeps the screen up to date, and
 ```rust checked title="src/main.rs"
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod::engine::Engine;
+use pushrod_sdl2::WindowSettings;
 use pushrod::event::Event;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
@@ -148,14 +139,6 @@ use pushrod::color::{Color, FontStyle};
 const FONT: &str = "assets/OpenSans-Regular.ttf";
 
 fn main() {
-    let sdl = sdl2::init().unwrap();
-    let window = sdl
-        .video()
-        .unwrap()
-        .window("Hello, Pushrod", 400, 140)
-        .position_centered()
-        .build()
-        .unwrap();
 
     let mut engine: Engine = Engine::new(size(400, 140), 60);
 
@@ -183,7 +166,7 @@ fn main() {
     ));
 
     let mut clicks = 0;
-    let mut events = engine.event_loop(&sdl, window);
+    let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Hello, Pushrod", size(400, 140)));
 
     // Your own event loop: next_event() waits for input, keeps the screen up to date,
     // and returns each event the widgets generate. It returns None when the window closes.
@@ -220,8 +203,8 @@ Click the button: the label counts your clicks. Close the window and the final c
 
 - `Engine` owns the window's widget tree. With callbacks, its type parameter is your state type (`Engine<Counter>`); in the event-loop version you keep state in local variables, so it's plain `Engine`.
 - `add_widget` added each widget to the window and returned its `WidgetId`.
-- **Callbacks:** `on_click(button, ..)` registered code that runs for that button. It receives `&mut Counter` and a `Ui` handle, which finds widgets by ID (`ui.get_mut::<TextWidget>(label)`). `engine.run` ran the loop until the window closed, then gave the state back.
-- **Event loop:** `engine.event_loop(&sdl, window)` opened the window for drawing, and each `engine.next_event(&mut events)` returned the next event, such as `Event::Clicked { id, button, count }`. You change widgets directly through `engine.widgets()`. The call blocks while nothing happens, so the loop doesn't spin.
+- **Callbacks:** `on_click(button, ..)` registered code that runs for that button. It receives `&mut Counter` and a `Ui` handle, which finds widgets by ID (`ui.get_mut::<TextWidget>(label)`). `pushrod_sdl2::run` ran the loop until the window closed, then gave the state back.
+- **Event loop:** `pushrod_sdl2::event_loop(&mut engine, settings)` opened the window for drawing, and each `engine.next_event(&mut events)` returned the next event, such as `Event::Clicked { id, button, count }`. You change widgets directly through `engine.widgets()`. The call blocks while nothing happens, so the loop doesn't spin.
 
 Both styles route input through the same widgets and produce the same events; see [Handling events](../guides/handling-events.md#two-ways-to-handle-events) for when to choose which.
 

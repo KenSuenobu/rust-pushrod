@@ -20,9 +20,9 @@
 //! geometry a text field needs.  A layout engine only *computes*; drawing stays with the painter,
 //! which rasterizes each glyph once into the atlas texture and copies rectangles from it.
 //!
-//! Two engines ship with Pushrod:
+//! Engines that ship with Pushrod:
 //!
-//! * [`TtfLayout`](crate::text::TtfLayout) (the default) measures with SDL2_ttf.  It reports sizes,
+//! * `TtfLayout` (in the `pushrod-sdl2` crate) measures with SDL2_ttf.  It reports sizes,
 //!   lines and caret geometry but no glyph runs; the SDL2 painter draws its text with SDL2_ttf.
 //! * `ParleyLayout` (the `parley` Cargo feature) uses Parley for shaping, bidirectional text,
 //!   line breaking and font fallback, and returns glyph runs.

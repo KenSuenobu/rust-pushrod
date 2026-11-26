@@ -23,7 +23,7 @@
 //! * (b) the draw path (atlas texture copies only),
 //! * (c) binary size and the time to create the engine and lay out the first text.
 //!
-//! Run it with `cargo run --release --example parley_spike --features parley`.  Pass `--window`
+//! Run it with `cargo run --release -p pushrod-sdl2 --example parley_spike --features parley`.  Pass `--window`
 //! to keep the window open until it is closed, or `--screenshot <file.png>` to save the last frame;
 //! otherwise it draws a few frames and exits.  Set
 //! `SDL_VIDEODRIVER=dummy` to run without a display.
@@ -156,7 +156,11 @@ impl Atlas {
 /// Builds a text style for the bundled font.
 fn style(size: u16) -> TextStyle {
     TextStyle {
-        font_name: concat!(env!("CARGO_MANIFEST_DIR"), "/assets/OpenSans-Regular.ttf").to_string(),
+        font_name: concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../assets/OpenSans-Regular.ttf"
+        )
+        .to_string(),
         font_style: FontStyle::NORMAL,
         font_size: size,
         font_color: Color {

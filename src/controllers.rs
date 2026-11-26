@@ -65,9 +65,8 @@
 
 use crate::event::{Event, EventMask};
 use crate::geometry::{Point, point};
+use crate::input::{Key, Modifiers, MouseButton};
 use crate::widget::WidgetId;
-use sdl2::keyboard::{Keycode, Mod};
-use sdl2::mouse::MouseButton;
 use std::time::Duration;
 
 /// A high-level result reported by a controller.
@@ -128,18 +127,18 @@ pub enum ControllerEvent {
     /// [`KeyController`]: a key went down (or repeated).
     KeyPressed {
         /// The key.
-        key: Keycode,
+        key: Key,
         /// The modifier keys held.
-        modifiers: Mod,
+        modifiers: Modifiers,
         /// `true` if this is an auto-repeat.
         repeat: bool,
     },
     /// [`KeyController`]: a key went up.
     KeyReleased {
         /// The key.
-        key: Keycode,
+        key: Key,
         /// The modifier keys held.
-        modifiers: Mod,
+        modifiers: Modifiers,
     },
 }
 
@@ -684,7 +683,7 @@ impl Controller for LongPressController {
 /// Key events bubble, so a container can handle keys its focused child ignored.
 #[derive(Default)]
 pub struct KeyController {
-    keys: Option<Vec<Keycode>>,
+    keys: Option<Vec<Key>>,
 }
 
 impl KeyController {
@@ -706,14 +705,14 @@ impl KeyController {
     /// # Returns
     ///
     /// The controller.
-    pub fn for_keys(keys: &[Keycode]) -> Self {
+    pub fn for_keys(keys: &[Key]) -> Self {
         Self {
             keys: Some(keys.to_vec()),
         }
     }
 
     /// Returns whether `key` is reported.
-    fn wants(&self, key: Keycode) -> bool {
+    fn wants(&self, key: Key) -> bool {
         self.keys.as_ref().is_none_or(|keys| keys.contains(&key))
     }
 }
@@ -1056,28 +1055,31 @@ mod tests {
         let down = |key| Event::KeyPressed {
             id: ID,
             key,
-            modifiers: Mod::NOMOD,
+            modifiers: Modifiers::empty(),
             repeat: false,
         };
         let up = Event::KeyReleased {
             id: ID,
-            key: Keycode::Return,
-            modifiers: Mod::NOMOD,
+            key: Key::Return,
+            modifiers: Modifiers::empty(),
         };
 
-        assert_eq!(run(&mut KeyController::new(), &[down(Keycode::A)]).len(), 1);
+        assert_eq!(
+            run(&mut KeyController::new(), &[down(Key::Char('a'))]).len(),
+            1
+        );
 
-        let mut only_return = KeyController::for_keys(&[Keycode::Return]);
+        let mut only_return = KeyController::for_keys(&[Key::Return]);
         let out = run(
             &mut only_return,
-            &[down(Keycode::A), down(Keycode::Return), up],
+            &[down(Key::Char('a')), down(Key::Return), up],
         );
 
         assert_eq!(out.len(), 2);
         assert!(matches!(
             out[1],
             ControllerEvent::KeyReleased {
-                key: Keycode::Return,
+                key: Key::Return,
                 ..
             }
         ));

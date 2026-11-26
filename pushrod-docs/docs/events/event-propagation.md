@@ -39,7 +39,7 @@ use pushrod::event::{Event, EventCtx, EventMask, EventPhase, Propagation};
 use pushrod::geometry::{Point, Size};
 use pushrod::paint::Painter;
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::keyboard::Keycode;
+use pushrod::input::Key;
 
 /// A dialog that activates its default button when Return reaches it.
 pub struct Dialog {
@@ -72,7 +72,7 @@ impl Widget for Dialog {
     fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
         // Only the bubble phase: the focused child had its chance first.
         if ctx.phase() == EventPhase::Bubble
-            && matches!(event, Event::KeyPressed { key: Keycode::Return, .. })
+            && matches!(event, Event::KeyPressed { key: Key::Return, .. })
         {
             self.confirmed = true;
             return Propagation::Stop;

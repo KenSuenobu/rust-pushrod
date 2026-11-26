@@ -23,7 +23,7 @@
 //! everything it does: extend it with new widgets, or replace it with a more graphically
 //! ambitious set, without changing the core.
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! use pushrod::engine::Engine;
 //! use pushrod::geometry::{point, size};
 //! use pushrod_widgets::button_widget::ButtonWidget;
@@ -35,8 +35,6 @@
 //!     clicks: u32,
 //! }
 //!
-//! let sdl = sdl2::init().unwrap();
-//! let window = sdl.video().unwrap().window("app", 400, 200).build().unwrap();
 //! let mut engine: Engine<AppState> = Engine::new(size(400, 200), 30);
 //!
 //! let font = String::from("assets/OpenSans-Regular.ttf");
@@ -52,7 +50,7 @@
 //!         .set_text(format!("Clicked {} times", state.clicks));
 //! });
 //!
-//! engine.run(sdl, window, AppState::default());
+//! pushrod_sdl2::run(engine, pushrod_sdl2::WindowSettings::new("app", size(400, 200)), AppState::default());
 //! ```
 
 // Every public item is documented, including `# Panics` and `# Errors` sections where they

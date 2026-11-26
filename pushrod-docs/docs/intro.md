@@ -10,7 +10,7 @@ Pushrod is a small, simple GUI library for Rust. It uses SDL2 for graphics and i
 
 ![A Pushrod window with a label and a button](/img/screenshots/quick-start.png)
 
-Every built-in widget, and its states, in the widget gallery (`cargo run -p pushrod-widgets --example gallery`):
+Every built-in widget, and its states, in the widget gallery (`cargo run -p pushrod-sdl2 --example gallery`):
 
 ![The widget gallery: Base, Box, Button, and Text widgets on labeled tiles](/img/screenshots/gallery.png)
 
@@ -28,6 +28,6 @@ Every built-in widget, and its states, in the widget gallery (`cargo run -p push
 - [Creating an application](./guides/creating-an-application.md): the engine, application state, and the widget tree.
 - [Handling events](./guides/handling-events.md): how events flow and how callbacks work.
 - [Creating widgets](./guides/creating-widgets.md): write and test your own widget.
-- [Widgets](/widgets): every built-in widget, one page each. The gallery example shows them all in one window; run `cargo run -p pushrod-widgets --example gallery`, or add `-- --screenshot <file.png>` to save a frame.
+- [Widgets](/widgets): every built-in widget, one page each. The gallery example shows them all in one window; run `cargo run -p pushrod-sdl2 --example gallery`, or add `-- --screenshot <file.png>` to save a frame.
 
 Pushrod is being modernized; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) for what's planned, and the [widget roadmaps](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/widgets/README.md) for how each planned widget will look and respond.

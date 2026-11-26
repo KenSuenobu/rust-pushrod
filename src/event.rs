@@ -77,18 +77,15 @@
 //! | Time | `Tick` | A frame passes while a widget animates; `elapsed` is the time since the last tick. |
 //! | Engine | `Engine` | Pushrod performs an internal action ([`EngineEvent`]). |
 //! | Extension | `Custom` | An application or library defines its own event ([`CustomEvent`]). |
-//! | Extension | `Raw` | An SDL2 event Pushrod has not mapped yet. |
 //!
 //! `BoundsChange` from the first release is now `PointerExited` followed by `PointerEntered`,
-//! and `SystemEvent` is split into `PointerPressed`, `PointerReleased`, and `PointerMoved`
-//! (or `Raw` for an unmapped SDL2 event).
+//! and `SystemEvent` is split into `PointerPressed`, `PointerReleased`, and `PointerMoved`.
+//! Window-system input arrives as a backend's [`InputEvent`](crate::input::InputEvent).
 
 use crate::geometry::{Point, Size};
+use crate::input::{Key, Modifiers, MouseButton};
 use crate::timer::TimerId;
 use crate::widget::WidgetId;
-use sdl2::event::Event as SdlEvent;
-use sdl2::keyboard::{Keycode, Mod};
-use sdl2::mouse::MouseButton;
 use std::any::Any;
 use std::fmt;
 use std::rc::Rc;
@@ -217,7 +214,7 @@ impl EventMask {
     pub const LIFECYCLE: EventMask = EventMask(1 << 8);
     /// Timer ticks ([`Event::Tick`]).  Without it the run loop blocks while idle.
     pub const TIMER: EventMask = EventMask(1 << 9);
-    /// Custom and unmapped events ([`Event::Custom`], [`Event::Raw`]).
+    /// Custom events ([`Event::Custom`]) and backend wake-ups.
     pub const CUSTOM: EventMask = EventMask(1 << 10);
     /// Engine events ([`Event::Engine`]).  A `Widget` receives them only with this class in its mask.
     pub const ENGINE: EventMask = EventMask(1 << 11);
@@ -548,8 +545,6 @@ pub enum EventKind {
     Engine,
     /// See [`Event::Custom`].
     Custom,
-    /// See [`Event::Raw`].
-    Raw,
 }
 
 impl EventKind {
@@ -579,7 +574,7 @@ impl EventKind {
             | K::Moved
             | K::Removed => Some(EventMask::LIFECYCLE),
             K::Tick => Some(EventMask::TIMER),
-            K::Custom | K::Raw => Some(EventMask::CUSTOM),
+            K::Custom => Some(EventMask::CUSTOM),
             K::Clicked
             | K::Activated
             | K::Toggled
@@ -691,9 +686,9 @@ pub enum Event {
         /// The widget with the keyboard.
         id: WidgetId,
         /// The key.
-        key: Keycode,
+        key: Key,
         /// The modifier keys held.
-        modifiers: Mod,
+        modifiers: Modifiers,
         /// `true` if this is an auto-repeat.
         repeat: bool,
     },
@@ -702,9 +697,9 @@ pub enum Event {
         /// The widget with the keyboard.
         id: WidgetId,
         /// The key.
-        key: Keycode,
+        key: Key,
         /// The modifier keys held.
-        modifiers: Mod,
+        modifiers: Modifiers,
     },
     /// Text was typed into widget `id`.
     TextEntered {
@@ -845,8 +840,6 @@ pub enum Event {
     Engine(EngineEvent),
     /// An application- or library-defined event.
     Custom(CustomEvent),
-    /// An SDL2 event Pushrod has not mapped yet.
-    Raw(SdlEvent),
 }
 
 impl Event {
@@ -929,7 +922,6 @@ impl Event {
             Event::Tick { .. } => EventKind::Tick,
             Event::Engine(_) => EventKind::Engine,
             Event::Custom(_) => EventKind::Custom,
-            Event::Raw(_) => EventKind::Raw,
         }
     }
 
@@ -974,8 +966,7 @@ impl Event {
             | Event::CloseRequested
             | Event::Tick { .. }
             | Event::Engine(_)
-            | Event::Custom(_)
-            | Event::Raw(_) => None,
+            | Event::Custom(_) => None,
         }
     }
 }
@@ -1199,7 +1190,7 @@ mod mask_tests {
             Some(EventMask::POINTER_MOTION)
         );
         assert_eq!(EventKind::Tick.mask_class(), Some(EventMask::TIMER));
-        assert_eq!(EventKind::Raw.mask_class(), Some(EventMask::CUSTOM));
+        assert_eq!(EventKind::Custom.mask_class(), Some(EventMask::CUSTOM));
         assert_eq!(EventKind::CloseRequested.mask_class(), None);
         assert_eq!(EventKind::Engine.mask_class(), None);
         assert_eq!(EventKind::Clicked.mask_class(), None);

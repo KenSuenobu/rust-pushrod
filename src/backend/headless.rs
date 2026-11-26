@@ -15,8 +15,9 @@
 
 //! # Headless backend
 //!
-//! A [`Painter`] that draws nothing and records every call, so a `Widget`'s `paint` can be unit
-//! tested without a window or display.
+//! A [`Painter`] that draws nothing and records every call, and a [`HeadlessBackend`] that has no
+//! window and records what the engine asks of it, so a `Widget`'s `paint` and a whole `Engine` can
+//! be unit tested without a display.
 //!
 //! ```rust
 //! use pushrod::backend::headless::{PaintCall, RecordingPainter};
@@ -28,9 +29,15 @@
 //! assert_eq!(p.calls, vec![PaintCall::Fill(Color::WHITE)]);
 //! ```
 
+use super::{Backend, Waker};
 use crate::color::Color;
+use crate::event::{EngineEvent, EventMask};
 use crate::geometry::{Point, Rect, Size};
+use crate::input::InputEvent;
 use crate::paint::{CachePolicy, Painter, TextStyle};
+use crate::widget::WidgetId;
+use std::collections::VecDeque;
+use std::time::Duration;
 
 /// One call made on a [`RecordingPainter`].
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -211,6 +218,229 @@ impl Painter for RecordingPainter {
     }
 }
 
+/// A [`Backend`] with no window: input is scripted, drawing is recorded, and nothing needs a
+/// display.
+///
+/// Queue input with [`HeadlessBackend::push_event`]; after the engine runs, read
+/// [`painted`](HeadlessBackend::painted), [`draws`](HeadlessBackend::draws) and
+/// [`frames`](HeadlessBackend::frames).  Each `Widget` is painted with a [`RecordingPainter`].
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::backend::Backend;
+/// use pushrod::backend::headless::HeadlessBackend;
+/// use pushrod::geometry::size;
+/// use pushrod::input::InputEvent;
+///
+/// let mut backend = HeadlessBackend::new(size(320, 200));
+///
+/// backend.push_event(InputEvent::Quit);
+/// assert_eq!(backend.poll_events(None), vec![InputEvent::Quit]);
+/// ```
+#[derive(Debug, Default)]
+pub struct HeadlessBackend {
+    size: Size,
+    script: VecDeque<InputEvent>,
+    /// Every `Widget` paint, in order: the widget, and the calls it made.
+    pub painted: Vec<(WidgetId, Vec<PaintCall>)>,
+    /// Every `Widget` texture drawn into a frame, in order, with its bounds.
+    pub draws: Vec<(WidgetId, Rect)>,
+    /// The number of frames presented.
+    pub frames: usize,
+    /// The last mask the engine set.
+    pub mask: Option<EventMask>,
+    /// Whether text input is currently on.
+    pub text_input: bool,
+    /// The clipboard contents.
+    pub clipboard: Option<String>,
+    /// The URLs the engine asked to open.
+    pub opened_urls: Vec<String>,
+}
+
+impl HeadlessBackend {
+    /// Creates a headless backend.
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The size of the pretend window.
+    ///
+    /// # Returns
+    ///
+    /// A new `HeadlessBackend` with no scripted input.
+    pub fn new(size: Size) -> Self {
+        Self {
+            size,
+            ..Self::default()
+        }
+    }
+
+    /// Queues an input event for the next [`Backend::poll_events`].
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event to deliver.
+    pub fn push_event(&mut self, event: InputEvent) {
+        self.script.push_back(event);
+    }
+}
+
+impl Backend for HeadlessBackend {
+    /// Returns the cache policy.
+    ///
+    /// # Returns
+    ///
+    /// [`CachePolicy::TextureCache`].
+    fn cache_policy(&self) -> CachePolicy {
+        CachePolicy::TextureCache
+    }
+
+    /// Returns the size of the pretend window.
+    ///
+    /// # Returns
+    ///
+    /// The size.
+    fn window_size(&self) -> Size {
+        self.size
+    }
+
+    /// Records a new window size.
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The new size.
+    fn resize_window(&mut self, size: Size) {
+        self.size = size;
+    }
+
+    /// Records the event mask in [`HeadlessBackend::mask`].
+    ///
+    /// # Arguments
+    ///
+    /// * `mask` - The run loop's event mask.
+    fn set_event_mask(&mut self, mask: EventMask) {
+        self.mask = Some(mask);
+    }
+
+    /// Records the text input state in [`HeadlessBackend::text_input`].
+    ///
+    /// # Arguments
+    ///
+    /// * `active` - Whether text input is on.
+    fn set_text_input(&mut self, active: bool) {
+        self.text_input = active;
+    }
+
+    /// Returns the scripted events, all at once; it never waits.  With an empty script the
+    /// window is treated as closed, so a loop run against this backend always ends.
+    ///
+    /// # Arguments
+    ///
+    /// * `_wait` - Ignored.
+    ///
+    /// # Returns
+    ///
+    /// The scripted events, or [`InputEvent::Quit`] if there are none.
+    fn poll_events(&mut self, _wait: Option<Duration>) -> Vec<InputEvent> {
+        if self.script.is_empty() {
+            return vec![InputEvent::Quit];
+        }
+
+        self.script.drain(..).collect()
+    }
+
+    /// A headless backend cannot be woken.
+    ///
+    /// # Returns
+    ///
+    /// `None`.
+    fn waker(&self) -> Option<Waker> {
+        None
+    }
+
+    /// Paints the `Widget` with a [`RecordingPainter`] and stores the calls in
+    /// [`HeadlessBackend::painted`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget`.
+    /// * `_size` - The `Widget`'s size; not needed to record.
+    /// * `paint` - Draws the `Widget`.
+    fn paint_widget(&mut self, id: WidgetId, _size: Size, paint: &mut dyn FnMut(&mut dyn Painter)) {
+        let mut painter = RecordingPainter::default();
+
+        paint(&mut painter);
+        self.painted.push((id, painter.calls));
+    }
+
+    /// Starts a frame; nothing to clear.
+    ///
+    /// # Arguments
+    ///
+    /// * `_clear` - The clear color; ignored.
+    fn begin_frame(&mut self, _clear: Color) {}
+
+    /// Records the draw in [`HeadlessBackend::draws`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget` drawn.
+    /// * `bounds` - Where it was drawn.
+    fn draw_widget(&mut self, id: WidgetId, bounds: Rect) {
+        self.draws.push((id, bounds));
+    }
+
+    /// Counts a presented frame in [`HeadlessBackend::frames`].
+    fn present(&mut self) {
+        self.frames += 1;
+    }
+
+    /// A headless backend loads no fonts, so it has no notices.
+    ///
+    /// # Returns
+    ///
+    /// An empty list.
+    fn take_notices(&mut self) -> Vec<EngineEvent> {
+        Vec::new()
+    }
+
+    /// Reads the stored clipboard text.
+    ///
+    /// # Returns
+    ///
+    /// The text, or `None` if nothing was stored.
+    fn clipboard_text(&mut self) -> Option<String> {
+        self.clipboard.clone()
+    }
+
+    /// Stores clipboard text.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The text to store.
+    fn set_clipboard_text(&mut self, text: &str) {
+        self.clipboard = Some(text.to_string());
+    }
+
+    /// Records the URL in [`HeadlessBackend::opened_urls`] without opening anything.
+    ///
+    /// # Arguments
+    ///
+    /// * `url` - The URL.
+    ///
+    /// # Returns
+    ///
+    /// Always `Ok`.
+    ///
+    /// # Errors
+    ///
+    /// Never fails.
+    fn open_url(&mut self, url: &str) -> Result<(), String> {
+        self.opened_urls.push(url.to_string());
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -263,5 +493,26 @@ mod tests {
             RecordingPainter::default().cache_policy(),
             CachePolicy::DirectDraw
         );
+    }
+
+    #[test]
+    fn headless_backend_scripts_input_and_records_drawing() {
+        let mut b = HeadlessBackend::new(Size::new(10, 10));
+
+        b.push_event(InputEvent::Exposed);
+        assert_eq!(b.poll_events(None), vec![InputEvent::Exposed]);
+        assert_eq!(b.poll_events(None), vec![InputEvent::Quit]);
+
+        b.paint_widget(3, Size::new(4, 4), &mut |p| p.fill(Color::RED));
+        b.draw_widget(3, Rect::new(0, 0, 4, 4));
+        b.present();
+        b.set_clipboard_text("hi");
+
+        assert_eq!(b.painted, vec![(3, vec![PaintCall::Fill(Color::RED)])]);
+        assert_eq!(b.draws.len(), 1);
+        assert_eq!(b.frames, 1);
+        assert_eq!(b.clipboard_text().as_deref(), Some("hi"));
+        assert!(b.open_url("https://example.com").is_ok());
+        assert_eq!(b.opened_urls, vec!["https://example.com"]);
     }
 }

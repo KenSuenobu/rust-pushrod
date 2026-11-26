@@ -27,8 +27,9 @@ use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::geometry::{point, size, Point, Size};
 use pushrod::paint::{self, Painter};
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::mouse::MouseButton;
+use pushrod::input::MouseButton;
 use pushrod::color::Color;
+use pushrod_sdl2::WindowSettings;
 
 /// A square that switches between two colors each time it is clicked.
 pub struct SwatchWidget {
@@ -153,8 +154,6 @@ Instead of tracking presses, drags, and timing yourself, attach a controller wit
 
 ```rust
 fn main() {
-    let sdl = sdl2::init().unwrap();
-    let window = sdl.video().unwrap().window("Swatch", 200, 140).position_centered().build().unwrap();
     let mut engine: Engine<()> = Engine::new(size(200, 140), 60);
 
     let swatch = engine.add_widget(SwatchWidget::new(
@@ -169,7 +168,7 @@ fn main() {
         println!("Swatch is now {:?}", color);
     });
 
-    engine.run(sdl, window, ());
+    pushrod_sdl2::run(engine, WindowSettings::new("Swatch", size(200, 140)), ());
 }
 ```
 
@@ -177,20 +176,22 @@ fn main() {
 
 ## Testing a widget
 
-`Engine::dispatch` runs an SDL2 event through routing, `handle_event`, and callbacks without a window:
+`Engine::dispatch` runs an `InputEvent` through routing, `handle_event`, and callbacks without a window:
 
 ```rust
 // tests/swatch.rs (SwatchWidget is the widget defined above)
 use pushrod::engine::Engine;
 use pushrod::geometry::{point, size};
-use sdl2::mouse::MouseButton;
+use pushrod::input::{InputEvent, MouseButton};
 use pushrod::color::Color;
 
-fn mouse(down: bool, x: i32, y: i32) -> Event {
+fn mouse(down: bool, x: i32, y: i32) -> InputEvent {
+    let (position, button, clicks) = (point(x, y), MouseButton::Left, 1);
+
     if down {
-        Event::MouseButtonDown { timestamp: 0, window_id: 0, which: 0, mouse_btn: MouseButton::Left, clicks: 1, x, y }
+        InputEvent::MouseDown { position, button, clicks }
     } else {
-        Event::MouseButtonUp { timestamp: 0, window_id: 0, which: 0, mouse_btn: MouseButton::Left, clicks: 1, x, y }
+        InputEvent::MouseUp { position, button, clicks }
     }
 }
 

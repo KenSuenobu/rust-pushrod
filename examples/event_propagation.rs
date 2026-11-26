@@ -9,10 +9,10 @@
 use pushrod::cache::WidgetCache;
 use pushrod::event::{Event, EventCtx, EventMask, EventPhase, Propagation};
 use pushrod::geometry::{point, size};
+use pushrod::input::{Key, Modifiers};
 use pushrod::paint::Painter;
 use pushrod::root_widget::RootWidget;
 use pushrod::widget::{Widget, WidgetCore};
-use sdl2::keyboard::{Keycode, Mod};
 
 /// A widget that prints each phase it sees; the dialog also captures and handles Return.
 struct Node {
@@ -81,8 +81,8 @@ fn main() {
         field,
         &Event::KeyPressed {
             id: field,
-            key: Keycode::Return,
-            modifiers: Mod::NOMOD,
+            key: Key::Return,
+            modifiers: Modifiers::empty(),
             repeat: false,
         },
     );

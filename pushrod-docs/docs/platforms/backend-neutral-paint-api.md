@@ -38,7 +38,7 @@ The helpers `paint::fill`, `paint::border` and `paint::text` build on these, so 
 
 | Backend | Where | Does |
 |---|---|---|
-| `Sdl2Painter` | `pushrod::backend::sdl2` | The default. Each widget paints into its own GPU texture when invalidated; frames are blits of cached textures. Nothing changes for applications. |
+| `Sdl2Painter` | `pushrod_sdl2` | Each widget paints into its own GPU texture when invalidated; frames are blits of cached textures. See [Backends](./backends.md). |
 | `RecordingPainter` | `pushrod::backend::headless` | Draws nothing and records every call as a `PaintCall`. For unit tests with no window. |
 
 ## Cache policy
