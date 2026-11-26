@@ -457,6 +457,13 @@ impl Backend for Sdl2Backend {
         }
     }
 
+    /// Destroys the removed `Widget`'s GPU texture and forgets its store.
+    fn release_widget(&mut self, id: WidgetId) {
+        if let Some(mut store) = self.textures.remove(&id) {
+            store.destroy();
+        }
+    }
+
     fn begin_frame(&mut self, clear: Color) {
         self.canvas.set_draw_color(to_sdl_color(clear));
         self.canvas.clear();

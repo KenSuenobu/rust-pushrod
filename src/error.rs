@@ -83,6 +83,14 @@ pub enum Error {
         /// What went wrong.
         message: String,
     },
+    /// A change to the widget tree is not allowed: removing or moving the root, moving a
+    /// `Widget` into its own subtree, or moving a composite's part out of its composite.
+    Tree {
+        /// The ID of the `Widget` being changed.
+        id: WidgetId,
+        /// What went wrong.
+        message: String,
+    },
 }
 
 /// The result of a fallible Pushrod function.
@@ -186,6 +194,23 @@ impl Error {
             message: message.into(),
         }
     }
+
+    /// Creates a [`Error::Tree`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget` being changed.
+    /// * `message` - What went wrong.
+    ///
+    /// # Returns
+    ///
+    /// The error.
+    pub fn tree(id: WidgetId, message: impl Into<String>) -> Self {
+        Error::Tree {
+            id,
+            message: message.into(),
+        }
+    }
 }
 
 impl fmt::Display for Error {
@@ -207,6 +232,7 @@ impl fmt::Display for Error {
             Error::UnknownWidget { id } => write!(f, "widget {id} does not exist"),
             Error::Composite { id, message } => write!(f, "composite {id}: {message}"),
             Error::FormFile { path, message } => write!(f, "form file \"{path}\": {message}"),
+            Error::Tree { id, message } => write!(f, "widget {id}: {message}"),
         }
     }
 }
@@ -243,6 +269,10 @@ mod tests {
         assert_eq!(
             Error::form_file("f.form", "syntax").to_string(),
             "form file \"f.form\": syntax"
+        );
+        assert_eq!(
+            Error::tree(0, "the root cannot be removed").to_string(),
+            "widget 0: the root cannot be removed"
         );
     }
 

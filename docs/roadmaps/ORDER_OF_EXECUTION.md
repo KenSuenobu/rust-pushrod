@@ -86,7 +86,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 47 | [#115](https://github.com/KenSuenobu/rust-pushrod/issues/115) | pushrod: [7.7] Performance benchmarks and budgets (done) |
 | ✅ 48 | [#25](https://github.com/KenSuenobu/rust-pushrod/issues/25) | pushrod: [1.10] High-DPI rendering and window resize (done) |
 | ✅ 49 | [#139](https://github.com/KenSuenobu/rust-pushrod/issues/139) | pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides (done) |
-| 50 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder |
+| ✅ 50 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder (done) |
 | 51 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen |
 | 52 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog |
 | 53 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod |
@@ -1101,11 +1101,11 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Remaining IDs never change
-- [ ] Removed textures are destroyed
-- [ ] Focus/hover/capture cleared safely
-- [ ] Tests for remove, reparent, reorder
-- [ ] Emits the corresponding `EngineEvent` (9.10)
+- [x] Remaining IDs never change
+- [x] Removed textures are destroyed
+- [x] Focus/hover/capture cleared safely
+- [x] Tests for remove, reparent, reorder
+- [x] Emits the corresponding `EngineEvent` (9.10)
 
 ### Step 51: Modal dialogs: run a form until a dismissing control is chosen
 

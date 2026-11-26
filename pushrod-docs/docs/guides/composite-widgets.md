@@ -43,7 +43,7 @@ flowchart TD
 - **Changing parts from inside.** `sync_parts(cache, ctx)` runs just before `layout_parts`, every time the parts are arranged, with the whole cache at hand. The composite uses it to set a part's value, hide a part, or read what its parts hold: a [container](../widgets/container.md) sets its scroll bars' thumbs and pans its content there. While it runs the composite is out of the cache, so it reaches itself through `self`. Events emitted through `ctx` are delivered to the application.
 - **Resizing arranges the parts.** `set_size` on a composite (or a layout manager resizing it) lays its parts out again before the next frame, as `request_arrange_parts` does.
 - **Hearing about changes below.** `Widget::descendant_changed` is called on every widget above one that was added, removed, moved, resized, repainted, or given the focus, at most once per frame. A composite that follows its content overrides it to call `request_arrange_parts`.
-- **Removing.** `remove_part` removes the part and everything inside it and emits `WidgetRemoved` for each. Removed IDs are never reused: `get` returns `None`, and callbacks registered on them never run again. Focus on a removed widget is cleared (`FocusChanged`).
+- **Removing.** `remove_part` removes the part and everything inside it and emits `WidgetRemoved` for each. `widgets.remove(part_id)` does the same for a part found by ID; see [Edit the widget tree at run time](../concepts/edit-the-widget-tree-at-run-time.md). Removed IDs are never reused: `get` returns `None`, and callbacks registered on them never run again. Focus on a removed widget is cleared (`FocusChanged`).
 
 ## Writing a composite widget
 

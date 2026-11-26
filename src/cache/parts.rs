@@ -480,7 +480,7 @@ impl WidgetCache {
     /// # Returns
     ///
     /// The ID of its parent, if the parent is a composite that lists it as a part.
-    fn owner_of(&self, part: WidgetId) -> Option<WidgetId> {
+    pub(super) fn owner_of(&self, part: WidgetId) -> Option<WidgetId> {
         let parent = self.get(part)?.get_parent();
 
         (parent != part
@@ -538,16 +538,18 @@ impl WidgetCache {
         out
     }
 
-    /// Removes a `Widget` and its descendants from the tree, leaving empty slots behind.
+    /// Removes a `Widget` and its descendants from the tree, leaving empty slots (tombstones)
+    /// behind so every other ID stays the same.
     ///
-    /// Focus, mouse capture, hover, animation requests, and engine filters that name a removed
-    /// `Widget` are cleared; a focus loss emits `FocusChanged`.  Each removed `Widget` emits
-    /// `WidgetRemoved`, parents first.
+    /// Focus, mouse capture, hover, animation requests, layout hints, and engine filters that
+    /// name a removed `Widget` are cleared; a focus loss emits `FocusChanged`.  Each removed
+    /// `Widget` emits `WidgetRemoved` and then [`Event::Removed`], parents first, and its
+    /// texture is released by the next [`WidgetCache::draw_loop`].
     ///
     /// # Arguments
     ///
     /// * `id` - The ID of the `Widget` to remove; never the root.
-    fn remove_subtree(&mut self, id: WidgetId) {
+    pub(super) fn remove_subtree(&mut self, id: WidgetId) {
         if id == ROOT_WIDGET_ID || self.get(id).is_none() {
             return;
         }
@@ -571,8 +573,10 @@ impl WidgetCache {
 
             self.cache[current as usize] = Box::new(Vacant::new(current, parent));
             self.removed.insert(current);
+            self.released_textures.push(current);
             self.animating.retain(|&animating| animating != current);
             self.engine_filters.remove(&current);
+            self.layout_hints.remove(&current);
 
             if self.captured_widget_id == Some(current) {
                 self.captured_widget_id = None;
@@ -594,6 +598,7 @@ impl WidgetCache {
                 id: current,
                 parent,
             }));
+            self.queue_event(Event::Removed { id: current });
         }
 
         self.needs_full_redraw = true;

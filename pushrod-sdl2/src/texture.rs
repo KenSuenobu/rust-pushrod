@@ -145,6 +145,17 @@ impl TextureStore {
         Ok(())
     }
 
+    /// Destroys the stored texture, if any, and leaves the store empty.  Called when the owning
+    /// `Widget` is removed; `unsafe_textures` textures are not freed when dropped, so this must
+    /// run while the renderer is still alive.
+    pub fn destroy(&mut self) {
+        if let Some(texture) = self.store.take() {
+            unsafe { texture.destroy() };
+        }
+
+        self.size = Size::new(0, 0);
+    }
+
     /// Removes the texture from the store, so it can be drawn into while the owning `Widget` is
     /// borrowed for painting.
     ///

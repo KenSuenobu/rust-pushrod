@@ -56,3 +56,4 @@
 [#115] Headless performance benchmarks with stored baseline checked in CI [kenji]
 [#25] High-DPI rendering and window resize that re-runs the root layout [kenji]
 [#139] Bundled-SDL CI build on macOS/Windows; per-platform install guides [kenji]
+[#23] Tree editing at run time: remove, reparent, set_stacking_index [kenji]

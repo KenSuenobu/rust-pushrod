@@ -51,6 +51,7 @@ mod focus;
 mod layout;
 mod parts;
 mod scroll;
+mod tree;
 
 /// The most times one frame lays out and arranges parts before drawing.  A composite whose
 /// parts depend on layout (a scrolling container that fits its content) settles in two or
@@ -93,6 +94,7 @@ pub struct WidgetCache {
     clipboard_snapshot: Option<String>,
     clipboard_write: Option<String>,
     removed: HashSet<WidgetId>,
+    released_textures: Vec<WidgetId>,
     layout_hints: HashMap<WidgetId, SizeHint>,
 }
 
@@ -140,6 +142,7 @@ impl WidgetCache {
             clipboard_snapshot: None,
             clipboard_write: None,
             removed: HashSet::new(),
+            released_textures: Vec::new(),
             layout_hints: HashMap::new(),
         }
     }
@@ -1248,6 +1251,9 @@ impl WidgetCache {
 
     /// Repaints changed `Widget`s and redraws the window if anything changed.
     ///
+    /// The textures of `Widget`s removed since the last frame ([`WidgetCache::remove`]) are
+    /// destroyed first, with [`Backend::release_widget`].
+    ///
     /// Containers whose layout is out of date are measured and arranged first, and composites
     /// that asked for it lay their parts out again, so painting sees the final sizes (see the
     /// [`layout`](crate::layout) and [`composite`](crate::composite) modules).
@@ -1266,6 +1272,11 @@ impl WidgetCache {
     /// `true` if a frame was drawn and the backend should present it, `false` if nothing
     /// changed.
     pub fn draw_loop(&mut self, backend: &mut dyn Backend) -> bool {
+        // Removed `Widget`s never draw again, so their textures are destroyed first.
+        for id in self.released_textures.drain(..) {
+            backend.release_widget(id);
+        }
+
         self.notify_descendant_changes();
 
         // Arranging parts can ask for layout (a resized part), and layout for arranging (a

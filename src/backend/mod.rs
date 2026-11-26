@@ -151,6 +151,18 @@ pub trait Backend {
     /// * `paint` - Draws the `Widget`, given the backend's [`Painter`].
     fn paint_widget(&mut self, id: WidgetId, size: Size, paint: &mut dyn FnMut(&mut dyn Painter));
 
+    /// Destroys a `Widget`'s cached texture, because the `Widget` was removed from the tree.
+    /// [`WidgetCache::draw_loop`](crate::cache::WidgetCache::draw_loop) calls it once for each
+    /// removed `Widget`, before the next frame is drawn.  The ID is never used again.  The
+    /// default does nothing, for a backend that keeps no textures.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The removed `Widget`.
+    fn release_widget(&mut self, id: WidgetId) {
+        let _ = id;
+    }
+
     /// Gives `measure` a [`Painter`] that only measures text: nothing is drawn.  Layout calls it
     /// to ask `Widget`s for their size hints.
     ///
