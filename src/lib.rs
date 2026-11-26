@@ -34,6 +34,16 @@
 //! ```
 //!
 //! For tests, [`HeadlessBackend`](backend::headless::HeadlessBackend) needs no display.
+//!
+//! # Writing widgets
+//!
+//! A widget stores a [`WidgetCore`](widget::WidgetCore) and implements
+//! [`Widget`](widget::Widget); a widget built from other widgets also implements
+//! [`Composite`](composite::Composite).  The guide
+//! [Writing widgets and composites](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/WRITING_WIDGETS.md)
+//! covers painting, events and callbacks, behavior and state, input controllers, composites,
+//! custom events, and testing with [`Engine::dispatch`](engine::Engine::dispatch), with a
+//! compiled sample for each.
 
 // Every public item is documented, including `# Panics` and `# Errors` sections where they
 // apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").

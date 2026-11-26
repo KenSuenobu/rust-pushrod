@@ -62,7 +62,7 @@ impl Reach {
 pub struct Contact {
     /// The full name; required.
     pub name: String,
-    /// The e-mail address; empty, or `name@domain.tld`.
+    /// The e-mail address; empty, or `name@example.com`.
     pub email: String,
     /// The telephone number, as the mask formats it (may be empty).
     pub phone: String,
@@ -435,7 +435,7 @@ impl Validator for RequiredValidator {
     }
 }
 
-/// Judges an e-mail address as it is typed: `name@domain.tld`, or empty.
+/// Judges an e-mail address as it is typed: `name@example.com`, or empty.
 ///
 /// White space and a second `@` are refused outright; text that could still become an address
 /// (`jane`, `jane@`, `jane@example`) is `Intermediate`.
