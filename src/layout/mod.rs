@@ -26,6 +26,8 @@
 //!   (`stretch`), how it sits in its slot (`alignment`), and its `margin`.
 //! * [`Layout`] - the trait a layout manager implements.  [`Layout::measure`] reports the size a
 //!   container needs; [`Layout::arrange`] returns a rectangle for each child.
+//! * [`Row`], [`Column`], and [`Spacer`] - ready-made layouts that place children in a line; see
+//!   the [`linear`] module.
 //!
 //! Give any container a layout with [`Widget::set_layout`](crate::widget::Widget::set_layout).
 //! Without one, a container keeps absolute positioning.  Layout runs once per frame, before
@@ -64,6 +66,10 @@
 //!     }
 //! }
 //! ```
+
+pub mod linear;
+
+pub use linear::{Column, Row, Spacer};
 
 use crate::geometry::{Rect, Size};
 use crate::widget::WidgetId;

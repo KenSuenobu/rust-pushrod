@@ -12,6 +12,7 @@ use pushrod::color::Color;
 use pushrod::engine::Engine;
 use pushrod::event::{Event, Propagation};
 use pushrod::geometry::{Point, Rect, Size, point, size};
+use pushrod::layout::{Align, Alignment, Column, LayoutParams, Margin, Row, Spacer};
 use pushrod::paint::{self, Painter, Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_sdl2::{Sdl2Backend, WindowSettings};
@@ -33,7 +34,7 @@ use pushrod_widgets::text_field::{Accessory, IntegerField, TextField};
 
 /// Window size in pixels: three columns of tiles.
 const WINDOW_W: u32 = 950;
-const WINDOW_H: u32 = 1080;
+const WINDOW_H: u32 = 1250;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -539,6 +540,56 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         engine.add_child_widget(image_tile, image);
         engine.add_child_widget(image_tile, Text::new(name).at(x, 112).size(54, 20));
     }
+
+    // Row and Column: a column of fields above a row whose spacer pushes OK and Cancel right.
+    let layout_tile = add_tile(&mut engine, panel_id, 0, 6, "Row and Column");
+    let mut form = Panel::new().at(10, 30).size(270, 112);
+
+    form.set_color(Color::RGBA(225, 225, 225, 255));
+
+    let form = engine.add_child_widget(layout_tile, form);
+    let fill = LayoutParams {
+        alignment: Alignment::new(Align::Fill, Align::Start),
+        ..LayoutParams::default()
+    };
+
+    for (label, text) in [("Name:", "Jane Doe"), ("City:", "Anytown")] {
+        let field = engine.add_child_widget(
+            form,
+            TextField::new()
+                .size(120, 24)
+                .with_label(label)
+                .with_text(text),
+        );
+
+        engine
+            .widgets()
+            .get_mut(field)
+            .unwrap()
+            .set_layout_params(fill);
+    }
+
+    engine.add_child_widget(form, Spacer::stretch());
+
+    let mut strip = Panel::new();
+
+    strip.set_color(Color::RGBA(225, 225, 225, 255));
+
+    let buttons = engine.add_child_widget(form, strip);
+
+    engine.add_child_widget(buttons, Spacer::stretch());
+    engine.add_child_widget(buttons, Button::new("OK").size(70, 24));
+    engine.add_child_widget(buttons, Button::new("Cancel").size(70, 24));
+
+    let row = engine.widgets().get_mut(buttons).unwrap();
+
+    row.set_layout_params(fill);
+    row.set_layout(Box::new(Row::new().spacing(6)));
+    engine
+        .widgets()
+        .get_mut(form)
+        .unwrap()
+        .set_layout(Box::new(Column::new().spacing(6).margins(Margin::all(6))));
 
     let quit_id = engine.add_child_widget(
         panel_id,

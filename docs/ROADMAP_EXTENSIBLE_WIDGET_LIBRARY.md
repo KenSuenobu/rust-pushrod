@@ -1360,7 +1360,6 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 |---|---|---|---|---|---|---|---|
 | 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `chassis`, `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | v0.1 | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
-| 5.6 (#117) | Row and column layouts | Arrange children in a horizontal row or vertical column with spacing, margins, alignment, and stretch. | `chassis`, `enhancement`, `layout`, `mvp`, `size/S` | N | v0.1 | S | `layout/linear.rs (new)` |
 | 5.7 (#118) | Form layout: aligned label and field rows | Two-column 'Label: field' rows with labels aligned and fields stretching to the available width. | `chassis`, `enhancement`, `layout`, `mvp`, `size/S`, `usability` | N | v0.1 | S | `layout/form.rs (new)` |
 | 5.8 (#119) | Grid layout | Rows and columns of cells with spans, per-row/column stretch, and alignment. | `enhancement`, `layout`, `parallelizable`, `size/M` | Y | N | M | `layout/grid.rs (new)` |
 | 5.9 (#120) | Stack layout (one child visible at a time) | Children occupy the same area; one is shown at a time (pages, wizards, tab contents). | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/stack.rs (new)` |
@@ -1527,6 +1526,8 @@ Like every widget, it can also receive application-defined custom events in `han
 **Technical Stack.** Rust
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/row-and-column.md` ("Row and Column", Layouts, new). Guides: 'Layouts' section. Rustdoc: `Row`, `Column`, `Spacer`. Examples: Example dialog built with rows and columns. Screenshots: Gallery tile.
+
+**Status:** done (#117). `pushrod::layout::{Row, Column}` take `spacing`, `margins`, and a cross-axis `align`; stretch shares extra space in proportion and passes on what a capped child cannot take, too little room shrinks children toward their minimum, and min/max are kept on both axes; `Spacer::stretch()` pushes children apart; `pushrod-sdl2/examples/row_and_column.rs` resizes a dialog between two widths, and the gallery has a Row and Column tile.
 
 ### 5.7 (#118): Form layout: aligned label and field rows
 
