@@ -70,4 +70,5 @@ pub mod prelude;
 pub mod progress_bar;
 pub mod radio_button;
 pub mod separator;
+pub mod slider;
 pub mod text;

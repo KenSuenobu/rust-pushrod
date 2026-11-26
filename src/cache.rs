@@ -737,6 +737,7 @@ impl WidgetCache {
         ctx: &mut EventCtx,
     ) -> Propagation {
         let loop_mask = self.loop_mask;
+        let origin = self.absolute_origin(id);
 
         if let Some(widget) = self.get_mut(id)
             && widget.is_enabled()
@@ -746,6 +747,7 @@ impl WidgetCache {
             })
         {
             ctx.set_source(Some(id));
+            ctx.set_origin(origin);
             ctx.set_phase(phase);
 
             let result = widget.handle_event(event, ctx);

@@ -1100,6 +1100,7 @@ pub enum EventPhase {
 pub struct EventCtx {
     events: Vec<Event>,
     source: Option<WidgetId>,
+    origin: Point,
     phase: EventPhase,
     animating: Vec<WidgetId>,
 }
@@ -1179,6 +1180,28 @@ impl EventCtx {
     /// * `source` - The `Widget` about to receive an event.
     pub(crate) fn set_source(&mut self, source: Option<WidgetId>) {
         self.source = source;
+        self.origin = Point::new(0, 0);
+    }
+
+    /// Records the window position of the `Widget` about to receive a pointer event.
+    ///
+    /// # Arguments
+    ///
+    /// * `origin` - The `Widget`'s upper left-hand corner in window coordinates.
+    pub(crate) fn set_origin(&mut self, origin: Point) {
+        self.origin = origin;
+    }
+
+    /// Returns the window position of the upper left-hand corner of the `Widget` currently
+    /// handling an event, so a `Widget` can turn the window coordinates of a pointer event into
+    /// its own coordinates (`position.x - ctx.origin().x`).
+    ///
+    /// # Returns
+    ///
+    /// The origin in window coordinates for events delivered through input propagation (pointer
+    /// and key events); `(0, 0)` for events broadcast to every `Widget`, such as ticks.
+    pub fn origin(&self) -> Point {
+        self.origin
     }
 
     /// Consumes the context and returns the queued events.
