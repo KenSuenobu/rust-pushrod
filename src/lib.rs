@@ -56,4 +56,5 @@ pub mod paint;
 pub mod root_widget;
 pub mod text;
 pub mod texture;
+pub mod timer;
 pub mod widget;

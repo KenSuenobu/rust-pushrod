@@ -84,6 +84,7 @@
 //! (or `Raw` for an unmapped SDL2 event).
 
 use crate::geometry::{Point, Size};
+use crate::timer::TimerId;
 use crate::widget::WidgetId;
 use sdl2::event::Event as SdlEvent;
 use sdl2::keyboard::{Keycode, Mod};
@@ -336,6 +337,14 @@ pub enum EngineEventKind {
     FocusChanged,
     /// See [`EngineEvent::ActionTriggered`].
     ActionTriggered,
+    /// See [`EngineEvent::TimerFired`].
+    TimerFired,
+    /// See [`EngineEvent::TimerCancelled`].
+    TimerCancelled,
+    /// See [`EngineEvent::IdleRan`].
+    IdleRan,
+    /// See [`EngineEvent::AnimationTicked`].
+    AnimationTicked,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -405,6 +414,31 @@ pub enum EngineEvent {
         /// `false` for the default action (Return), `true` for the cancel action (Escape).
         cancel: bool,
     },
+    /// A timer registered with `Engine::on_timer` fired and its callback ran.
+    TimerFired {
+        /// The timer that fired.
+        id: TimerId,
+        /// `true` if it repeats; `false` if this was its only firing.
+        repeat: bool,
+    },
+    /// A timer was cancelled before it fired again, by `Ui::cancel_timer` or
+    /// `Engine::cancel_timer`.  Not sent when a one-shot timer simply finishes.
+    TimerCancelled {
+        /// The timer that was cancelled.
+        id: TimerId,
+    },
+    /// The idle callbacks ran because no events were pending.
+    IdleRan {
+        /// How many idle callbacks ran.
+        callbacks: usize,
+    },
+    /// [`Event::Tick`] was delivered to the `Widget`s that requested animation.
+    AnimationTicked {
+        /// How many `Widget`s received the tick.
+        recipients: usize,
+        /// The time since the previous frame's tick.
+        elapsed: Duration,
+    },
 }
 
 impl EngineEvent {
@@ -423,6 +457,10 @@ impl EngineEvent {
             EngineEvent::GlyphAtlasPageAdded { .. } => EngineEventKind::GlyphAtlasPageAdded,
             EngineEvent::FocusChanged { .. } => EngineEventKind::FocusChanged,
             EngineEvent::ActionTriggered { .. } => EngineEventKind::ActionTriggered,
+            EngineEvent::TimerFired { .. } => EngineEventKind::TimerFired,
+            EngineEvent::TimerCancelled { .. } => EngineEventKind::TimerCancelled,
+            EngineEvent::IdleRan { .. } => EngineEventKind::IdleRan,
+            EngineEvent::AnimationTicked { .. } => EngineEventKind::AnimationTicked,
         }
     }
 }
@@ -1046,6 +1084,7 @@ pub struct EventCtx {
     events: Vec<Event>,
     source: Option<WidgetId>,
     phase: EventPhase,
+    animating: Vec<WidgetId>,
 }
 
 impl EventCtx {
@@ -1075,6 +1114,27 @@ impl EventCtx {
             target,
             payload: Rc::new(payload),
         }));
+    }
+
+    /// Asks for an [`Event::Tick`] on the next frame, for the `Widget` currently handling an event.
+    ///
+    /// The request is for one frame, like a browser's `requestAnimationFrame`: a `Widget` that
+    /// keeps animating calls this again each time it handles a `Tick`, and stops by not calling
+    /// it.  Only `Widget`s with [`EventMask::TIMER`] in their mask receive the tick.  Does nothing
+    /// outside event handling.
+    pub fn request_animation(&mut self) {
+        if let Some(id) = self.source {
+            self.animating.push(id);
+        }
+    }
+
+    /// Takes the animation requests made through [`EventCtx::request_animation`].
+    ///
+    /// # Returns
+    ///
+    /// The requesting `Widget`s, in the order they asked.
+    pub(crate) fn take_animation_requests(&mut self) -> Vec<WidgetId> {
+        std::mem::take(&mut self.animating)
     }
 
     /// Returns the phase of delivery the current event is in.

@@ -142,7 +142,7 @@ impl WidgetCache {
         self.send(id, &event, EventPhase::Target, &mut ctx);
         self.queue_event(event);
 
-        for generated in ctx.into_events() {
+        for generated in self.finish(ctx) {
             self.queue_event(generated);
         }
     }

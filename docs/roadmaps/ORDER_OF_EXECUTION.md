@@ -58,7 +58,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 19 | [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) | pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state (done) |
 | ✅ 20 | [#289](https://github.com/KenSuenobu/rust-pushrod/issues/289) | pushrod: [1.26] Text truncation: shorten text that doesn't fit with an ellipsis (done) |
 | ✅ 21 | [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) | pushrod: [1.27] Wrapped text: multi-line labels that reflow (done) |
-| 22 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks |
+| ✅ 22 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks (done) |
 | 23 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
 | 24 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking |
 | 25 | [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) | pushrod: [1.24] Fonts: shared font handles and a built-in default font |
@@ -656,11 +656,11 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] One-shot and repeating timers fire within one frame of their interval
-- [ ] Timers can be cancelled from callbacks
-- [ ] `Tick` only flows while a widget requests animation
-- [ ] Idle callbacks run only when no events are pending
-- [ ] Emits the corresponding `EngineEvent` (9.10)
+- [x] One-shot and repeating timers fire within one frame of their interval
+- [x] Timers can be cancelled from callbacks
+- [x] `Tick` only flows while a widget requests animation
+- [x] Idle callbacks run only when no events are pending
+- [x] Emits the corresponding `EngineEvent` (9.10)
 
 ### Step 23: Backend crates: keep SDL out of the core and the widgets
 

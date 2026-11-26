@@ -91,7 +91,7 @@ Window events are [broadcast](../concepts/broadcast-events-to-all-interested-wid
 | `WindowResized { size }` | The window changes size. Broadcast to widgets with `WINDOW` in their mask. |
 | `WindowFocusChanged { focused }` | The window gains or loses focus. Broadcast to widgets with `WINDOW` in their mask. |
 | `CloseRequested` | The user asks to close the window. |
-| `Tick { elapsed }` | A frame passes while a widget animates. |
+| `Tick { elapsed }` | A frame passes while a widget animates: the widget asked for it with `ctx.request_animation()`. See [Timers and idle callbacks](../concepts/timers-and-idle-callbacks.md). |
 | `Engine(EngineEvent)` | Pushrod performs an internal action. |
 | `Custom(CustomEvent)` | An application or library defines its own event. See [Custom Events](./custom-events.md). |
 | `Raw(sdl2::event::Event)` | An SDL2 event Pushrod has not mapped yet. |
