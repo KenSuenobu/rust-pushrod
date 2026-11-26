@@ -1360,7 +1360,6 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 |---|---|---|---|---|---|---|---|
 | 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `chassis`, `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | v0.1 | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
-| 5.7 (#118) | Form layout: aligned label and field rows | Two-column 'Label: field' rows with labels aligned and fields stretching to the available width. | `chassis`, `enhancement`, `layout`, `mvp`, `size/S`, `usability` | N | v0.1 | S | `layout/form.rs (new)` |
 | 5.8 (#119) | Grid layout | Rows and columns of cells with spans, per-row/column stretch, and alignment. | `enhancement`, `layout`, `parallelizable`, `size/M` | Y | N | M | `layout/grid.rs (new)` |
 | 5.9 (#120) | Stack layout (one child visible at a time) | Children occupy the same area; one is shown at a time (pages, wizards, tab contents). | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/stack.rs (new)` |
 | 5.10 (#121) | Flow layout (wrapping rows) | Children placed left to right, wrapping to the next row when the width runs out. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/flow.rs (new)` |
@@ -1563,6 +1562,8 @@ Like every widget, it can also receive application-defined custom events in `han
 **Technical Stack.** Rust
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/layouts/form-layout.md` ("Form Layout", Layouts, new). Guides: 'Layouts' section. Rustdoc: `FormLayout`. Examples: Settings form example. Screenshots: Gallery tile.
+
+**Status:** done (#118). `pushrod::layout::FormLayout` places `add_row(label, field)` rows with labels right- (default) or left-aligned in a column as wide as the widest label, fields that fill the rest, and `add_full_row` rows; too narrow a form puts labels above fields; `Layout::focus_target` lets a label click focus its field; `pushrod-sdl2/examples/form_layout.rs` is a settings form that resizes between two widths, and the gallery has a Form Layout tile.
 
 ### 5.8 (#119): Grid layout
 

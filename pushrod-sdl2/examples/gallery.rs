@@ -12,7 +12,7 @@ use pushrod::color::Color;
 use pushrod::engine::Engine;
 use pushrod::event::{Event, Propagation};
 use pushrod::geometry::{Point, Rect, Size, point, size};
-use pushrod::layout::{Align, Alignment, Column, LayoutParams, Margin, Row, Spacer};
+use pushrod::layout::{Align, Alignment, Column, FormLayout, LayoutParams, Margin, Row, Spacer};
 use pushrod::paint::{self, Painter, Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_sdl2::{Sdl2Backend, WindowSettings};
@@ -590,6 +590,48 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         .get_mut(form)
         .unwrap()
         .set_layout(Box::new(Column::new().spacing(6).margins(Margin::all(6))));
+
+    // Form Layout: labels right-aligned in a column as wide as the widest, fields filling the
+    // rest, and a full-width check box.
+    let form_tile = add_tile(&mut engine, panel_id, 1, 6, "Form Layout");
+    let mut sheet = Panel::new().at(10, 30).size(270, 112);
+
+    sheet.set_color(Color::RGBA(225, 225, 225, 255));
+
+    let sheet = engine.add_child_widget(form_tile, sheet);
+    let mut form_layout = FormLayout::new()
+        .spacing(6)
+        .column_spacing(6)
+        .margins(Margin::all(6));
+
+    for (label, text) in [
+        ("Name:", "Jane Doe"),
+        ("Server address:", "mail.example.com"),
+    ] {
+        let mut label = Text::new(label);
+
+        // Labels share the form's background, so they read as text drawn on the form.
+        label.set_color(Color::RGBA(225, 225, 225, 255));
+
+        let label = engine.add_child_widget(sheet, label);
+        let field = engine.add_child_widget(sheet, TextField::new().size(100, 24).with_text(text));
+
+        form_layout.add_row(label, field);
+    }
+
+    let mut check = CheckBox::new("Remember me").checked(true);
+
+    // The check box shares the form's background too.
+    check.set_color(Color::RGBA(225, 225, 225, 255));
+
+    let remember = engine.add_child_widget(sheet, check);
+
+    form_layout.add_full_row(remember);
+    engine
+        .widgets()
+        .get_mut(sheet)
+        .unwrap()
+        .set_layout(Box::new(form_layout));
 
     let quit_id = engine.add_child_widget(
         panel_id,

@@ -14,7 +14,7 @@ A widget can take focus when it is `Behavior::FOCUSABLE`, enabled, and not hidde
 
 | Input | What happens |
 |---|---|
-| **Click** | Focuses the nearest focusable widget at or above the one clicked. Clicking something that cannot take focus leaves focus where it is. |
+| **Click** | Focuses the nearest focusable widget at or above the one clicked. A label in a [Form Layout](../layouts/form-layout.md) focuses its field. Clicking something that cannot take focus leaves focus where it is. |
 | **Tab** / **Shift-Tab** | Next / previous focus group, in `WidgetId` order (the order the form was designed in). Wraps at the ends. |
 | **Arrow keys** | Move within a radio group: Right and Down go forward, Left and Up go back, wrapping at the ends. |
 | `set_focus(id)` | Focuses a widget from code. Returns `false` if it cannot take focus. |

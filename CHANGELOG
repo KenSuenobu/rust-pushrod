@@ -49,3 +49,4 @@
 [#57] Composite widgets: named parts, add/insert/remove, part events [kenji]
 [#116] Layout trait, SizeHint, LayoutParams; measure/arrange per frame [kenji]
 [#117] Row and Column layouts with spacing, margins, stretch; Spacer [kenji]
+[#118] FormLayout: aligned labels, stretching fields, narrow stacking [kenji]
