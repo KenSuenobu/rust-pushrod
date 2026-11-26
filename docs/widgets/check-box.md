@@ -53,9 +53,10 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Click, Space, and mnemonic toggle
-- [ ] Indeterminate renders and resolves on click
-- [ ] Label click toggles
+- [x] Click and Space toggle
+- [ ] Mnemonic toggle (arrives with 1.12 (#76))
+- [x] Indeterminate renders and resolves on click
+- [x] Label click toggles
 
 ## Depends on
 

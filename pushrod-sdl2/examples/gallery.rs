@@ -17,6 +17,7 @@ use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_sdl2::{Sdl2Backend, WindowSettings};
 use pushrod_widgets::boxed_label::BoxedLabel;
 use pushrod_widgets::button::Button;
+use pushrod_widgets::check_box::CheckBox;
 use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
 use pushrod_widgets::glyph_button::GlyphButton;
@@ -28,7 +29,7 @@ use pushrod_widgets::text::{Text, TextJustify};
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 1080;
+const WINDOW_H: u32 = 1250;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -323,6 +324,33 @@ pub fn main() -> Result<(), pushrod::error::Error> {
             .size(TILE_W - 44, 18),
     );
     engine.add_child_widget(group, button(point(12, 56), "Apply"));
+
+    // CheckBox: unchecked, checked, indeterminate, and disabled (fictional options).
+    let check_tile = add_tile(&mut engine, panel_id, 0, 6, "Check Box");
+    let mut disabled_box = CheckBox::new("Disabled")
+        .at(150, 70)
+        .size(130, 20)
+        .checked(true);
+    disabled_box.set_enabled(false);
+    engine.add_child_widget(
+        check_tile,
+        CheckBox::new("Send email").at(10, 40).size(130, 20),
+    );
+    engine.add_child_widget(
+        check_tile,
+        CheckBox::new("Checked")
+            .at(150, 40)
+            .size(130, 20)
+            .checked(true),
+    );
+    engine.add_child_widget(
+        check_tile,
+        CheckBox::new("All items")
+            .at(10, 70)
+            .size(130, 20)
+            .indeterminate(),
+    );
+    engine.add_child_widget(check_tile, disabled_box);
 
     // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.
     let glyph_tile = add_tile(&mut engine, panel_id, 1, 5, "Glyph Button");
