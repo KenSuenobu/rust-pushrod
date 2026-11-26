@@ -28,6 +28,7 @@
 //!   container needs; [`Layout::arrange`] returns a rectangle for each child.
 //! * [`Row`], [`Column`], and [`Spacer`] - ready-made layouts that place children in a line; see
 //!   the [`linear`] module.
+//! * [`FormLayout`] - aligned "Label: field" rows; see the [`form`] module.
 //!
 //! Give any container a layout with [`Widget::set_layout`](crate::widget::Widget::set_layout).
 //! Without one, a container keeps absolute positioning.  Layout runs once per frame, before
@@ -67,8 +68,10 @@
 //! }
 //! ```
 
+pub mod form;
 pub mod linear;
 
+pub use form::FormLayout;
 pub use linear::{Column, Row, Spacer};
 
 use crate::geometry::{Rect, Size};
@@ -300,6 +303,24 @@ pub trait Layout {
     /// One rectangle per child, in the same order, relative to the container's upper left-hand
     /// corner.  A missing rectangle leaves its child where it is.
     fn arrange(&self, children: &[ChildInfo], bounds: Rect) -> Vec<Rect>;
+
+    /// Names the `Widget` that should take the keyboard focus when a child is clicked, so a
+    /// click on a label focuses the field it names.  The cache asks the clicked child's
+    /// container before walking further up the tree; [`FormLayout`] answers for its labels.
+    ///
+    /// # Arguments
+    ///
+    /// * `child` - The child that was clicked; it cannot take focus itself.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget` to focus instead, or `None` (the default) to keep looking at the
+    /// container's ancestors.
+    fn focus_target(&self, child: WidgetId) -> Option<WidgetId> {
+        let _ = child;
+
+        None
+    }
 }
 
 /// Positions a `Widget` inside a slot, as its [`LayoutParams`] ask.  Layout managers call it so

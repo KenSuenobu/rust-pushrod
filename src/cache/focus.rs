@@ -151,7 +151,10 @@ impl WidgetCache {
 
     /// Focuses the nearest focusable `Widget` at or above the one that was clicked.
     ///
-    /// A click on something that cannot take focus leaves the focus where it is.
+    /// For each `Widget` that cannot take focus, its container's layout is asked first through
+    /// [`Layout::focus_target`](crate::layout::Layout::focus_target), so a click on a form
+    /// label focuses its field.  A click on something that cannot take focus leaves the focus
+    /// where it is.
     ///
     /// # Arguments
     ///
@@ -161,9 +164,41 @@ impl WidgetCache {
 
         candidates.extend(self.ancestors(target));
 
-        if let Some(&id) = candidates.iter().find(|&&id| self.can_focus(id)) {
+        let found = candidates.iter().find_map(|&id| {
+            if self.can_focus(id) {
+                Some(id)
+            } else {
+                self.layout_focus_target(id)
+            }
+        });
+
+        if let Some(id) = found {
             self.move_focus(Some(id));
         }
+    }
+
+    /// Asks a `Widget`'s container's layout which `Widget` a click on it should focus.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The clicked `Widget`, or one of its ancestors.
+    ///
+    /// # Returns
+    ///
+    /// The `Widget` the layout names, if it can take focus now; `None` for the root, a container
+    /// without a layout, or a layout with no answer.
+    fn layout_focus_target(&self, id: WidgetId) -> Option<WidgetId> {
+        if id == ROOT_WIDGET_ID {
+            return None;
+        }
+
+        let parent = self.get(id)?.get_parent();
+
+        self.get(parent)?
+            .core()
+            .layout_ref()?
+            .focus_target(id)
+            .filter(|&target| self.can_focus(target))
     }
 
     /// Returns the `Widget` that receives keys.

@@ -33,6 +33,6 @@ pub use crate::event::{Event, EventMask};
 pub use crate::font::Font;
 pub use crate::geometry::{Point, Rect, Size, point, rect, size};
 pub use crate::input::{InputEvent, Key, MouseButton};
-pub use crate::layout::{Column, Layout, LayoutParams, Row, SizeHint, Spacer};
+pub use crate::layout::{Column, FormLayout, Layout, LayoutParams, Row, SizeHint, Spacer};
 pub use crate::paint::{TextJustify, Truncate, Wrap};
 pub use crate::widget::{Behavior, VisualState, Widget, WidgetCore, WidgetId};

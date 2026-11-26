@@ -13,6 +13,7 @@ Layouts are optional and extensible. A container without a layout behaves exactl
 | Layout | Use it for |
 |---|---|
 | [Row and Column](./row-and-column.md) | Children in a line, with spacing, margins, alignment, stretch, and `Spacer`: a column of fields, a row of buttons. |
+| [Form Layout](./form-layout.md) | "Label: field" rows with labels aligned to the widest label, stretching fields, full-width rows, and labels above fields when narrow. |
 
 ## The pieces
 
@@ -21,7 +22,7 @@ Layouts are optional and extensible. A container without a layout behaves exactl
 | `SizeHint { min, preferred, max }` | What a widget reports: the smallest, wanted, and largest size. `UNBOUNDED` as a maximum means no limit. |
 | `LayoutParams { stretch, alignment, margin }` | What a child asks of its container: its share of extra space, how it sits in its slot (`Alignment` of `Align::Start`, `Center`, `End`, `Fill`), and the space around it (`Margin`). |
 | `ChildInfo { id, hint, params }` | What a layout is told about each visible child. |
-| `trait Layout` | `measure(children, available) -> SizeHint` and `arrange(children, bounds) -> Vec<Rect>`. |
+| `trait Layout` | `measure(children, available) -> SizeHint` and `arrange(children, bounds) -> Vec<Rect>`; optionally `focus_target(child)`, the widget a click on a child focuses (a form label's field). |
 
 `place_in_slot(slot, child)` applies a child's margin and alignment to a slot, so managers treat them the same way.
 
