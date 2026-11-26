@@ -38,7 +38,7 @@ use crate::geometry::{Point, Rect, Size};
 use crate::input::InputEvent;
 use crate::paint::{CachePolicy, Painter, TextStyle};
 use crate::widget::WidgetId;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 /// One call made on a [`RecordingPainter`].
@@ -57,6 +57,8 @@ pub enum PaintCall {
     Text(Rect, String, Color),
     /// `image(path, bounds)`
     Image(String, Rect),
+    /// `image_part(path, source, bounds)`
+    ImagePart(String, Option<Rect>, Rect),
     /// `dither(bounds, first, second)`
     Dither(Rect, Color, Color),
     /// `dither_overlay(bounds, color)`
@@ -70,6 +72,10 @@ pub enum PaintCall {
 pub struct RecordingPainter {
     /// Every call made, in order.
     pub calls: Vec<PaintCall>,
+    /// The images this painter pretends exist, by path, with their pixel sizes.  A path not
+    /// listed behaves like a missing file: [`Painter::image_size`] and [`Painter::image_part`]
+    /// fail with [`Error::Image`].
+    pub images: HashMap<String, Size>,
 }
 
 impl Painter for RecordingPainter {
@@ -187,6 +193,48 @@ impl Painter for RecordingPainter {
     /// Never fails.
     fn image(&mut self, path: &str, bounds: Rect) -> Result<(), Error> {
         self.calls.push(PaintCall::Image(path.to_string(), bounds));
+        Ok(())
+    }
+
+    /// Returns the size registered for an image in [`images`](RecordingPainter::images).
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The image path.
+    ///
+    /// # Returns
+    ///
+    /// The registered size.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Image`] if the path is not registered (a missing file).
+    fn image_size(&mut self, path: &str) -> Result<Size, Error> {
+        self.images
+            .get(path)
+            .copied()
+            .ok_or_else(|| Error::image(path, "file not found"))
+    }
+
+    /// Records part of an image.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The image path.
+    /// * `source` - The part of the image drawn, or `None` for all of it.
+    /// * `bounds` - The rectangle drawn into.
+    ///
+    /// # Returns
+    ///
+    /// `Ok(())` for a registered image.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Image`] if the path is not registered (a missing file).
+    fn image_part(&mut self, path: &str, source: Option<Rect>, bounds: Rect) -> Result<(), Error> {
+        self.image_size(path)?;
+        self.calls
+            .push(PaintCall::ImagePart(path.to_string(), source, bounds));
         Ok(())
     }
 
@@ -492,6 +540,30 @@ mod tests {
         assert_eq!(p.calls[0], PaintCall::Fill(Color::BLACK));
         assert_eq!(p.calls[5], PaintCall::Clip(None));
         assert_eq!(p.calls[6], PaintCall::Image(String::from("a.png"), r));
+    }
+
+    #[test]
+    fn registered_images_have_a_size_and_record_parts() {
+        let mut p = RecordingPainter::default();
+        let (src, dst) = (Rect::new(0, 0, 2, 2), Rect::new(5, 5, 4, 4));
+
+        p.images.insert("a.png".to_string(), Size::new(8, 6));
+
+        assert_eq!(p.image_size("a.png").unwrap(), Size::new(8, 6));
+        assert!(p.image_part("a.png", Some(src), dst).is_ok());
+        assert_eq!(
+            p.calls,
+            vec![PaintCall::ImagePart("a.png".into(), Some(src), dst)]
+        );
+    }
+
+    #[test]
+    fn unregistered_images_fail_like_missing_files() {
+        let mut p = RecordingPainter::default();
+
+        assert!(matches!(p.image_size("x.png"), Err(Error::Image { .. })));
+        assert!(p.image_part("x.png", None, Rect::new(0, 0, 1, 1)).is_err());
+        assert!(p.calls.is_empty());
     }
 
     #[test]

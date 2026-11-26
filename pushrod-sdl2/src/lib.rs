@@ -50,11 +50,13 @@
 
 mod backend;
 pub mod font;
+pub mod image_cache;
 mod input;
 pub mod painter;
 pub mod texture;
 pub mod ttf_layout;
 
 pub use backend::{Sdl2Backend, WindowSettings, event_loop, run};
+pub use image_cache::ImageCache;
 pub use painter::Sdl2Painter;
 pub use ttf_layout::TtfLayout;

@@ -20,13 +20,14 @@ use pushrod_widgets::button::Button;
 use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
 use pushrod_widgets::group_box::GroupBox;
+use pushrod_widgets::image_widget::{FitMode, ImageWidget};
 use pushrod_widgets::panel::Panel;
 use pushrod_widgets::separator::Separator;
 use pushrod_widgets::text::{Text, TextJustify};
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 910;
+const WINDOW_H: u32 = 1080;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -305,6 +306,26 @@ pub fn main() -> Result<(), pushrod::error::Error> {
             .size(TILE_W - 44, 18),
     );
     engine.add_child_widget(group, button(point(12, 56), "Apply"));
+
+    // ImageWidget: the four fit modes, then a missing file (a crossed box).
+    let image_tile = add_tile(&mut engine, panel_id, 0, 5, "Image");
+    let sample = concat!(env!("CARGO_MANIFEST_DIR"), "/examples/assets/sample.png");
+    let samples = [
+        ("Center", FitMode::Center, sample),
+        ("Stretch", FitMode::Stretch, sample),
+        ("Fit", FitMode::Fit, sample),
+        ("Tile", FitMode::Tile, sample),
+        ("Missing", FitMode::Fit, "missing.png"),
+    ];
+
+    for (column, (name, fit, path)) in samples.into_iter().enumerate() {
+        let x = 10 + column as i32 * 54;
+        let mut image = ImageWidget::new(path).at(x, 40).size(46, 70).fit(fit);
+
+        image.set_color(Color::RGBA(225, 225, 225, 255));
+        engine.add_child_widget(image_tile, image);
+        engine.add_child_widget(image_tile, Text::new(name).at(x, 112).size(54, 20));
+    }
 
     let quit_id = engine.add_child_widget(
         panel_id,

@@ -21,6 +21,7 @@
 //! for drawing.
 
 use crate::font::FontCache;
+use crate::image_cache::ImageCache;
 use pushrod::color::{Color, FontStyle};
 use pushrod::error::Error;
 use pushrod::geometry::{Point, Rect, Size};
@@ -75,6 +76,7 @@ pub fn to_sdl_font_style(s: FontStyle) -> SdlFontStyle {
 pub struct Sdl2Painter<'a> {
     canvas: &'a mut Canvas<Window>,
     fonts: &'a mut FontCache,
+    images: Option<&'a mut ImageCache>,
     errors: Vec<Error>,
 }
 
@@ -113,8 +115,25 @@ impl<'a> Sdl2Painter<'a> {
         Self {
             canvas,
             fonts,
+            images: None,
             errors: Vec::new(),
         }
+    }
+
+    /// Gives the painter the shared image cache used by [`Painter::image_size`] and
+    /// [`Painter::image_part`].  Without one those calls fail with [`Error::Image`].
+    ///
+    /// # Arguments
+    ///
+    /// * `images` - The cache shared by every `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The painter, for chaining.
+    #[must_use]
+    pub fn with_images(mut self, images: &'a mut ImageCache) -> Self {
+        self.images = Some(images);
+        self
     }
 
     /// Removes and returns the drawing failures since the last call.
@@ -315,6 +334,64 @@ impl Painter for Sdl2Painter<'_> {
         unsafe { texture.destroy() };
 
         result.map_err(|message| Error::image(path, message))
+    }
+
+    /// Returns an image's size, loading it into the shared image cache on first use.  A failure
+    /// is also recorded for the backend to report as an engine error event.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the image file.
+    ///
+    /// # Returns
+    ///
+    /// The image's size in pixels.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Image`] if there is no image cache or the file cannot be loaded.
+    fn image_size(&mut self, path: &str) -> Result<Size, Error> {
+        let result = match self.images.as_deref_mut() {
+            Some(images) => images.load(self.canvas, path),
+            None => Err(Error::image(path, "no image cache")),
+        };
+
+        if let Err(error) = &result {
+            self.errors.push(error.clone());
+        }
+
+        result
+    }
+
+    /// Copies part of a cached image texture into a rectangle.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the image file.
+    /// * `source` - The part of the image to copy, in image pixels; `None` copies all of it.
+    /// * `bounds` - The rectangle to draw into.
+    ///
+    /// # Returns
+    ///
+    /// `Ok(())` once drawn.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Image`] if there is no image cache or the file cannot be loaded or drawn.
+    fn image_part(&mut self, path: &str, source: Option<Rect>, bounds: Rect) -> Result<(), Error> {
+        let Some(images) = self.images.as_deref_mut() else {
+            return Err(Error::image(path, "no image cache"));
+        };
+
+        images.load(self.canvas, path)?;
+
+        let texture = images
+            .texture(path)
+            .ok_or_else(|| Error::image(path, "image not cached"))?;
+
+        self.canvas
+            .copy(texture, source.map(to_sdl_rect), to_sdl_rect(bounds))
+            .map_err(|message| Error::image(path, message))
     }
 
     /// Fills a rectangle with a checkerboard of two colors.

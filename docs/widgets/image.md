@@ -50,9 +50,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Loads PNG and BMP
-- [ ] Fit modes render as documented
-- [ ] Missing files don't panic
+- [x] Loads PNG and BMP
+- [x] Fit modes render as documented
+- [x] Missing files don't panic
 
 ## Depends on
 

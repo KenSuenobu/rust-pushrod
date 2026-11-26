@@ -37,3 +37,4 @@
 [#27] BoxedLabel widget: fill, centered text, border [kenji]
 [#83] Separator widget: horizontal/vertical line, optionally etched [kenji]
 [#41] GroupBox widget: titled frame that holds child widgets [kenji]
+[#33] ImageWidget: PNG/BMP with center/stretch/fit/tile, missing-file box [kenji]
