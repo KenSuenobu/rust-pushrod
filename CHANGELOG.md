@@ -15,6 +15,8 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-26
+
 ### Added
 
 - [#10] Modernized core: dyn Widget tree, WidgetCore, paint helpers, VB-style callbacks [kenji]
