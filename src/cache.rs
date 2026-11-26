@@ -38,10 +38,10 @@ use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventCtx, EventMask, EventPhase, EventTarget,
     MaskScope, Propagation, engine_filter_accepts,
 };
-use crate::geometry::{Point, make_rect, point};
+use crate::geometry::{Point, Rect, make_rect, point};
 use crate::input::InputEvent;
 use crate::paint::{self, CachePolicy};
-use crate::widget::{ROOT_WIDGET_ID, VisualState, Widget, WidgetId};
+use crate::widget::{Behavior, ROOT_WIDGET_ID, VisualState, Widget, WidgetId};
 use std::any::Any;
 use std::collections::HashMap;
 use std::time::Duration;
@@ -414,6 +414,51 @@ impl WidgetCache {
         origin
     }
 
+    /// Returns the part of a `Widget` that can be seen and clicked, in window coordinates.
+    ///
+    /// This is the `Widget`'s own rectangle intersected with each ancestor's rectangle, so a child
+    /// that sticks out of its parent is cropped.  A `Widget` with [`Behavior::OVERLAY`] is not
+    /// cropped by its ancestors (its own children still are cropped to it).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The visible rectangle, or `None` if the ID does not exist or nothing of the `Widget` is
+    /// visible.
+    pub fn visible_rect(&self, id: WidgetId) -> Option<Rect> {
+        let widget = self.get(id)?;
+        let mut visible = make_rect(self.absolute_origin(id), widget.get_size());
+        let mut current = id;
+
+        while !self.cache[current as usize]
+            .behavior()
+            .contains(Behavior::OVERLAY)
+        {
+            let parent = self.cache[current as usize].get_parent();
+
+            if parent == current {
+                break;
+            }
+
+            let bounds = make_rect(
+                self.absolute_origin(parent),
+                self.cache[parent as usize].get_size(),
+            );
+
+            visible = visible.intersection(&bounds)?;
+            current = parent;
+        }
+
+        if visible.w == 0 || visible.h == 0 {
+            return None;
+        }
+
+        Some(visible)
+    }
+
     /// Returns the IDs of all visible `Widget`s in drawing order: parents before children, and
     /// siblings in the order in which they were added.  Hidden `Widget`s and their children are
     /// skipped.
@@ -455,13 +500,8 @@ impl WidgetCache {
     /// other `Widget` contains it.
     pub fn widget_at(&self, x: i32, y: i32) -> WidgetId {
         for id in self.draw_order().into_iter().rev() {
-            let origin = self.absolute_origin(id);
-            let size = self.cache[id as usize].get_size();
-
-            if x >= origin.x
-                && x < origin.x + size.w as i32
-                && y >= origin.y
-                && y < origin.y + size.h as i32
+            if let Some(visible) = self.visible_rect(id)
+                && visible.contains(x, y)
             {
                 return id;
             }
@@ -1191,10 +1231,13 @@ impl WidgetCache {
         backend.begin_frame(Color::WHITE);
 
         for id in order {
+            let Some(dest) = self.visible_rect(id) else {
+                continue;
+            };
             let origin = self.absolute_origin(id);
-            let size = self.cache[id as usize].get_size();
+            let source = Rect::new(dest.x - origin.x, dest.y - origin.y, dest.w, dest.h);
 
-            backend.draw_widget(id, make_rect(origin, size));
+            backend.draw_widget(id, source, dest);
         }
 
         self.needs_full_redraw = false;

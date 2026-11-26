@@ -22,9 +22,10 @@ Because the flags live on the widget itself, selection, default buttons, and dis
 | `ACTIVATE_ON_PRESS` (fires on press, not release) | `HOVERED` (pointer inside) |
 | `EXCLUSIVE` (one-of-many among siblings) | `DRAG_OVER` (a drag is over it) |
 | `HIDDEN` | |
+| `OVERLAY` (not clipped to its parent) | |
 
 :::note
-This release stores the flags and acts on `HIDDEN` and `DISABLED`. The other flags are stored for the features that use them: focus, default and cancel buttons, dialogs, and radio groups.
+This release stores the flags and acts on `HIDDEN`, `OVERLAY`, and `DISABLED`. The other flags are stored for the features that use them: focus, default and cancel buttons, dialogs, and radio groups.
 :::
 
 ## Reading and changing flags

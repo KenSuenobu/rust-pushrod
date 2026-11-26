@@ -100,6 +100,9 @@ bitflags! {
         const EXCLUSIVE = 1 << 6;
         /// The `Widget` and its children are not drawn and do not receive input.
         const HIDDEN = 1 << 7;
+        /// The `Widget` is an overlay (menu, tooltip, pop-up): it is not clipped to its ancestors'
+        /// bounds, though its own children are still clipped to it.
+        const OVERLAY = 1 << 8;
     }
 }
 

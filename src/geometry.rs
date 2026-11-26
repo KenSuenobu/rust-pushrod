@@ -143,6 +143,55 @@ impl Rect {
     pub fn new(x: i32, y: i32, w: u32, h: u32) -> Self {
         Self { x, y, w, h }
     }
+
+    /// Returns `true` if a point lies inside the `Rect`.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - The horizontal coordinate in pixels.
+    /// * `y` - The vertical coordinate in pixels.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the point is inside; the left and top edges are inside, the right and bottom edges
+    /// are not.
+    pub fn contains(&self, x: i32, y: i32) -> bool {
+        let (x, y) = (i64::from(x), i64::from(y));
+
+        x >= i64::from(self.x)
+            && x < i64::from(self.x) + i64::from(self.w)
+            && y >= i64::from(self.y)
+            && y < i64::from(self.y) + i64::from(self.h)
+    }
+
+    /// Returns the area two `Rect`s have in common.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The `Rect` to intersect with.
+    ///
+    /// # Returns
+    ///
+    /// The overlapping `Rect`, or `None` if they do not overlap (or the overlap is empty).
+    pub fn intersection(&self, other: &Rect) -> Option<Rect> {
+        let left = i64::from(self.x).max(i64::from(other.x));
+        let top = i64::from(self.y).max(i64::from(other.y));
+        let right =
+            (i64::from(self.x) + i64::from(self.w)).min(i64::from(other.x) + i64::from(other.w));
+        let bottom =
+            (i64::from(self.y) + i64::from(self.h)).min(i64::from(other.y) + i64::from(other.h));
+
+        if right <= left || bottom <= top {
+            return None;
+        }
+
+        Some(Rect::new(
+            left as i32,
+            top as i32,
+            (right - left) as u32,
+            (bottom - top) as u32,
+        ))
+    }
 }
 
 /// Creates a rectangle from an origin and a size.
@@ -182,4 +231,45 @@ pub fn rect(x: i32, y: i32, w: u32, h: u32) -> Rect {
 /// A `Point` at the origin.
 pub fn origin_point() -> Point {
     Point { x: 0, y: 0 }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn overlapping_rects_intersect() {
+        let a = Rect::new(0, 0, 10, 10);
+        let b = Rect::new(5, -5, 10, 10);
+
+        assert_eq!(a.intersection(&b), Some(Rect::new(5, 0, 5, 5)));
+        assert_eq!(b.intersection(&a), a.intersection(&b));
+    }
+
+    #[test]
+    fn touching_or_disjoint_rects_do_not_intersect() {
+        let a = Rect::new(0, 0, 10, 10);
+
+        assert_eq!(a.intersection(&Rect::new(10, 0, 5, 5)), None);
+        assert_eq!(a.intersection(&Rect::new(50, 50, 5, 5)), None);
+        assert_eq!(a.intersection(&Rect::new(2, 2, 0, 5)), None);
+    }
+
+    #[test]
+    fn extreme_rects_do_not_overflow() {
+        let a = Rect::new(i32::MAX - 1, 0, u32::MAX, 10);
+
+        assert_eq!(a.intersection(&a), Some(a).filter(|r| r.w > 0));
+    }
+
+    #[test]
+    fn contains_includes_left_top_and_excludes_right_bottom() {
+        let r = Rect::new(2, 3, 4, 5);
+
+        assert!(r.contains(2, 3));
+        assert!(r.contains(5, 7));
+        assert!(!r.contains(6, 3));
+        assert!(!r.contains(2, 8));
+        assert!(!r.contains(1, 3));
+    }
 }
