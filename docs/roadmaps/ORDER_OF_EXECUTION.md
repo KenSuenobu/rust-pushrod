@@ -63,7 +63,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 24 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking (done) |
 | ✅ 25 | [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) | pushrod: [1.24] Fonts: shared font handles and a built-in default font (done) |
 | ✅ 26 | [#136](https://github.com/KenSuenobu/rust-pushrod/issues/136) | pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability (done) |
-| 27 | [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) | pushrod: [2.10] Custom paint widget (closure-drawn) |
+| ✅ 27 | [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) | pushrod: [2.10] Custom paint widget (closure-drawn) (done) |
 | 28 | [#27](https://github.com/KenSuenobu/rust-pushrod/issues/27) | pushrod: [2.1] Boxed label widget |
 | 29 | [#83](https://github.com/KenSuenobu/rust-pushrod/issues/83) | pushrod: [2.14] Separator line |
 | 30 | [#41](https://github.com/KenSuenobu/rust-pushrod/issues/41) | pushrod: [3.3] Group box (titled frame) |
@@ -732,9 +732,9 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Closure paints into the texture
-- [ ] Optional event closure receives events
-- [ ] Example draws a chart
+- [x] Closure paints into the texture
+- [x] Optional event closure receives events
+- [x] Example draws a chart
 
 ### Step 28: Boxed label widget
 

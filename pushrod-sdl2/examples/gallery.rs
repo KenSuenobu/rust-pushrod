@@ -10,18 +10,20 @@
 
 use pushrod::color::Color;
 use pushrod::engine::Engine;
-use pushrod::geometry::{Point, point, size};
-use pushrod::paint::{Truncate, Wrap};
+use pushrod::event::{Event, Propagation};
+use pushrod::geometry::{Point, Rect, Size, point, size};
+use pushrod::paint::{self, Painter, Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_sdl2::{Sdl2Backend, WindowSettings};
 use pushrod_widgets::button::Button;
+use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
 use pushrod_widgets::panel::Panel;
 use pushrod_widgets::text::{Text, TextJustify};
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 570;
+const WINDOW_H: u32 = 740;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -98,6 +100,40 @@ fn add_tile(
 /// Returns the button, not yet added to the tree.
 fn button(origin: Point, text: &str) -> Button {
     Button::new(text).at(origin.x, origin.y).size(120, 24)
+}
+
+/// Draws the gallery's bar chart: white background, one blue bar per value (black when
+/// highlighted), and a one-pixel border.
+///
+/// * `p` - the painter, targeting the chart widget.
+/// * `size` - the widget's size in pixels.
+/// * `data` - the bar heights (percent of the chart height) and the highlighted bar's index.
+fn draw_chart(p: &mut dyn Painter, size: Size, data: &(Vec<u32>, usize)) {
+    let (bars, selected) = data;
+    let slot = size.w / bars.len().max(1) as u32;
+
+    paint::fill(p, Color::WHITE);
+
+    for (i, value) in bars.iter().enumerate() {
+        let height = size.h * (*value).min(100) / 100;
+        let color = if i == *selected {
+            Color::BLACK
+        } else {
+            Color::BLUE
+        };
+
+        p.fill_rect(
+            Rect::new(
+                i as i32 * slot as i32 + 6,
+                (size.h - height) as i32,
+                slot - 12,
+                height,
+            ),
+            color,
+        );
+    }
+
+    paint::border(p, size, Color::BLACK, 1);
 }
 
 /// Draws one frame of the widget tree into a fresh window and saves it as an image.
@@ -196,6 +232,33 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     paragraph.set_wrap(Wrap::Word);
     paragraph.set_max_lines(Some(4));
     engine.add_child_widget(wrap_tile, paragraph);
+
+    // Custom paint: a bar chart of fictional monthly totals drawn by a closure.  Each press
+    // highlights the next bar, which the event closure records in the widget's data.
+    let chart_tile = add_tile(
+        &mut engine,
+        panel_id,
+        0,
+        3,
+        "Custom Paint (click to highlight)",
+    );
+    engine.add_child_widget(
+        chart_tile,
+        CustomPaint::with_data(
+            point(10, 36),
+            size(TILE_W - 20, 100),
+            (vec![40u32, 65, 30, 80, 55, 90], 0usize),
+            draw_chart,
+        )
+        .on_event(|(bars, selected), event, _ctx| {
+            if matches!(event, Event::PointerPressed { .. }) {
+                *selected = (*selected + 1) % bars.len();
+                return Propagation::Stop;
+            }
+
+            Propagation::Continue
+        }),
+    );
 
     let quit_id = engine.add_child_widget(
         panel_id,

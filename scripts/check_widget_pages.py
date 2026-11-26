@@ -19,10 +19,11 @@ PAGES = ROOT / "pushrod-docs" / "docs" / "widgets"
 def main():
     """Reports each widget module without a page; returns the process exit status."""
     modules = sorted(p.stem for p in MODULES.glob("*.rs") if p.stem not in ("lib", "prelude"))
-    missing = [name for name in modules if not (PAGES / f"{name}.md").exists()]
+    # A module `custom_paint.rs` is documented by the page `custom-paint.md`.
+    missing = [name for name in modules if not (PAGES / f"{name.replace('_', '-')}.md").exists()]
 
     for name in missing:
-        print(f"missing page: pushrod-docs/docs/widgets/{name}.md (for {name}.rs)")
+        print(f"missing page: pushrod-docs/docs/widgets/{name.replace('_', '-')}.md (for {name}.rs)")
 
     print(f"{len(modules) - len(missing)} of {len(modules)} widget modules have a page")
     return 1 if missing else 0
