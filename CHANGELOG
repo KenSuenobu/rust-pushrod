@@ -34,3 +34,4 @@
 [#137] Font handles, engine font registry, embedded default font [kenji]
 [#136] Short widget constructors, preludes, non_exhaustive enums, Debug [kenji]
 [#36] CustomPaint widget: closure-drawn, optional event closure [kenji]
+[#27] BoxedLabel widget: fill, centered text, border [kenji]

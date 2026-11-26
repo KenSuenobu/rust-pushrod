@@ -938,7 +938,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 2.1 (#27) | Boxed label widget | Text with background and border. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/boxed_label.rs (new)` |
 | 2.2 (#28) | Glyph button (small single-character button) | A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. | `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/glyph_button.rs (new)` |
 | 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | v0.1 | S | `pushrod-widgets/src/button.rs`, `src/paint.rs` |
 | 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/check_box.rs (new)` |
@@ -963,6 +962,8 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | 2.24 (#292) | Count badge on buttons, tabs, and rows | A small count or dot drawn on a corner of a button, tab, or list row. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `src/paint.rs`, `pushrod-widgets/src/image_button.rs`, `pushrod-widgets/src/tab_view.rs`, `pushrod-widgets/src/list_view.rs` |
 
 ### 2.1 (#27): Boxed label widget
+
+**Status:** done (#27). `pushrod_widgets::boxed_label::BoxedLabel`: `new(text)` with `at`, `size`, `font`, `font_color`, `border_color`, `border_width`; display only (empty event mask); the gallery shows it.
 
 Text with background and border. **Widget roadmap:** [`docs/widgets/boxed-label.md`](widgets/boxed-label.md) (look, behavior, events, acceptance criteria).
 

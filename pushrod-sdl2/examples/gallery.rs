@@ -15,6 +15,7 @@ use pushrod::geometry::{Point, Rect, Size, point, size};
 use pushrod::paint::{self, Painter, Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_sdl2::{Sdl2Backend, WindowSettings};
+use pushrod_widgets::boxed_label::BoxedLabel;
 use pushrod_widgets::button::Button;
 use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
@@ -259,6 +260,19 @@ pub fn main() -> Result<(), pushrod::error::Error> {
             Propagation::Continue
         }),
     );
+
+    // Boxed label: text with a fill and a border; the second is disabled (fictional status text).
+    let boxed_tile = add_tile(&mut engine, panel_id, 1, 3, "Boxed Label");
+    let mut ready = BoxedLabel::new("Ready")
+        .at(10, 36)
+        .size(TILE_W - 20, 28)
+        .border_color(Color::BLUE);
+    ready.set_color(Color::CYAN);
+    engine.add_child_widget(boxed_tile, ready);
+    let mut offline = BoxedLabel::new("Offline").at(10, 76).size(TILE_W - 20, 28);
+    offline.set_color(Color::WHITE);
+    offline.set_enabled(false);
+    engine.add_child_widget(boxed_tile, offline);
 
     let quit_id = engine.add_child_widget(
         panel_id,
