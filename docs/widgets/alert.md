@@ -15,7 +15,7 @@ Every system has a one-call alert (icon, message, a few buttons). Pushrod has no
 
 ## What it does
 
-`ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` builds a centered modal form ([6.7](https://github.com/KenSuenobu/rust-pushrod/issues/66)) from existing widgets and calls the completion closure with the chosen button index. Return chooses the default, Escape the last button. Always drawn by Pushrod. **Parts ([5.2](https://github.com/KenSuenobu/rust-pushrod/issues/57)):** `AlertParts { icon, title, message, buttons }`; `add_button`, `remove_button`, `set_default_button`. Every part can be retrieved and restyled (font, color, text). Example: `let a = ui.alert(..); ui.get_mut::<TextWidget>(a.parts().message)?.set_font_color(Color::RED); a.add_button(ui, "Help");`
+`ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` builds a centered modal form ([6.7](https://github.com/KenSuenobu/rust-pushrod/issues/66)) from existing widgets and calls the completion closure with the chosen button index. Return chooses the default, Escape the last button. Always drawn by Pushrod. **Parts ([5.2](https://github.com/KenSuenobu/rust-pushrod/issues/57)):** `AlertParts { icon, title, message, buttons }`; `add_button`, `remove_button`, `set_default_button`. Every part can be retrieved and restyled (font, color, text). Example: `let a = ui.alert(..); ui.get_mut::<Text>(a.parts().message)?.set_font_color(Color::RED); a.add_button(ui, "Help");`
 
 ## How it looks
 

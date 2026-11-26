@@ -26,7 +26,7 @@ use pushrod::paint::Painter;
 use pushrod::widget::{Widget, WidgetCore};
 use std::time::{Duration, Instant};
 
-/// A label that shows the elapsed seconds.  (The standard `TextWidget` is in `pushrod-widgets`.)
+/// A label that shows the elapsed seconds.  (The standard `Text` is in `pushrod-widgets`.)
 struct ClockLabel {
     core: WidgetCore,
     text: String,

@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! # BaseWidget
+//! # Panel
 //!
 //! This is a default widget that can be used as a top-level canvas.  It is a basic `Widget`
 //! implementation that fills its background with the desired color.
 
-use pushrod::geometry::{Point, Size};
+use pushrod::geometry::{point, size};
 use pushrod::paint::{self, Painter};
 use pushrod::widget::{Widget, WidgetCore};
 
@@ -30,19 +30,19 @@ use pushrod::widget::{Widget, WidgetCore};
 /// # Examples
 ///
 /// ```rust
-/// use pushrod::geometry::{point, size};
 /// use pushrod::widget::Widget;
-/// use pushrod_widgets::base_widget::BaseWidget;
+/// use pushrod_widgets::panel::Panel;
 /// use pushrod::color::Color;
 ///
-/// let mut panel = BaseWidget::new(point(10, 10), size(200, 100));
+/// let mut panel = Panel::new().at(10, 10).size(200, 100);
 /// panel.set_color(Color::RGB(220, 220, 220));
 /// ```
-pub struct BaseWidget {
+#[derive(Debug)]
+pub struct Panel {
     core: WidgetCore,
 }
 
-impl Widget for BaseWidget {
+impl Widget for Panel {
     /// Returns the panel's shared state.
     ///
     /// # Returns
@@ -71,20 +71,59 @@ impl Widget for BaseWidget {
     }
 }
 
-impl BaseWidget {
-    /// Creates a panel.  Its color is transparent until set with `set_color`.
-    ///
-    /// # Arguments
-    ///
-    /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
-    /// * `size` - The width and height in pixels.
+impl Panel {
+    /// Creates a panel, 100 by 100 pixels at the upper left-hand corner of its parent.  Its color
+    /// is transparent until set with `set_color`.
     ///
     /// # Returns
     ///
-    /// The new `BaseWidget`.
-    pub fn new(origin: Point, size: Size) -> Self {
+    /// The new `Panel`.
+    pub fn new() -> Self {
         Self {
-            core: WidgetCore::new(origin, size),
+            core: WidgetCore::new(point(0, 0), size(100, 100)),
         }
+    }
+
+    /// Sets the upper left-hand corner, relative to the parent `Widget`.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - Horizontal position in pixels.
+    /// * `y` - Vertical position in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The panel, for chaining.
+    #[must_use]
+    pub fn at(mut self, x: i32, y: i32) -> Self {
+        self.set_origin(point(x, y));
+        self
+    }
+
+    /// Sets the width and height.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - Width in pixels.
+    /// * `height` - Height in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The panel, for chaining.
+    #[must_use]
+    pub fn size(mut self, width: u32, height: u32) -> Self {
+        self.set_size(size(width, height));
+        self
+    }
+}
+
+impl Default for Panel {
+    /// Creates a panel with [`Panel::new`].
+    ///
+    /// # Returns
+    ///
+    /// The new `Panel`.
+    fn default() -> Self {
+        Self::new()
     }
 }

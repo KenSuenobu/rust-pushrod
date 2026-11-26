@@ -9,7 +9,7 @@ This file is the specification for this widget: what it is, what it does, and ho
 
 Horizontal or vertical divider line.
 
-Dialogs group content with simple lines; today that needs a 1-pixel BoxWidget.
+Dialogs group content with simple lines; today that needs a 1-pixel Frame.
 
 *Ideas from:* Separators in Qt, GTK, Windows, and the classic Mac. Names and behavior are Pushrod's own.
 

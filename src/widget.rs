@@ -152,6 +152,7 @@ bitflags! {
 ///
 /// let core = WidgetCore::new(point(10, 20), size(100, 30));
 /// ```
+#[derive(Debug)]
 pub struct WidgetCore {
     /// The `Widget`'s ID, assigned by the `WidgetCache` when the `Widget` is added.
     pub(crate) id: WidgetId,

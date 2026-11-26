@@ -1,28 +1,18 @@
 // Event dispatch tests.  These exercise the WidgetCache and Engine without opening a window.
 
 use pushrod::cache::WidgetCache;
-use pushrod::color::Color;
 use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, EngineEventKind, Event, EventKind, EventMask, MaskScope};
-use pushrod::font::Font;
 use pushrod::geometry::{point, size};
 use pushrod::input::InputEvent;
 use pushrod::input::MouseButton;
 use pushrod::widget::{Behavior, VisualState, Widget};
-use pushrod_widgets::base_widget::BaseWidget;
-use pushrod_widgets::button_widget::ButtonWidget;
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::button::Button;
+use pushrod_widgets::panel::Panel;
+use pushrod_widgets::text::Text;
 
-fn button(x: i32, y: i32) -> ButtonWidget {
-    ButtonWidget::new(
-        point(x, y),
-        size(100, 20),
-        Font::default(),
-        Color::BLACK,
-        TextJustify::Center,
-        String::from("Button"),
-        2,
-    )
+fn button(x: i32, y: i32) -> Button {
+    Button::new("Button").at(x, y).size(100, 20)
 }
 
 fn down(x: i32, y: i32) -> InputEvent {
@@ -62,9 +52,9 @@ fn clicks(events: &[Event]) -> Vec<u32> {
 fn cache_with_button() -> (WidgetCache, u32, u32) {
     let mut cache = WidgetCache::new();
 
-    cache.add(Box::new(BaseWidget::new(point(0, 0), size(400, 300))));
+    cache.add(Box::new(Panel::new().at(0, 0).size(400, 300)));
 
-    let panel = cache.add(Box::new(BaseWidget::new(point(20, 20), size(300, 200))));
+    let panel = cache.add(Box::new(Panel::new().at(20, 20).size(300, 200)));
     let button = cache.add_child(panel, Box::new(button(10, 10)));
 
     (cache, panel, button)
@@ -114,9 +104,9 @@ fn press_and_release_inside_emits_clicked() {
 
     assert!(clicks(&cache.handle_event(motion(40, 40))).is_empty());
     assert!(clicks(&cache.handle_event(down(40, 40))).is_empty());
-    assert!(cache.get_as::<ButtonWidget>(button).unwrap().is_selected());
+    assert!(cache.get_as::<Button>(button).unwrap().is_selected());
     assert_eq!(clicks(&cache.handle_event(up(40, 40))), vec![button]);
-    assert!(!cache.get_as::<ButtonWidget>(button).unwrap().is_selected());
+    assert!(!cache.get_as::<Button>(button).unwrap().is_selected());
 }
 
 #[test]
@@ -126,7 +116,7 @@ fn dragging_out_before_release_cancels_the_click() {
     cache.handle_event(motion(40, 40));
     cache.handle_event(down(40, 40));
     cache.handle_event(motion(200, 150));
-    assert!(!cache.get_as::<ButtonWidget>(button).unwrap().is_selected());
+    assert!(!cache.get_as::<Button>(button).unwrap().is_selected());
     assert!(clicks(&cache.handle_event(up(200, 150))).is_empty());
 }
 
@@ -138,7 +128,7 @@ fn dragging_back_in_before_release_still_clicks() {
     cache.handle_event(down(40, 40));
     cache.handle_event(motion(200, 150));
     cache.handle_event(motion(45, 45));
-    assert!(cache.get_as::<ButtonWidget>(button).unwrap().is_selected());
+    assert!(cache.get_as::<Button>(button).unwrap().is_selected());
     assert_eq!(clicks(&cache.handle_event(up(45, 45))), vec![button]);
 }
 
@@ -151,17 +141,17 @@ fn releasing_over_another_button_clicks_neither() {
     cache.handle_event(down(40, 40));
     cache.handle_event(motion(40, 80));
     assert!(clicks(&cache.handle_event(up(40, 80))).is_empty());
-    assert!(!cache.get_as::<ButtonWidget>(first).unwrap().is_selected());
-    assert!(!cache.get_as::<ButtonWidget>(second).unwrap().is_selected());
+    assert!(!cache.get_as::<Button>(first).unwrap().is_selected());
+    assert!(!cache.get_as::<Button>(second).unwrap().is_selected());
 }
 
 #[test]
 fn get_as_returns_none_for_the_wrong_type() {
     let (cache, panel, button) = cache_with_button();
 
-    assert!(cache.get_as::<ButtonWidget>(panel).is_none());
-    assert!(cache.get_as::<ButtonWidget>(button).is_some());
-    assert!(cache.get_as::<ButtonWidget>(99).is_none());
+    assert!(cache.get_as::<Button>(panel).is_none());
+    assert!(cache.get_as::<Button>(button).is_some());
+    assert!(cache.get_as::<Button>(99).is_none());
 }
 
 #[derive(Default)]
@@ -174,18 +164,11 @@ struct State {
 fn engine_runs_click_callbacks_with_state_and_widget_access() {
     let mut engine: Engine<State> = Engine::new(size(400, 300), 30);
     let button_id = engine.add_widget(button(10, 10));
-    let label_id = engine.add_widget(TextWidget::new(
-        point(10, 50),
-        size(200, 20),
-        Font::default(),
-        Color::BLACK,
-        TextJustify::Left,
-        String::new(),
-    ));
+    let label_id = engine.add_widget(Text::new("").at(10, 50).size(200, 20));
 
     engine.on_click(button_id, move |state, ui| {
         state.clicks += 1;
-        ui.get_mut::<TextWidget>(label_id)
+        ui.get_mut::<Text>(label_id)
             .unwrap()
             .set_text(format!("{}", state.clicks));
     });
@@ -208,7 +191,7 @@ fn engine_runs_click_callbacks_with_state_and_widget_access() {
     assert_eq!(
         engine
             .widgets()
-            .get_as::<TextWidget>(label_id)
+            .get_as::<Text>(label_id)
             .unwrap()
             .get_text(),
         "2"
@@ -266,7 +249,7 @@ fn recorder(x: i32, y: i32) -> Recorder {
 fn pointer_events_use_the_new_names_and_named_fields() {
     let mut cache = WidgetCache::new();
 
-    cache.add(Box::new(BaseWidget::new(point(0, 0), size(400, 300))));
+    cache.add(Box::new(Panel::new().at(0, 0).size(400, 300)));
 
     let first = cache.add(Box::new(recorder(10, 10)));
     let second = cache.add(Box::new(recorder(10, 50)));
@@ -418,7 +401,7 @@ fn disabled_widgets_receive_no_input_and_block_widgets_beneath_them() {
     assert_eq!(cache.widget_at(40, 40), button, "still hit-tested");
     assert!(clicks(&cache.handle_event(down(40, 40))).is_empty());
     assert!(clicks(&cache.handle_event(up(40, 40))).is_empty());
-    assert!(!cache.get_as::<ButtonWidget>(button).unwrap().is_selected());
+    assert!(!cache.get_as::<Button>(button).unwrap().is_selected());
     assert!(cache.get(panel).is_some());
 
     cache.get_mut(button).unwrap().set_enabled(true);
@@ -430,7 +413,7 @@ fn disabled_widgets_receive_no_input_and_block_widgets_beneath_them() {
 fn widgets_with_an_empty_mask_receive_nothing_while_a_button_still_clicks() {
     let mut cache = WidgetCache::new();
 
-    cache.add(Box::new(BaseWidget::new(point(0, 0), size(400, 300))));
+    cache.add(Box::new(Panel::new().at(0, 0).size(400, 300)));
 
     let mut quiet = recorder(10, 10);
 
@@ -461,7 +444,7 @@ fn widgets_with_an_empty_mask_receive_nothing_while_a_button_still_clicks() {
 fn a_widget_only_receives_the_classes_in_its_mask() {
     let mut cache = WidgetCache::new();
 
-    cache.add(Box::new(BaseWidget::new(point(0, 0), size(400, 300))));
+    cache.add(Box::new(Panel::new().at(0, 0).size(400, 300)));
 
     let mut hover_only = recorder(10, 10);
 

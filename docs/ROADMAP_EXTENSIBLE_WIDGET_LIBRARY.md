@@ -168,6 +168,8 @@ Pushrod's vocabulary, defined in 9.1 (#93) and 1.1 (#19). Edit here and in those
 
 **Engine events:** `DrawingModeChanged`, `EventMaskChanged`, `FocusChanged`, `ModalOpened`, `ModalClosed`, `MenuOpened`, `MenuClosed`, `WidgetAdded`, `WidgetRemoved`, `WidgetReparented`, `FormLoaded`, `DragStarted`, `DragEnded`, `TooltipShown`, `TooltipHidden`, `TimerFired`, `WindowOpened`, `WindowClosed`, `ScaleFactorChanged`, `ActionChanged`, `IdleStarted`, `IdleEnded`
 
+**Widget types (decided in 1.23 (#136)):** the `Widget` suffix is dropped: `Button`, `Text`, `Frame` (a bare `Box` would shadow `std::boxed::Box`), `Panel`; modules match (`button`, `text`, `frame`, `panel`). The core keeps `RootWidget`.
+
 **Crates:** `pushrod`, `pushrod-widgets`, `pushrod-sdl2`, `pushrod-sdl3`, `chassis-code-editor`, `chassis`
 
 ## Epic 1: Core: behavior flags, focus, timing, and performance (#11)
@@ -190,7 +192,7 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.9 (#24) | Dirty-rectangle redraw | Only re-blit the screen regions that changed. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `src/cache.rs`, `src/engine.rs` |
 | 1.10 (#25) | High-DPI rendering and window resize | The root widget follows the window size; crisp rendering on high-DPI displays. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/engine.rs`, `src/cache.rs`, `src/geometry.rs` |
 | 1.11 (#26) | Application lifecycle: startup and close-request callbacks | Run code before the first frame; confirm or veto closing the window. | `core`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/engine.rs` |
-| 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | v0.2 | S | `src/paint.rs`, `src/cache.rs`, `pushrod-widgets/src/button_widget.rs`, `pushrod-widgets/src/text_widget.rs` |
+| 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | v0.2 | S | `src/paint.rs`, `src/cache.rs`, `pushrod-widgets/src/button.rs`, `pushrod-widgets/src/text.rs` |
 | 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
 | 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/L`, `usability` | Y | v0.2 | L | `src/accessibility.rs (new)`, `src/widget.rs`, `src/engine.rs` |
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `chassis`, `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `src/undo.rs (new)`, `src/engine.rs` |
@@ -201,7 +203,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.20 (#113) | Layers and invalidation: cache hints, texture memory budget, incremental pipeline | Decide which widgets get their own GPU texture, cap texture memory, and invalidate layout, paint, and compositing separately. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `src/cache.rs`, `src/texture.rs`, `src/widget.rs` |
 | 1.21 (#130) | Split the standard widgets into the pushrod-widgets crate | Make Pushrod a Cargo workspace: `pushrod` is the core, and the standard widgets move to their own crate, `pushrod-widgets`. | `architecture`, `enhancement`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml (workspace)`, `src/root_widget.rs (new)`, `pushrod-widgets/ (new crate)` |
 | 1.22 (#131) | Widget libraries: extend or replace pushrod-widgets | Make it straightforward for a separate crate to add widgets alongside pushrod-widgets, or to replace it with a different look. | `architecture`, `chassis`, `enhancement`, `extensibility`, `parallelizable`, `size/M` | Y | N | M | `src/registry.rs`, `pushrod-widgets/src/lib.rs`, `examples/widget-library/ (new crate)` |
-| 1.23 (#136) | Public API polish before publishing: builders, prelude, and stability | Make the public API pleasant and stable before crates.io: builders with defaults, preludes, non-exhaustive enums, and consistent names. | `api`, `enhancement`, `mvp`, `parallelizable`, `size/M`, `usability` | Y | v0.1 | M | `src/lib.rs`, `pushrod-widgets (all widgets)` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
 
@@ -281,7 +282,7 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 - Masked SDL event types are disabled in SDL and re-enabled when the mask changes
 - Close requests are always delivered
 - Idle loop blocks on `wait_event_timeout` (near-zero idle CPU)
-- Widgets never receive events outside their mask; a `BoxWidget` receives nothing while a button still clicks
+- Widgets never receive events outside their mask; a `Frame` receives nothing while a button still clicks
 
 **Status:** done (#6).
 
@@ -773,7 +774,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Problem Statement.** With the widgets inside the core crate, the core and the look are tied together. Anyone wanting a different look (shadows, gradients) or specialized widgets (tree view, graph view, 3D container) would have to change Pushrod itself.
 
-**Solution / Scope.** A Cargo workspace with two crates. **`pushrod`** (the core, repository root): engine, widget tree and IDs, events and callbacks, `paint` helpers, texture and font caches, and shared widget behavior. Its only widget is `RootWidget`, the window's ID-0 background, so the engine doesn't depend on any widget library; `Engine::set_background(color)` recolors it. **`pushrod-widgets`** (`pushrod-widgets/`): the standard KISS widget set (`BaseWidget`, `BoxWidget`, `TextWidget`, `ButtonWidget` today; every widget in this roadmap's widget epics lands here). It depends on `pushrod` and uses only its public API, so the crate boundary itself guarantees another library can do anything it does. The example and the widget tests move with the widgets; the core keeps tests that need no widgets. Both crates are versioned and published together (7.5 (#73)).
+**Solution / Scope.** A Cargo workspace with two crates. **`pushrod`** (the core, repository root): engine, widget tree and IDs, events and callbacks, `paint` helpers, texture and font caches, and shared widget behavior. Its only widget is `RootWidget`, the window's ID-0 background, so the engine doesn't depend on any widget library; `Engine::set_background(color)` recolors it. **`pushrod-widgets`** (`pushrod-widgets/`): the standard KISS widget set (`Panel`, `Frame`, `Text`, `Button` today; every widget in this roadmap's widget epics lands here). It depends on `pushrod` and uses only its public API, so the crate boundary itself guarantees another library can do anything it does. The example and the widget tests move with the widgets; the core keeps tests that need no widgets. Both crates are versioned and published together (7.5 (#73)).
 
 **Acceptance Criteria.**
 
@@ -808,16 +809,18 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ### 1.23 (#136): Public API polish before publishing: builders, prelude, and stability
 
+**Status:** done (#136). Widget types drop the `Widget` suffix (`Button`, `Text`, `Frame`, `Panel`); constructors take at most one required argument and are configured with chained setters (`at`, `size`, `font`, ...); public enums are `#[non_exhaustive]`; `pushrod::prelude` and `pushrod_widgets::prelude` exist; `cargo-semver-checks` is wired into CI for pull requests once the crates are published (set the repository variable `SEMVER_CHECKS` to `true`).
+
 **Problem Statement.** Constructors take many positional arguments (`ButtonWidget::new` takes nine), and every new event or option would be a breaking change. With two crates and third-party widget libraries, the core's public API is a contract.
 
 **Solution / Scope.** **Construction:** short constructors with sensible defaults plus chained setters (`Button::new("OK").at(20, 60).size(120, 24)`), or a builder where a widget has many options; the default font, colors, and size come from the engine (1.24 (#137)). **Names:** decide once whether widget types keep the `Widget` suffix (`ButtonWidget`) or drop it (`Button`), and apply it across the crates and the roadmap. **Stability:** `#[non_exhaustive]` on public enums (events, keys) and option structs; `#[must_use]` where results matter; `Debug` on public types. **Preludes:** `pushrod::prelude` and `pushrod_widgets::prelude` export what applications normally use. **Policy:** semantic versioning; after the first release, `cargo-semver-checks` runs in CI.
 
 **Acceptance Criteria.**
 
-- No public constructor needs more than three required arguments
-- Public enums are `#[non_exhaustive]`
-- Quick start uses the preludes
-- Naming decision recorded in the roadmap's Naming section
+- [x] No public constructor needs more than three required arguments
+- [x] Public enums are `#[non_exhaustive]`
+- [x] Quick start uses the preludes
+- [x] Naming decision recorded in the roadmap's Naming section
 
 **Parallelism / Dependencies.** Parallelizable. Requires 1.21 (#130), 9.1 (#93), 1.24 (#137), 1.25 (#138).
 
@@ -867,11 +870,11 @@ Like every widget, it can also receive application-defined custom events in `han
 
 ### 1.26 (#289): Text truncation: shorten text that doesn't fit with an ellipsis
 
-**Status:** done (#289). `paint::text` takes a `Truncate` mode; `TextWidget` and `ButtonWidget` default to `End`.
+**Status:** done (#289). `paint::text` takes a `Truncate` mode; `Text` and `Button` default to `End`.
 
 **Problem Statement.** Text that doesn't fit its widget is currently clipped mid-letter or drawn over its neighbors. Buttons, labels, list rows, table cells, tabs, and breadcrumbs all meet text that is too long sooner or later, and every toolkit handles it the same way: shorten it and show an ellipsis.
 
-**Solution / Scope.** `paint::text` and the text layout (1.18 (#111)) take a `Truncate` mode: `None` (clip, as today), `End` ("Quarterly rep…"), `Start` ("…report.txt"), or `Middle` ("Quart…t.txt", for paths and file names). The cut falls on a grapheme boundary and the ellipsis is measured in the same font. `TextWidget` and `ButtonWidget` get a `truncate` property (default `End`); every later widget that draws text uses the same helper, so list rows, table cells, tabs, and menu items behave alike. `is_truncated()` reports whether text was shortened, so a tooltip (2.13 (#77)) can show the full text. Truncated layouts are cached with the rest of the text layout.
+**Solution / Scope.** `paint::text` and the text layout (1.18 (#111)) take a `Truncate` mode: `None` (clip, as today), `End` ("Quarterly rep…"), `Start` ("…report.txt"), or `Middle` ("Quart…t.txt", for paths and file names). The cut falls on a grapheme boundary and the ellipsis is measured in the same font. `Text` and `Button` get a `truncate` property (default `End`); every later widget that draws text uses the same helper, so list rows, table cells, tabs, and menu items behave alike. `is_truncated()` reports whether text was shortened, so a tooltip (2.13 (#77)) can show the full text. Truncated layouts are cached with the rest of the text layout.
 
 #### Look and behavior (proposed)
 
@@ -896,11 +899,11 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ### 1.27 (#290): Wrapped text: multi-line labels that reflow
 
-**Status:** done (#290). `TextWidget` has `wrap`, `max_lines` and `height_for_width`; layouts call `height_for_width` once 5.5 (#116) lands.
+**Status:** done (#290). `Text` has `wrap`, `max_lines` and `height_for_width`; layouts call `height_for_width` once 5.5 (#116) lands.
 
 **Problem Statement.** Alert messages, explanations beside options, and help text are sentences, not single lines. Today a label draws one line; long text is cut off, so dialogs with real messages can't be built.
 
-**Solution / Scope.** `TextWidget` gets `wrap: Wrap` (`None`, `Word`, `Anywhere`) and `max_lines`. With wrapping on, the text layout (1.18 (#111)) breaks lines to the widget's width, honoring explicit `\n`; alignment (left, center, right) applies per line. If `max_lines` is set and the text needs more, the last line is truncated with an ellipsis (1.26 (#289)). The widget reports its height for a given width (`height_for_width`), which the layout managers (5.5 (#116)) use so a wrapped label pushes the widgets below it down. The boxed label (2.1 (#27)), check box and radio labels, and the alert (2.9 (#35)) use the same wrapping when they are built.
+**Solution / Scope.** `Text` gets `wrap: Wrap` (`None`, `Word`, `Anywhere`) and `max_lines`. With wrapping on, the text layout (1.18 (#111)) breaks lines to the widget's width, honoring explicit `\n`; alignment (left, center, right) applies per line. If `max_lines` is set and the text needs more, the last line is truncated with an ellipsis (1.26 (#289)). The widget reports its height for a given width (`height_for_width`), which the layout managers (5.5 (#116)) use so a wrapped label pushes the widgets below it down. The boxed label (2.1 (#27)), check box and radio labels, and the alert (2.9 (#35)) use the same wrapping when they are built.
 
 #### Look and behavior (proposed)
 
@@ -921,7 +924,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 **Technical Stack.** Rust
 
-**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text.md` ("Text", Concepts, update). Guides: update the guide or concept page covering: Text (wrapping section). Rustdoc: `Wrap`, `TextWidget::wrap`. Examples: Wrapped paragraph in the showcase. Screenshots: Text page screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/text.md` ("Text", Concepts, update). Guides: update the guide or concept page covering: Text (wrapping section). Rustdoc: `Wrap`, `Text::wrap`. Examples: Wrapped paragraph in the showcase. Screenshots: Text page screenshot.
 
 ## Epic 2: Core dialog widgets (#12)
 
@@ -937,7 +940,7 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 |---|---|---|---|---|---|---|---|
 | 2.1 (#27) | Boxed label widget | Text with background and border. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/boxed_label.rs (new)` |
 | 2.2 (#28) | Glyph button (small single-character button) | A small box with an arrow or symbol, used for scroll arrows, close boxes, and spin buttons. | `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/glyph_button.rs (new)` |
-| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | v0.1 | S | `pushrod-widgets/src/button_widget.rs`, `src/paint.rs` |
+| 2.3 (#29) | Button behaviors: default, cancel, toggle, activate-on-press, dismiss dialog | A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog. | `enhancement`, `mvp`, `size/S`, `usability`, `widget` | N | v0.1 | S | `pushrod-widgets/src/button.rs`, `src/paint.rs` |
 | 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/check_box.rs (new)` |
 | 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/radio_button.rs (new)`, `src/cache.rs` |
 | 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `chassis`, `enhancement`, `mvp`, `size/L`, `widget` | N | v0.1 | L | `pushrod-widgets/src/text_field.rs (new)`, `src/paint.rs` |
@@ -957,7 +960,7 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | 2.20 (#89) | Message bar (non-modal inline notice) | A dismissible banner for warnings and information that doesn't block the window. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/message_bar.rs (new)` |
 | 2.21 (#125) | Image button | A button that shows an image, or an image with a text label, with the full button behavior. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/image_button.rs (new)` |
 | 2.22 (#126) | Link label | Clickable text that looks like a link and opens a URL or runs a callback. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/link_label.rs (new)` |
-| 2.23 (#291) | Selectable label text | Text in labels can be selected with the mouse or keyboard and copied. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/text_widget.rs` |
+| 2.23 (#291) | Selectable label text | Text in labels can be selected with the mouse or keyboard and copied. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/text.rs` |
 | 2.24 (#292) | Count badge on buttons, tabs, and rows | A small count or dot drawn on a corner of a button, tab, or list row. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `src/paint.rs`, `pushrod-widgets/src/image_button.rs`, `pushrod-widgets/src/tab_view.rs`, `pushrod-widgets/src/list_view.rs` |
 
 ### 2.1 (#27): Boxed label widget
@@ -1096,7 +1099,7 @@ Clickable text that looks like a link and opens a URL or runs a callback. **Widg
 
 **Problem Statement.** Users need to copy what an application tells them: an error message, a version number, a path, an ID. Text they can read but can't copy forces retyping.
 
-**Solution / Scope.** `TextWidget::selectable(true)`: drag selects, double-click selects a word, triple-click a line, Ctrl+A all; Ctrl+C copies through the clipboard; the pointer becomes an I-beam (9.9 (#101)). The selection is inverted like a text field's. Not focusable by Tab unless `focusable(true)`; no caret, no editing. Works with wrapped text (1.27 (#290)). The boxed label and link label inherit it.
+**Solution / Scope.** `Text::selectable(true)`: drag selects, double-click selects a word, triple-click a line, Ctrl+A all; Ctrl+C copies through the clipboard; the pointer becomes an I-beam (9.9 (#101)). The selection is inverted like a text field's. Not focusable by Tab unless `focusable(true)`; no caret, no editing. Works with wrapped text (1.27 (#290)). The boxed label and link label inherit it.
 
 #### Look and behavior (proposed)
 
@@ -1124,7 +1127,7 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Technical Stack.** Rust
 
-**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/text.md` ("Text", Widgets, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: `TextWidget::selectable`. Examples: Copyable error text in the showcase. Screenshots: Text page screenshot.
+**Documentation.** Docusaurus page: `pushrod-docs/docs/widgets/text.md` ("Text", Widgets, update). Guides: none beyond the pages listed; link it from related guides where useful. Rustdoc: `Text::selectable`. Examples: Copyable error text in the showcase. Screenshots: Text page screenshot.
 
 ### 2.24 (#292): Count badge on buttons, tabs, and rows
 
@@ -1376,16 +1379,16 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 
 **Problem Statement.** Complex controls (alert, scroll bar, spin box, combo box, menu, file chooser) are naturally made from simpler widgets. `paint` made drawing reusable, but interactive widgets can't yet be reused as parts of another widget. And because every widget that displays elements must be customizable, an application must be able to reach those elements: change the font or color of an alert's message, add a Help button to an alert, restyle one menu item, or recolor a scroll bar's thumb.
 
-**Solution / Scope.** `Composite` trait: `build(&mut self, parts: &mut PartsBuilder)` runs when the widget is added and creates its parts as ordinary child widgets with their own IDs. **Parts are public, not hidden.** Every composite provides (1) `parts() -> Vec<(PartName, WidgetId)>` listing every part by a stable name (`"message"`, `"button:0"`, `"thumb"`), (2) `part(name) -> Option<WidgetId>`, and (3) typed accessors for its own structure (for example `AlertParts { icon, title, message, buttons: Vec<WidgetId> }`). Applications change parts through the normal API: `ui.get_mut::<TextWidget>(parts.message)?.set_font(..)`, `set_font_color`, `set_color`, `set_text`, any property (6.2 (#61)). Composites whose structure is a list (alert buttons, menu items, toolbar items, tabs, list columns) also provide `add_*`, `insert_*`, and `remove_*` methods that create or remove parts and re-lay them out (for example `alert.add_button("Help") -> WidgetId`). Part events reach the composite's `handle_part_event` first, so it can translate them (an arrow's `Clicked` into the scroll bar's `ValueChanged`); applications can also attach callbacks directly to a part's ID. Form files (6.5 (#64)) store a composite as its type plus part overrides (changed properties) and added or removed parts, so customizations survive save and load. Chassis selects a composite as one object and lets the user drill into its parts.
+**Solution / Scope.** `Composite` trait: `build(&mut self, parts: &mut PartsBuilder)` runs when the widget is added and creates its parts as ordinary child widgets with their own IDs. **Parts are public, not hidden.** Every composite provides (1) `parts() -> Vec<(PartName, WidgetId)>` listing every part by a stable name (`"message"`, `"button:0"`, `"thumb"`), (2) `part(name) -> Option<WidgetId>`, and (3) typed accessors for its own structure (for example `AlertParts { icon, title, message, buttons: Vec<WidgetId> }`). Applications change parts through the normal API: `ui.get_mut::<Text>(parts.message)?.set_font(..)`, `set_font_color`, `set_color`, `set_text`, any property (6.2 (#61)). Composites whose structure is a list (alert buttons, menu items, toolbar items, tabs, list columns) also provide `add_*`, `insert_*`, and `remove_*` methods that create or remove parts and re-lay them out (for example `alert.add_button("Help") -> WidgetId`). Part events reach the composite's `handle_part_event` first, so it can translate them (an arrow's `Clicked` into the scroll bar's `ValueChanged`); applications can also attach callbacks directly to a part's ID. Form files (6.5 (#64)) store a composite as its type plus part overrides (changed properties) and added or removed parts, so customizations survive save and load. Chassis selects a composite as one object and lets the user drill into its parts.
 
 ```text
 Alert (composite, id 40)
  ├── icon     (ImageWidget, id 41)   "icon"
- ├── title    (TextWidget,  id 42)   "title"
- ├── message  (TextWidget,  id 43)   "message"   <- app: set_font(bold), set_font_color(..)
- ├── button 0 (ButtonWidget,id 44)   "button:0"  Delete
- ├── button 1 (ButtonWidget,id 45)   "button:1"  Cancel
- └── button 2 (ButtonWidget,id 46)   "button:2"  Help   <- app: alert.add_button("Help")
+ ├── title    (Text,  id 42)   "title"
+ ├── message  (Text,  id 43)   "message"   <- app: set_font(bold), set_font_color(..)
+ ├── button 0 (Button,id 44)   "button:0"  Delete
+ ├── button 1 (Button,id 45)   "button:1"  Cancel
+ └── button 2 (Button,id 46)   "button:2"  Help   <- app: alert.add_button("Help")
 ```
 
 #### Look and behavior (proposed)
@@ -2201,7 +2204,7 @@ A modern event vocabulary, capture/bubble propagation, reusable input controller
 |---|---|---|---|---|---|---|---|
 | 9.2 (#94) | Event propagation: capture, target, and bubble phases with handled/ignored | Input events travel from the window down to the target widget and back up to its parents, and any widget can mark them handled. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/cache.rs`, `src/widget.rs`, `src/event.rs` |
 | 9.3 (#95) | Event filters: observe or intercept another widget's events | Install a filter that sees a widget's (or the whole application's) events first and can stop them. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `src/cache.rs`, `src/engine.rs` |
-| 9.4 (#96) | Reusable input controllers: click, drag, scroll, hover, long-press, key | Composable input handlers that widgets attach instead of re-implementing press/drag/release logic. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/controllers.rs (new)`, `src/widget.rs`, `pushrod-widgets/src/button_widget.rs` |
+| 9.4 (#96) | Reusable input controllers: click, drag, scroll, hover, long-press, key | Composable input handlers that widgets attach instead of re-implementing press/drag/release logic. | `core`, `enhancement`, `events`, `mvp`, `size/M` | N | v0.1 | M | `src/controllers.rs (new)`, `src/widget.rs`, `pushrod-widgets/src/button.rs` |
 | 9.5 (#97) | Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons | One action object drives every menu item, toolbar button, and shortcut that performs the same command, keeping enabled/checked state in sync. | `chassis`, `core`, `enhancement`, `events`, `size/M`, `usability` | N | N | M | `src/action.rs (new)`, `src/engine.rs`, `pushrod-widgets/src/menu.rs`, `pushrod-widgets/src/toolbar.rs` |
 | 9.6 (#98) | Property bindings: keep two properties in sync | Bind a source widget property to a target property, one-way or two-way, with optional conversion. | `enhancement`, `events`, `parallelizable`, `size/M` | Y | N | M | `src/binding.rs (new)`, `src/engine.rs` |
 | 9.7 (#99) | Callback handles: disconnect, block, and unblock | Every registration returns a handle to remove or temporarily silence the callback. | `enhancement`, `events`, `parallelizable`, `size/S` | Y | N | S | `src/engine.rs` |
@@ -2228,7 +2231,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 - `pushrod::Event` with the variants above; `EventKind`; `widget()`
 - PR #10 behavior and tests ported to the new names
-- `ButtonWidget` uses `PointerPressed/Released/Entered/Exited`
+- `Button` uses `PointerPressed/Released/Entered/Exited`
 - Rustdoc lists every event with when it is emitted
 
 **Parallelism / Dependencies.** Not parallelizable. Requires PR #10. Blocks every issue that names events.
@@ -2297,7 +2300,7 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Problem Statement.** Buttons, check boxes, sliders, scroll bars, and list rows all re-implement 'press, track, release inside', dragging thresholds, double-click counting, and long-press. Duplicated input logic is the most common source of inconsistent behavior.
 
-**Solution / Scope.** Controllers own an input pattern and report high-level results to the widget: `ClickController` (press/release inside, count, capture while pressed), `DragController` (threshold, start/update/end with offsets), `ScrollController`, `HoverController` (enter/exit), `LongPressController`, `KeyController`. A widget holds controllers in a `Controllers` list in its core; the default `handle_event` feeds them; widgets implement small hooks (`on_controller_event`). `ButtonWidget` is ported to `ClickController` as the reference.
+**Solution / Scope.** Controllers own an input pattern and report high-level results to the widget: `ClickController` (press/release inside, count, capture while pressed), `DragController` (threshold, start/update/end with offsets), `ScrollController`, `HoverController` (enter/exit), `LongPressController`, `KeyController`. A widget holds controllers in a `Controllers` list in its core; the default `handle_event` feeds them; widgets implement small hooks (`on_controller_event`). `Button` is ported to `ClickController` as the reference.
 
 **Acceptance Criteria.**
 
@@ -3126,7 +3129,7 @@ Larger and compound widgets live in the separate `pushrod-extra-widgets` crate, 
 
 | Issue | Status |
 |---|---|
-| #4 Create ButtonWidget | Closed by #10 |
+| #4 Create Button | Closed by #10 |
 | #9 Add mutability to handle_event | Closed by #10 |
 | #6 Add event mask to widgets | Reformatted as 1.2 (#6) |
 | #7 Add broadcast of specific events | Reformatted as 1.3 (#7) |

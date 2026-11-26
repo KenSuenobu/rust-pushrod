@@ -1,34 +1,37 @@
 ---
 sidebar_position: 2
-title: Box
+title: Frame
 description: A filled rectangle with a border of any width and color.
 ---
 
-# Box
+# Frame
 
-`BoxWidget` (module `pushrod_widgets::box_widget`): a filled rectangle with a border of any width and color.
+`Frame` (module `pushrod_widgets::frame`): a filled rectangle with a border of any width and color.
 
 ![A Box widget with a 3-pixel black border](/img/screenshots/box.png)
 
 ## Creating it
 
 ```rust
-use pushrod_widgets::box_widget::BoxWidget;
-use pushrod::geometry::{point, size};
-use pushrod::widget::Widget;
-use pushrod::color::Color;
+use pushrod::prelude::*;
+use pushrod_widgets::prelude::*;
 
-let mut frame = BoxWidget::new(point(20, 20), size(120, 80), Color::BLACK, 3);
+let mut frame = Frame::new()
+    .at(20, 20)
+    .size(120, 80)
+    .border_color(Color::BLACK)
+    .border_width(3);
 frame.set_color(Color::WHITE);
 engine.add_widget(frame);
 ```
 
-| Parameter | Type | Meaning |
-|---|---|---|
-| `origin` | `Point` | Upper-left corner, relative to the parent. |
-| `size` | `Size` | Width and height in pixels. |
-| `border_color` | `Color` | Border color. |
-| `border_width` | `u8` | Border width in pixels; `0` draws no border. |
+| Setter | Type | Default | Meaning |
+|---|---|---|---|
+| `Frame::new()` | none | | A 100 by 100 frame at (0, 0) with a black one-pixel border. |
+| `at(x, y)` | `i32`, `i32` | `0, 0` | Upper-left corner, relative to the parent. |
+| `size(width, height)` | `u32`, `u32` | `100, 100` | Width and height in pixels. |
+| `border_color(color)` | `Color` | black | Border color. |
+| `border_width(width)` | `u8` | `1` | Border width in pixels; `0` draws no border. |
 
 ## Methods
 

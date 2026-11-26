@@ -1,32 +1,31 @@
 ---
 sidebar_position: 1
-title: Base
+title: Panel
 description: A rectangle filled with one color. Use it as a background or a panel that holds other widgets.
 ---
 
-# Base
+# Panel
 
-`BaseWidget` (module `pushrod_widgets::base_widget`): a rectangle filled with one color. Use it as a background or a panel that holds other widgets.
+`Panel` (module `pushrod_widgets::panel`): a rectangle filled with one color. Use it as a background or a panel that holds other widgets.
 
 ![A Base widget filled with blue](/img/screenshots/base.png)
 
 ## Creating it
 
 ```rust
-use pushrod_widgets::base_widget::BaseWidget;
-use pushrod::geometry::{point, size};
-use pushrod::widget::Widget;
-use pushrod::color::Color;
+use pushrod::prelude::*;
+use pushrod_widgets::prelude::*;
 
-let mut panel = BaseWidget::new(point(20, 20), size(120, 80));
+let mut panel = Panel::new().at(20, 20).size(120, 80);
 panel.set_color(Color::RGB(70, 130, 200));
 let panel_id = engine.add_widget(panel);
 ```
 
-| Parameter | Type | Meaning |
-|---|---|---|
-| `origin` | `Point` | Upper-left corner, relative to the parent. |
-| `size` | `Size` | Width and height in pixels. |
+| Setter | Type | Default | Meaning |
+|---|---|---|---|
+| `Panel::new()` | none | | A transparent 100 by 100 panel at (0, 0). |
+| `at(x, y)` | `i32`, `i32` | `0, 0` | Upper-left corner, relative to the parent. |
+| `size(width, height)` | `u32`, `u32` | `100, 100` | Width and height in pixels. |
 
 ## Methods
 
@@ -46,7 +45,7 @@ Every widget also has the methods of the `Widget` trait: `get_id`, `get_parent`,
 
 ## Notes
 
-The window's root widget (ID `0`) is the core's `RootWidget`, not a `BaseWidget`; change the window color with `engine.set_background(color)`. Add other widgets as its children with `engine.add_child_widget(panel_id, widget)` to group and move them together.
+The window's root widget (ID `0`) is the core's `RootWidget`, not a `Panel`; change the window color with `engine.set_background(color)`. Add other widgets as its children with `engine.add_child_widget(panel_id, widget)` to group and move them together.
 
 ## Planned
 

@@ -71,6 +71,7 @@ use std::time::Duration;
 
 /// A high-level result reported by a controller.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub enum ControllerEvent {
     /// [`ClickController`]: the button went down on the `Widget`.
     ClickPressed,
@@ -170,6 +171,23 @@ pub struct Controllers {
     list: Vec<Box<dyn Controller>>,
 }
 
+impl std::fmt::Debug for Controllers {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Controllers")
+            .field("count", &self.list.len())
+            .finish_non_exhaustive()
+    }
+}
+
 impl Controllers {
     /// Adds a controller.  Controllers see events in the order they were added.
     ///
@@ -226,6 +244,7 @@ impl Controllers {
 /// leaves and re-enters, then [`ControllerEvent::Clicked`] if released while armed, otherwise
 /// [`ControllerEvent::ClickCancelled`].  Only events addressed to the owning `Widget` count, so a
 /// press that bubbles up from a child is not a click on the parent.
+#[derive(Debug)]
 pub struct ClickController {
     button: MouseButton,
     pressed: bool,
@@ -332,6 +351,7 @@ impl Controller for ClickController {
 /// pointer first moves `threshold` pixels from the press, then an update per move, then
 /// [`ControllerEvent::DragEnded`] on release.  A press and release without crossing the threshold
 /// reports nothing, so it can still be a click.
+#[derive(Debug)]
 pub struct DragController {
     button: MouseButton,
     threshold: u32,
@@ -465,7 +485,7 @@ impl Controller for DragController {
 /// Reports wheel and trackpad scrolling.
 ///
 /// Scrolls bubble, so a scrolling container sees scrolls over its children too.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct ScrollController;
 
 impl ScrollController {
@@ -504,7 +524,7 @@ impl Controller for ScrollController {
 }
 
 /// Reports the pointer entering and leaving the `Widget`.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct HoverController {
     hovered: bool,
 }
@@ -559,6 +579,7 @@ impl Controller for HoverController {
 /// Time advances only through [`Event::Tick`], so the `Widget` must receive ticks (the
 /// [`EventMask::TIMER`] class).  The press is cancelled by a release, or by moving more than
 /// `slop` pixels.  It reports [`ControllerEvent::LongPressed`] at most once per press.
+#[derive(Debug)]
 pub struct LongPressController {
     button: MouseButton,
     delay: Duration,
@@ -681,7 +702,7 @@ impl Controller for LongPressController {
 /// Reports key presses and releases, optionally only for chosen keys.
 ///
 /// Key events bubble, so a container can handle keys its focused child ignored.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct KeyController {
     keys: Option<Vec<Key>>,
 }

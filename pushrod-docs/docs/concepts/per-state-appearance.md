@@ -40,7 +40,7 @@ When several states are active at once, the first of these that is active **and*
 5. `HOVERED`
 6. `FOCUSED`
 
-Fields that style leaves unset come from the `normal` style, and fields still unset use the widget's built-in look. The built-in look is unchanged, so a widget with no styles set draws exactly as before. For example, a `ButtonWidget` still inverts its colors while pressed unless you style `PRESSED`.
+Fields that style leaves unset come from the `normal` style, and fields still unset use the widget's built-in look. The built-in look is unchanged, so a widget with no styles set draws exactly as before. For example, a `Button` still inverts its colors while pressed unless you style `PRESSED`.
 
 ## Who sets the state
 
@@ -113,7 +113,7 @@ A drop target in its drag-over state:
 
 ## Using it in your own widgets
 
-Read `self.style()` in `paint` and use the field if it is set, otherwise your default. The standard widgets do this: `BaseWidget` (background), `BoxWidget` (background, border color and width), `TextWidget` (background, text color, font) and `ButtonWidget` (all of them).
+Read `self.style()` in `paint` and use the field if it is set, otherwise your default. The standard widgets do this: `Panel` (background), `Frame` (background, border color and width), `Text` (background, text color, font) and `Button` (all of them).
 
 ## Not yet
 

@@ -133,7 +133,7 @@ flowchart LR
     E --> F[Draw shortened text,<br/>truncated = true]
 ```
 
-`TextWidget` and `ButtonWidget` have a `truncate` property (`set_truncate`, `get_truncate`) that defaults to `Truncate::End`, and `is_truncated()` reports whether the last paint shortened the text, so a tooltip can show the full text. Every widget that draws text through `paint::text` behaves the same way. A widget paints into its cached texture only when invalidated, so the shortened text is computed once per change, not once per frame.
+`Text` and `Button` have a `truncate` property (`set_truncate`, `get_truncate`) that defaults to `Truncate::End`, and `is_truncated()` reports whether the last paint shortened the text, so a tooltip can show the full text. Every widget that draws text through `paint::text` behaves the same way. A widget paints into its cached texture only when invalidated, so the shortened text is computed once per change, not once per frame.
 
 `fit_text` is the pure helper behind it. Give it a function that measures a string:
 
@@ -155,7 +155,7 @@ fn main() {
 
 ## Wrapping
 
-A label draws one line unless you turn wrapping on. `TextWidget::set_wrap` takes a `Wrap` mode, and `set_max_lines` limits the lines.
+A label draws one line unless you turn wrapping on. `Text::set_wrap` takes a `Wrap` mode, and `set_max_lines` limits the lines.
 
 | Mode | Lines break |
 | --- | --- |
@@ -232,6 +232,6 @@ The layout engine and the rasterizer pass the gate, but Parley adds a sizable de
 
 ## See also
 
-- The widget gallery shows the truncation and wrapping modes on `TextWidget` (`cargo run -p pushrod-sdl2 --example gallery`).
+- The widget gallery shows the truncation and wrapping modes on `Text` (`cargo run -p pushrod-sdl2 --example gallery`).
 - [Drawing](drawing.md) for how widgets paint into cached textures.
 - [Backend-neutral paint API](../platforms/backend-neutral-paint-api.md) for the `Painter` trait.

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! # ButtonWidget
+//! # Button
 //!
 //! This is a simple system `Widget` that fills its background, displays a text message within its
 //! bounds, and draws a border around its frame.  It generates a `Clicked { id, button, count }` event when
@@ -28,7 +28,7 @@ use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::font::Font;
-use pushrod::geometry::{Point, Rect, Size};
+use pushrod::geometry::{Rect, point, size};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle, Truncate};
 use pushrod::widget::{VisualState, Widget, WidgetCore};
 use std::cell::Cell;
@@ -38,7 +38,8 @@ use std::cell::Cell;
 /// Pressing the left mouse button selects (inverts) the button; dragging out of its bounds
 /// deselects it and dragging back in selects it again.  Releasing the mouse button while the
 /// button is selected emits `Clicked { id, button, count }`.
-pub struct ButtonWidget {
+#[derive(Debug)]
+pub struct Button {
     core: WidgetCore,
     style: TextStyle,
     msg: String,
@@ -48,7 +49,7 @@ pub struct ButtonWidget {
     truncated: Cell<bool>,
 }
 
-impl Widget for ButtonWidget {
+impl Widget for Button {
     /// Returns the button's shared state.
     ///
     /// # Returns
@@ -185,34 +186,28 @@ impl Widget for ButtonWidget {
     }
 }
 
-impl ButtonWidget {
-    /// Creates a button.  Its background is transparent until set with `set_color`.
+impl Button {
+    /// Creates a button with a label and sensible defaults.
+    ///
+    /// The button is 100 by 24 pixels at the upper left-hand corner of its parent, with the
+    /// engine's default font, a black centered label, and a two pixel label inset.  Its background
+    /// is transparent until set with `set_color`.  Change the defaults with the chained setters:
+    ///
+    /// ```rust
+    /// use pushrod_widgets::button::Button;
+    ///
+    /// let ok = Button::new("OK").at(20, 60).size(120, 24);
+    /// ```
     ///
     /// # Arguments
     ///
-    /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
-    /// * `size` - The width and height in pixels.
-    /// * `font` - The font handle: a registered family, size, and style.  `Font::default()` is
-    ///   the engine's default font, which needs no files.
-    /// * `font_color` - The label color.
-    /// * `justification` - The horizontal alignment of the label.
-    /// * `msg` - The label.
-    /// * `border_width` - Horizontal inset of the label from the edges, in pixels (the frame itself is
-    ///   always one pixel).
+    /// * `label` - The button's label.
     ///
     /// # Returns
     ///
-    /// The new `ButtonWidget`.
-    pub fn new(
-        origin: Point,
-        size: Size,
-        font: Font,
-        font_color: Color,
-        justification: TextJustify,
-        msg: String,
-        border_width: u8,
-    ) -> Self {
-        let mut core = WidgetCore::new(origin, size);
+    /// The new `Button`.
+    pub fn new(label: impl Into<String>) -> Self {
+        let mut core = WidgetCore::new(point(0, 0), size(100, 24));
 
         // The click controller needs presses and releases to click, and hover to follow the
         // pointer in and out of the button's bounds while pressed.
@@ -220,13 +215,105 @@ impl ButtonWidget {
 
         Self {
             core,
-            style: TextStyle::new(font, font_color, justification),
-            msg,
-            border_width,
+            style: TextStyle::new(Font::default(), Color::BLACK, TextJustify::Center),
+            msg: label.into(),
+            border_width: 2,
             selected: false,
             truncate: Truncate::End,
             truncated: Cell::new(false),
         }
+    }
+
+    /// Sets the upper left-hand corner, relative to the parent `Widget`.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - Horizontal position in pixels.
+    /// * `y` - Vertical position in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn at(mut self, x: i32, y: i32) -> Self {
+        self.set_origin(point(x, y));
+        self
+    }
+
+    /// Sets the width and height.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - Width in pixels.
+    /// * `height` - Height in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn size(mut self, width: u32, height: u32) -> Self {
+        self.set_size(size(width, height));
+        self
+    }
+
+    /// Sets the label font.
+    ///
+    /// # Arguments
+    ///
+    /// * `font` - The font handle.
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn font(mut self, font: Font) -> Self {
+        self.style.font = font;
+        self
+    }
+
+    /// Sets the label color.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The label color.
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn font_color(mut self, color: Color) -> Self {
+        self.style.font_color = color;
+        self
+    }
+
+    /// Sets the label's horizontal alignment.
+    ///
+    /// # Arguments
+    ///
+    /// * `justification` - The alignment.
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn justify(mut self, justification: TextJustify) -> Self {
+        self.style.justification = justification;
+        self
+    }
+
+    /// Sets the label's horizontal inset.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The inset in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The button, for chaining.
+    #[must_use]
+    pub fn border_width(mut self, width: u8) -> Self {
+        self.border_width = width;
+        self
     }
 
     /// Sets the label's horizontal inset, and invalidates the button.

@@ -3,13 +3,13 @@
 use pushrod::backend::headless::{PaintCall, RecordingPainter};
 use pushrod::color::Color;
 use pushrod::font::Font;
-use pushrod::geometry::{Rect, point, size};
+use pushrod::geometry::{Rect, size};
 use pushrod::paint::{Truncate, Wrap};
 use pushrod::widget::Widget;
-use pushrod_widgets::base_widget::BaseWidget;
-use pushrod_widgets::box_widget::BoxWidget;
-use pushrod_widgets::button_widget::ButtonWidget;
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::button::Button;
+use pushrod_widgets::frame::Frame;
+use pushrod_widgets::panel::Panel;
+use pushrod_widgets::text::Text;
 
 fn painted(widget: &dyn Widget) -> Vec<PaintCall> {
     let mut p = RecordingPainter::default();
@@ -19,14 +19,17 @@ fn painted(widget: &dyn Widget) -> Vec<PaintCall> {
 
 #[test]
 fn base_widget_fills() {
-    let mut w = BaseWidget::new(point(0, 0), size(10, 10));
+    let mut w = Panel::new().size(10, 10);
     w.set_color(Color::GRAY);
     assert_eq!(painted(&w), vec![PaintCall::Fill(Color::GRAY)]);
 }
 
 #[test]
 fn box_widget_fills_then_borders() {
-    let mut w = BoxWidget::new(point(0, 0), size(10, 10), Color::BLUE, 2);
+    let mut w = Frame::new()
+        .size(10, 10)
+        .border_color(Color::BLUE)
+        .border_width(2);
     w.set_color(Color::CYAN);
     assert_eq!(
         painted(&w),
@@ -40,14 +43,9 @@ fn box_widget_fills_then_borders() {
 
 #[test]
 fn text_widget_fills_then_draws_text() {
-    let mut w = TextWidget::new(
-        point(0, 0),
-        size(100, 20),
-        Font::default().with_size(10),
-        Color::BLACK,
-        TextJustify::Left,
-        String::from("Hello"),
-    );
+    let mut w = Text::new("Hello")
+        .size(100, 20)
+        .font(Font::default().with_size(10));
     w.set_color(Color::WHITE);
     assert_eq!(
         painted(&w),
@@ -64,15 +62,9 @@ fn text_widget_fills_then_draws_text() {
 
 #[test]
 fn button_widget_draws_label_inset_and_frame() {
-    let mut w = ButtonWidget::new(
-        point(0, 0),
-        size(60, 20),
-        Font::default().with_size(10),
-        Color::BLACK,
-        TextJustify::Center,
-        String::from("OK"),
-        2,
-    );
+    let mut w = Button::new("OK")
+        .size(60, 20)
+        .font(Font::default().with_size(10));
     w.set_color(Color::WHITE);
     assert_eq!(
         painted(&w),
@@ -84,16 +76,10 @@ fn button_widget_draws_label_inset_and_frame() {
     );
 }
 
-fn plain_button() -> ButtonWidget {
-    let mut w = ButtonWidget::new(
-        point(0, 0),
-        size(60, 20),
-        Font::default().with_size(10),
-        Color::BLACK,
-        TextJustify::Center,
-        String::from("OK"),
-        2,
-    );
+fn plain_button() -> Button {
+    let mut w = Button::new("OK")
+        .size(60, 20)
+        .font(Font::default().with_size(10));
 
     w.set_color(Color::WHITE);
     w
@@ -173,11 +159,14 @@ fn box_base_and_text_widgets_honor_their_styles() {
         ..StateStyle::default()
     };
 
-    let mut base = BaseWidget::new(point(0, 0), size(10, 10));
+    let mut base = Panel::new().size(10, 10);
     base.set_style(VisualState::empty(), style.clone());
     assert_eq!(painted(&base), vec![PaintCall::Fill(Color::YELLOW)]);
 
-    let mut b = BoxWidget::new(point(0, 0), size(10, 10), Color::BLUE, 2);
+    let mut b = Frame::new()
+        .size(10, 10)
+        .border_color(Color::BLUE)
+        .border_width(2);
     b.set_style(VisualState::empty(), style.clone());
     assert_eq!(
         painted(&b),
@@ -187,14 +176,9 @@ fn box_base_and_text_widgets_honor_their_styles() {
         ]
     );
 
-    let mut t = TextWidget::new(
-        point(0, 0),
-        size(100, 20),
-        Font::default().with_size(10),
-        Color::BLACK,
-        TextJustify::Left,
-        String::from("Hi"),
-    );
+    let mut t = Text::new("Hi")
+        .size(100, 20)
+        .font(Font::default().with_size(10));
     t.set_style(VisualState::empty(), style);
     assert!(matches!(
         &painted(&t)[..],
@@ -203,15 +187,10 @@ fn box_base_and_text_widgets_honor_their_styles() {
 }
 
 /// A 50-pixel-wide text widget (ten characters at 5 pixels each in the recording painter).
-fn narrow_text(msg: &str) -> TextWidget {
-    TextWidget::new(
-        point(0, 0),
-        size(50, 20),
-        Font::default().with_size(10),
-        Color::BLACK,
-        TextJustify::Left,
-        String::from(msg),
-    )
+fn narrow_text(msg: &str) -> Text {
+    Text::new(msg)
+        .size(50, 20)
+        .font(Font::default().with_size(10))
 }
 
 fn drawn_string(calls: &[PaintCall]) -> String {
@@ -233,15 +212,10 @@ fn text_and_button_widgets_truncate_at_the_end_by_default() {
     assert_eq!(drawn_string(&painted(&t)), "Quarterly\u{2026}");
     assert!(t.is_truncated());
 
-    let mut b = ButtonWidget::new(
-        point(0, 0),
-        size(50, 20),
-        Font::default().with_size(10),
-        Color::BLACK,
-        TextJustify::Center,
-        String::from("Quarterly report.txt"),
-        0,
-    );
+    let mut b = Button::new("Quarterly report.txt")
+        .size(50, 20)
+        .font(Font::default().with_size(10))
+        .border_width(0);
 
     assert_eq!(b.get_truncate(), Truncate::End);
     assert_eq!(drawn_string(&painted(&b)), "Quarterl\u{2026}");
@@ -281,15 +255,10 @@ fn changing_the_truncate_mode_invalidates_the_widget() {
 
 const PARAGRAPH: &str = "the quick brown fox jumps";
 
-fn paragraph_widget(width: u32) -> TextWidget {
-    let mut t = TextWidget::new(
-        point(0, 0),
-        size(width, 60),
-        Font::default().with_size(10),
-        Color::BLACK,
-        TextJustify::Left,
-        String::from(PARAGRAPH),
-    );
+fn paragraph_widget(width: u32) -> Text {
+    let mut t = Text::new(PARAGRAPH)
+        .size(width, 60)
+        .font(Font::default().with_size(10));
 
     t.set_wrap(Wrap::Word);
     t

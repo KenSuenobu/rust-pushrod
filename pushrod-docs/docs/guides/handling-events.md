@@ -29,7 +29,7 @@ while let Some(event) = engine.next_event(&mut events) {
         Event::Clicked { id, .. } if id == button => {
             clicks += 1;
 
-            if let Some(text) = engine.widgets().get_as_mut::<TextWidget>(label) {
+            if let Some(text) = engine.widgets().get_as_mut::<Text>(label) {
                 text.set_text(format!("Clicked {} time(s).", clicks));
             }
         }
@@ -83,7 +83,7 @@ flowchart TD
 
 ## Choosing which events to receive
 
-By default every widget has an empty [event mask](../concepts/event-masks-for-the-run-loop-and-for-widgets.md) and receives nothing; widgets that handle events (such as `ButtonWidget`) ask for the classes they need. Use `Engine::set_event_mask` to drop whole classes, such as pointer motion, for the entire window.
+By default every widget has an empty [event mask](../concepts/event-masks-for-the-run-loop-and-for-widgets.md) and receives nothing; widgets that handle events (such as `Button`) ask for the classes they need. Use `Engine::set_event_mask` to drop whole classes, such as pointer motion, for the entire window.
 
 ## Events
 
@@ -133,7 +133,7 @@ Pointer events also set `HOVERED` and `PRESSED` on the widget, so you can change
 | `engine.on_engine_event_filtered(&kinds, f)` | Same, for the listed kinds only | `FnMut(&mut S, &mut Ui, &EngineEvent)` |
 | `engine.on_event(f)` | Any widget emits any event | `FnMut(&mut S, &mut Ui, &Event)` |
 
-A callback only runs for events the widget actually emits. `ButtonWidget` emits `Clicked`, `PointerPressed`, `PointerReleased`, `PointerEntered` and `PointerExited`, so `on_click`, `on_press`, `on_release` and `on_hover` work on buttons; the other methods run for widgets that emit their event (value controls, text fields, lists). Every `on_*` method fires only for its widget and event kind, after the widget has updated itself, and returns a `CallbackId`. Several callbacks can be registered for the same widget; they run in the order they were registered, and `on_event` callbacks run after the widget-specific ones and the engine-event ones. Pushrod's own actions (such as a mask change or a widget being added) arrive as [engine events](../events/engine-events.md).
+A callback only runs for events the widget actually emits. `Button` emits `Clicked`, `PointerPressed`, `PointerReleased`, `PointerEntered` and `PointerExited`, so `on_click`, `on_press`, `on_release` and `on_hover` work on buttons; the other methods run for widgets that emit their event (value controls, text fields, lists). Every `on_*` method fires only for its widget and event kind, after the widget has updated itself, and returns a `CallbackId`. Several callbacks can be registered for the same widget; they run in the order they were registered, and `on_event` callbacks run after the widget-specific ones and the engine-event ones. Pushrod's own actions (such as a mask change or a widget being added) arrive as [engine events](../events/engine-events.md).
 
 ## The `Ui` handle
 

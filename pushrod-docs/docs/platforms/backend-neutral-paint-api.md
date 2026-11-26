@@ -57,11 +57,10 @@ A backend declares how painted widgets are kept between frames:
 ```rust
 use pushrod::backend::headless::{PaintCall, RecordingPainter};
 use pushrod::color::Color;
-use pushrod::geometry::{point, size};
 use pushrod::widget::Widget;
-use pushrod_widgets::base_widget::BaseWidget;
+use pushrod_widgets::panel::Panel;
 
-let mut panel = BaseWidget::new(point(0, 0), size(10, 10));
+let mut panel = Panel::new().size(10, 10);
 panel.set_color(Color::GRAY);
 
 let mut p = RecordingPainter::default();

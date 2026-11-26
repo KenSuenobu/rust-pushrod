@@ -154,6 +154,7 @@ impl Default for Font {
 
 /// Where the bytes of a registered font come from.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum FontSource {
     /// A TrueType or OpenType file on disk.
     Path(String),
@@ -369,6 +370,15 @@ impl Default for FontRegistry {
 
 impl std::fmt::Debug for FontRegistry {
     /// Lists the registered families and the default.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    /// Formats the value for debugging.
     ///
     /// # Arguments
     ///

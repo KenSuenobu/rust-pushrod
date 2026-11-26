@@ -6,36 +6,33 @@ description: A single string of text on a filled background.
 
 # Text
 
-`TextWidget` (module `pushrod_widgets::text_widget`): a single string of text on a filled background.
+`Text` (module `pushrod_widgets::text`): a single string of text on a filled background.
 
 ![A Text widget showing Hello, Pushrod](/img/screenshots/text.png)
 
 ## Creating it
 
 ```rust
-use pushrod::geometry::{point, size};
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use pushrod::color::Color;
-use pushrod::font::Font;
+use pushrod::prelude::*;
+use pushrod_widgets::prelude::*;
 
-let label = engine.add_widget(TextWidget::new(
-    point(20, 20),
-    size(140, 24),
-    Font::default().with_size(16),
-    Color::BLACK,
-    TextJustify::Center,
-    "Hello, Pushrod".into(),
-));
+let label = engine.add_widget(
+    Text::new("Hello, Pushrod")
+        .at(20, 20)
+        .size(140, 24)
+        .font(Font::default().with_size(16))
+        .justify(TextJustify::Center),
+);
 ```
 
-| Parameter | Type | Meaning |
-|---|---|---|
-| `origin` | `Point` | Upper-left corner, relative to the parent. |
-| `size` | `Size` | Width and height in pixels. |
-| `font` | `Font` | A [font handle](../concepts/text-and-fonts.md): family, size, and style. `Font::default()` is the built-in font. |
-| `font_color` | `Color` | Text color. |
-| `justification` | `TextJustify` | `Left`, `Center`, or `Right`. |
-| `msg` | `String` | The text to show. |
+| Setter | Type | Default | Meaning |
+|---|---|---|---|
+| `Text::new(text)` | `impl Into<String>` | required | The text to show. |
+| `at(x, y)` | `i32`, `i32` | `0, 0` | Upper-left corner, relative to the parent. |
+| `size(width, height)` | `u32`, `u32` | `200, 20` | Width and height in pixels. |
+| `font(font)` | `Font` | `Font::default()` | A [font handle](../concepts/text-and-fonts.md): family, size, and style. |
+| `font_color(color)` | `Color` | black | Text color. |
+| `justify(justification)` | `TextJustify` | `Left` | `Left`, `Center`, or `Right`. |
 
 ## Methods
 

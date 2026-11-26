@@ -32,3 +32,4 @@
 [#134] pushrod-sdl2 backend crate; core and widgets are SDL-free [kenji]
 [#138] Errors: pushrod::Error, Result APIs, Error engine event [kenji]
 [#137] Font handles, engine font registry, embedded default font [kenji]
+[#136] Short widget constructors, preludes, non_exhaustive enums, Debug [kenji]

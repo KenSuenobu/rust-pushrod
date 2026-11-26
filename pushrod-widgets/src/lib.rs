@@ -24,12 +24,8 @@
 //! ambitious set, without changing the core.
 //!
 //! ```rust,ignore
-//! use pushrod::engine::Engine;
-//! use pushrod::geometry::{point, size};
-//! use pushrod_widgets::button_widget::ButtonWidget;
-//! use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-//! use pushrod::color::Color;
-//! use pushrod::font::Font;
+//! use pushrod::prelude::*;
+//! use pushrod_widgets::prelude::*;
 //!
 //! #[derive(Default)]
 //! struct AppState {
@@ -38,15 +34,12 @@
 //!
 //! let mut engine: Engine<AppState> = Engine::new(size(400, 200), 30);
 //!
-//! let font = Font::default();
-//! let label = engine.add_widget(TextWidget::new(point(20, 20), size(200, 20), font.clone(),
-//!     Color::BLACK, TextJustify::Left, String::from("Not clicked")));
-//! let button = engine.add_widget(ButtonWidget::new(point(20, 60), size(120, 20), font,
-//!     Color::BLACK, TextJustify::Center, String::from("Click me"), 2));
+//! let label = engine.add_widget(Text::new("Not clicked").at(20, 20).size(200, 20));
+//! let button = engine.add_widget(Button::new("Click me").at(20, 60).size(120, 24));
 //!
 //! engine.on_click(button, move |state, ui| {
 //!     state.clicks += 1;
-//!     ui.get_mut::<TextWidget>(label)
+//!     ui.get_mut::<Text>(label)
 //!         .unwrap()
 //!         .set_text(format!("Clicked {} times", state.clicks));
 //! });
@@ -56,10 +49,16 @@
 
 // Every public item is documented, including `# Panics` and `# Errors` sections where they
 // apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").
-#![warn(missing_docs, clippy::missing_panics_doc, clippy::missing_errors_doc)]
+#![warn(
+    missing_docs,
+    missing_debug_implementations,
+    clippy::missing_panics_doc,
+    clippy::missing_errors_doc
+)]
 #![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
-pub mod base_widget;
-pub mod box_widget;
-pub mod button_widget;
-pub mod text_widget;
+pub mod button;
+pub mod frame;
+pub mod panel;
+pub mod prelude;
+pub mod text;

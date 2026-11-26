@@ -22,10 +22,10 @@
 //!
 //! ```text
 //!   ID 0  RootWidget (window)
-//!    ├── ID 1  BaseWidget
-//!    │    ├── ID 2  TextWidget      origins are relative to the parent
-//!    │    └── ID 3  ButtonWidget
-//!    └── ID 4  BoxWidget            later siblings are drawn on top
+//!    ├── ID 1  Panel
+//!    │    ├── ID 2  Text      origins are relative to the parent
+//!    │    └── ID 3  Button
+//!    └── ID 4  Frame            later siblings are drawn on top
 //! ```
 //!
 //! A flat list addressed by ID avoids reference-counted parent pointers entirely, and allows a
@@ -81,6 +81,25 @@ pub struct WidgetCache {
     focused_widget_id: Option<WidgetId>,
     text_input_wanted: bool,
     animating: Vec<WidgetId>,
+}
+
+impl std::fmt::Debug for WidgetCache {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WidgetCache")
+            .field("widgets", &self.cache.len())
+            .field("focused", &self.focused_widget_id)
+            .field("loop_mask", &self.loop_mask)
+            .finish_non_exhaustive()
+    }
 }
 
 impl WidgetCache {

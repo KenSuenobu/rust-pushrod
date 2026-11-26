@@ -32,17 +32,17 @@ let state = pushrod_sdl2::run(engine, WindowSettings::new("Events", size(320, 20
 
 ```rust
 // A gray panel; its children are positioned relative to it.
-let mut panel = BaseWidget::new(point(10, 10), size(300, 180));
+let mut panel = Panel::new().at(10, 10).size(300, 180);
 panel.set_color(Color::RGB(220, 220, 220));
 let panel_id = engine.add_widget(panel);
 
 let indicator = engine.add_child_widget(
     panel_id,
-    BoxWidget::new(point(20, 20), size(40, 40), Color::BLACK, 1),
+    Frame::new().at(20, 20).size(40, 40),
 );
 ```
 
-Keep the IDs you need in callbacks. IDs are assigned in the order widgets are added and never change.
+A widget is created with a short constructor and chained setters; anything you leave out has a default (see each widget's page). Keep the IDs you need in callbacks. IDs are assigned in the order widgets are added and never change.
 
 ## Connecting callbacks
 
@@ -62,17 +62,9 @@ Callbacks receive `&mut AppState` and a `Ui` handle. See [Handling events](./han
 ![The application below, after clicking Save](/img/screenshots/events.png)
 
 ```rust checked title="src/main.rs"
-use pushrod_widgets::base_widget::BaseWidget;
-use pushrod_widgets::box_widget::BoxWidget;
-use pushrod_widgets::button_widget::ButtonWidget;
-use pushrod::engine::Engine;
+use pushrod::prelude::*;
 use pushrod_sdl2::WindowSettings;
-use pushrod::event::Event;
-use pushrod::geometry::{point, size};
-use pushrod_widgets::text_widget::TextJustify;
-use pushrod::widget::Widget;
-use pushrod::color::Color;
-use pushrod::font::Font;
+use pushrod_widgets::prelude::*;
 
 #[derive(Default)]
 struct AppState {
@@ -83,21 +75,19 @@ fn main() -> Result<(), pushrod::error::Error> {
     let mut engine: Engine<AppState> = Engine::new(size(320, 200), 60);
 
     // A gray panel; its children are positioned relative to it.
-    let mut panel = BaseWidget::new(point(10, 10), size(300, 180));
+    let mut panel = Panel::new().at(10, 10).size(300, 180);
     panel.set_color(Color::RGB(220, 220, 220));
     let panel_id = engine.add_widget(panel);
 
-    let indicator = engine.add_child_widget(panel_id, BoxWidget::new(point(20, 20), size(40, 40), Color::BLACK, 1));
+    let indicator = engine.add_child_widget(panel_id, Frame::new().at(20, 20).size(40, 40));
 
     let save = engine.add_child_widget(
         panel_id,
-        ButtonWidget::new(point(20, 80), size(100, 28), Font::default(),
-            Color::BLACK, TextJustify::Center, "Save".into(), 2),
+        Button::new("Save").at(20, 80).size(100, 28),
     );
     let quit = engine.add_child_widget(
         panel_id,
-        ButtonWidget::new(point(140, 80), size(100, 28), Font::default(),
-            Color::BLACK, TextJustify::Center, "Quit".into(), 2),
+        Button::new("Quit").at(140, 80).size(100, 28),
     );
 
     // Per-widget callback: runs only when `save` is clicked.

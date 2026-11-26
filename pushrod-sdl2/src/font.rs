@@ -76,13 +76,15 @@ const ATLAS_PAGE_SIZE: u32 = 1024;
 ///
 /// # Errors
 ///
-/// Returns the SDL2_ttf error message, or the reason SDL2_ttf could not be initialized.
+/// Returns the SDL2_ttf error message, the reason SDL2_ttf could not be initialized, or a message
+/// when the font source kind is not supported by this backend.
 pub(crate) fn load_ttf(source: &FontSource, size: u16) -> Result<Font<'static, 'static>, String> {
     let ttf = ttf_context()?;
 
     match source {
         FontSource::Path(path) => ttf.load_font(path, size),
         FontSource::Bytes(bytes) => ttf.load_font_from_rwops(RWops::from_bytes(bytes)?, size),
+        _ => Err(String::from("unsupported font source")),
     }
 }
 
@@ -212,6 +214,21 @@ pub struct FontCache {
     stats: FontCacheStats,
     notices: Vec<FontNotice>,
     registry: FontRegistry,
+}
+
+impl std::fmt::Debug for FontCache {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FontCache").finish_non_exhaustive()
+    }
 }
 
 /// Returns the kerning adjustment between two glyphs.
