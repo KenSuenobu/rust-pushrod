@@ -384,10 +384,12 @@ impl Backend for Sdl2Backend {
     }
 
     /// A failed copy is reported through [`Backend::take_notices`] and the `Widget` is skipped.
-    fn draw_widget(&mut self, id: WidgetId, bounds: Rect) {
+    fn draw_widget(&mut self, id: WidgetId, source: Rect, dest: Rect) {
         if let Some(store) = self.textures.get_mut(&id)
             && let Some(texture) = store.get_optional_ref()
-            && let Err(message) = self.canvas.copy(texture, None, to_sdl_rect(bounds))
+            && let Err(message) = self
+                .canvas
+                .copy(texture, to_sdl_rect(source), to_sdl_rect(dest))
         {
             self.report(Error::texture(message));
         }

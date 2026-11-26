@@ -1358,7 +1358,6 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 5.1 (#56) | Clip children to their parent's bounds | Children never draw or receive input outside their parent. | `core`, `enhancement`, `layout`, `mvp`, `size/S` | N | v0.1 | S | `src/cache.rs` |
 | 5.2 (#57) | Composite widgets: build widgets from parts that applications can retrieve and modify | A Composite trait whose parts (labels, buttons, icons, rows) are real widgets that applications can fetch, restyle, add, and remove. | `core`, `enhancement`, `layout`, `mvp`, `size/M`, `usability` | N | v0.1 | M | `src/widget.rs`, `src/cache.rs`, `src/composite.rs (new)` |
 | 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `chassis`, `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | v0.1 | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
@@ -1371,15 +1370,17 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 
 ### 5.1 (#56): Clip children to their parent's bounds
 
+**Status:** done (#56). `WidgetCache::visible_rect(id)` is a widget's rectangle intersected with its ancestors'; `draw_loop` blits only the cropped source and destination rectangles (`Backend::draw_widget(id, source, dest)`) and `widget_at` hit-tests the visible rectangle; `Behavior::OVERLAY` opts menus, tooltips, and pop-ups out; `examples/clipping.rs` demonstrates it.
+
 **Problem Statement.** A child partly outside its parent draws over neighbors and receives input outside the parent; containers need clipping.
 
 **Solution / Scope.** Each widget's visible rectangle is its rectangle intersected with its ancestors'. Blits use cropped source/destination rectangles; hit testing uses the visible rectangle. Overlays (menus, tooltips, pop-ups) opt out.
 
 **Acceptance Criteria.**
 
-- Partly outside children are cropped
-- Hit testing ignores cropped parts
-- Golden test
+- [x] Partly outside children are cropped
+- [x] Hit testing ignores cropped parts
+- [x] Golden test
 
 **Parallelism / Dependencies.** Not parallelizable. Requires PR #10.
 

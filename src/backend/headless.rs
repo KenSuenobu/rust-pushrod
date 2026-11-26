@@ -297,6 +297,9 @@ pub struct HeadlessBackend {
     pub painted: Vec<(WidgetId, Vec<PaintCall>)>,
     /// Every `Widget` texture drawn into a frame, in order, with its bounds.
     pub draws: Vec<(WidgetId, Rect)>,
+    /// The part of each texture in [`draws`](HeadlessBackend::draws) that was copied, in the same
+    /// order, relative to the widget's upper left-hand corner.
+    pub draw_sources: Vec<(WidgetId, Rect)>,
     /// The number of frames presented.
     pub frames: usize,
     /// The last mask the engine set.
@@ -442,14 +445,16 @@ impl Backend for HeadlessBackend {
     /// * `_clear` - The clear color; ignored.
     fn begin_frame(&mut self, _clear: Color) {}
 
-    /// Records the draw in [`HeadlessBackend::draws`].
+    /// Records the draw in [`HeadlessBackend::draws`] and [`HeadlessBackend::draw_sources`].
     ///
     /// # Arguments
     ///
     /// * `id` - The `Widget` drawn.
-    /// * `bounds` - Where it was drawn.
-    fn draw_widget(&mut self, id: WidgetId, bounds: Rect) {
-        self.draws.push((id, bounds));
+    /// * `source` - The part of its texture copied.
+    /// * `dest` - Where it was drawn.
+    fn draw_widget(&mut self, id: WidgetId, source: Rect, dest: Rect) {
+        self.draw_sources.push((id, source));
+        self.draws.push((id, dest));
     }
 
     /// Counts a presented frame in [`HeadlessBackend::frames`].
@@ -602,7 +607,7 @@ mod tests {
         assert_eq!(b.poll_events(None), vec![InputEvent::Quit]);
 
         b.paint_widget(3, Size::new(4, 4), &mut |p| p.fill(Color::RED));
-        b.draw_widget(3, Rect::new(0, 0, 4, 4));
+        b.draw_widget(3, Rect::new(0, 0, 4, 4), Rect::new(0, 0, 4, 4));
         b.present();
         b.set_clipboard_text("hi");
 

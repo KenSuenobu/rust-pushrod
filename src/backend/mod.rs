@@ -131,13 +131,18 @@ pub trait Backend {
     /// * `clear` - The color to clear to.
     fn begin_frame(&mut self, clear: Color);
 
-    /// Copies a `Widget`'s cached texture into the frame; nothing happens if it has none.
+    /// Copies part of a `Widget`'s cached texture into the frame; nothing happens if it has none.
+    ///
+    /// The parts of a `Widget` outside its ancestors' bounds are cropped away, so `source` and
+    /// `dest` are the same size and may be smaller than the `Widget`.
     ///
     /// # Arguments
     ///
     /// * `id` - The `Widget` to draw.
-    /// * `bounds` - Where to draw it, in window coordinates.
-    fn draw_widget(&mut self, id: WidgetId, bounds: Rect);
+    /// * `source` - The part of the `Widget`'s texture to copy, relative to its upper left-hand
+    ///   corner.
+    /// * `dest` - Where to draw it, in window coordinates.
+    fn draw_widget(&mut self, id: WidgetId, source: Rect, dest: Rect);
 
     /// Finishes the frame and shows it.
     fn present(&mut self);
