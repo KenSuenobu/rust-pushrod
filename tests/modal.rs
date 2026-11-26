@@ -3,10 +3,12 @@
 //
 // Headless: raw input events are built by hand and given to the engine.
 
+use pushrod::cache::ModalStyle;
+use pushrod::color::Color;
 use pushrod::engine::Engine;
 use pushrod::error::Error;
 use pushrod::event::{EngineEvent, Event, EventCtx, EventMask, Propagation};
-use pushrod::geometry::{point, size};
+use pushrod::geometry::{Rect, point, size};
 use pushrod::input::{InputEvent, Key, Modifiers, MouseButton};
 use pushrod::paint::Painter;
 use pushrod::root_widget::RootWidget;
@@ -517,4 +519,138 @@ fn opening_repaints_a_dialog_that_was_hidden_since_it_was_built() {
     for id in [app.dialog, app.ok, app.cancel] {
         assert!(app.engine.widgets().get(id).unwrap().is_invalidated());
     }
+}
+
+/// Draws one full frame headless and returns the backend's record of it.
+fn compose(app: &mut App) -> pushrod::backend::headless::HeadlessBackend {
+    let mut backend = pushrod::backend::headless::HeadlessBackend::new(size(300, 300));
+
+    app.engine.widgets().invalidate_all();
+    app.engine.widgets().draw_loop(&mut backend);
+    backend
+}
+
+#[test]
+fn no_backdrop_is_drawn_without_a_dialog() {
+    let mut app = App::new();
+    let backend = compose(&mut app);
+
+    assert!(backend.backdrops.is_empty());
+    assert!(backend.frame_fills.is_empty());
+}
+
+#[test]
+fn each_dialog_is_drawn_over_a_backdrop_with_an_outlined_border() {
+    let mut app = App::new();
+    let alert = add_panel(&mut app.engine, 200);
+    let alert_ok = add_probe(
+        &mut app.engine,
+        &app.log,
+        alert,
+        0,
+        Behavior::FOCUSABLE | Behavior::DEFAULT_ACTION | Behavior::DISMISSES_DIALOG,
+    );
+
+    app.open(app.dialog);
+    app.open(alert);
+
+    let backend = compose(&mut app);
+    let drawn: Vec<WidgetId> = backend.draws.iter().map(|(id, _)| *id).collect();
+    let style = app.engine.widgets().modal_style();
+
+    // Window, backdrop, dialog, backdrop, alert: one backdrop per layer of modality.
+    assert_eq!(
+        drawn,
+        vec![
+            ROOT_WIDGET_ID,
+            app.main,
+            app.dialog,
+            app.ok,
+            app.cancel,
+            alert,
+            alert_ok
+        ]
+    );
+    assert_eq!(
+        backend.backdrops,
+        vec![(2, style.shade, style.blur), (5, style.shade, style.blur)]
+    );
+
+    // Border, gap, and outline around each dialog: three rings of four edges.
+    assert_eq!(backend.frame_fills.len(), 24);
+
+    let dialog_border: Vec<_> = backend.frame_fills[..4].to_vec();
+
+    assert_eq!(
+        dialog_border,
+        vec![
+            (Rect::new(99, -1, 102, 1), Color::BLACK),
+            (Rect::new(99, 100, 102, 1), Color::BLACK),
+            (Rect::new(99, 0, 1, 100), Color::BLACK),
+            (Rect::new(200, 0, 1, 100), Color::BLACK),
+        ]
+    );
+    assert_eq!(backend.frame_fills[4].1, Color::WHITE);
+    assert_eq!(backend.frame_fills[4].0, Rect::new(97, -3, 106, 2));
+    assert_eq!(backend.frame_fills[8].0, Rect::new(96, -4, 108, 1));
+}
+
+#[test]
+fn a_dialog_is_drawn_and_hit_on_top_wherever_it_sits_in_the_tree() {
+    let mut app = App::new();
+    // The dialog lives inside a holder panel; a sibling of the holder, added later and
+    // overlapping the dialog, would normally draw above it and take its clicks.
+    let holder = app.engine.add_widget(RootWidget::new(size(300, 300)));
+    let inner = add_panel(&mut app.engine, 0);
+
+    app.engine.widgets().reparent(inner, holder).unwrap();
+
+    let inner_ok = add_probe(
+        &mut app.engine,
+        &app.log,
+        inner,
+        0,
+        Behavior::FOCUSABLE | Behavior::DEFAULT_ACTION | Behavior::DISMISSES_DIALOG,
+    );
+    let cover = add_probe(
+        &mut app.engine,
+        &app.log,
+        ROOT_WIDGET_ID,
+        0,
+        Behavior::FOCUSABLE,
+    );
+
+    app.open(inner);
+
+    let backend = compose(&mut app);
+    let drawn: Vec<WidgetId> = backend.draws.iter().map(|(id, _)| *id).collect();
+    let position = |id| drawn.iter().position(|&d| d == id).unwrap();
+
+    assert!(position(cover) < position(inner_ok));
+    assert_eq!(backend.backdrops[0].0, position(inner));
+    assert_eq!(app.engine.widgets().widget_at(5, 5), inner_ok);
+
+    // The click lands on the dialog's control, not the cover.
+    app.click(5);
+    assert_eq!(app.state.dismissed, vec![(inner, inner_ok)]);
+}
+
+#[test]
+fn the_modal_style_changes_the_backdrop_and_border() {
+    let mut app = App::new();
+    let style = ModalStyle {
+        shade: Color::RGBA(0, 0, 0, 128),
+        blur: 0,
+        outlined: false,
+        ..ModalStyle::default()
+    };
+
+    app.engine.widgets().set_modal_style(style);
+    app.open(app.dialog);
+
+    let backend = compose(&mut app);
+
+    assert_eq!(backend.backdrops, vec![(2, Color::RGBA(0, 0, 0, 128), 0)]);
+    // Only the one-pixel border: four edges.
+    assert_eq!(backend.frame_fills.len(), 4);
 }

@@ -11,7 +11,7 @@ A **modal dialog** takes all the input until it is dismissed. Alerts, file choos
 - `root` is the dialog's root widget. Usually it is a hidden `Panel` that holds the dialog's controls and is built with the rest of the window.
 - The callback runs **once**, when a dismissing control inside the dialog is chosen. It receives the application state, a `Ui`, and the ID of the control that closed the dialog.
 
-![A settings dialog open over the main window: a Settings title, Dark theme and Autosave check boxes, and Reset..., Cancel, and Save buttons; the window's own Settings... button is covered and inert](/img/screenshots/modal-dialog.png)
+![A settings dialog with an outlined border open over the main window, which is darkened and blurred: a Settings title, Dark theme and Autosave check boxes, and Reset..., Cancel, and Save buttons](/img/screenshots/modal-dialog.png)
 
 ## Running a dialog
 
@@ -67,13 +67,62 @@ The complete program, with a nested confirmation alert and a status line of engi
 
 | What | Behavior |
 |---|---|
-| **Drawing** | The dialog's root is shown and raised above its siblings. The rest of the window is still drawn. |
+| **Drawing** | The dialog's root is shown and drawn above everything else, over a darkened, softened backdrop (see [How a dialog looks](#how-a-dialog-looks)). The rest of the window is still drawn. |
 | **Input** | Only the dialog's root and its descendants receive pointer, key, and text input. Everything else is **inert**: clicks, hover, and the wheel do nothing there, and it never looks hovered or pressed. |
 | **Focus** | Focus moves to the dialog's first focusable widget in Tab order, or is cleared if it has none. Tab and Shift-Tab stay inside the dialog, and inert widgets cannot take focus, even with `set_focus`. |
 | **Return / Escape** | Return activates the dialog's `DEFAULT_ACTION` widget and Escape (or Cmd-. on macOS) its `CANCEL_ACTION` widget. The search stops at the dialog's root, so the main window's default button is never pressed. |
 | **Not blocked** | Timers, animation ticks, idle callbacks, custom events, and broadcasts (such as a window resize) still reach every widget, because they are not input. |
 
 `WidgetCache::is_inert(id)` tells whether a widget is blocked, `top_modal()` returns the dialog that has the input, and `open_modals()` lists every open dialog, first opened first.
+
+## How a dialog looks
+
+Each open dialog is drawn as a layer of its own, above everything beneath it, wherever its root sits in the widget tree. Before the layer is drawn:
+
+1. **Backdrop.** Everything already in the frame is darkened and slightly blurred, so it reads as out of reach.
+2. **Border.** The dialog gets a GEM-style `OUTLINED` frame just outside its bounds: a one-pixel black border, a two-pixel white gap, and a one-pixel black outline.
+
+A dialog opened over another dialog repeats both steps, so the window beneath grows darker and softer with each layer of modality.
+
+![The reset alert open over the settings dialog: the dialog is darkened and blurred once, the main window beneath it twice, and each has its own outlined border](/img/screenshots/modal-dialog-nested.png)
+
+```mermaid
+flowchart LR
+    W["Window widgets"] --> B1["Backdrop: shade + blur"]
+    B1 --> D1["Settings dialog<br/>border, outline, widgets"]
+    D1 --> B2["Backdrop: shade + blur"]
+    B2 --> D2["Reset alert<br/>border, outline, widgets"]
+```
+
+All of it is composed on the GPU from cached textures. The SDL2 backend composes the frame into an offscreen texture, and blurs it by scaling it down by halves and back up with linear filtering. No pixel is touched on the CPU, and nothing is repainted: the effect is redrawn only when a frame is composed.
+
+Change the look with `WidgetCache::set_modal_style`:
+
+```rust checked title="src/modal_style.rs"
+use pushrod::cache::ModalStyle;
+use pushrod::color::Color;
+use pushrod::engine::Engine;
+
+/// A darker backdrop with no blur, and a plain one-pixel border.
+pub fn plain_dialogs(engine: &mut Engine) {
+    engine.widgets().set_modal_style(ModalStyle {
+        shade: Color::RGBA(0, 0, 0, 96),
+        blur: 0,
+        outlined: false,
+        ..ModalStyle::default()
+    });
+}
+```
+
+| Field | Default | Meaning |
+|---|---|---|
+| `shade` | `Color::RGBA(0, 0, 0, 64)` | Blended over everything beneath a dialog. Its alpha sets how much it darkens; `0` draws no shade. |
+| `blur` | `2` | How much to soften, in halvings of resolution: `0` is sharp, `1` halves, `2` quarters. |
+| `border` | `Color::BLACK` | The one-pixel border just outside the dialog, and the outline. |
+| `outlined` | `true` | Adds GEM's outline: a two-pixel `gap`, then a one-pixel line in `border`. |
+| `gap` | `Color::WHITE` | The gap between the border and the outline. |
+
+A backend that cannot compose effects (the default `Backend::draw_backdrop` and `Backend::fill_frame_rect`) draws the dialog without them.
 
 ## Dismissing a dialog
 
@@ -102,7 +151,7 @@ A dismissing control outside every open dialog, or with no dialog open, does not
 
 ## Nested dialogs
 
-Dialogs nest. Opening a dialog while another is open (for example an "Are you sure?" alert from a dialog's Reset... button) makes the new one the only one that takes input. The dialog underneath is drawn but inert until the alert closes. Then focus goes back to where it was in that dialog. A dismissal callback can also open the next dialog.
+Dialogs nest. Opening a dialog while another is open (for example an "Are you sure?" alert from a dialog's Reset... button) makes the new one the only one that takes input. The dialog underneath is drawn, darkened and blurred under the alert's own backdrop, but inert until the alert closes. Then focus goes back to where it was in that dialog. A dismissal callback can also open the next dialog.
 
 ```rust
 engine.on_click(reset, move |_state, ui| {
@@ -142,5 +191,6 @@ See [Engine events](../events/engine-events.md).
 | `WidgetCache::top_modal()` | The root of the dialog that has the input, or `None`. |
 | `WidgetCache::open_modals()` | Every open dialog's root, first opened first. |
 | `WidgetCache::is_inert(id)` | Whether an open dialog blocks a widget from input. |
+| `WidgetCache::set_modal_style(style)` / `modal_style()` | How dialogs are drawn: backdrop shade and blur, border, and outline. |
 
 See also [Keyboard and focus](../guides/keyboard-and-focus.md#dialogs) and [Button](../widgets/button.md#behaviors).

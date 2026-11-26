@@ -256,7 +256,9 @@ impl<'a, S> Ui<'a, S> {
     ///
     /// While the dialog is open, input goes only to `root` and its descendants: the rest of the
     /// window is still drawn but is inert (no clicks, keys, hover, or focus).  The root is shown
-    /// and raised above its siblings, and focus starts on its first focusable `Widget`.  Return
+    /// and drawn above everything else, over a darkened, softened backdrop and inside a GEM-style
+    /// outlined border (see [`ModalStyle`](crate::cache::ModalStyle)); each nested dialog adds
+    /// another backdrop.  Focus starts on the dialog's first focusable `Widget`.  Return
     /// and Escape activate the dialog's
     /// [`Behavior::DEFAULT_ACTION`](crate::widget::Behavior::DEFAULT_ACTION) and
     /// [`Behavior::CANCEL_ACTION`](crate::widget::Behavior::CANCEL_ACTION) `Widget`s.

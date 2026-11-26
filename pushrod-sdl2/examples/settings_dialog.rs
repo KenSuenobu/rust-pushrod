@@ -25,9 +25,13 @@
 //! - The status line shows the `ModalOpened`, `DialogDismissRequested`, and `ModalClosed`
 //!   engine events.
 //!
+//! - Each open dialog darkens and softens everything beneath it and has a GEM-style outlined
+//!   border, so the alert over the dialog shows two layers of modality.
+//!
 //! Run it with `cargo run -p pushrod-sdl2 --example settings_dialog`.  Pass
-//! `--screenshot <file.png>` to click **Settings...**, draw one frame, save it, and exit; this is
-//! how the documentation screenshot is made.  All sample data is fictional.
+//! `--screenshot <file.png>` to click **Settings...**, draw one frame, save it, and exit; add
+//! `nested` to also click **Reset...**.  This is how the documentation screenshots are made.  All
+//! sample data is fictional.
 
 use pushrod::color::Color;
 use pushrod::engine::Engine;
@@ -53,6 +57,9 @@ const ALERT_COLOR: Color = Color::RGBA(250, 235, 200, 255);
 
 /// Where the **Settings...** button is, for the screenshot's scripted click.
 const SETTINGS_BUTTON: Point = Point { x: 80, y: 68 };
+
+/// Where the dialog's **Reset...** button is, for the nested screenshot's scripted click.
+const RESET_BUTTON: Point = Point { x: 121, y: 212 };
 
 /// The saved settings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -124,33 +131,15 @@ fn add_label(engine: &mut Engine<AppState>, parent: WidgetId, mut text: Text, co
     engine.add_child_widget(parent, text);
 }
 
-/// Clicks **Settings...**, draws one frame with the dialog open, and saves it.
+/// Clicks the left mouse button at a point.
 ///
 /// # Arguments
 ///
-/// * `engine` - The application, built.
-/// * `settings` - The window to draw into.
-/// * `path` - Where to save the PNG.
-///
-/// # Returns
-///
-/// Nothing on success.
-///
-/// # Errors
-///
-/// Returns the backend's error if the window cannot be created or the image cannot be saved.
-fn save_screenshot(
-    mut engine: Engine<AppState>,
-    settings: &WindowSettings,
-    path: &str,
-) -> Result<(), pushrod::error::Error> {
-    let mut backend = Sdl2Backend::new(settings)?;
-    let mut state = AppState::default();
-
-    engine.widgets().draw_loop(&mut backend);
-
+/// * `engine` - The application.
+/// * `state` - The application state.
+/// * `position` - Where to click, in window coordinates.
+fn click(engine: &mut Engine<AppState>, state: &mut AppState, position: Point) {
     for down in [true, false] {
-        let position = SETTINGS_BUTTON;
         let event = if down {
             InputEvent::MouseDown {
                 position,
@@ -165,7 +154,40 @@ fn save_screenshot(
             }
         };
 
-        engine.dispatch(event, &mut state);
+        engine.dispatch(event, state);
+    }
+}
+
+/// Clicks **Settings...** (and **Reset...** when `nested`), draws one frame, and saves it.
+///
+/// # Arguments
+///
+/// * `engine` - The application, built.
+/// * `settings` - The window to draw into.
+/// * `path` - Where to save the PNG.
+/// * `nested` - `true` to open the reset alert over the dialog too.
+///
+/// # Returns
+///
+/// Nothing on success.
+///
+/// # Errors
+///
+/// Returns the backend's error if the window cannot be created or the image cannot be saved.
+fn save_screenshot(
+    mut engine: Engine<AppState>,
+    settings: &WindowSettings,
+    path: &str,
+    nested: bool,
+) -> Result<(), pushrod::error::Error> {
+    let mut backend = Sdl2Backend::new(settings)?;
+    let mut state = AppState::default();
+
+    engine.widgets().draw_loop(&mut backend);
+    click(&mut engine, &mut state, SETTINGS_BUTTON);
+
+    if nested {
+        click(&mut engine, &mut state, RESET_BUTTON);
     }
 
     engine.widgets().invalidate_all();
@@ -352,7 +374,9 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     if let Some(index) = args.iter().position(|a| a == "--screenshot")
         && let Some(path) = args.get(index + 1)
     {
-        return save_screenshot(engine, &settings, path);
+        let nested = args.get(index + 2).map(String::as_str) == Some("nested");
+
+        return save_screenshot(engine, &settings, path, nested);
     }
 
     pushrod_sdl2::run(engine, settings, AppState::default())?;

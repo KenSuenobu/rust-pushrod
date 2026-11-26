@@ -21,11 +21,127 @@
 //! **inert**: it receives no pointer, key, or text input, cannot take focus, and its default
 //! and cancel `Widget`s do not answer Return and Escape.  Timers, animation ticks, custom
 //! events, and broadcasts are not input and still reach it.
+//!
+//! **Layers.**  Each open dialog is drawn as its own layer, after everything beneath it.  Before
+//! a layer is drawn, everything already in the frame is darkened and softened (see
+//! [`ModalStyle`]), and the dialog gets a GEM-style outlined border, so every nested dialog adds
+//! one more visible step of modality.
 
 use super::WidgetCache;
+use crate::backend::Backend;
+use crate::color::Color;
 use crate::error::{Error, Result};
 use crate::event::{EngineEvent, Event};
+use crate::geometry::Rect;
 use crate::widget::{Behavior, ROOT_WIDGET_ID, WidgetId};
+
+/// How open modal dialogs are drawn: the backdrop laid over everything beneath each dialog, and
+/// the border drawn around it.
+///
+/// The defaults follow GEM's `OUTLINED` dialogs: a one-pixel black border, a two-pixel white
+/// gap, and a one-pixel black outline, over a slightly darkened and softened window.
+///
+/// # Examples
+///
+/// ```rust
+/// use pushrod::cache::{ModalStyle, WidgetCache};
+/// use pushrod::color::Color;
+///
+/// let mut cache = WidgetCache::new();
+///
+/// // A plain one-pixel border and a darker backdrop, with no blur.
+/// cache.set_modal_style(ModalStyle {
+///     shade: Color::RGBA(0, 0, 0, 96),
+///     blur: 0,
+///     outlined: false,
+///     ..ModalStyle::default()
+/// });
+///
+/// assert_eq!(cache.modal_style().blur, 0);
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ModalStyle {
+    /// The color laid over everything beneath a dialog.  Its alpha sets how much it darkens;
+    /// fully transparent draws no shade.
+    pub shade: Color,
+    /// How much everything beneath a dialog is softened, in halvings of resolution: `0` keeps
+    /// it sharp, `1` halves it, `2` quarters it.  Backends that cannot blur ignore it.
+    pub blur: u8,
+    /// The color of the one-pixel border drawn just outside the dialog.
+    pub border: Color,
+    /// `true` to add GEM's outline outside the border: a two-pixel `gap` and a one-pixel line
+    /// in the `border` color.
+    pub outlined: bool,
+    /// The color of the gap between the border and the outline.
+    pub gap: Color,
+}
+
+impl Default for ModalStyle {
+    /// The GEM look: a 25% black shade, softened to a quarter of its resolution, a black border,
+    /// and a white-gapped outline.
+    ///
+    /// # Returns
+    ///
+    /// The default style.
+    fn default() -> Self {
+        Self {
+            shade: Color::RGBA(0, 0, 0, 64),
+            blur: 2,
+            border: Color::BLACK,
+            outlined: true,
+            gap: Color::WHITE,
+        }
+    }
+}
+
+/// The width of GEM's outline gap, in logical pixels.
+const OUTLINE_GAP: i32 = 2;
+
+/// One layer of a frame: the `Widget`s drawn together, and the dialog the layer belongs to.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) struct DrawLayer {
+    /// The root of the modal dialog this layer draws, or `None` for the window beneath every
+    /// dialog.
+    pub(super) modal: Option<WidgetId>,
+    /// The `Widget`s of the layer in drawing order.
+    pub(super) ids: Vec<WidgetId>,
+}
+
+/// Returns the four one-pixel-thick edges of a ring `distance` pixels outside `rect`.
+///
+/// # Arguments
+///
+/// * `rect` - The rectangle the ring surrounds.
+/// * `distance` - How far outside `rect` the ring lies; `1` touches it.
+/// * `thickness` - How many pixels thick the ring is, growing outward.
+///
+/// # Returns
+///
+/// The top, bottom, left, and right edges.
+fn ring(rect: Rect, distance: i32, thickness: i32) -> [Rect; 4] {
+    let outer_x = rect.x - distance - thickness + 1;
+    let outer_y = rect.y - distance - thickness + 1;
+    let outer_w = (rect.w as i32 + 2 * (distance + thickness - 1)).max(0) as u32;
+    let outer_h = (rect.h as i32 + 2 * (distance + thickness - 1)).max(0) as u32;
+    let t = thickness.max(0) as u32;
+
+    [
+        Rect::new(outer_x, outer_y, outer_w, t),
+        Rect::new(outer_x, outer_y + outer_h as i32 - t as i32, outer_w, t),
+        Rect::new(
+            outer_x,
+            outer_y + t as i32,
+            t,
+            outer_h.saturating_sub(2 * t),
+        ),
+        Rect::new(
+            outer_x + outer_w as i32 - t as i32,
+            outer_y + t as i32,
+            t,
+            outer_h.saturating_sub(2 * t),
+        ),
+    ]
+}
 
 /// One open modal dialog.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -40,7 +156,9 @@ impl WidgetCache {
     /// Opens a modal dialog: from now on, input goes only to `root` and its descendants.
     ///
     /// The root is shown (its [`Behavior::HIDDEN`] flag is cleared) and brought to the top of
-    /// its parent's stacking order, so the dialog is drawn above its siblings.  Focus moves to
+    /// its parent's stacking order.  Until it closes it is drawn as a layer of its own, above
+    /// everything else, after a backdrop that darkens and softens what lies beneath and with a
+    /// border around it (see [`ModalStyle`]).  Focus moves to
     /// the dialog's first focusable `Widget` in Tab order, or is cleared if it has none.  Return
     /// and Escape activate the dialog's default and cancel `Widget`s.  Activating a
     /// [`Behavior::DISMISSES_DIALOG`] `Widget` inside it closes it (see
@@ -131,6 +249,119 @@ impl WidgetCache {
                 }
 
                 widget.set_invalidated(true);
+            }
+        }
+    }
+
+    /// Returns how open modal dialogs are drawn.
+    ///
+    /// # Returns
+    ///
+    /// The style set with [`WidgetCache::set_modal_style`]; [`ModalStyle::default`] until then.
+    pub fn modal_style(&self) -> ModalStyle {
+        self.modal_style
+    }
+
+    /// Changes how open modal dialogs are drawn, and redraws the window.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The backdrop and border to use from the next frame.
+    pub fn set_modal_style(&mut self, style: ModalStyle) {
+        self.modal_style = style;
+        self.needs_full_redraw = true;
+    }
+
+    /// Splits the visible `Widget`s into drawing layers: the window, then one layer per open
+    /// modal dialog in the order they opened.  A dialog's subtree is taken out of the layer it
+    /// sits in, so every dialog is drawn above everything beneath it, wherever it is in the tree.
+    /// A dialog that is hidden itself or through a parent has no layer.
+    ///
+    /// # Returns
+    ///
+    /// The layers, bottom first; the first is always the window's.
+    pub(super) fn draw_layers(&self) -> Vec<DrawLayer> {
+        let roots = self.open_modals();
+        let mut layers = vec![DrawLayer {
+            modal: None,
+            ids: self.visible_subtree(ROOT_WIDGET_ID, &roots),
+        }];
+
+        for &root in &roots {
+            let shown = std::iter::once(root)
+                .chain(self.ancestors(root))
+                .all(|id| self.get(id).is_some_and(|w| !w.is_hidden()));
+
+            if shown {
+                layers.push(DrawLayer {
+                    modal: Some(root),
+                    ids: self.visible_subtree(root, &roots),
+                });
+            }
+        }
+
+        layers
+    }
+
+    /// Lists the visible `Widget`s under `top` in drawing order (parents before children,
+    /// siblings in stacking order), leaving out hidden subtrees and the subtrees of other open
+    /// dialogs.
+    ///
+    /// # Arguments
+    ///
+    /// * `top` - Where to start; it is included.
+    /// * `dialogs` - The roots of the open dialogs, each drawn in a layer of its own.
+    ///
+    /// # Returns
+    ///
+    /// The IDs in drawing order.
+    fn visible_subtree(&self, top: WidgetId, dialogs: &[WidgetId]) -> Vec<WidgetId> {
+        let mut order = Vec::new();
+        let mut stack = vec![top];
+
+        while let Some(id) = stack.pop() {
+            let Some(widget) = self.get(id) else {
+                continue;
+            };
+
+            if widget.is_hidden() || (id != top && dialogs.contains(&id)) {
+                continue;
+            }
+
+            order.push(id);
+            stack.extend(self.children_of(id).iter().rev());
+        }
+
+        order
+    }
+
+    /// Draws what goes beneath a dialog's layer: the backdrop over everything already in the
+    /// frame, then the dialog's border and outline.
+    ///
+    /// # Arguments
+    ///
+    /// * `root` - The dialog's root `Widget`.
+    /// * `backend` - The backend composing the frame.
+    pub(super) fn draw_modal_backdrop(&self, root: WidgetId, backend: &mut dyn Backend) {
+        let style = self.modal_style;
+
+        backend.draw_backdrop(style.shade, style.blur);
+
+        let Some(bounds) = self.visible_rect(root) else {
+            return;
+        };
+        let mut rings = vec![(1, 1, style.border)];
+
+        if style.outlined {
+            rings.push((2, OUTLINE_GAP, style.gap));
+            rings.push((2 + OUTLINE_GAP, 1, style.border));
+        }
+
+        for (distance, thickness, color) in rings {
+            for edge in ring(bounds, distance, thickness) {
+                if edge.w > 0 && edge.h > 0 {
+                    backend.fill_frame_rect(edge, color);
+                }
             }
         }
     }

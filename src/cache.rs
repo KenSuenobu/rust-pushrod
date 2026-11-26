@@ -54,6 +54,8 @@ mod parts;
 mod scroll;
 mod tree;
 
+pub use modal::ModalStyle;
+
 /// The most times one frame lays out and arranges parts before drawing.  A composite whose
 /// parts depend on layout (a scrolling container that fits its content) settles in two or
 /// three passes; anything still pending waits for the next frame.
@@ -98,6 +100,7 @@ pub struct WidgetCache {
     released_textures: Vec<WidgetId>,
     layout_hints: HashMap<WidgetId, SizeHint>,
     modals: Vec<modal::ModalFrame>,
+    modal_style: ModalStyle,
 }
 
 impl std::fmt::Debug for WidgetCache {
@@ -147,6 +150,7 @@ impl WidgetCache {
             released_textures: Vec::new(),
             layout_hints: HashMap::new(),
             modals: Vec::new(),
+            modal_style: ModalStyle::default(),
         }
     }
 
@@ -515,28 +519,17 @@ impl WidgetCache {
 
     /// Returns the IDs of all visible `Widget`s in drawing order: parents before children, and
     /// siblings in the order in which they were added.  Hidden `Widget`s and their children are
-    /// skipped.
+    /// skipped.  Open modal dialogs come last, each after everything beneath it (see
+    /// [`WidgetCache::open_modal`]).
     fn draw_order(&self) -> Vec<WidgetId> {
-        let mut order = Vec::with_capacity(self.cache.len());
-        let mut stack = Vec::new();
-
-        if !self.cache.is_empty() {
-            stack.push(ROOT_WIDGET_ID);
+        if self.cache.is_empty() {
+            return Vec::new();
         }
 
-        while let Some(id) = stack.pop() {
-            if self.cache[id as usize].is_hidden() {
-                continue;
-            }
-
-            order.push(id);
-
-            for child in self.children[id as usize].iter().rev() {
-                stack.push(*child);
-            }
-        }
-
-        order
+        self.draw_layers()
+            .into_iter()
+            .flat_map(|layer| layer.ids)
+            .collect()
     }
 
     /// Finds the top-most visible `Widget` at a point in the window.
@@ -1327,11 +1320,15 @@ impl WidgetCache {
             }
         }
 
-        let order = self.draw_order();
+        let layers = if self.cache.is_empty() {
+            Vec::new()
+        } else {
+            self.draw_layers()
+        };
         let mut visible = vec![false; self.cache.len()];
         let mut redraw = self.needs_full_redraw;
 
-        for id in &order {
+        for id in layers.iter().flat_map(|layer| &layer.ids) {
             visible[*id as usize] = true;
         }
 
@@ -1354,7 +1351,28 @@ impl WidgetCache {
 
         backend.begin_frame(Color::WHITE);
 
-        for id in order {
+        for layer in layers {
+            if let Some(root) = layer.modal {
+                self.draw_modal_backdrop(root, backend);
+            }
+
+            self.draw_layer(&layer.ids, backend);
+        }
+
+        self.needs_full_redraw = false;
+
+        true
+    }
+
+    /// Copies the cached textures of one layer's `Widget`s into the frame, cropped to their
+    /// ancestors' bounds.
+    ///
+    /// # Arguments
+    ///
+    /// * `ids` - The layer's `Widget`s in drawing order.
+    /// * `backend` - The backend composing the frame.
+    fn draw_layer(&self, ids: &[WidgetId], backend: &mut dyn Backend) {
+        for &id in ids {
             let Some(dest) = self.visible_rect(id) else {
                 continue;
             };
@@ -1363,10 +1381,6 @@ impl WidgetCache {
 
             backend.draw_widget(id, source, dest);
         }
-
-        self.needs_full_redraw = false;
-
-        true
     }
 }
 
