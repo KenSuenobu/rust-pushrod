@@ -206,6 +206,7 @@ flowchart TD
 
 ## Notes
 
+- Losing the keyboard focus releases the selection (the caret position is kept).
 - The caret blinks on the core's animation ticks (`Event::Tick`) while the field has the focus, and the field asks for the next tick itself.
 - Copy and paste go through the engine to the system clipboard. The engine refreshes its copy of the clipboard while a text field has the focus.
 - Positions are counted in characters, not bytes. Input-method composition arrives with [1.19](https://github.com/KenSuenobu/rust-pushrod/issues/112); plain typing works now.

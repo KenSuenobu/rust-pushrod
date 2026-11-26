@@ -363,6 +363,7 @@ impl Widget for TextField {
             Event::FocusLost { .. } => {
                 self.focused = false;
                 self.dragging = false;
+                self.anchor = self.caret;
                 self.set_invalidated(true);
                 ctx.emit(Event::EditingFinished { id: self.get_id() });
                 Propagation::Continue

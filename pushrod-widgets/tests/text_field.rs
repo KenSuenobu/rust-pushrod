@@ -818,3 +818,20 @@ fn double_click_in_an_empty_field_does_not_panic() {
     assert_eq!(get(&cache, id).selected_text(), "");
     assert_eq!(get(&cache, id).caret(), 0);
 }
+
+#[test]
+fn losing_the_focus_releases_the_selection() {
+    let (mut cache, id) = focused(TextField::new().with_text("hello"));
+
+    cache.handle_event(command('a'));
+    assert_eq!(get(&cache, id).selected_text(), "hello");
+
+    cache.clear_focus();
+
+    assert_eq!(get(&cache, id).selected_text(), "");
+    assert!(
+        !painted(get(&cache, id))
+            .iter()
+            .any(|c| matches!(c, PaintCall::FillRect(_, color) if *color == Color::BLACK))
+    );
+}
