@@ -941,7 +941,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 2.8 (#34) | Icon widget (picture with caption) | Picture with a caption, selectable and double-clickable, like desktop icons. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/icon_widget.rs (new)` |
-| 2.9 (#35) | Alert dialog | One-call modal alert with icon, message, and up to three buttons. | `enhancement`, `forms`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/alert.rs (new)`, `src/engine.rs` |
 | 2.11 (#37) | Menu bar and drop-down menus (drawn by Pushrod) | Menu bar with drop-down menus, separators, check marks, submenus, shortcuts, and mnemonics. | `chassis`, `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/menu.rs (new)`, `src/cache.rs`, `src/engine.rs` |
 | 2.12 (#38) | File chooser dialog (drawn by Pushrod) | Choose a file or directory with a consistent look on every platform. | `chassis`, `enhancement`, `forms`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/file_chooser.rs (new)` |
 | 2.13 (#77) | Tooltips | Short help text shown after the pointer rests on a widget. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `src/cache.rs`, `pushrod-widgets/src/tooltip.rs (new)` |
@@ -1019,6 +1018,8 @@ Picture with a caption, selectable and double-clickable, like desktop icons. **W
 **Dependencies.** Requires 1.6 (#22), 2.7 (#33).
 
 ### 2.9 (#35): Alert dialog
+
+**Status:** done (#35). `pushrod_widgets::alert`: `ui.alert(AlertKind, title, message, buttons, default, |state, ui, choice| ..)` (the `AlertExt` trait on `Ui`) builds an `Alert` composite, centers it, and opens it with `ui.open_modal`; Return chooses the default button, Escape the last given button, and the alert is removed before the completion closure gets the index. Parts: `AlertParts { icon, title, message, buttons }`; `AlertHandle::add_button` (placed at the lower left), `remove_button`, `set_default_button`. Docs: `pushrod-docs/docs/widgets/alert.md`; example: `pushrod-sdl2/examples/alert.rs` (with a quit confirmation).
 
 One-call modal alert with icon, message, and up to three buttons. **Widget roadmap:** [`docs/widgets/alert.md`](widgets/alert.md) (look, behavior, events, acceptance criteria).
 

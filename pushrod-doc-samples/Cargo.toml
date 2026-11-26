@@ -1,6 +1,6 @@
 [package]
 name = "pushrod-doc-samples"
-version = "0.0.31"
+version = "0.0.32"
 description = "Compiles the documentation samples marked `rust checked` so they cannot go stale"
 edition.workspace = true
 rust-version.workspace = true
@@ -15,8 +15,8 @@ path = "src/lib.rs"
 
 [dependencies]
 pushrod = { path = "..", version = "0.0.40" }
-pushrod-widgets = { path = "../pushrod-widgets", version = "0.0.39" }
-pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.0.46" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.0.40" }
+pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.0.47" }
 
 [dependencies.sdl2]
 version = "0.38"

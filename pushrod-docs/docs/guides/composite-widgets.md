@@ -16,7 +16,7 @@ ButtonBar (composite, id 1)
  └── "button:2"  Button  id 5   Help   <- app: insert_list_part(bar, "button", ..)
 ```
 
-The `Composite` trait lives in `pushrod::composite`. The alert is built on it later (roadmap step 52); its proposed look, customized through its parts, is [mockup 5.2-1](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/mockups/5.2-1.png).
+The `Composite` trait lives in `pushrod::composite`. The [alert](../widgets/alert.md) is built on it, with its typed `AlertParts { icon, title, message, buttons }`.
 
 ## How it works
 
@@ -285,7 +285,7 @@ See [Engine events](../events/engine-events.md).
 
 ## Planned
 
-- The [scroll bar](../widgets/scroll-bar.md) and the [container](../widgets/container.md) are built on `Composite`, with their typed `ScrollBarParts` and `ContainerParts`. The alert ([roadmap step 52](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/roadmaps/ORDER_OF_EXECUTION.md)) follows.
+- The [scroll bar](../widgets/scroll-bar.md) and the [container](../widgets/container.md) are built on `Composite`, with their typed `ScrollBarParts` and `ContainerParts`. The [alert](../widgets/alert.md) is one too, with `AlertParts`, and adds and removes its buttons as a list of parts (`"button:0"`, `"button:1"`, ...).
 - Form files store a composite's part overrides and added or removed parts once the form writer exists (step 65).
 
 Related: [Creating widgets](creating-widgets.md), [Widget tree and IDs](../concepts/widget-tree-and-ids.md), [Handling events](handling-events.md).

@@ -88,7 +88,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 49 | [#139](https://github.com/KenSuenobu/rust-pushrod/issues/139) | pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides (done) |
 | ✅ 50 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder (done) |
 | ✅ 51 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen (done) |
-| 52 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog |
+| ✅ 52 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog (done) |
 | 53 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod |
 | 54 | [#72](https://github.com/KenSuenobu/rust-pushrod/issues/72) | pushrod: [7.4] Guide: writing widgets and composites |
 | 55 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release |
@@ -1134,11 +1134,11 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Modal: nothing else receives input while open
-- [ ] Return/Escape behave as described
-- [ ] Completion closure gets the index
-- [ ] Built on the step 40 `Composite` trait: `AlertParts`, plus `add_button` for extra buttons
-- [ ] Parts are retrievable and modifiable as described
+- [x] Modal: nothing else receives input while open
+- [x] Return/Escape behave as described
+- [x] Completion closure gets the index
+- [x] Built on the step 40 `Composite` trait: `AlertParts`, plus `add_button` for extra buttons
+- [x] Parts are retrievable and modifiable as described
 
 ### Step 53: Reference application: a real app built only with Pushrod
 
