@@ -748,3 +748,14 @@ fn the_engine_writes_copied_text_to_the_backend_clipboard() {
         "a focused text field asks for text input"
     );
 }
+
+#[test]
+fn double_click_in_an_empty_field_does_not_panic() {
+    let (mut cache, id) = focused(TextField::new());
+
+    cache.handle_event(down(12, 20, 2));
+    cache.handle_event(down(12, 20, 3));
+
+    assert_eq!(get(&cache, id).selected_text(), "");
+    assert_eq!(get(&cache, id).caret(), 0);
+}

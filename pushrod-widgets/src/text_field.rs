@@ -1027,12 +1027,10 @@ impl TextField {
                 self.move_caret(index, false);
             }
             2 => {
-                self.anchor = self
-                    .word_before(index.min(self.chars.len()).max(1))
-                    .min(index);
-                self.caret = self
-                    .word_after(self.anchor)
-                    .max(index.min(self.chars.len()));
+                let at = index.min(self.chars.len());
+
+                self.anchor = self.word_before(at.max(1).min(self.chars.len())).min(at);
+                self.caret = self.word_after(self.anchor).max(at);
                 self.restart_blink();
             }
             _ => {
