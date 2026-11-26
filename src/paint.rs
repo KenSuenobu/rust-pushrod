@@ -67,6 +67,18 @@ pub enum Truncate {
     Middle,
 }
 
+/// How [`paragraph`] breaks text into lines.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Wrap {
+    /// One line; [`text`] draws it (see [`Truncate`]).
+    #[default]
+    None,
+    /// Break at spaces; a word wider than the width is broken between graphemes.
+    Word,
+    /// Break between any two graphemes, as late as possible.
+    Anywhere,
+}
+
 /// The ellipsis drawn where text is cut.
 pub const ELLIPSIS: &str = "\u{2026}";
 
@@ -202,6 +214,17 @@ pub trait Painter {
     ///
     /// The size of the text drawn; `0` by `0` if nothing was drawn.
     fn text(&mut self, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size;
+
+    /// Returns the height of one line of text in a font.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The font.
+    ///
+    /// # Returns
+    ///
+    /// The line height in pixels.
+    fn line_height(&mut self, style: &TextStyle) -> u32;
 
     /// Measures how wide text is on one line, without drawing it.
     ///
@@ -455,6 +478,239 @@ pub fn fit_text(
     }
 
     Some(best.unwrap_or_default())
+}
+
+/// Breaks text into lines no wider than a width.
+///
+/// Explicit `\n` always starts a new line (an empty line stays empty).  With [`Wrap::Word`] lines
+/// break at spaces (runs of spaces collapse to one) and a word wider than the width is broken
+/// between graphemes; with [`Wrap::Anywhere`] they break between graphemes.  [`Wrap::None`] only
+/// splits at `\n`.  If `max_lines` is set and the text needs more lines, the last line is cut
+/// and ends in an ellipsis.
+///
+/// # Arguments
+///
+/// * `msg` - The text.
+/// * `max_width` - The width in pixels each line must fit (a single grapheme wider than this is
+///   still put on its own line).
+/// * `wrap` - How to break lines.
+/// * `max_lines` - The most lines to return (at least one is returned), or `None` for no limit.
+/// * `measure` - Returns the width in pixels of a string in the font being drawn.
+///
+/// # Returns
+///
+/// The lines, top to bottom, and whether the last line was cut to honor `max_lines`.
+pub fn wrap_text(
+    msg: &str,
+    max_width: u32,
+    wrap: Wrap,
+    max_lines: Option<usize>,
+    measure: &mut dyn FnMut(&str) -> u32,
+) -> (Vec<String>, bool) {
+    let mut lines: Vec<String> = Vec::new();
+
+    for paragraph in msg.split('\n') {
+        match wrap {
+            Wrap::None => lines.push(paragraph.to_string()),
+            Wrap::Anywhere => break_graphemes(paragraph, max_width, measure, &mut lines),
+            Wrap::Word => break_words(paragraph, max_width, measure, &mut lines),
+        }
+    }
+
+    let Some(limit) = max_lines.map(|n| n.max(1)) else {
+        return (lines, false);
+    };
+
+    if lines.len() <= limit {
+        return (lines, false);
+    }
+
+    lines.truncate(limit);
+
+    // Dropping the trailing ellipsis from the candidate is what fit_text does when it must cut, so
+    // the result always ends in exactly one ellipsis.
+    let last = format!("{}{ELLIPSIS}", lines[limit - 1]);
+    let cut = fit_text(&last, max_width, Truncate::End, measure).unwrap_or(last);
+
+    lines[limit - 1] = cut;
+
+    (lines, true)
+}
+
+/// Breaks one paragraph between graphemes, as late as possible, appending the lines to `out`.
+///
+/// # Arguments
+///
+/// * `text` - The paragraph (no newlines).
+/// * `max_width` - The width each line must fit.
+/// * `measure` - Measures a string.
+/// * `out` - Receives the lines; an empty paragraph adds one empty line.
+fn break_graphemes(
+    text: &str,
+    max_width: u32,
+    measure: &mut dyn FnMut(&str) -> u32,
+    out: &mut Vec<String>,
+) {
+    let mut current = String::new();
+
+    for g in text.graphemes(true) {
+        let candidate = format!("{current}{g}");
+
+        if current.is_empty() || measure(&candidate) <= max_width {
+            current = candidate;
+        } else {
+            out.push(std::mem::replace(&mut current, g.to_string()));
+        }
+    }
+
+    out.push(current);
+}
+
+/// Breaks one paragraph at spaces, appending the lines to `out`.
+///
+/// # Arguments
+///
+/// * `text` - The paragraph (no newlines).
+/// * `max_width` - The width each line must fit.
+/// * `measure` - Measures a string.
+/// * `out` - Receives the lines; an empty paragraph adds one empty line.
+fn break_words(
+    text: &str,
+    max_width: u32,
+    measure: &mut dyn FnMut(&str) -> u32,
+    out: &mut Vec<String>,
+) {
+    let mut current = String::new();
+
+    for word in text.split(' ').filter(|w| !w.is_empty()) {
+        let candidate = if current.is_empty() {
+            word.to_string()
+        } else {
+            format!("{current} {word}")
+        };
+
+        if measure(&candidate) <= max_width {
+            current = candidate;
+            continue;
+        }
+
+        if !current.is_empty() {
+            out.push(std::mem::take(&mut current));
+        }
+
+        if measure(word) <= max_width {
+            current = word.to_string();
+        } else {
+            // A word wider than the width: break it between graphemes; the last piece may take
+            // the next word.
+            let mut pieces = Vec::new();
+
+            break_graphemes(word, max_width, measure, &mut pieces);
+            current = pieces.pop().unwrap_or_default();
+            out.extend(pieces);
+        }
+    }
+
+    out.push(current);
+}
+
+/// Measures the height of wrapped text for a given width, so a layout can give a label the height
+/// it needs.
+///
+/// # Arguments
+///
+/// * `p` - The painter (it measures).
+/// * `style` - The font.
+/// * `msg` - The text.
+/// * `width` - The width in pixels the text will be drawn at.
+/// * `wrap` - How lines break; [`Wrap::None`] is one line per `\n`.
+/// * `max_lines` - The most lines, or `None`.
+///
+/// # Returns
+///
+/// The height in pixels: the number of lines times the line height.
+pub fn height_for_width(
+    p: &mut dyn Painter,
+    style: &TextStyle,
+    msg: &str,
+    width: u32,
+    wrap: Wrap,
+    max_lines: Option<usize>,
+) -> u32 {
+    if msg.is_empty() {
+        return 0;
+    }
+
+    let (lines, _) = wrap_text(msg, width, wrap, max_lines, &mut |s| p.text_width(style, s));
+
+    lines.len() as u32 * p.line_height(style)
+}
+
+/// Draws wrapped text: a block of lines, each aligned by `style.justification` within the
+/// rectangle, centered vertically when the block fits (top-aligned when it doesn't).  Lines that
+/// start below the rectangle are not drawn.
+///
+/// # Arguments
+///
+/// * `p` - The painter, targeting the `Widget`.
+/// * `bounds` - The rectangle to draw within, in `Widget` coordinates.
+/// * `style` - The font and alignment.
+/// * `color` - The text color.
+/// * `msg` - The text; `\n` starts a new line.
+/// * `wrap` - How lines break (see [`wrap_text`]).
+/// * `max_lines` - The most lines; the last is cut with an ellipsis if the text needs more.
+///
+/// # Returns
+///
+/// The size of the block drawn (`0` by `0` if nothing was drawn) and whether the text was cut to
+/// honor `max_lines`.
+pub fn paragraph(
+    p: &mut dyn Painter,
+    bounds: Rect,
+    style: &TextStyle,
+    color: Color,
+    msg: &str,
+    wrap: Wrap,
+    max_lines: Option<usize>,
+) -> TextDrawn {
+    if msg.is_empty() || bounds.w == 0 {
+        return TextDrawn {
+            size: Size::new(0, 0),
+            truncated: false,
+        };
+    }
+
+    let (lines, truncated) = wrap_text(msg, bounds.w, wrap, max_lines, &mut |s| {
+        p.text_width(style, s)
+    });
+    let line_h = p.line_height(style);
+    let block_h = lines.len() as u32 * line_h;
+    let top = if block_h < bounds.h {
+        bounds.y + (bounds.h - block_h) as i32 / 2
+    } else {
+        bounds.y
+    };
+    let bottom = bounds.y + bounds.h as i32;
+    let mut widest = 0;
+
+    for (i, line) in lines.iter().enumerate() {
+        let y = top + i as i32 * line_h as i32;
+
+        if y >= bottom {
+            break;
+        }
+
+        if !line.is_empty() {
+            let drawn = p.text(Rect::new(bounds.x, y, bounds.w, line_h), style, color, line);
+
+            widest = widest.max(drawn.w);
+        }
+    }
+
+    TextDrawn {
+        size: Size::new(widest, block_h),
+        truncated,
+    }
 }
 
 /// Computes where text of a given size is drawn within a rectangle.
@@ -797,5 +1053,153 @@ mod tests {
     #[test]
     fn end_is_the_default_mode() {
         assert_eq!(Truncate::default(), Truncate::End);
+    }
+
+    /// Five pixels per character, like the recording painter at font size 10.
+    fn five(s: &str) -> u32 {
+        s.chars().count() as u32 * 5
+    }
+
+    #[test]
+    fn word_wrap_breaks_at_spaces_and_reflows() {
+        let msg = "the quick brown fox jumps";
+        let (wide, _) = wrap_text(msg, 100, Wrap::Word, None, &mut five);
+        let (narrow, _) = wrap_text(msg, 50, Wrap::Word, None, &mut five);
+
+        assert_eq!(wide, vec!["the quick brown fox", "jumps"]);
+        assert_eq!(narrow, vec!["the quick", "brown fox", "jumps"]);
+        assert!(narrow.iter().all(|l| five(l) <= 50));
+    }
+
+    #[test]
+    fn explicit_newlines_are_kept_and_blank_lines_stay() {
+        let (lines, _) = wrap_text("a\n\nb c", 100, Wrap::Word, None, &mut five);
+
+        assert_eq!(lines, vec!["a", "", "b c"]);
+    }
+
+    #[test]
+    fn a_word_wider_than_the_width_is_broken() {
+        let (lines, _) = wrap_text("abcdefghij kl", 20, Wrap::Word, None, &mut five);
+
+        assert_eq!(lines, vec!["abcd", "efgh", "ij", "kl"]);
+    }
+
+    #[test]
+    fn anywhere_breaks_between_graphemes() {
+        let (lines, _) = wrap_text("abcdefghij", 25, Wrap::Anywhere, None, &mut five);
+
+        assert_eq!(lines, vec!["abcde", "fghij"]);
+
+        let (lines, _) = wrap_text(
+            "e\u{301}e\u{301}e\u{301}",
+            5,
+            Wrap::Anywhere,
+            None,
+            &mut |s| s.graphemes(true).count() as u32 * 5,
+        );
+
+        assert_eq!(
+            lines,
+            vec!["e\u{301}", "e\u{301}", "e\u{301}"],
+            "accents stay with their letter"
+        );
+    }
+
+    #[test]
+    fn max_lines_cuts_the_last_line_with_an_ellipsis() {
+        let (lines, cut) = wrap_text(
+            "the quick brown fox jumps",
+            50,
+            Wrap::Word,
+            Some(2),
+            &mut five,
+        );
+
+        assert!(cut);
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0], "the quick");
+        assert_eq!(lines[1], "brown fox\u{2026}");
+        assert!(lines.iter().all(|l| five(l) <= 50));
+
+        let (lines, cut) = wrap_text("a\nb", 100, Wrap::Word, Some(1), &mut five);
+
+        assert!(cut, "an explicit break past the limit also cuts");
+        assert_eq!(lines, vec!["a\u{2026}"]);
+
+        let (_, cut) = wrap_text("a b", 100, Wrap::Word, Some(2), &mut five);
+
+        assert!(!cut, "text that fits is not cut");
+    }
+
+    #[test]
+    fn paragraph_aligns_each_line_and_reports_height() {
+        let mut p = RecordingPainter::default();
+        let s = style(TextJustify::Right);
+        let drawn = paragraph(
+            &mut p,
+            Rect::new(0, 0, 50, 40),
+            &s,
+            Color::BLACK,
+            "the quick brown fox",
+            Wrap::Word,
+            None,
+        );
+
+        assert_eq!(drawn.size.h, 20, "two lines of ten pixels");
+        assert!(!drawn.truncated);
+        assert_eq!(
+            p.calls,
+            vec![
+                PaintCall::Text(
+                    Rect::new(0, 10, 50, 10),
+                    String::from("the quick"),
+                    Color::BLACK
+                ),
+                PaintCall::Text(
+                    Rect::new(0, 20, 50, 10),
+                    String::from("brown fox"),
+                    Color::BLACK
+                ),
+            ],
+            "each line gets its own rectangle, so the justification applies per line"
+        );
+    }
+
+    #[test]
+    fn paragraph_skips_lines_below_the_bounds() {
+        let mut p = RecordingPainter::default();
+        let s = style(TextJustify::Left);
+
+        paragraph(
+            &mut p,
+            Rect::new(0, 0, 50, 15),
+            &s,
+            Color::BLACK,
+            "a\nb\nc",
+            Wrap::Word,
+            None,
+        );
+
+        assert_eq!(
+            p.calls.len(),
+            2,
+            "lines at y 0 and 10 start inside; y 20 does not"
+        );
+    }
+
+    #[test]
+    fn height_for_width_grows_as_the_width_shrinks() {
+        let mut p = RecordingPainter::default();
+        let s = style(TextJustify::Left);
+        let msg = "the quick brown fox jumps";
+
+        assert_eq!(height_for_width(&mut p, &s, msg, 100, Wrap::Word, None), 20);
+        assert_eq!(height_for_width(&mut p, &s, msg, 50, Wrap::Word, None), 30);
+        assert_eq!(
+            height_for_width(&mut p, &s, msg, 50, Wrap::Word, Some(2)),
+            20
+        );
+        assert_eq!(height_for_width(&mut p, &s, "", 50, Wrap::Word, None), 0);
     }
 }

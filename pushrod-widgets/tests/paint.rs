@@ -3,7 +3,7 @@
 use pushrod::backend::headless::{PaintCall, RecordingPainter};
 use pushrod::color::{Color, FontStyle};
 use pushrod::geometry::{Rect, point, size};
-use pushrod::paint::Truncate;
+use pushrod::paint::{Truncate, Wrap};
 use pushrod::widget::Widget;
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
@@ -287,5 +287,119 @@ fn changing_the_truncate_mode_invalidates_the_widget() {
     t.set_truncate(Truncate::End);
     assert!(!t.is_invalidated(), "the same mode changes nothing");
     t.set_truncate(Truncate::Middle);
+    assert!(t.is_invalidated());
+}
+
+const PARAGRAPH: &str = "the quick brown fox jumps";
+
+fn paragraph_widget(width: u32) -> TextWidget {
+    let mut t = TextWidget::new(
+        point(0, 0),
+        size(width, 60),
+        String::from("font.ttf"),
+        FontStyle::NORMAL,
+        10,
+        Color::BLACK,
+        TextJustify::Left,
+        String::from(PARAGRAPH),
+    );
+
+    t.set_wrap(Wrap::Word);
+    t
+}
+
+fn text_calls(calls: &[PaintCall]) -> Vec<String> {
+    calls
+        .iter()
+        .filter_map(|c| match c {
+            PaintCall::Text(_, t, _) => Some(t.clone()),
+            _ => None,
+        })
+        .collect()
+}
+
+#[test]
+fn text_widget_does_not_wrap_by_default() {
+    let t = narrow_text(PARAGRAPH);
+
+    assert_eq!(t.get_wrap(), Wrap::None);
+    assert_eq!(t.get_max_lines(), None);
+}
+
+#[test]
+fn wrapped_text_reflows_when_the_width_changes() {
+    let mut t = paragraph_widget(100);
+
+    assert_eq!(
+        text_calls(&painted(&t)),
+        vec!["the quick brown fox", "jumps"]
+    );
+
+    t.set_size(size(50, 60));
+    assert_eq!(
+        text_calls(&painted(&t)),
+        vec!["the quick", "brown fox", "jumps"]
+    );
+}
+
+#[test]
+fn max_lines_ends_the_last_line_with_an_ellipsis() {
+    let mut t = paragraph_widget(50);
+
+    t.set_max_lines(Some(2));
+    assert_eq!(
+        text_calls(&painted(&t)),
+        vec!["the quick", "brown fox\u{2026}"]
+    );
+    assert!(t.is_truncated());
+
+    t.set_max_lines(None);
+    painted(&t);
+    assert!(!t.is_truncated());
+}
+
+#[test]
+fn each_wrapped_line_gets_its_own_row_so_alignment_applies_per_line() {
+    let t = paragraph_widget(50);
+    let rects: Vec<Rect> = painted(&t)
+        .iter()
+        .filter_map(|c| match c {
+            PaintCall::Text(r, _, _) => Some(*r),
+            _ => None,
+        })
+        .collect();
+
+    // Three ten-pixel lines centered in sixty pixels: rows at 15, 25 and 35, each the full width.
+    assert_eq!(
+        rects,
+        vec![
+            Rect::new(0, 15, 50, 10),
+            Rect::new(0, 25, 50, 10),
+            Rect::new(0, 35, 50, 10)
+        ]
+    );
+}
+
+#[test]
+fn height_for_width_reports_the_lines_needed() {
+    let mut p = RecordingPainter::default();
+    let mut t = paragraph_widget(100);
+
+    assert_eq!(t.height_for_width(&mut p, 100), 20);
+    assert_eq!(t.height_for_width(&mut p, 50), 30);
+
+    t.set_max_lines(Some(2));
+    assert_eq!(t.height_for_width(&mut p, 50), 20);
+}
+
+#[test]
+fn wrap_and_max_lines_invalidate_only_on_change() {
+    let mut t = paragraph_widget(100);
+
+    t.set_invalidated(false);
+    t.set_wrap(Wrap::Word);
+    t.set_max_lines(None);
+    assert!(!t.is_invalidated());
+    t.set_wrap(Wrap::Anywhere);
     assert!(t.is_invalidated());
 }

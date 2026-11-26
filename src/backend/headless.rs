@@ -134,6 +134,19 @@ impl Painter for RecordingPainter {
         Size::new(width, style.font_size as u32)
     }
 
+    /// Returns the line height: the font size.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The font.
+    ///
+    /// # Returns
+    ///
+    /// The font size in pixels.
+    fn line_height(&mut self, style: &TextStyle) -> u32 {
+        style.font_size as u32
+    }
+
     /// Measures text the way [`text`](Painter::text) sizes it, without recording a call.
     ///
     /// # Arguments
