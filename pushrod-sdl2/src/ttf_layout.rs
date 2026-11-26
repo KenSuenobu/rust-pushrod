@@ -209,6 +209,21 @@ pub struct TtfLayout {
     registry: FontRegistry,
 }
 
+impl std::fmt::Debug for TtfLayout {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TtfLayout").finish_non_exhaustive()
+    }
+}
+
 impl TtfLayout {
     /// Creates an engine with no fonts loaded.
     ///

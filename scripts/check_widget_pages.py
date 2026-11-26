@@ -2,7 +2,7 @@
 """Checks that every widget module has a documentation page.
 
 Every `<name>_widget.rs` in `pushrod-widgets/src/` needs `pushrod-docs/docs/widgets/<name>.md`
-(`button_widget.rs` -> `button.md`).  Missing pages are listed and the exit status is 1.
+(`button.rs` -> `button.md`).  Missing pages are listed and the exit status is 1.
 Run from anywhere inside the repository:
 
     python3 scripts/check_widget_pages.py
@@ -18,11 +18,11 @@ PAGES = ROOT / "pushrod-docs" / "docs" / "widgets"
 
 def main():
     """Reports each widget module without a page; returns the process exit status."""
-    modules = sorted(p.stem[: -len("_widget")] for p in MODULES.glob("*_widget.rs"))
+    modules = sorted(p.stem for p in MODULES.glob("*.rs") if p.stem not in ("lib", "prelude"))
     missing = [name for name in modules if not (PAGES / f"{name}.md").exists()]
 
     for name in missing:
-        print(f"missing page: pushrod-docs/docs/widgets/{name}.md (for {name}_widget.rs)")
+        print(f"missing page: pushrod-docs/docs/widgets/{name}.md (for {name}.rs)")
 
     print(f"{len(modules) - len(missing)} of {len(modules)} widget modules have a page")
     return 1 if missing else 0

@@ -3,13 +3,13 @@ use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::event::{EngineEvent, EngineEventKind, Event, EventMask, EventTarget, MaskScope};
 use pushrod::font::Font;
-use pushrod::geometry::{point, size};
+use pushrod::geometry::size;
 use pushrod::widget::{Behavior, VisualState, Widget};
 use pushrod_sdl2::WindowSettings;
-use pushrod_widgets::base_widget::BaseWidget;
-use pushrod_widgets::box_widget::BoxWidget;
-use pushrod_widgets::button_widget::ButtonWidget;
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::button::Button;
+use pushrod_widgets::frame::Frame;
+use pushrod_widgets::panel::Panel;
+use pushrod_widgets::text::Text;
 
 /// A custom event posted by the background thread below: how far along the "download" is.
 struct DownloadProgress {
@@ -28,81 +28,59 @@ pub fn main() -> Result<(), pushrod::error::Error> {
 
     // A gray panel.  Every other widget is a child of the panel, so their origins are relative
     // to the panel's upper left-hand corner (20, 20).
-    let mut panel = BaseWidget::new(point(20, 20), size(760, 560));
+    let mut panel = Panel::new().at(20, 20).size(760, 560);
     panel.set_color(Color::RGBA(127, 127, 127, 255));
     let panel_id = engine.add_widget(panel);
 
-    let mut welcome = TextWidget::new(
-        point(20, 10),
-        size(180, 18),
-        Font::default(),
-        Color::WHITE,
-        TextJustify::Left,
-        String::from("Welcome to Pushrod!"),
-    );
+    let mut welcome = Text::new("Welcome to Pushrod!")
+        .at(20, 10)
+        .size(180, 18)
+        .font_color(Color::WHITE);
     welcome.set_color(Color::RGBA(127, 127, 127, 255));
     engine.add_child_widget(panel_id, welcome);
 
-    let mut box_widget1 = BoxWidget::new(point(20, 40), size(100, 100), Color::BLUE, 3);
+    let mut box_widget1 = Frame::new()
+        .at(20, 40)
+        .size(100, 100)
+        .border_color(Color::BLUE)
+        .border_width(3);
     box_widget1.set_color(Color::CYAN);
     engine.add_child_widget(panel_id, box_widget1);
 
-    let mut box_widget2 = BoxWidget::new(point(160, 40), size(100, 100), Color::GREEN, 5);
+    let mut box_widget2 = Frame::new()
+        .at(160, 40)
+        .size(100, 100)
+        .border_color(Color::GREEN)
+        .border_width(5);
     box_widget2.set_color(Color::GRAY);
     engine.add_child_widget(panel_id, box_widget2);
 
-    let mut box_widget3 = BoxWidget::new(point(300, 40), size(100, 100), Color::RED, 10);
+    let mut box_widget3 = Frame::new()
+        .at(300, 40)
+        .size(100, 100)
+        .border_color(Color::RED)
+        .border_width(10);
     box_widget3.set_color(Color::MAGENTA);
     engine.add_child_widget(panel_id, box_widget3);
 
-    let button_id = engine.add_child_widget(
-        panel_id,
-        ButtonWidget::new(
-            point(20, 160),
-            size(120, 20),
-            Font::default(),
-            Color::BLACK,
-            TextJustify::Center,
-            String::from("Click me"),
-            2,
-        ),
-    );
+    let button_id =
+        engine.add_child_widget(panel_id, Button::new("Click me").at(20, 160).size(120, 20));
 
-    let mut status = TextWidget::new(
-        point(160, 161),
-        size(300, 18),
-        Font::default(),
-        Color::WHITE,
-        TextJustify::Left,
-        String::from("Not clicked yet."),
-    );
+    let mut status = Text::new("Not clicked yet.")
+        .at(160, 161)
+        .size(300, 18)
+        .font_color(Color::WHITE);
     status.set_color(Color::RGBA(127, 127, 127, 255));
     let status_id = engine.add_child_widget(panel_id, status);
 
     // A disabled button is drawn dimmed and receives no input.
-    let mut disabled = ButtonWidget::new(
-        point(20, 240),
-        size(120, 20),
-        Font::default(),
-        Color::BLACK,
-        TextJustify::Center,
-        String::from("Disabled"),
-        2,
-    );
+    let mut disabled = Button::new("Disabled").at(20, 240).size(120, 20);
     disabled.set_enabled(false);
     engine.add_child_widget(panel_id, disabled);
 
     // Per-state appearance: the button turns blue while the pointer is over it, and dark blue
     // while it is pressed.  Everything else about its look stays at the defaults.
-    let mut styled = ButtonWidget::new(
-        point(20, 320),
-        size(120, 20),
-        Font::default(),
-        Color::BLACK,
-        TextJustify::Center,
-        String::from("Hover me"),
-        2,
-    );
+    let mut styled = Button::new("Hover me").at(20, 320).size(120, 20);
     styled.set_style(
         VisualState::HOVERED,
         StateStyle {
@@ -121,28 +99,13 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     );
     engine.add_child_widget(panel_id, styled);
 
-    let quit_id = engine.add_child_widget(
-        panel_id,
-        ButtonWidget::new(
-            point(20, 200),
-            size(120, 20),
-            Font::default(),
-            Color::BLACK,
-            TextJustify::Center,
-            String::from("Quit"),
-            2,
-        ),
-    );
+    let quit_id = engine.add_child_widget(panel_id, Button::new("Quit").at(20, 200).size(120, 20));
 
     // Engine events: a status line that reports what Pushrod does internally.
-    let mut engine_status = TextWidget::new(
-        point(160, 201),
-        size(560, 18),
-        Font::default(),
-        Color::WHITE,
-        TextJustify::Left,
-        String::from("Engine events appear here."),
-    );
+    let mut engine_status = Text::new("Engine events appear here.")
+        .at(160, 201)
+        .size(560, 18)
+        .font_color(Color::WHITE);
     engine_status.set_color(Color::RGBA(127, 127, 127, 255));
     let engine_status_id = engine.add_child_widget(panel_id, engine_status);
 
@@ -156,45 +119,30 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         )
         .unwrap();
 
-    let mut font_status = TextWidget::new(
-        point(160, 281),
-        size(560, 24),
-        Font::new("Body", 18, FontStyle::BOLD),
-        Color::WHITE,
-        TextJustify::Left,
-        String::from("Font \"Body\" registered with engine.fonts().load_bytes"),
-    );
+    let mut font_status = Text::new("Font \"Body\" registered with engine.fonts().load_bytes")
+        .at(160, 281)
+        .size(560, 24)
+        .font(Font::new("Body", 18, FontStyle::BOLD))
+        .font_color(Color::WHITE);
     font_status.set_color(Color::RGBA(127, 127, 127, 255));
     engine.add_child_widget(panel_id, font_status);
 
     // Toggling the run-loop hover mask is an internal action, so it emits `EventMaskChanged`.
     let hover_id = engine.add_child_widget(
         panel_id,
-        ButtonWidget::new(
-            point(20, 280),
-            size(120, 20),
-            Font::default(),
-            Color::BLACK,
-            TextJustify::Center,
-            String::from("Toggle hover"),
-            2,
-        ),
+        Button::new("Toggle hover").at(20, 280).size(120, 20),
     );
 
     // Custom events: a background thread posts progress, and the UI thread shows it.
-    let mut task_status = TextWidget::new(
-        point(160, 241),
-        size(560, 18),
-        Font::default(),
-        Color::WHITE,
-        TextJustify::Left,
-        String::from("Background task: starting..."),
-    );
+    let mut task_status = Text::new("Background task: starting...")
+        .at(160, 241)
+        .size(560, 18)
+        .font_color(Color::WHITE);
     task_status.set_color(Color::RGBA(127, 127, 127, 255));
     let task_status_id = engine.add_child_widget(panel_id, task_status);
 
     engine.on_custom::<DownloadProgress, _>(move |_state, ui, _source, progress| {
-        ui.get_mut::<TextWidget>(task_status_id)
+        ui.get_mut::<Text>(task_status_id)
             .unwrap()
             .set_text(format!("Background task: {}% done", progress.percent));
     });
@@ -220,7 +168,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     engine.on_click(button_id, move |state, ui| {
         state.clicks += 1;
 
-        ui.get_mut::<TextWidget>(status_id)
+        ui.get_mut::<Text>(status_id)
             .unwrap()
             .set_text(format!("Clicked {} time(s).", state.clicks));
     });
@@ -229,7 +177,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
 
     // Per-kind callbacks: pointer-down on the button shows a message before the click completes.
     engine.on_press(button_id, move |_state, ui| {
-        ui.get_mut::<TextWidget>(status_id)
+        ui.get_mut::<Text>(status_id)
             .unwrap()
             .set_text(String::from("Button pressed..."));
     });
@@ -261,6 +209,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
                     let who = match scope {
                         MaskScope::RunLoop => String::from("window"),
                         MaskScope::Widget(id) => format!("widget {}", id),
+                        _ => String::from("another scope"),
                     };
 
                     format!("{} mask is now {:?}", who, new)
@@ -271,9 +220,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
                 _ => return,
             };
 
-            ui.get_mut::<TextWidget>(engine_status_id)
-                .unwrap()
-                .set_text(text);
+            ui.get_mut::<Text>(engine_status_id).unwrap().set_text(text);
         },
     );
 

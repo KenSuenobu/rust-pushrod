@@ -89,4 +89,4 @@ The cache routes pointer events itself. Until keyboard focus exists, send a key 
 
 ## Updating existing widgets
 
-`handle_event` now returns `Propagation`. Existing widgets add `-> Propagation` and end with `Propagation::Continue` (or `Stop` when they consume the event, as `ButtonWidget` does for its pointer events).
+`handle_event` now returns `Propagation`. Existing widgets add `-> Propagation` and end with `Propagation::Continue` (or `Stop` when they consume the event, as `Button` does for its pointer events).

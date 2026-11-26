@@ -22,10 +22,10 @@
 //!
 //! ```text
 //!   RootWidget   = fill
-//!   BaseWidget   = fill
-//!   BoxWidget    = fill + border
-//!   TextWidget   = fill + text
-//!   ButtonWidget = fill + text + border   (+ pressed state)
+//!   Panel   = fill
+//!   Frame    = fill + border
+//!   Text   = fill + text
+//!   Button = fill + text + border   (+ pressed state)
 //! ```
 //!
 //! The `pushrod-sdl2` crate's `Sdl2Painter` is the default backend: each `Widget` paints
@@ -42,6 +42,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 /// Horizontal alignment of text within its bounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum TextJustify {
     /// Aligned to the left edge.
     Left,
@@ -57,6 +58,7 @@ pub enum TextJustify {
 /// measured in the same font, marks the cut.  Truncation applies to single-line text; text that
 /// contains a newline is left alone.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
 pub enum Truncate {
     /// Don't shorten the text; it is clipped (or wrapped) as before.
     None,
@@ -71,6 +73,7 @@ pub enum Truncate {
 
 /// How [`paragraph`] breaks text into lines.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
 pub enum Wrap {
     /// One line; [`text`] draws it (see [`Truncate`]).
     #[default]
@@ -86,6 +89,7 @@ pub const ELLIPSIS: &str = "\u{2026}";
 
 /// The result of [`text`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct TextDrawn {
     /// The size of the text drawn; `0` by `0` if nothing was drawn.
     pub size: Size,
@@ -95,6 +99,7 @@ pub struct TextDrawn {
 
 /// How a backend keeps painted `Widget`s between frames.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
 pub enum CachePolicy {
     /// Each `Widget` paints into its own cached surface (a GPU texture) when invalidated, and frames
     /// are blits of those surfaces.  Used by GPU backends such as `SDL2`.

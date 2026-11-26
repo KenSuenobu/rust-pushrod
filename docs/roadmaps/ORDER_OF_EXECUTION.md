@@ -62,7 +62,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 23 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets (done) |
 | ✅ 24 | [#138](https://github.com/KenSuenobu/rust-pushrod/issues/138) | pushrod: [1.25] Errors: return Result instead of panicking (done) |
 | ✅ 25 | [#137](https://github.com/KenSuenobu/rust-pushrod/issues/137) | pushrod: [1.24] Fonts: shared font handles and a built-in default font (done) |
-| 26 | [#136](https://github.com/KenSuenobu/rust-pushrod/issues/136) | pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability |
+| ✅ 26 | [#136](https://github.com/KenSuenobu/rust-pushrod/issues/136) | pushrod: [1.23] Public API polish before publishing: builders, prelude, and stability (done) |
 | 27 | [#36](https://github.com/KenSuenobu/rust-pushrod/issues/36) | pushrod: [2.10] Custom paint widget (closure-drawn) |
 | 28 | [#27](https://github.com/KenSuenobu/rust-pushrod/issues/27) | pushrod: [2.1] Boxed label widget |
 | 29 | [#83](https://github.com/KenSuenobu/rust-pushrod/issues/83) | pushrod: [2.14] Separator line |
@@ -374,7 +374,7 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 - [x] `pushrod::Event` with the variants above; `EventKind`; `widget()`
 - [x] PR #10 behavior and tests ported to the new names
-- [x] `ButtonWidget` uses `PointerPressed/Released/Entered/Exited`
+- [x] `Button` uses `PointerPressed/Released/Entered/Exited`
 - [x] Rustdoc lists every event with when it is emitted
 
 **Status:** done (issue closed). Its video can be a recap of the finished work.
@@ -430,7 +430,7 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 - [ ] Masked SDL event types are disabled in SDL and re-enabled when the mask changes
 - [ ] Close requests are always delivered
 - [ ] Idle loop blocks on `wait_event_timeout` (near-zero idle CPU)
-- [ ] Widgets never receive events outside their mask; a `BoxWidget` receives nothing while a button still clicks
+- [ ] Widgets never receive events outside their mask; a `Frame` receives nothing while a button still clicks
 
 ### Step 8: Engine events: every internal action Pushrod performs emits an event
 
@@ -715,10 +715,10 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] No public constructor needs more than three required arguments
-- [ ] Public enums are `#[non_exhaustive]`
-- [ ] Quick start uses the preludes
-- [ ] Naming decision recorded in the roadmap's Naming section
+- [x] No public constructor needs more than three required arguments
+- [x] Public enums are `#[non_exhaustive]`
+- [x] Quick start uses the preludes
+- [x] Naming decision recorded in the roadmap's Naming section
 
 ### Step 27: Custom paint widget (closure-drawn)
 

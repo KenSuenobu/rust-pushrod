@@ -43,6 +43,7 @@ use std::time::Duration;
 
 /// One call made on a [`RecordingPainter`].
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum PaintCall {
     /// `fill(color)`
     Fill(Color),

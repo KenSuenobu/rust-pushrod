@@ -76,6 +76,21 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
+  semver:
+    name: Semver checks (published crates)
+    # Runs once the crates have a published release to compare against: set the repository
+    # variable SEMVER_CHECKS to "true" after the first release.
+    if: github.event_name == 'pull_request' && vars.SEMVER_CHECKS == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SDL2
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          workspace: true
+
   docs:
     name: Documentation checks (widget pages, checked samples)
     runs-on: ubuntu-latest

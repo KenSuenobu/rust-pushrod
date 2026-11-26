@@ -36,6 +36,21 @@ pub struct TextureStore {
     invalidated: bool,
 }
 
+impl std::fmt::Debug for TextureStore {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TextureStore").finish_non_exhaustive()
+    }
+}
+
 impl TextureStore {
     /// Returns the stored texture for drawing into.
     ///

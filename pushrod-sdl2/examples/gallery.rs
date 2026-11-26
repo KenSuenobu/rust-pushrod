@@ -10,15 +10,14 @@
 
 use pushrod::color::Color;
 use pushrod::engine::Engine;
-use pushrod::font::Font;
 use pushrod::geometry::{Point, point, size};
 use pushrod::paint::{Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_sdl2::{Sdl2Backend, WindowSettings};
-use pushrod_widgets::base_widget::BaseWidget;
-use pushrod_widgets::box_widget::BoxWidget;
-use pushrod_widgets::button_widget::ButtonWidget;
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
+use pushrod_widgets::button::Button;
+use pushrod_widgets::frame::Frame;
+use pushrod_widgets::panel::Panel;
+use pushrod_widgets::text::{Text, TextJustify};
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
@@ -52,14 +51,10 @@ fn add_label(
     width: u32,
     text: &str,
 ) -> WidgetId {
-    let mut label = TextWidget::new(
-        origin,
-        size(width, 18),
-        Font::default(),
-        Color::WHITE,
-        TextJustify::Left,
-        String::from(text),
-    );
+    let mut label = Text::new(text)
+        .at(origin.x, origin.y)
+        .size(width, 18)
+        .font_color(Color::WHITE);
     label.set_color(BACKGROUND);
     engine.add_child_widget(parent, label)
 }
@@ -84,7 +79,10 @@ fn add_tile(
         GAP + column as i32 * (TILE_W as i32 + GAP),
         GAP + row as i32 * (TILE_H as i32 + GAP),
     );
-    let mut frame = BoxWidget::new(origin, size(TILE_W, TILE_H), Color::WHITE, 1);
+    let mut frame = Frame::new()
+        .at(origin.x, origin.y)
+        .size(TILE_W, TILE_H)
+        .border_color(Color::WHITE);
     frame.set_color(BACKGROUND);
     let tile = engine.add_child_widget(parent, frame);
 
@@ -98,16 +96,8 @@ fn add_tile(
 /// * `text` - the button's label.
 ///
 /// Returns the button, not yet added to the tree.
-fn button(origin: Point, text: &str) -> ButtonWidget {
-    ButtonWidget::new(
-        origin,
-        size(120, 24),
-        Font::default(),
-        Color::BLACK,
-        TextJustify::Center,
-        String::from(text),
-        2,
-    )
+fn button(origin: Point, text: &str) -> Button {
+    Button::new(text).at(origin.x, origin.y).size(120, 24)
 }
 
 /// Draws one frame of the widget tree into a fresh window and saves it as an image.
@@ -131,38 +121,37 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let settings = WindowSettings::new("pushrod gallery", size(WINDOW_W, WINDOW_H));
     let mut engine: Engine<AppState> = Engine::new(size(WINDOW_W, WINDOW_H), 30);
 
-    let mut panel = BaseWidget::new(point(0, 0), size(WINDOW_W, WINDOW_H));
+    let mut panel = Panel::new().size(WINDOW_W, WINDOW_H);
     panel.set_color(Color::RGBA(80, 80, 80, 255));
     let panel_id = engine.add_widget(panel);
 
     // Base: a plain filled rectangle.
-    let base_tile = add_tile(&mut engine, panel_id, 0, 0, "BaseWidget");
-    let mut base = BaseWidget::new(point(10, 36), size(120, 60));
+    let base_tile = add_tile(&mut engine, panel_id, 0, 0, "Panel");
+    let mut base = Panel::new().at(10, 36).size(120, 60);
     base.set_color(Color::RGBA(30, 90, 160, 255));
     engine.add_child_widget(base_tile, base);
 
     // Box: a fill with a border, at three border widths.
-    let box_tile = add_tile(&mut engine, panel_id, 1, 0, "BoxWidget");
+    let box_tile = add_tile(&mut engine, panel_id, 1, 0, "Frame");
     for (i, width) in [1u8, 3, 6].iter().enumerate() {
-        let mut sample = BoxWidget::new(
-            point(10 + i as i32 * 90, 36),
-            size(80, 60),
-            Color::BLUE,
-            *width,
-        );
+        let mut sample = Frame::new()
+            .at(10 + i as i32 * 90, 36)
+            .size(80, 60)
+            .border_color(Color::BLUE)
+            .border_width(*width);
         sample.set_color(Color::CYAN);
         engine.add_child_widget(box_tile, sample);
     }
 
     // Button: normal and disabled.
-    let button_tile = add_tile(&mut engine, panel_id, 0, 1, "ButtonWidget");
+    let button_tile = add_tile(&mut engine, panel_id, 0, 1, "Button");
     engine.add_child_widget(button_tile, button(point(10, 36), "Normal"));
     let mut disabled = button(point(150, 36), "Disabled");
     disabled.set_enabled(false);
     engine.add_child_widget(button_tile, disabled);
 
     // Text: left, centered, and right justified labels (fictional sample text).
-    let text_tile = add_tile(&mut engine, panel_id, 1, 1, "TextWidget");
+    let text_tile = add_tile(&mut engine, panel_id, 1, 1, "Text");
     for (i, (justify, text)) in [
         (TextJustify::Left, "Jane Doe"),
         (TextJustify::Center, "Anytown"),
@@ -171,14 +160,11 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     .into_iter()
     .enumerate()
     {
-        let mut sample = TextWidget::new(
-            point(10, 36 + i as i32 * 26),
-            size(TILE_W - 20, 18),
-            Font::default(),
-            Color::WHITE,
-            justify,
-            String::from(text),
-        );
+        let mut sample = Text::new(text)
+            .at(10, 36 + i as i32 * 26)
+            .size(TILE_W - 20, 18)
+            .font_color(Color::WHITE)
+            .justify(justify);
         sample.set_color(Color::RGBA(30, 90, 160, 255));
         engine.add_child_widget(text_tile, sample);
     }
@@ -189,14 +175,10 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         .into_iter()
         .enumerate()
     {
-        let mut sample = TextWidget::new(
-            point(10, 36 + i as i32 * 26),
-            size(TILE_W - 20, 18),
-            Font::default(),
-            Color::WHITE,
-            TextJustify::Left,
-            String::from("Quarterly sales report for the western region.txt"),
-        );
+        let mut sample = Text::new("Quarterly sales report for the western region.txt")
+            .at(10, 36 + i as i32 * 26)
+            .size(TILE_W - 20, 18)
+            .font_color(Color::WHITE);
         sample.set_color(Color::RGBA(30, 90, 160, 255));
         sample.set_truncate(mode);
         engine.add_child_widget(truncate_tile, sample);
@@ -204,16 +186,12 @@ pub fn main() -> Result<(), pushrod::error::Error> {
 
     // Wrapped text: a (fictional) paragraph that reflows, limited to four lines.
     let wrap_tile = add_tile(&mut engine, panel_id, 1, 2, "Wrap (Word, max 4 lines)");
-    let mut paragraph = TextWidget::new(
-        point(10, 32),
-        size(TILE_W - 20, 110),
-        Font::default(),
-        Color::WHITE,
-        TextJustify::Left,
-        String::from(
-            "Your changes to the quarterly report have not been saved.\nClose the document anyway and discard them?",
-        ),
-    );
+    let mut paragraph = Text::new(
+        "Your changes to the quarterly report have not been saved.\nClose the document anyway and discard them?",
+    )
+    .at(10, 32)
+    .size(TILE_W - 20, 110)
+    .font_color(Color::WHITE);
     paragraph.set_color(Color::RGBA(30, 90, 160, 255));
     paragraph.set_wrap(Wrap::Word);
     paragraph.set_max_lines(Some(4));

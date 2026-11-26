@@ -68,6 +68,7 @@ fn main() {
             let who = match scope {
                 MaskScope::RunLoop => String::from("window"),
                 MaskScope::Widget(id) => format!("widget {}", id),
+                _ => String::from("another scope"),
             };
 
             log.push(format!("{} now handles {:?}", who, new));

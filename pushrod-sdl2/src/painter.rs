@@ -78,6 +78,21 @@ pub struct Sdl2Painter<'a> {
     errors: Vec<Error>,
 }
 
+impl<'a> std::fmt::Debug for Sdl2Painter<'a> {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Sdl2Painter").finish_non_exhaustive()
+    }
+}
+
 impl Sdl2Painter<'_> {
     /// The cache policy of the `SDL2` backend: per-widget GPU textures.
     pub const CACHE_POLICY: CachePolicy = CachePolicy::TextureCache;

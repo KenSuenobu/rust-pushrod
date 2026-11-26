@@ -92,6 +92,6 @@ A runnable version, driven without a window, is `examples/drag_controller.rs`: `
 
 Implement the `Controller` trait: `handle(widget, event, out)` pushes results onto `out`, and `event_mask()` names the classes it needs. A controller is a plain state machine that never touches the widget, so test it by feeding it events, as the built-in controllers' tests do.
 
-## ButtonWidget
+## Button
 
-`ButtonWidget` is the reference: it holds a `ClickController`, selects itself on `ClickPressed`, follows `ClickArmed`, and emits `Clicked` on `Clicked`. Its behavior is unchanged.
+`Button` is the reference: it holds a `ClickController`, selects itself on `ClickPressed`, follows `ClickArmed`, and emits `Clicked` on `Clicked`. Its behavior is unchanged.

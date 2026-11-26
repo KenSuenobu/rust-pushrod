@@ -61,13 +61,9 @@ Replace `src/main.rs` with either version. Both build the same window and behave
 Pushrod runs the event loop; you register a callback for the button.
 
 ```rust checked title="src/main.rs"
-use pushrod_widgets::button_widget::ButtonWidget;
-use pushrod::engine::Engine;
+use pushrod::prelude::*;
 use pushrod_sdl2::WindowSettings;
-use pushrod::geometry::{point, size};
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use pushrod::color::Color;
-use pushrod::font::Font;
+use pushrod_widgets::prelude::*;
 
 /// Application state: passed to every callback as `&mut Counter`.
 #[derive(Default)]
@@ -79,29 +75,20 @@ fn main() -> Result<(), pushrod::error::Error> {
 
     let mut engine: Engine<Counter> = Engine::new(size(400, 140), 60);
 
-    let label = engine.add_widget(TextWidget::new(
-        point(20, 20),
-        size(360, 24),
-        Font::default().with_size(16),
-        Color::BLACK,
-        TextJustify::Left,
-        "Not clicked yet.".into(),
-    ));
+    let label = engine.add_widget(Text::new("Not clicked yet.")
+        .at(20, 20)
+        .size(360, 24)
+        .font(Font::default().with_size(16)));
 
-    let button = engine.add_widget(ButtonWidget::new(
-        point(20, 70),
-        size(120, 30),
-        Font::default().with_size(16),
-        Color::BLACK,
-        TextJustify::Center,
-        "Click me".into(),
-        2,
-    ));
+    let button = engine.add_widget(Button::new("Click me")
+            .at(20, 70)
+            .size(120, 30)
+            .font(Font::default().with_size(16)));
 
     engine.on_click(button, move |state, ui| {
         state.clicks += 1;
 
-        if let Some(text) = ui.get_mut::<TextWidget>(label) {
+        if let Some(text) = ui.get_mut::<Text>(label) {
             text.set_text(format!("Clicked {} time(s).", state.clicks));
         }
     });
@@ -120,37 +107,23 @@ fn main() -> Result<(), pushrod::error::Error> {
 You run the loop: `next_event` waits for input, keeps the screen up to date, and returns each event the widgets generate; `match` on the ones you care about. It returns `None` when the window closes.
 
 ```rust checked title="src/main.rs"
-use pushrod_widgets::button_widget::ButtonWidget;
-use pushrod::engine::Engine;
+use pushrod::prelude::*;
 use pushrod_sdl2::WindowSettings;
-use pushrod::event::Event;
-use pushrod::geometry::{point, size};
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-use pushrod::color::Color;
-use pushrod::font::Font;
+use pushrod_widgets::prelude::*;
 
 fn main() -> Result<(), pushrod::error::Error> {
 
     let mut engine: Engine = Engine::new(size(400, 140), 60);
 
-    let label = engine.add_widget(TextWidget::new(
-        point(20, 20),
-        size(360, 24),
-        Font::default().with_size(16),
-        Color::BLACK,
-        TextJustify::Left,
-        "Not clicked yet.".into(),
-    ));
+    let label = engine.add_widget(Text::new("Not clicked yet.")
+        .at(20, 20)
+        .size(360, 24)
+        .font(Font::default().with_size(16)));
 
-    let button = engine.add_widget(ButtonWidget::new(
-        point(20, 70),
-        size(120, 30),
-        Font::default().with_size(16),
-        Color::BLACK,
-        TextJustify::Center,
-        "Click me".into(),
-        2,
-    ));
+    let button = engine.add_widget(Button::new("Click me")
+            .at(20, 70)
+            .size(120, 30)
+            .font(Font::default().with_size(16)));
 
     let mut clicks = 0;
     let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Hello, Pushrod", size(400, 140)))?;
@@ -162,7 +135,7 @@ fn main() -> Result<(), pushrod::error::Error> {
             Event::Clicked { id, .. } if id == button => {
                 clicks += 1;
 
-                if let Some(text) = engine.widgets().get_as_mut::<TextWidget>(label) {
+                if let Some(text) = engine.widgets().get_as_mut::<Text>(label) {
                     text.set_text(format!("Clicked {} time(s).", clicks));
                 }
             }
@@ -191,8 +164,10 @@ Click the button: the label counts your clicks. Close the window and the final c
 ## What just happened
 
 - `Engine` owns the window's widget tree. With callbacks, its type parameter is your state type (`Engine<Counter>`); in the event-loop version you keep state in local variables, so it's plain `Engine`.
+- `use pushrod::prelude::*` and `use pushrod_widgets::prelude::*` import what an application normally needs: the engine, events, geometry helpers, colors and fonts, and the standard widgets.
+- Each widget is created with a short constructor and chained setters (`Button::new("Click me").at(20, 70).size(120, 30)`); anything you leave out has a default.
 - `add_widget` added each widget to the window and returned its `WidgetId`.
-- **Callbacks:** `on_click(button, ..)` registered code that runs for that button. It receives `&mut Counter` and a `Ui` handle, which finds widgets by ID (`ui.get_mut::<TextWidget>(label)`). `pushrod_sdl2::run` ran the loop until the window closed, then gave the state back.
+- **Callbacks:** `on_click(button, ..)` registered code that runs for that button. It receives `&mut Counter` and a `Ui` handle, which finds widgets by ID (`ui.get_mut::<Text>(label)`). `pushrod_sdl2::run` ran the loop until the window closed, then gave the state back.
 - **Event loop:** `pushrod_sdl2::event_loop(&mut engine, settings)` opened the window for drawing, and each `engine.next_event(&mut events)` returned the next event, such as `Event::Clicked { id, button, count }`. You change widgets directly through `engine.widgets()`. The call blocks while nothing happens, so the loop doesn't spin.
 
 Both styles route input through the same widgets and produce the same events; see [Handling events](../guides/handling-events.md#two-ways-to-handle-events) for when to choose which.

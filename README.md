@@ -55,6 +55,9 @@ application needs, without changing the core.
 ## Writing an application
 
 ```rust
+use pushrod::prelude::*;
+use pushrod_widgets::prelude::*;
+
 #[derive(Default)]
 struct AppState {
     clicks: u32,
@@ -62,12 +65,12 @@ struct AppState {
 
 let mut engine: Engine<AppState> = Engine::new(size(800, 600), 30);
 
-let label = engine.add_widget(TextWidget::new(/* ... */));
-let button = engine.add_widget(ButtonWidget::new(/* ... */));
+let label = engine.add_widget(Text::new("Not clicked").at(20, 20).size(200, 20));
+let button = engine.add_widget(Button::new("Click me").at(20, 60).size(120, 24));
 
 engine.on_click(button, move |state, ui| {
     state.clicks += 1;
-    ui.get_mut::<TextWidget>(label)
+    ui.get_mut::<Text>(label)
         .unwrap()
         .set_text(format!("Clicked {} times", state.clicks));
 });

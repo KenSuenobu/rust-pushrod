@@ -30,6 +30,7 @@ use crate::widget::{Widget, WidgetCore};
 ///
 /// The `Engine` creates one as `Widget` `0` for every window.  It is the parent of every other
 /// `Widget`.
+#[derive(Debug)]
 pub struct RootWidget {
     core: WidgetCore,
 }

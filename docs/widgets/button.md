@@ -9,7 +9,7 @@ This file is the specification for this widget: what it is, what it does, and ho
 
 A push button that runs an action when clicked; it can also be a dialog's default or cancel button, a toggle, or a button that closes a dialog.
 
-`ButtonWidget` is only a push button. Dialogs need a visibly distinct default button (Return), a cancel button (Escape), toggle buttons, buttons that fire on press, and buttons that close a dialog.
+`Button` is only a push button. Dialogs need a visibly distinct default button (Return), a cancel button (Escape), toggle buttons, buttons that fire on press, and buttons that close a dialog.
 
 *Ideas from:* Default and cancel buttons on the classic Mac, GEM, Motif, Windows, Qt, and GTK; toggle buttons everywhere. Names and behavior are Pushrod's own.
 
@@ -72,7 +72,7 @@ Requires [1.1](https://github.com/KenSuenobu/rust-pushrod/issues/19), [1.6](http
 ## Implementation notes
 
 - **Crate:** `pushrod-widgets`, using only the public API of the `pushrod` core. Shared behavior (states, focus, events) comes from the core; anything the widget needs that the core doesn't expose is added to the core first.
-- **Modules:** `pushrod-widgets/src/button_widget.rs`, `src/paint.rs`
+- **Modules:** `pushrod-widgets/src/button.rs`, `src/paint.rs`
 - **Stack:** Rust
 - **Drawing:** paints into its own GPU texture only when invalidated; frames are composed by blitting. No OS-native controls; no per-frame CPU pixel work.
 

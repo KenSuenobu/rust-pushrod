@@ -137,6 +137,7 @@ parameter under `# Arguments`, and `# Returns`). Run it before opening a pull re
   `paint::text`) and draw everything through Pushrod; no OS-native controls, and no glass, shadows,
   bevels, gradients, or rounded corners ([DESIGN_PHILOSOPHY.md](DESIGN_PHILOSOPHY.md)).
 - Any internal action you add emits an engine event: add its `EngineEvent` variant, emit it after the action completes, and test it (see [Engine events](pushrod-docs/docs/events/engine-events.md)).
+- Public API changes follow semantic versioning: public enums are `#[non_exhaustive]`, public types implement `Debug`, and constructors take few required arguments (chain setters for the rest). After the first release, `cargo-semver-checks` runs on pull requests in CI.
 - The pull request template's checklist is filled in.
 
 ## Sample data and privacy

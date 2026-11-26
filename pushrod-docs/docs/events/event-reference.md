@@ -96,7 +96,7 @@ Window events are [broadcast](../concepts/broadcast-events-to-all-interested-wid
 | `Custom(CustomEvent)` | An application or library defines its own event. See [Custom Events](./custom-events.md). |
 
 :::note[What emits what today]
-Pointer, key, and text events propagate: see [Event propagation](./event-propagation.md). The cache currently produces the pointer events (`PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`), and `ButtonWidget` emits `Clicked`. The other variants are the shared vocabulary that later features (keyboard, focus, new widgets, timers) emit; `EngineEvent` currently has `EventMaskChanged { scope, old, new }` and `WidgetAdded { id, parent }`; see [Engine events](./engine-events.md).
+Pointer, key, and text events propagate: see [Event propagation](./event-propagation.md). The cache currently produces the pointer events (`PointerEntered`, `PointerExited`, `PointerMoved`, `PointerPressed`, `PointerReleased`), and `Button` emits `Clicked`. The other variants are the shared vocabulary that later features (keyboard, focus, new widgets, timers) emit; `EngineEvent` currently has `EventMaskChanged { scope, old, new }` and `WidgetAdded { id, parent }`; see [Engine events](./engine-events.md).
 :::
 
 ## Renamed from the first release

@@ -25,6 +25,7 @@ use bitflags::bitflags;
 
 /// A keyboard key, by what it means rather than where it sits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum Key {
     /// A printable key, as its lowercase character: `Char('a')`, `Char('.')`, `Char(' ')`.
     Char(char),
@@ -79,6 +80,7 @@ bitflags! {
 
 /// A mouse button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum MouseButton {
     /// The left (primary) button.
     Left,
@@ -92,6 +94,7 @@ pub enum MouseButton {
 
 /// A window-system event a backend delivers to the engine, in window coordinates.
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub enum InputEvent {
     /// The user asked to close the window.
     Quit,

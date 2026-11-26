@@ -56,6 +56,7 @@ use std::time::Duration;
 /// assert!(settings.centered);
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct WindowSettings {
     /// The window title.
     pub title: String,
@@ -108,6 +109,21 @@ pub struct Sdl2Backend {
     /// Every error reported so far, so a failure that repeats on every repaint (a missing font)
     /// is reported once.
     reported: HashSet<Error>,
+}
+
+impl std::fmt::Debug for Sdl2Backend {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Sdl2Backend").finish_non_exhaustive()
+    }
 }
 
 impl Sdl2Backend {

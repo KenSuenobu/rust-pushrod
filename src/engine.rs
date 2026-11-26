@@ -31,12 +31,8 @@
 //! contains no widgets other than the window's [`RootWidget`].
 //!
 //! ```rust,ignore
-//! use pushrod::engine::Engine;
-//! use pushrod::geometry::{point, size};
-//! use pushrod_widgets::button_widget::ButtonWidget;
-//! use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-//! use pushrod::color::Color;
-//! use pushrod::font::Font;
+//! use pushrod::prelude::*;
+//! use pushrod_widgets::prelude::*;
 //!
 //! #[derive(Default)]
 //! struct AppState {
@@ -45,15 +41,12 @@
 //!
 //! let mut engine: Engine<AppState> = Engine::new(size(400, 200), 30);
 //!
-//! let font = Font::default();
-//! let label = engine.add_widget(TextWidget::new(point(20, 20), size(200, 20), font.clone(),
-//!     Color::BLACK, TextJustify::Left, String::from("Not clicked")));
-//! let button = engine.add_widget(ButtonWidget::new(point(20, 60), size(120, 20), font,
-//!     Color::BLACK, TextJustify::Center, String::from("Click me"), 2));
+//! let label = engine.add_widget(Text::new("Not clicked").at(20, 20).size(200, 20));
+//! let button = engine.add_widget(Button::new("Click me").at(20, 60).size(120, 24));
 //!
 //! engine.on_click(button, move |state, ui| {
 //!     state.clicks += 1;
-//!     ui.get_mut::<TextWidget>(label)
+//!     ui.get_mut::<Text>(label)
 //!         .unwrap()
 //!         .set_text(format!("Clicked {} times", state.clicks));
 //! });
@@ -127,6 +120,21 @@ struct Mailbox {
 #[derive(Clone)]
 pub struct Sender {
     mailbox: Arc<Mailbox>,
+}
+
+impl std::fmt::Debug for Sender {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Sender").finish_non_exhaustive()
+    }
 }
 
 impl Sender {
@@ -218,6 +226,23 @@ pub struct Ui<'a> {
     event_mask: &'a mut EventMask,
     posted: &'a mut Vec<Event>,
     timers: &'a mut TimerSchedule,
+}
+
+impl std::fmt::Debug for Ui<'_> {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Ui")
+            .field("running", &self.running)
+            .finish_non_exhaustive()
+    }
 }
 
 impl<'a> Ui<'a> {
@@ -389,6 +414,26 @@ pub struct Engine<S = ()> {
     idle_callbacks: Vec<IdleCallback<S>>,
     last_tick: Instant,
     fonts: FontRegistry,
+}
+
+impl<S> std::fmt::Debug for Engine<S> {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Engine")
+            .field("frame_rate", &self.frame_rate)
+            .field("size", &self.size)
+            .field("running", &self.running)
+            .field("widgets", &self.widget_cache.len())
+            .finish_non_exhaustive()
+    }
 }
 
 impl<S> Engine<S> {
@@ -1846,6 +1891,23 @@ pub struct EventLoop {
     frame_time: Duration,
     queue: EventQueue,
     applied_mask: EventMask,
+}
+
+impl std::fmt::Debug for EventLoop {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("EventLoop")
+            .field("frame_time", &self.frame_time)
+            .finish_non_exhaustive()
+    }
 }
 
 #[cfg(test)]

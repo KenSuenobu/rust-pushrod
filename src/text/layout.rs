@@ -60,6 +60,15 @@ impl std::fmt::Debug for FontData {
     /// # Returns
     ///
     /// The formatter's result.
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FontData")
             .field("id", &self.id)
@@ -158,6 +167,26 @@ pub struct LaidOut {
     pub geometry: Box<dyn TextGeometry>,
 }
 
+impl std::fmt::Debug for LaidOut {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LaidOut")
+            .field("size", &self.size)
+            .field("min_width", &self.min_width)
+            .field("lines", &self.lines)
+            .field("runs", &self.runs)
+            .finish_non_exhaustive()
+    }
+}
+
 impl LaidOut {
     /// The size hint for layout managers.
     ///
@@ -198,6 +227,23 @@ struct LayoutKey {
 pub struct LayoutCache {
     entry: Option<(LayoutKey, LaidOut)>,
     layouts: usize,
+}
+
+impl std::fmt::Debug for LayoutCache {
+    /// Formats the value for debugging.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LayoutCache")
+            .field("layouts", &self.layouts)
+            .finish_non_exhaustive()
+    }
 }
 
 impl LayoutCache {

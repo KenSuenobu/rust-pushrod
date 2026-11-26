@@ -40,7 +40,12 @@
 //! features = ["ttf", "image", "unsafe_textures"]
 //! ```
 
-#![warn(missing_docs, clippy::missing_panics_doc, clippy::missing_errors_doc)]
+#![warn(
+    missing_docs,
+    missing_debug_implementations,
+    clippy::missing_panics_doc,
+    clippy::missing_errors_doc
+)]
 #![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
 mod backend;

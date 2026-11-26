@@ -13,14 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! # TextWidget
+//! # Text
 //!
-//! This is a simple system `Widget` that fills its background like the `BaseWidget`, and draws a
+//! This is a simple system `Widget` that fills its background like the `Panel`, and draws a
 //! text message with a given font name, style, color, and message on top of it.
 
 use pushrod::color::Color;
 use pushrod::font::Font;
-use pushrod::geometry::{Point, Rect, Size};
+use pushrod::geometry::{Rect, point, size};
 use pushrod::paint::{self, Painter, TextStyle, Truncate, Wrap};
 use pushrod::widget::{Widget, WidgetCore};
 use std::cell::Cell;
@@ -30,11 +30,12 @@ pub use pushrod::paint::TextJustify;
 /// A string of text on a filled background.
 ///
 /// The text is aligned horizontally by its justification and centered vertically when it fits.
-/// Text wider than the widget is shortened with an ellipsis as set by [`TextWidget::set_truncate`]
-/// (the end, by default), or, with [`TextWidget::set_wrap`], broken into lines (each aligned by
-/// the justification) that reflow when the width changes; [`TextWidget::set_max_lines`] limits
+/// Text wider than the widget is shortened with an ellipsis as set by [`Text::set_truncate`]
+/// (the end, by default), or, with [`Text::set_wrap`], broken into lines (each aligned by
+/// the justification) that reflow when the width changes; [`Text::set_max_lines`] limits
 /// them.  It doesn't respond to input.
-pub struct TextWidget {
+#[derive(Debug)]
+pub struct Text {
     core: WidgetCore,
     style: TextStyle,
     msg: String,
@@ -44,7 +45,7 @@ pub struct TextWidget {
     truncated: Cell<bool>,
 }
 
-impl Widget for TextWidget {
+impl Widget for Text {
     /// Returns the text widget's shared state.
     ///
     /// # Returns
@@ -86,39 +87,113 @@ impl Widget for TextWidget {
     }
 }
 
-impl TextWidget {
-    /// Creates a text widget.  Its background is transparent until set with `set_color`.
+impl Text {
+    /// Creates a text widget with sensible defaults.
+    ///
+    /// It is 200 by 20 pixels at the upper left-hand corner of its parent, with the engine's
+    /// default font, black left-justified text, and no wrapping.  Its background is transparent
+    /// until set with `set_color`.  Change the defaults with the chained setters:
+    ///
+    /// ```rust
+    /// use pushrod_widgets::text::Text;
+    ///
+    /// let label = Text::new("Not clicked").at(20, 20).size(200, 20);
+    /// ```
     ///
     /// # Arguments
     ///
-    /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
-    /// * `size` - The width and height in pixels.
-    /// * `font` - The font handle: a registered family, size, and style.  `Font::default()` is
-    ///   the engine's default font, which needs no files.
-    /// * `font_color` - The text color.
-    /// * `justification` - The horizontal alignment of the text.
     /// * `msg` - The text to display.
     ///
     /// # Returns
     ///
-    /// The new `TextWidget`.
-    pub fn new(
-        origin: Point,
-        size: Size,
-        font: Font,
-        font_color: Color,
-        justification: TextJustify,
-        msg: String,
-    ) -> Self {
+    /// The new `Text`.
+    pub fn new(msg: impl Into<String>) -> Self {
         Self {
-            core: WidgetCore::new(origin, size),
-            style: TextStyle::new(font, font_color, justification),
-            msg,
+            core: WidgetCore::new(point(0, 0), size(200, 20)),
+            style: TextStyle::new(Font::default(), Color::BLACK, TextJustify::Left),
+            msg: msg.into(),
             truncate: Truncate::End,
             wrap: Wrap::None,
             max_lines: None,
             truncated: Cell::new(false),
         }
+    }
+
+    /// Sets the upper left-hand corner, relative to the parent `Widget`.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - Horizontal position in pixels.
+    /// * `y` - Vertical position in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The text widget, for chaining.
+    #[must_use]
+    pub fn at(mut self, x: i32, y: i32) -> Self {
+        self.set_origin(point(x, y));
+        self
+    }
+
+    /// Sets the width and height.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - Width in pixels.
+    /// * `height` - Height in pixels.
+    ///
+    /// # Returns
+    ///
+    /// The text widget, for chaining.
+    #[must_use]
+    pub fn size(mut self, width: u32, height: u32) -> Self {
+        self.set_size(size(width, height));
+        self
+    }
+
+    /// Sets the font.
+    ///
+    /// # Arguments
+    ///
+    /// * `font` - Sets the font.
+    ///
+    /// # Returns
+    ///
+    /// The text widget, for chaining.
+    #[must_use]
+    pub fn font(mut self, font: Font) -> Self {
+        self.style.font = font;
+        self
+    }
+
+    /// Sets the text color.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - Sets the text color.
+    ///
+    /// # Returns
+    ///
+    /// The text widget, for chaining.
+    #[must_use]
+    pub fn font_color(mut self, color: Color) -> Self {
+        self.style.font_color = color;
+        self
+    }
+
+    /// Sets the horizontal alignment.
+    ///
+    /// # Arguments
+    ///
+    /// * `justification` - Sets the horizontal alignment.
+    ///
+    /// # Returns
+    ///
+    /// The text widget, for chaining.
+    #[must_use]
+    pub fn justify(mut self, justification: TextJustify) -> Self {
+        self.style.justification = justification;
+        self
     }
 
     /// Sets the text color, and invalidates the widget.

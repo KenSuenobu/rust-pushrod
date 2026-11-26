@@ -16,34 +16,20 @@ Every widget that draws text takes a **`Font`**: a family name, a size in points
 Pushrod embeds **Open Sans Regular** in the `pushrod` crate. That is why the [quick start](../getting-started/quick-start.mdx) runs from any directory: there is no `assets/` folder to find.
 
 ```rust checked
-use pushrod::color::{Color, FontStyle};
-use pushrod::font::Font;
-use pushrod::geometry::{point, size};
-use pushrod::engine::Engine;
-use pushrod_widgets::text_widget::{TextJustify, TextWidget};
+use pushrod::prelude::*;
+use pushrod_widgets::prelude::*;
 
 fn built_in_font() {
     let mut engine: Engine = Engine::new(size(300, 100), 60);
 
     // Font::default() is the engine's default family at 14 points.
-    let plain = TextWidget::new(
-        point(10, 10),
-        size(200, 20),
-        Font::default(),
-        Color::BLACK,
-        TextJustify::Left,
-        "Plain".into(),
-    );
+    let plain = Text::new("Plain").at(10, 10).size(200, 20);
 
     // Change the size or style of any handle; the family is kept.
-    let heading = TextWidget::new(
-        point(10, 40),
-        size(200, 30),
-        Font::default().with_size(22).with_style(FontStyle::BOLD),
-        Color::BLACK,
-        TextJustify::Left,
-        "Heading".into(),
-    );
+    let heading = Text::new("Heading")
+        .at(10, 40)
+        .size(200, 30)
+        .font(Font::default().with_size(22).with_style(FontStyle::BOLD));
 
     engine.add_widget(plain);
     engine.add_widget(heading);

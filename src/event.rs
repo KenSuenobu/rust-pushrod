@@ -98,6 +98,7 @@ use std::time::Duration;
 /// event; the target only chooses which `Widget`s see it in `handle_event`.  A `Widget` receives it
 /// only if [`EventMask::CUSTOM`] is in its mask (and in the run loop's mask).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum EventTarget {
     /// One `Widget`.
     Widget(WidgetId),
@@ -307,6 +308,7 @@ impl std::ops::Not for EventMask {
 
 /// What an event mask belongs to, in [`EngineEvent::EventMaskChanged`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum MaskScope {
     /// The run loop's mask.
     RunLoop,
@@ -488,6 +490,7 @@ pub fn engine_filter_accepts(filter: Option<&[EngineEventKind]>, event: &EngineE
 
 /// The kind of an [`Event`], without its data.  Used by masks and the callback registry.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum EventKind {
     /// See [`Event::PointerEntered`].
     PointerEntered,
@@ -632,6 +635,7 @@ impl EventKind {
 /// [`Engine::next_event`](crate::engine::Engine::next_event).  Positions are in window
 /// coordinates.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum Event {
     // ---- Pointer ----
     /// The pointer moved onto widget `id`.
@@ -1051,6 +1055,7 @@ mod tests {
 /// [`EventPhase`]; returning `Stop` ends delivery, so no later `Widget` sees the event.  Events that
 /// do not propagate ignore the value.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Propagation {
     /// The event was not consumed; deliver it to the next `Widget` in the path.
     #[default]
@@ -1065,6 +1070,7 @@ pub enum Propagation {
 /// [`handles_capture`](crate::widget::Widget::handles_capture) is `true`), then **target**, then
 /// **bubble** from the target's parent up to the root.  Read it with [`EventCtx::phase`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum EventPhase {
     /// The root-to-parent pass, before the target sees the event.
     Capture,
@@ -1080,7 +1086,7 @@ pub enum EventPhase {
 /// `Widget`s use it to queue the events they generate.  Queueing, instead of calling application
 /// code from inside the `Widget`, lets callbacks later receive mutable access to both the
 /// application state and every `Widget`.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct EventCtx {
     events: Vec<Event>,
     source: Option<WidgetId>,

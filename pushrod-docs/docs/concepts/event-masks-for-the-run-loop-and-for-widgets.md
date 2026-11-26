@@ -57,7 +57,7 @@ fn main() {
 
 ## The widget mask
 
-`Widget::event_mask()` returns the classes a widget wants. The default is `EventMask::NONE`, so a `BoxWidget` or `BaseWidget` receives nothing, while a `ButtonWidget` asks for `POINTER_BUTTONS | HOVER` and still clicks. A widget that handles events sets its mask when it is built:
+`Widget::event_mask()` returns the classes a widget wants. The default is `EventMask::NONE`, so a `Frame` or `Panel` receives nothing, while a `Button` asks for `POINTER_BUTTONS | HOVER` and still clicks. A widget that handles events sets its mask when it is built:
 
 ```rust checked title="src/main.rs"
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
