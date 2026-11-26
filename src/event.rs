@@ -64,6 +64,7 @@
 //! | Semantic | `SelectionChanged` | The selection in a list, table, or tab set changes. |
 //! | Semantic | `TextChanged` | The text of an editor changes. |
 //! | Semantic | `EditingFinished` | An editor loses focus or the user confirms its text. |
+//! | Semantic | `AccessoryClicked` | A custom accessory button inside an editor is clicked; `which` is its side. |
 //! | Semantic | `Triggered` | A named action is triggered (menu, shortcut, toolbar). |
 //! | Semantic | `ContextMenuRequested` | The user asks for a context menu at `position`. |
 //! | Semantic | `PropertyChanged` | A named property of a widget changes. |
@@ -538,6 +539,8 @@ pub enum EventKind {
     TextChanged,
     /// See [`Event::EditingFinished`].
     EditingFinished,
+    /// See [`Event::AccessoryClicked`].
+    AccessoryClicked,
     /// See [`Event::Triggered`].
     Triggered,
     /// See [`Event::ContextMenuRequested`].
@@ -605,6 +608,7 @@ impl EventKind {
             | K::SelectionChanged
             | K::TextChanged
             | K::EditingFinished
+            | K::AccessoryClicked
             | K::Triggered
             | K::ContextMenuRequested
             | K::CloseRequested
@@ -778,6 +782,14 @@ pub enum Event {
         /// The widget that was edited.
         id: WidgetId,
     },
+    /// An accessory button inside widget `id` was clicked.  Built-in accessories that act on
+    /// their own (clear, reveal password) do not send it.
+    AccessoryClicked {
+        /// The widget that holds the accessory.
+        id: WidgetId,
+        /// Which accessory was clicked.
+        which: AccessorySide,
+    },
     /// A named action was triggered by widget `id`.
     Triggered {
         /// The widget that triggered it.
@@ -901,6 +913,7 @@ impl Event {
             | Event::SelectionChanged { id }
             | Event::TextChanged { id }
             | Event::EditingFinished { id }
+            | Event::AccessoryClicked { id, .. }
             | Event::ViewportChanged { id, .. } => Some(*id),
             _ => None,
         }
@@ -931,6 +944,7 @@ impl Event {
             Event::SelectionChanged { .. } => EventKind::SelectionChanged,
             Event::TextChanged { .. } => EventKind::TextChanged,
             Event::EditingFinished { .. } => EventKind::EditingFinished,
+            Event::AccessoryClicked { .. } => EventKind::AccessoryClicked,
             Event::Triggered { .. } => EventKind::Triggered,
             Event::ContextMenuRequested { .. } => EventKind::ContextMenuRequested,
             Event::PropertyChanged { .. } => EventKind::PropertyChanged,
@@ -976,6 +990,7 @@ impl Event {
             | Event::SelectionChanged { id }
             | Event::TextChanged { id }
             | Event::EditingFinished { id }
+            | Event::AccessoryClicked { id, .. }
             | Event::Triggered { id, .. }
             | Event::ContextMenuRequested { id, .. }
             | Event::PropertyChanged { id, .. }
@@ -1091,6 +1106,15 @@ pub enum EventPhase {
     Bubble,
 }
 
+/// The edge of an editor an accessory button sits at; see [`Event::AccessoryClicked`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AccessorySide {
+    /// The leading (left) edge.
+    Leading,
+    /// The trailing (right) edge.
+    Trailing,
+}
+
 /// The context passed to [`Widget::handle_event`](crate::widget::Widget::handle_event).
 ///
 /// `Widget`s use it to queue the events they generate.  Queueing, instead of calling application
@@ -1103,9 +1127,52 @@ pub struct EventCtx {
     origin: Point,
     phase: EventPhase,
     animating: Vec<WidgetId>,
+    clipboard: Option<String>,
+    clipboard_write: Option<String>,
 }
 
 impl EventCtx {
+    /// Returns the text on the system clipboard, for a `Widget` that pastes.
+    ///
+    /// The engine refreshes a copy of the clipboard while a text editor has the keyboard focus,
+    /// so this is only meaningful for such a `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The clipboard text, or `None` if it is empty or unavailable.
+    pub fn clipboard_text(&self) -> Option<&str> {
+        self.clipboard.as_deref()
+    }
+
+    /// Replaces the text on the system clipboard, for a `Widget` that copies or cuts.
+    ///
+    /// The engine writes it to the backend before the next frame.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The text to place on the clipboard.
+    pub fn set_clipboard_text(&mut self, text: impl Into<String>) {
+        self.clipboard_write = Some(text.into());
+    }
+
+    /// Gives the context a copy of the clipboard for `Widget`s to read.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The clipboard text, if any.
+    pub(crate) fn set_clipboard_snapshot(&mut self, text: Option<String>) {
+        self.clipboard = text;
+    }
+
+    /// Takes the text a `Widget` asked to place on the clipboard.
+    ///
+    /// # Returns
+    ///
+    /// The text, or `None` if no `Widget` wrote the clipboard.
+    pub(crate) fn take_clipboard_write(&mut self) -> Option<String> {
+        self.clipboard_write.take()
+    }
+
     /// Queues an event generated by a `Widget`.
     ///
     /// Queued events are delivered to the application in the order in which they were emitted.
@@ -1307,5 +1374,39 @@ mod mask_tests {
             Some(&[EngineEventKind::EventMaskChanged]),
             &added
         ));
+    }
+}
+
+#[cfg(test)]
+mod clipboard_tests {
+    use super::*;
+
+    #[test]
+    fn the_context_carries_a_clipboard_snapshot_in_and_a_write_out() {
+        let mut ctx = EventCtx::default();
+
+        assert_eq!(ctx.clipboard_text(), None);
+
+        ctx.set_clipboard_snapshot(Some("in".to_string()));
+        assert_eq!(ctx.clipboard_text(), Some("in"));
+
+        assert_eq!(ctx.take_clipboard_write(), None);
+        ctx.set_clipboard_text("out");
+        assert_eq!(ctx.take_clipboard_write().as_deref(), Some("out"));
+        assert_eq!(ctx.take_clipboard_write(), None);
+    }
+
+    #[test]
+    fn accessory_clicked_belongs_to_its_widget_and_is_never_filtered() {
+        let event = Event::AccessoryClicked {
+            id: 4,
+            which: AccessorySide::Trailing,
+        };
+
+        assert_eq!(event.kind(), EventKind::AccessoryClicked);
+        assert_eq!(event.widget(), Some(4));
+        assert_eq!(event.widget_id(), Some(4));
+        assert_eq!(EventKind::AccessoryClicked.mask_class(), None);
+        assert!(!EventKind::AccessoryClicked.propagates());
     }
 }

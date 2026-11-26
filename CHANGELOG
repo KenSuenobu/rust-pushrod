@@ -44,3 +44,4 @@
 [#31] RadioButton and RadioGroup: exclusive checking, arrow-key selection [kenji]
 [#48] ProgressBar widget: determinate fill, busy animation, outline mode [kenji]
 [#40] Slider widget: drag, click, keys, step, ticks, value text; EventCtx::origin [kenji]
+[#32] TextField: caret, selection, clipboard, masks, validators [kenji]

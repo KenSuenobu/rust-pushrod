@@ -63,12 +63,12 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Typing, deleting, caret movement, selection, copy/paste
-- [ ] Masks and validators reject invalid input
-- [ ] Numeric mode with range
-- [ ] `EditingFinished` on Return and focus loss
-- [ ] Leading/trailing accessories inside the edit area; text never overlaps them
-- [ ] `Clear`, `Search`, `RevealPassword`, and custom accessories; `TextField::search()` preset
+- [x] Typing, deleting, caret movement, selection, copy/paste
+- [x] Masks and validators reject invalid input
+- [x] Numeric mode with range
+- [x] `EditingFinished` on Return and focus loss
+- [x] Leading/trailing accessories inside the edit area; text never overlaps them
+- [x] `Clear`, `Search`, `RevealPassword`, and custom accessories; `TextField::search()` preset
 
 ## Depends on
 

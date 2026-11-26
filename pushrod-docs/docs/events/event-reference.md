@@ -68,6 +68,7 @@ Positions are `Point`s in window coordinates.
 | `SelectionChanged { id }` | A selection changes. |
 | `TextChanged { id }` | An editor's text changes. |
 | `EditingFinished { id }` | Editing is confirmed or the editor loses focus. |
+| `AccessoryClicked { id, which }` | A search or custom accessory inside an editor is clicked; `which` is `AccessorySide::Leading` or `Trailing`. |
 | `Triggered { id, action }` | A named action is triggered. |
 | `ContextMenuRequested { id, position }` | The user asks for a context menu. |
 | `PropertyChanged { id, name }` | A named property changes. |

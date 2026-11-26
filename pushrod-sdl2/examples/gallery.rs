@@ -29,10 +29,11 @@ use pushrod_widgets::radio_button::RadioGroup;
 use pushrod_widgets::separator::Separator;
 use pushrod_widgets::slider::Slider;
 use pushrod_widgets::text::{Text, TextJustify};
+use pushrod_widgets::text_field::{Accessory, IntegerField, TextField};
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 1380;
+const WINDOW_H: u32 = 1590;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -431,6 +432,71 @@ pub fn main() -> Result<(), pushrod::error::Error> {
             .size(30, 108)
             .value(75.0)
             .show_value(true),
+    );
+
+    // TextField: a labelled field, a date mask, a search field, a password with reveal, a
+    // whole-number field, and a disabled field.
+    let field_tile = add_tile(&mut engine, panel_id, 0, 8, "Text Field");
+    engine.add_child_widget(
+        field_tile,
+        TextField::new()
+            .at(10, 34)
+            .size(270, 24)
+            .with_label("Name:")
+            .placeholder("Your name")
+            .with_text("Jane"),
+    );
+    engine.add_child_widget(
+        field_tile,
+        TextField::new()
+            .at(10, 64)
+            .size(270, 24)
+            .with_label("Date:")
+            .with_mask("99/99/9999")
+            .placeholder("MM/DD/YYYY"),
+    );
+    engine.add_child_widget(field_tile, TextField::search().at(10, 94).size(270, 24));
+    let disabled_field = engine.add_child_widget(
+        field_tile,
+        TextField::new()
+            .at(10, 122)
+            .size(270, 22)
+            .with_text("Disabled"),
+    );
+    engine
+        .widgets()
+        .get_mut(disabled_field)
+        .unwrap()
+        .set_enabled(false);
+
+    let restricted_tile = add_tile(&mut engine, panel_id, 1, 8, "Text Field (restricted)");
+    engine.add_child_widget(
+        restricted_tile,
+        TextField::new()
+            .at(10, 34)
+            .size(270, 24)
+            .with_label("Password:")
+            .password()
+            .with_text("sample-pass")
+            .with_trailing(Accessory::RevealPassword),
+    );
+    engine.add_child_widget(
+        restricted_tile,
+        IntegerField::range(0, 120)
+            .at(10, 64)
+            .size(270, 24)
+            .with_label("Age (0-120):")
+            .placeholder("0"),
+    );
+    engine.add_child_widget(
+        restricted_tile,
+        TextField::new()
+            .at(10, 94)
+            .size(270, 24)
+            .with_label("Code (4):")
+            .max_length(4)
+            .with_trailing(Accessory::Clear)
+            .with_text("AB12"),
     );
 
     // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.

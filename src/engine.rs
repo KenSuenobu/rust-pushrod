@@ -844,7 +844,8 @@ impl<S> Engine<S> {
         }
     }
 
-    /// Passes changes made since the last call on to the backend: the event mask and text input.
+    /// Passes changes made since the last call on to the backend: the event mask, text input, and
+    /// the clipboard.
     ///
     /// # Arguments
     ///
@@ -858,6 +859,17 @@ impl<S> Engine<S> {
 
         if let Some(active) = self.text_input_pending.take() {
             backend.set_text_input(active);
+        }
+
+        // Text copied by a widget goes to the system clipboard; while a text editor has the
+        // focus, its paste sees the system clipboard as of this pass.
+        if let Some(text) = self.widget_cache.take_clipboard_write() {
+            backend.set_clipboard_text(&text);
+        }
+
+        if self.widget_cache.text_input_wanted() {
+            self.widget_cache
+                .set_clipboard_snapshot(backend.clipboard_text());
         }
     }
 
