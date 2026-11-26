@@ -53,3 +53,4 @@
 [#39] ScrollBar: repeating arrows, track paging, proportional thumb [kenji]
 [#58] Container: scrollable viewport onto content with its own 0,0 [kenji]
 [#70] Golden-image tests: widgets rendered and compared with PNGs in CI [kenji]
+[#115] Headless performance benchmarks with stored baseline checked in CI [kenji]

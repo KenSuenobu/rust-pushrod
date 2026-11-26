@@ -179,6 +179,30 @@ The gallery shows every built-in widget, and its states, on a labeled tile
 To retake the screenshot, run
 `cargo run -p pushrod-sdl2 --example gallery -- --screenshot pushrod-docs/static/img/screenshots/gallery.png`.
 
+## Performance
+
+Pushrod's premise is small and fast, so the numbers are measured on every pull request
+(headless, with built-in timing: `cargo bench -p pushrod-sdl2 --bench performance`) and compared
+with a stored baseline.  A budget that grows more than 10% fails CI; a timing that gets much
+slower warns.  Numbers from an Apple-silicon laptop (macOS, release build):
+
+| Benchmark | Current | Unit |
+|---|---:|---|
+| Event dispatch (pointer event through the 148-widget gallery) | 3,700 | ns/event |
+| Gallery frame under interaction (one slider changes, one click) | 14 | µs/frame |
+| Gallery full redraw (every widget repainted and blitted) | 8 | µs/frame |
+| Text: first layout (font load and glyph atlas warm-up) | 784 | µs |
+| Text: repeat layout of the same text | 4,437 | ns |
+| Form load (40 label and field rows, first frame) | 379 | µs |
+| Texture memory per widget (gallery average) | 113,103 | bytes |
+| Gallery example binary (release) | 1,475,088 | bytes |
+
+These time Pushrod's own work (event routing, layout, painting calls, cache bookkeeping); GPU
+time is not included.  **Low-end target:** on a Raspberry Pi 4 class device, one interactive
+frame of Pushrod's CPU work stays under 2 ms (an eighth of a 60 frames-per-second budget) and a
+dialog application's binary stays under 5 MB.  The target is a budget, not yet measured on that
+hardware.  See [Performance benchmarks and budgets](pushrod-docs/docs/contributing/performance-benchmarks-and-budgets.md).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Demos, examples, tests, mockups, and documentation use fictional sample data only: no real names or personal information.

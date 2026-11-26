@@ -17,6 +17,7 @@ A change cannot merge while any job fails. The badge at the top of the
 | **Rust** | Ubuntu with Rust 1.100.0 (the minimum supported version) and latest stable; macOS and Windows with latest stable | `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `python3 scripts/check_docs.py` (doc headers), and `cargo doc --workspace --no-deps` with `RUSTDOCFLAGS=-D warnings` |
 | **Documentation site** | Ubuntu | `npm ci && npm run build` in `pushrod-docs/`; broken links fail the build |
 | **Golden-image rendering tests** | Ubuntu with Xvfb | `PUSHROD_GOLDEN=1 xvfb-run -a cargo test -p pushrod-sdl2 --test visual`; on failure the diff images are uploaded as the `golden-diff` artifact (see [Golden-image rendering tests](golden-image-rendering-tests.md)) |
+| **Performance benchmarks** | Ubuntu | `python3 scripts/check_benchmarks.py`: a budget over its tolerance fails, a slow timing warns; the results are uploaded as the `benchmark-results` artifact (see [Performance benchmarks and budgets](performance-benchmarks-and-budgets.md)) |
 | **Sample data** | Ubuntu | `python3 scripts/check_sample_data.py` |
 
 Warnings fail the build: Clippy and rustdoc run with `-D warnings`, so fix every warning rather than silencing it.
@@ -34,6 +35,7 @@ cargo test --workspace
 python3 scripts/check_docs.py
 RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 python3 scripts/check_sample_data.py
+python3 scripts/check_benchmarks.py
 ```
 
 ## The sample-data check

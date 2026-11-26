@@ -1965,7 +1965,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
 | 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
-| 7.7 (#115) | Performance benchmarks and budgets | Measure frame time, input latency, memory per widget, and startup; fail CI on regressions. | `ci`, `mvp`, `parallelizable`, `performance`, `size/S` | Y | v0.1 | S | `benches/ (new)`, `.github/workflows/ci.yml` |
 | 7.9 (#139) | Easy installation: bundled SDL, static linking, and platform guides | Make installing Pushrod painless on Linux, macOS, and Windows, including building SDL from source. | `build`, `documentation`, `mvp`, `parallelizable`, `size/S`, `usability` | Y | v0.1 | S | `Cargo.toml`, `.github/workflows/ci.yml`, `pushrod-docs/` |
 | 7.10 (#140) | Reference application: a real app built only with Pushrod | A small but complete application, maintained in the repository, that exercises the MVP together and surfaces API problems early. | `example`, `mvp`, `parallelizable`, `quality`, `size/M`, `usability` | Y | v0.1 | M | `pushrod-widgets/examples/contacts/ (new)` |
 
@@ -2085,6 +2084,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Sources.** [Raph Levien, "Advice for the Next 100 Rust GUIs" (Linebender blog, 2026)](https://linebender.org/blog/next-100-guis/)
 
 ### 7.7 (#115): Performance benchmarks and budgets
+
+**Status:** done (#115). `pushrod-sdl2/benches/performance.rs` (built-in timing, headless; the text benchmark uses SDL's dummy driver) measures event dispatch, interactive and full gallery frames, text atlas warm-up and cached layout, form load, and texture bytes per widget; `scripts/check_benchmarks.py` adds the gallery's release size and compares with `benches/baseline.json` (per platform): a budget over 10% fails, a timing over 2.5x warns. The CI `benchmarks` job runs it and uploads the results; the README has a Performance section with the numbers and the low-end target. The Linux baseline is recorded from the first CI artifact.
 
 **Problem Statement.** Pushrod's premise is small and fast, but nothing measures it, so regressions go unnoticed.
 
