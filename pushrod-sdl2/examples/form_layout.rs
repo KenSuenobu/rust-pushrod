@@ -44,6 +44,9 @@ const WIDE: u32 = 520;
 /// The form's height, in pixels.
 const FORM_H: u32 = 300;
 
+/// The form's background, which its labels share.
+const FORM_COLOR: Color = Color::RGBA(225, 225, 225, 255);
+
 /// The settings rows: a label and the field's starting text.
 const ROWS: [(&str, &str); 4] = [
     ("Display name:", "Jane Doe"),
@@ -97,13 +100,18 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     );
     let mut panel = Panel::new().at(20, 60).size(NARROW, FORM_H);
 
-    panel.set_color(Color::RGBA(225, 225, 225, 255));
+    panel.set_color(FORM_COLOR);
 
     let form = engine.add_widget(panel);
     let mut rows = Vec::with_capacity(ROWS.len());
 
     for (label, text) in ROWS {
-        let label = engine.add_child_widget(form, Text::new(label));
+        let mut label = Text::new(label);
+
+        // Labels share the form's background, so they read as text drawn on the form.
+        label.set_color(FORM_COLOR);
+
+        let label = engine.add_child_widget(form, label);
         let field = engine.add_child_widget(form, TextField::new().size(140, 24).with_text(text));
 
         rows.push((label, field));

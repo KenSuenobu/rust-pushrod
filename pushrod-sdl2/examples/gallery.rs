@@ -608,7 +608,12 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         ("Name:", "Jane Doe"),
         ("Server address:", "mail.example.com"),
     ] {
-        let label = engine.add_child_widget(sheet, Text::new(label));
+        let mut label = Text::new(label);
+
+        // Labels share the form's background, so they read as text drawn on the form.
+        label.set_color(Color::RGBA(225, 225, 225, 255));
+
+        let label = engine.add_child_widget(sheet, label);
         let field = engine.add_child_widget(sheet, TextField::new().size(100, 24).with_text(text));
 
         form_layout.add_row(label, field);
