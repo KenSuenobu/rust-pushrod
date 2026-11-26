@@ -31,9 +31,9 @@ use pushrod_widgets::slider::Slider;
 use pushrod_widgets::text::{Text, TextJustify};
 use pushrod_widgets::text_field::{Accessory, IntegerField, TextField};
 
-/// Window size in pixels.
-const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 1590;
+/// Window size in pixels: three columns of tiles.
+const WINDOW_W: u32 = 950;
+const WINDOW_H: u32 = 1080;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -190,7 +190,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     }
 
     // Button: normal and disabled.
-    let button_tile = add_tile(&mut engine, panel_id, 0, 1, "Button");
+    let button_tile = add_tile(&mut engine, panel_id, 2, 0, "Button");
     engine.add_child_widget(button_tile, button(point(10, 36), "Normal"));
     let mut disabled = button(point(150, 36), "Disabled");
     disabled.set_enabled(false);
@@ -213,7 +213,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     );
 
     // Text: left, centered, and right justified labels (fictional sample text).
-    let text_tile = add_tile(&mut engine, panel_id, 1, 1, "Text");
+    let text_tile = add_tile(&mut engine, panel_id, 0, 1, "Text");
     for (i, (justify, text)) in [
         (TextJustify::Left, "Jane Doe"),
         (TextJustify::Center, "Anytown"),
@@ -232,7 +232,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     }
 
     // Truncation: the same long (fictional) file name cut at the end, start and middle.
-    let truncate_tile = add_tile(&mut engine, panel_id, 0, 2, "Truncate (End, Start, Middle)");
+    let truncate_tile = add_tile(&mut engine, panel_id, 1, 1, "Truncate (End, Start, Middle)");
     for (i, mode) in [Truncate::End, Truncate::Start, Truncate::Middle]
         .into_iter()
         .enumerate()
@@ -247,7 +247,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     }
 
     // Wrapped text: a (fictional) paragraph that reflows, limited to four lines.
-    let wrap_tile = add_tile(&mut engine, panel_id, 1, 2, "Wrap (Word, max 4 lines)");
+    let wrap_tile = add_tile(&mut engine, panel_id, 2, 1, "Wrap (Word, max 4 lines)");
     let mut paragraph = Text::new(
         "Your changes to the quarterly report have not been saved.\nClose the document anyway and discard them?",
     )
@@ -265,7 +265,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         &mut engine,
         panel_id,
         0,
-        3,
+        2,
         "Custom Paint (click to highlight)",
     );
     engine.add_child_widget(
@@ -287,7 +287,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     );
 
     // Boxed label: text with a fill and a border; the second is disabled (fictional status text).
-    let boxed_tile = add_tile(&mut engine, panel_id, 1, 3, "Boxed Label");
+    let boxed_tile = add_tile(&mut engine, panel_id, 1, 2, "Boxed Label");
     let mut ready = BoxedLabel::new("Ready")
         .at(10, 36)
         .size(TILE_W - 20, 28)
@@ -300,7 +300,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     engine.add_child_widget(boxed_tile, offline);
 
     // Separator: a horizontal line, a vertical line, and an etched pair (fictional layout).
-    let separator_tile = add_tile(&mut engine, panel_id, 0, 4, "Separator");
+    let separator_tile = add_tile(&mut engine, panel_id, 2, 2, "Separator");
     engine.add_child_widget(
         separator_tile,
         Separator::horizontal(TILE_W - 20).at(10, 50),
@@ -316,7 +316,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     engine.add_child_widget(separator_tile, Separator::vertical(60).etched().at(140, 85));
 
     // GroupBox: a titled frame that holds child widgets (fictional dialog).
-    let group_tile = add_tile(&mut engine, panel_id, 1, 4, "Group Box");
+    let group_tile = add_tile(&mut engine, panel_id, 0, 3, "Group Box");
     let group = engine.add_child_widget(
         group_tile,
         GroupBox::new("Size").at(10, 36).size(TILE_W - 20, 104),
@@ -330,7 +330,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     engine.add_child_widget(group, button(point(12, 56), "Apply"));
 
     // CheckBox: unchecked, checked, indeterminate, and disabled (fictional options).
-    let check_tile = add_tile(&mut engine, panel_id, 0, 6, "Check Box");
+    let check_tile = add_tile(&mut engine, panel_id, 0, 4, "Check Box");
     let mut disabled_box = CheckBox::new("Disabled")
         .at(150, 70)
         .size(130, 20)
@@ -357,7 +357,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     engine.add_child_widget(check_tile, disabled_box);
 
     // RadioButton: a size picker (Medium checked) and a disabled pair (fictional options).
-    let radio_tile = add_tile(&mut engine, panel_id, 1, 6, "Radio Button");
+    let radio_tile = add_tile(&mut engine, panel_id, 1, 4, "Radio Button");
     RadioGroup::new(["Small", "Medium", "Large"])
         .at(10, 40)
         .item_size(130, 20)
@@ -373,7 +373,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     }
 
     // ProgressBar: empty, 40%, busy (animated), and busy in outline mode (static stripes).
-    let progress_tile = add_tile(&mut engine, panel_id, 0, 7, "Progress Bar");
+    let progress_tile = add_tile(&mut engine, panel_id, 2, 4, "Progress Bar");
     for (row, value) in [0.0, 40.0].into_iter().enumerate() {
         let bar = ProgressBar::new(100.0)
             .at(10, 40 + row as i32 * 24)
@@ -392,7 +392,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
 
     // Slider: a volume slider with its value, one with ticks and snapping, a disabled one, and a
     // vertical one.
-    let slider_tile = add_tile(&mut engine, panel_id, 1, 7, "Slider");
+    let slider_tile = add_tile(&mut engine, panel_id, 0, 5, "Slider");
     engine.add_child_widget(
         slider_tile,
         Slider::new(0.0, 100.0)
@@ -436,7 +436,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
 
     // TextField: a labelled field, a date mask, a search field, a password with reveal, a
     // whole-number field, and a disabled field.
-    let field_tile = add_tile(&mut engine, panel_id, 0, 8, "Text Field");
+    let field_tile = add_tile(&mut engine, panel_id, 1, 5, "Text Field");
     engine.add_child_widget(
         field_tile,
         TextField::new()
@@ -469,7 +469,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         .unwrap()
         .set_enabled(false);
 
-    let restricted_tile = add_tile(&mut engine, panel_id, 1, 8, "Text Field (restricted)");
+    let restricted_tile = add_tile(&mut engine, panel_id, 2, 5, "Text Field (restricted)");
     engine.add_child_widget(
         restricted_tile,
         TextField::new()
@@ -500,7 +500,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     );
 
     // GlyphButton: four small symbol buttons; the last two fire on press and repeat while held.
-    let glyph_tile = add_tile(&mut engine, panel_id, 1, 5, "Glyph Button");
+    let glyph_tile = add_tile(&mut engine, panel_id, 2, 3, "Glyph Button");
     let glyphs = [
         ('←', "Click", false),
         ('→', "Click", false),
@@ -521,7 +521,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     }
 
     // ImageWidget: the four fit modes, then a missing file (a crossed box).
-    let image_tile = add_tile(&mut engine, panel_id, 0, 5, "Image");
+    let image_tile = add_tile(&mut engine, panel_id, 1, 3, "Image");
     let sample = concat!(env!("CARGO_MANIFEST_DIR"), "/examples/assets/sample.png");
     let samples = [
         ("Center", FitMode::Center, sample),
