@@ -415,6 +415,24 @@ impl WidgetCache {
         Ok(placed)
     }
 
+    /// Arranges the parts of every composite that called
+    /// [`Widget::request_arrange_parts`](crate::widget::Widget::request_arrange_parts), and
+    /// clears the requests.  [`WidgetCache::draw_loop`] calls it before drawing.
+    pub(crate) fn arrange_requested_parts(&mut self) {
+        let requested: Vec<WidgetId> = (0..self.cache.len() as WidgetId)
+            .filter(|&id| self.cache[id as usize].core().arrange_requested())
+            .collect();
+
+        for id in requested {
+            self.cache[id as usize]
+                .core_mut()
+                .set_arrange_requested(false);
+
+            // A `Widget` that is not a composite has no parts; its request is dropped.
+            let _ = self.arrange_parts(id);
+        }
+    }
+
     /// Returns the composite that owns a part.
     ///
     /// # Arguments

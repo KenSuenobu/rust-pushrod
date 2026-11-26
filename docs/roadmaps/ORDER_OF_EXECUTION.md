@@ -80,7 +80,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 41 | [#116](https://github.com/KenSuenobu/rust-pushrod/issues/116) | pushrod: [5.5] Layout manager foundation: Layout trait, size hints, measure and arrange (done) |
 | ✅ 42 | [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) | pushrod: [5.6] Row and column layouts (done) |
 | ✅ 43 | [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) | pushrod: [5.7] Form layout: aligned label and field rows (done) |
-| 44 | [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) | pushrod: [3.1] Scroll bar |
+| ✅ 44 | [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) | pushrod: [3.1] Scroll bar (done) |
 | 45 | [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) | pushrod: [5.3] Container: a scrollable viewport onto fixed-size content |
 | 46 | [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) | pushrod: [7.2] Golden-image rendering tests |
 | 47 | [#115](https://github.com/KenSuenobu/rust-pushrod/issues/115) | pushrod: [7.7] Performance benchmarks and budgets |
@@ -1008,10 +1008,10 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Drag, arrows with repeat, track paging
-- [ ] Thumb size reflects proportion
-- [ ] Built on the step 40 `Composite` trait: `parts()`, `part(name)`, and typed accessors for the arrows and thumb
-- [ ] Parts are retrievable and modifiable as described
+- [x] Drag, arrows with repeat, track paging
+- [x] Thumb size reflects proportion
+- [x] Built on the step 40 `Composite` trait: `parts()`, `part(name)`, and typed accessors for the arrows and thumb
+- [x] Parts are retrievable and modifiable as described
 
 ### Step 45: Container: a scrollable viewport onto fixed-size content
 

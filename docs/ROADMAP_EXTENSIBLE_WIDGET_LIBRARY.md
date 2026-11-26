@@ -1176,12 +1176,13 @@ Scroll bar, slider, group box, choice button, split view, and expander.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 3.1 (#39) | Scroll bar | Vertical/horizontal scroll bar with arrows and a proportional thumb. | `enhancement`, `mvp`, `size/M`, `widget` | N | v0.1 | M | `pushrod-widgets/src/scroll_bar.rs (new)` |
 | 3.6 (#44) | Choice button: pop-up list and click-to-cycle modes | Pick one of several options compactly, as a pop-up list or a click-to-cycle button. | `chassis`, `enhancement`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/choice_button.rs (new)` |
 | 3.9 (#47) | Split view (panes with draggable dividers) | Two or more panes side by side or stacked, separated by dividers the user drags to resize them. | `chassis`, `enhancement`, `layout`, `parallelizable`, `size/M`, `usability`, `widget` | Y | N | M | `pushrod-widgets/src/split_view.rs (new)` |
 | 3.10 (#90) | Expander (collapsible section) | A titled section that shows or hides its contents when clicked. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/expander.rs (new)` |
 
 ### 3.1 (#39): Scroll bar
+
+**Status:** done (#39). `pushrod_widgets::scroll_bar::ScrollBar`: a `Composite` built from `"track"` and `"thumb"` (`Frame`s) and `"up"` and `"down"` (`GlyphButton`s, activate-on-press with auto-repeat), returned by `TypedParts` as `ScrollBarParts { up, down, track, thumb }`; `ScrollBar::vertical()` / `horizontal()` with `at`, `size`, `value`, `page_size`, `step`, and `set_proportion(visible, total)`; arrows step, track presses page, the thumb drags, and every change emits `ValueChanged`; `Widget::request_arrange_parts()` (new in the core) lets a composite move its own parts before the next frame; `GlyphButton` gains `set_font` and `set_font_color`; the gallery shows it.
 
 Vertical/horizontal scroll bar with arrows and a proportional thumb. **Widget roadmap:** [`docs/widgets/scroll-bar.md`](widgets/scroll-bar.md) (look, behavior, events, acceptance criteria).
 
@@ -1426,7 +1427,7 @@ Like every widget, it can also receive application-defined custom events in `han
 - [x] List-structured composites support add/insert/remove of parts with automatic re-layout
 - [x] Composite translates part events; callbacks on part IDs also work
 - [ ] Form round trip preserves part overrides and added/removed parts (deferred to the form writer, step 65)
-- [ ] Scroll bar and alert built on it (deferred to steps 44 and 52)
+- [ ] Scroll bar and alert built on it (scroll bar done in step 44, #39; alert deferred to step 52)
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 1.6 (#22), 9.2 (#94).
 

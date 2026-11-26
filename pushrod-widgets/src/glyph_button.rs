@@ -403,6 +403,45 @@ impl GlyphButton {
         self.glyph
     }
 
+    /// Sets the glyph font, and invalidates the button.  The four arrow characters are drawn as
+    /// shapes, so the font changes only other glyphs.
+    ///
+    /// # Arguments
+    ///
+    /// * `font` - The font handle.
+    pub fn set_font(&mut self, font: Font) {
+        self.style.font = font;
+        self.set_invalidated(true);
+    }
+
+    /// Returns the glyph font.
+    ///
+    /// # Returns
+    ///
+    /// The font handle.
+    pub fn get_font(&self) -> &Font {
+        &self.style.font
+    }
+
+    /// Sets the glyph color, and invalidates the button.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The glyph color.
+    pub fn set_font_color(&mut self, color: Color) {
+        self.style.font_color = color;
+        self.set_invalidated(true);
+    }
+
+    /// Returns the glyph color.
+    ///
+    /// # Returns
+    ///
+    /// The color the glyph is drawn in (when not pressed).
+    pub fn get_font_color(&self) -> Color {
+        self.style.font_color
+    }
+
     /// Returns whether the button is drawn selected (pressed, with the pointer inside).
     ///
     /// # Returns

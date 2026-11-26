@@ -56,9 +56,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Drag, arrows with repeat, track paging
-- [ ] Thumb size reflects proportion
-- [ ] Parts are retrievable and modifiable as described
+- [x] Drag, arrows with repeat, track paging
+- [x] Thumb size reflects proportion
+- [x] Parts are retrievable and modifiable as described
 
 ## Depends on
 

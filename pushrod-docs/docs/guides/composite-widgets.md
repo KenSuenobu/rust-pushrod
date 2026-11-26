@@ -27,6 +27,7 @@ flowchart TD
     C --> D["layout_parts(): rectangles for the parts"]
     D --> E["PartsArranged { id, placed }"]
     F["ui.widgets().insert_part / remove_part<br/>insert_list_part / remove_list_part"] --> D
+    K["composite.request_arrange_parts()<br/>(laid out before the next frame)"] --> D
     G["A part emits an event (Clicked)"] --> H["composite.handle_part_event(part, event, ctx)"]
     H --> I["The part's event: callbacks on the part's ID"]
     I --> J["The composite's translated events"]
@@ -37,6 +38,7 @@ flowchart TD
 - **Changed through the normal API.** `ui.get_mut::<Text>(title)?.set_font_color(Color::RED)` changes a part and invalidates it, so it is repainted on the next frame.
 - **Lists of parts.** Parts that form a list are named `"<kind>:<n>"` (`"button:0"`, `"item:3"`). `insert_list_part(composite, kind, index, widget)` and `remove_list_part(composite, kind, index)` add and remove items and renumber the list. `add_part`, `insert_part`, and `remove_part` work with any name. After every change the composite's `layout_parts` runs again.
 - **Part events reach the composite first.** `handle_part_event` sees each event a part emits and can emit its own through `ctx` (a scroll bar turns an arrow's `Clicked` into its own `ValueChanged`). The part's event is still delivered, so callbacks registered on the part's ID run, followed by the composite's events. Translation climbs through nested composites one level at a time; an event a composite emits for one of its own parts is not handed back to it.
+- **Moving parts from inside.** A composite has no access to the cache in `handle_event` or `handle_part_event`, so it cannot move its parts itself. When its own state changes where a part goes (a scroll bar's value moves its thumb), it calls `self.request_arrange_parts()`, and `layout_parts` runs again before the next frame is drawn. Several requests in one frame arrange the parts once.
 - **Removing.** `remove_part` removes the part and everything inside it and emits `WidgetRemoved` for each. Removed IDs are never reused: `get` returns `None`, and callbacks registered on them never run again. Focus on a removed widget is cleared (`FocusChanged`).
 
 ## Writing a composite widget
@@ -257,6 +259,7 @@ Inside a callback, the same calls go through `ui`: `ui.get_mut::<Text>(message)`
 | `WidgetCache::add_part` / `insert_part` / `remove_part` | Add, insert at a position, or remove a part by name. |
 | `WidgetCache::insert_list_part` / `remove_list_part` | Add or remove an item of a `"<kind>:<n>"` list, and renumber it. |
 | `WidgetCache::arrange_parts(composite)` | Lay the parts out again, for example after resizing the composite. |
+| `Widget::request_arrange_parts()` | From inside the composite: lay the parts out again before the next frame. |
 
 Errors are `Error::UnknownWidget` for an ID that does not exist and `Error::Composite { id, message }` for a widget that is not a composite, a part name already used, or a part that does not exist. `PartsBuilder::add` panics on a name already used, because that is a mistake in the composite's own code.
 
@@ -266,7 +269,7 @@ Errors are `Error::UnknownWidget` for an ID that does not exist and `Error::Comp
 |---|---|
 | `WidgetAdded { id, parent }` | Each part is created, during the build or by `add_part` and friends. |
 | `WidgetRemoved { id, parent }` | Each widget removed with its part. |
-| `PartsArranged { id, placed }` | The composite laid its parts out; `placed` is how many it placed. |
+| `PartsArranged { id, placed }` | The composite laid its parts out (including after `request_arrange_parts`); `placed` is how many it placed. |
 
 See [Engine events](../events/engine-events.md).
 
@@ -276,7 +279,7 @@ See [Engine events](../events/engine-events.md).
 
 ## Planned
 
-- The scroll bar ([roadmap step 44](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/roadmaps/ORDER_OF_EXECUTION.md)) and the alert (step 52) are built on `Composite`, with their own typed parts.
+- The [scroll bar](../widgets/scroll-bar.md) is built on `Composite`, with its typed `ScrollBarParts`. The alert ([roadmap step 52](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/roadmaps/ORDER_OF_EXECUTION.md)) follows.
 - Form files store a composite's part overrides and added or removed parts once the form writer exists (step 65).
 
 Related: [Creating widgets](creating-widgets.md), [Widget tree and IDs](../concepts/widget-tree-and-ids.md), [Handling events](handling-events.md).

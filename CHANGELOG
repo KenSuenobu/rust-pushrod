@@ -50,3 +50,4 @@
 [#116] Layout trait, SizeHint, LayoutParams; measure/arrange per frame [kenji]
 [#117] Row and Column layouts with spacing, margins, stretch; Spacer [kenji]
 [#118] FormLayout: aligned labels, stretching fields, narrow stacking [kenji]
+[#39] ScrollBar: repeating arrows, track paging, proportional thumb [kenji]
