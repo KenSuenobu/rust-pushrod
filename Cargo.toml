@@ -1,13 +1,14 @@
 [package]
 name = "pushrod"
-version = "0.0.41"
+version = "0.1.0"
 authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
 edition.workspace = true
 rust-version.workspace = true
 description = "Pushrod UI Library: engine, widget tree, events, and drawing core"
 license.workspace = true
 readme = "README.md"
-repository = "https://github.com/KenSuenobu/rust-pushrod"
+repository.workspace = true
+homepage.workspace = true
 documentation = "https://docs.rs/pushrod"
 keywords = ["sdl", "sdl2", "pushrod", "ui", "gui"]
 categories = ["gui", "graphics", "visualization"]
@@ -15,6 +16,7 @@ include = [
     "**/*.rs",
     "assets/OpenSans-Regular.ttf",
     "assets/OFL.txt",
+    "/LICENSE",
     "Cargo.toml",
 ]
 
@@ -26,6 +28,7 @@ edition = "2024"
 rust-version = "1.100"
 license = "Apache-2.0"
 repository = "https://github.com/KenSuenobu/rust-pushrod"
+homepage = "https://pushrod.nobudata.com"
 
 [lib]
 name = "pushrod"
@@ -42,3 +45,7 @@ unicode-segmentation = "1"
 default = []
 # Lay out text with Parley and rasterize glyphs with swash instead of SDL2_ttf.
 parley = ["dep:parley", "dep:swash"]
+
+# docs.rs documents the optional Parley text engine too.
+[package.metadata.docs.rs]
+features = ["parley"]

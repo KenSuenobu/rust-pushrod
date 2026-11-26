@@ -119,6 +119,23 @@ pub struct ParleyLayout {
     registry: FontRegistry,
 }
 
+impl std::fmt::Debug for ParleyLayout {
+    /// Shows the resolved font families; Parley's contexts have no `Debug`.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatter's result.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ParleyLayout")
+            .field("families", &self.families)
+            .finish_non_exhaustive()
+    }
+}
+
 impl ParleyLayout {
     /// Creates an engine that discovers the system's fonts for fallback.
     ///

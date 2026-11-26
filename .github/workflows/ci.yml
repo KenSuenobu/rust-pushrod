@@ -199,6 +199,27 @@ jobs:
       - name: Checked code samples compile
         run: cargo test -p pushrod-doc-samples
 
+  release:
+    name: Release readiness (metadata, changelog, cargo publish --dry-run)
+    # Packages and builds the three published crates exactly as crates.io would receive them,
+    # without uploading anything. Publishing itself is .github/workflows/release.yml, on a v* tag.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SDL2
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Release-check tests
+        run: python3 scripts/test_check_release.py
+      - name: Matching versions, crates.io metadata, and an Unreleased changelog section
+        run: python3 scripts/check_release.py
+      - name: Package and build every published crate
+        run: cargo publish --workspace --dry-run
+
   sample-data:
     name: Sample data (no real e-mail addresses or home paths)
     runs-on: ubuntu-latest

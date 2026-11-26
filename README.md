@@ -7,7 +7,9 @@ OpenGL for the drawing layer.
 
 ## Documentation
 
-The documentation site lives in [`pushrod-docs/`](pushrod-docs/) (Docusaurus). It has a five-minute quick start, guides for creating applications, handling events, and creating widgets, and a page for every widget. To preview it: `cd pushrod-docs && npm install && npm start`.
+The documentation site is <https://pushrod.nobudata.com>, built from [`pushrod-docs/`](pushrod-docs/) (Docusaurus). It has a five-minute quick start, guides for creating applications, handling events, and creating widgets, and a page for every widget. To preview it: `cd pushrod-docs && npm install && npm start`.
+
+The API reference is on docs.rs: [`pushrod`](https://docs.rs/pushrod), [`pushrod-widgets`](https://docs.rs/pushrod-widgets), [`pushrod-sdl2`](https://docs.rs/pushrod-sdl2). Release notes are in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Summary
 
@@ -30,18 +32,19 @@ the `OBJECT` tree of a GEM resource.  This keeps forms simple to save, load, and
 
 ## Crates
 
-Pushrod is a Cargo workspace with two crates:
+Pushrod is a Cargo workspace with three crates, published to crates.io with matching versions:
 
 | Crate | What it contains |
 |---|---|
 | [`pushrod`](src/lib.rs) (this directory) | The core: engine, widget tree and IDs, events and callbacks, `paint` helpers, texture and font caches. No widgets except the window's root. |
 | [`pushrod-widgets`](pushrod-widgets/) | The standard widgets: simple, flat, and predictable. |
+| [`pushrod-sdl2`](pushrod-sdl2/) | The SDL2 backend: window, input, GPU textures, and text. |
 
 ```toml
 [dependencies]
-pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+pushrod = "0.1"
+pushrod-widgets = "0.1"
+pushrod-sdl2 = "0.1"
 ```
 
 SDL2 lives in its own backend crate, `pushrod-sdl2`, so the core and the widgets don't depend on

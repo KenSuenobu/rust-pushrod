@@ -40,12 +40,12 @@ In `Cargo.toml`:
 
 ```toml
 [dependencies]
-pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod" }
+pushrod = "0.1"
+pushrod-widgets = "0.1"
+pushrod-sdl2 = "0.1"
 ```
 
-`pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets; `pushrod-sdl2` is the SDL2 [backend](../platforms/backends.md) that opens the window and draws. Your application does not depend on `sdl2` itself. Pushrod requires Rust 1.100 or newer (edition 2024).
+`pushrod` is the core (engine, events, drawing); `pushrod-widgets` has the standard widgets; `pushrod-sdl2` is the SDL2 [backend](../platforms/backends.md) that opens the window and draws. Your application does not depend on `sdl2` itself. Pushrod requires Rust 1.100 or newer (edition 2024). The three crates come from crates.io and always share a version; to use unreleased code from GitHub instead, see [Installation](./installation.md#use-the-latest-code-from-github).
 
 ## 4. Fonts
 

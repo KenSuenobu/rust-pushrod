@@ -19,6 +19,7 @@ A change cannot merge while any job fails. The badge at the top of the
 | **Golden-image rendering tests** | Ubuntu with Xvfb | `PUSHROD_GOLDEN=1 xvfb-run -a cargo test -p pushrod-sdl2 --test visual --test contacts` (every widget, and the [reference application](../guides/reference-application.md)'s screens); on failure the diff images are uploaded as the `golden-diff` artifact (see [Golden-image rendering tests](golden-image-rendering-tests.md)) |
 | **Performance benchmarks** | Ubuntu | `python3 scripts/check_benchmarks.py`: a budget over its tolerance fails, a slow timing warns; the results are uploaded as the `benchmark-results` artifact (see [Performance benchmarks and budgets](performance-benchmarks-and-budgets.md)) |
 | **Sample data** | Ubuntu | `python3 scripts/check_sample_data.py` |
+| **Release readiness** | Ubuntu | `python3 scripts/test_check_release.py`, `python3 scripts/check_release.py` (matching versions, crates.io metadata, an `Unreleased` changelog section), and `cargo publish --workspace --dry-run` (see [Changelog, Cargo metadata, and crates.io release](changelog-cargo-metadata-and-crates-io-release.md)) |
 
 Warnings fail the build: Clippy and rustdoc run with `-D warnings`, so fix every warning rather than silencing it.
 SDL2, SDL2_ttf, and SDL2_image are installed with `apt` on Linux, Homebrew on macOS, and the
@@ -36,6 +37,8 @@ python3 scripts/check_docs.py
 RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 python3 scripts/check_sample_data.py
 python3 scripts/check_benchmarks.py
+python3 scripts/check_release.py
+cargo publish --workspace --dry-run
 ```
 
 ## The sample-data check

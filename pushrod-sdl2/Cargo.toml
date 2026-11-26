@@ -1,6 +1,6 @@
 [package]
 name = "pushrod-sdl2"
-version = "0.0.48"
+version = "0.1.0"
 authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
 description = "SDL2 backend for the Pushrod UI library: window, input, GPU textures, and text"
 readme = "README.md"
@@ -11,13 +11,14 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
 
 [lib]
 name = "pushrod_sdl2"
 path = "src/lib.rs"
 
 [dependencies]
-pushrod = { path = "..", version = "0.0.41" }
+pushrod = { path = "..", version = "0.1.0" }
 
 # sdl2 0.39.0 doesn't compile with `unsafe_textures`; stay on 0.38 until a fixed release.
 [dependencies.sdl2]
@@ -25,7 +26,7 @@ version = "0.38"
 features = ["ttf", "image", "unsafe_textures"]
 
 [dev-dependencies]
-pushrod-widgets = { path = "../pushrod-widgets", version = "0.0.40" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.1.0" }
 
 [features]
 default = []
@@ -36,6 +37,10 @@ bundled = ["sdl2/bundled"]
 static-link = ["sdl2/static-link"]
 # Lay out text with Parley and rasterize glyphs with swash.
 parley = ["pushrod/parley"]
+
+# docs.rs documents the optional Parley text engine too (not `bundled`, which needs CMake).
+[package.metadata.docs.rs]
+features = ["parley"]
 
 [[example]]
 name = "parley_spike"

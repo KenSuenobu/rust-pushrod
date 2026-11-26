@@ -35,6 +35,29 @@ Pushrod is three crates:
 
 Most applications use all three: pick a backend crate to run on. A different widget library can extend or replace `pushrod-widgets`; see [Widget libraries](../concepts/widget-libraries.md).
 
+### Install from crates.io
+
+The three crates are published to [crates.io](https://crates.io/crates/pushrod) with matching versions, so use the same version for all three:
+
+```toml
+[dependencies]
+pushrod = "0.1"
+pushrod-widgets = "0.1"
+pushrod-sdl2 = "0.1"
+```
+
+Or add them from the command line:
+
+```bash
+cargo add pushrod pushrod-widgets pushrod-sdl2
+```
+
+The API reference for each crate is on docs.rs: [`pushrod`](https://docs.rs/pushrod), [`pushrod-widgets`](https://docs.rs/pushrod-widgets), [`pushrod-sdl2`](https://docs.rs/pushrod-sdl2). What changed in each release is in [`CHANGELOG.md`](https://github.com/KenSuenobu/rust-pushrod/blob/main/CHANGELOG.md).
+
+### Use the latest code from GitHub
+
+To try changes that are not released yet, depend on the repository instead:
+
 ```toml
 [dependencies]
 pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
@@ -59,9 +82,9 @@ Enable `bundled` and Cargo compiles SDL2 from source instead of using the system
 
 ```toml
 [dependencies]
-pushrod = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-pushrod-widgets = { git = "https://github.com/KenSuenobu/rust-pushrod" }
-pushrod-sdl2 = { git = "https://github.com/KenSuenobu/rust-pushrod", features = ["bundled"] }
+pushrod = "0.1"
+pushrod-widgets = "0.1"
+pushrod-sdl2 = { version = "0.1", features = ["bundled"] }
 ```
 
 CI builds `pushrod-sdl2` this way on macOS and Windows on every pull request.
