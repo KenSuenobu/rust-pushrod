@@ -56,7 +56,7 @@ A validator judges the whole text of a field after each edit. `Invalid` refuses 
 ```rust checked title="src/email.rs"
 use pushrod_widgets::text_field::validate::{Validator, Validity};
 
-/// Judges an e-mail address as it is typed: `name@domain.tld`, or empty.
+/// Judges an e-mail address as it is typed: `name@example.com`, or empty.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct EmailValidator;
 

@@ -607,6 +607,10 @@ impl Alert {
     /// * `alert` - The alert's ID.
     /// * `index` - The button's index.
     ///
+    /// # Returns
+    ///
+    /// `Ok(())` once the button at `index` is the default.
+    ///
     /// # Errors
     ///
     /// [`Error::UnknownWidget`] if `alert` does not exist; [`Error::Composite`] if it is not an
