@@ -11,6 +11,7 @@
 use pushrod::color::{Color, FontStyle};
 use pushrod::engine::Engine;
 use pushrod::geometry::{Point, point, size};
+use pushrod::paint::Truncate;
 use pushrod::widget::{Behavior, Widget, WidgetId};
 use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
@@ -27,7 +28,7 @@ const FONT: &str = concat!(
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 400;
+const WINDOW_H: u32 = 570;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -213,6 +214,27 @@ pub fn main() {
         );
         sample.set_color(Color::RGBA(30, 90, 160, 255));
         engine.add_child_widget(text_tile, sample);
+    }
+
+    // Truncation: the same long (fictional) file name cut at the end, start and middle.
+    let truncate_tile = add_tile(&mut engine, panel_id, 0, 2, "Truncate (End, Start, Middle)");
+    for (i, mode) in [Truncate::End, Truncate::Start, Truncate::Middle]
+        .into_iter()
+        .enumerate()
+    {
+        let mut sample = TextWidget::new(
+            point(10, 36 + i as i32 * 26),
+            size(TILE_W - 20, 18),
+            String::from(FONT),
+            FontStyle::NORMAL,
+            14,
+            Color::WHITE,
+            TextJustify::Left,
+            String::from("Quarterly sales report for the western region.txt"),
+        );
+        sample.set_color(Color::RGBA(30, 90, 160, 255));
+        sample.set_truncate(mode);
+        engine.add_child_widget(truncate_tile, sample);
     }
 
     let quit_id = engine.add_child_widget(

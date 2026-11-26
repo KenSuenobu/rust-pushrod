@@ -205,7 +205,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.23 (#136) | Public API polish before publishing: builders, prelude, and stability | Make the public API pleasant and stable before crates.io: builders with defaults, preludes, non-exhaustive enums, and consistent names. | `api`, `enhancement`, `mvp`, `parallelizable`, `size/M`, `usability` | Y | v0.1 | M | `src/lib.rs`, `pushrod-widgets (all widgets)` |
 | 1.24 (#137) | Fonts: shared font handles and a built-in default font | Replace per-widget font file paths with shared `Font` handles, and ship a default font so applications work without any font files. | `api`, `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `text`, `usability` | Y | v0.1 | S | `src/font.rs`, `assets/ (font and license)` |
 | 1.25 (#138) | Errors: return Result instead of panicking | Library code reports failures (fonts, images, windows, unknown widget IDs) as `Result` values instead of panicking. | `api`, `enhancement`, `mvp`, `parallelizable`, `reliability`, `size/S` | Y | v0.1 | S | `src/error.rs (new)`, `src/font.rs`, `src/engine.rs`, `src/cache.rs` |
-| 1.26 (#289) | Text truncation: shorten text that doesn't fit with an ellipsis | Text that is wider than its space is cut cleanly and ends in an ellipsis, at the end, start, or middle. | `chassis`, `core`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `usability` | Y | v0.1 | S | `src/paint.rs`, `src/text/layout.rs`, `pushrod-widgets/src/text_widget.rs`, `pushrod-widgets/src/button_widget.rs` |
 | 1.27 (#290) | Wrapped text: multi-line labels that reflow | Labels wrap their text onto several lines at word boundaries and reflow when their width changes. | `chassis`, `core`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `usability` | Y | v0.1 | S | `src/paint.rs`, `src/text/layout.rs`, `pushrod-widgets/src/text_widget.rs` |
 
 ### 1.1 (#19): Widget behavior flags and visual states
@@ -865,6 +864,8 @@ Like every widget, it can also receive application-defined custom events in `han
 **Documentation.** Docusaurus page: `pushrod-docs/docs/guides/creating-an-application.md` ("Creating an application", Guides, update). Guides: update the guide or concept page covering: a new Errors section in creating an application. Rustdoc: `pushrod::Error`, fallible functions. Examples: examples handle errors with `?`. Screenshots: n/a.
 
 ### 1.26 (#289): Text truncation: shorten text that doesn't fit with an ellipsis
+
+**Status:** done (#289). `paint::text` takes a `Truncate` mode; `TextWidget` and `ButtonWidget` default to `End`.
 
 **Problem Statement.** Text that doesn't fit its widget is currently clipped mid-letter or drawn over its neighbors. Buttons, labels, list rows, table cells, tabs, and breadcrumbs all meet text that is too long sooner or later, and every toolkit handles it the same way: shorten it and show an ellipsis.
 

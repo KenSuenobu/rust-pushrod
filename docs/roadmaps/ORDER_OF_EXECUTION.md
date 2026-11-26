@@ -56,7 +56,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 17 | [#96](https://github.com/KenSuenobu/rust-pushrod/issues/96) | pushrod: [9.4] Reusable input controllers: click, drag, scroll, hover, long-press, key (done) |
 | ✅ 18 | [#20](https://github.com/KenSuenobu/rust-pushrod/issues/20) | pushrod: [1.4] Keyboard focus, Tab order, and Return/Escape (done) |
 | ✅ 19 | [#104](https://github.com/KenSuenobu/rust-pushrod/issues/104) | pushrod: [1.17] Per-state appearance: colors, border, and font for each visual state (done) |
-| 20 | [#289](https://github.com/KenSuenobu/rust-pushrod/issues/289) | pushrod: [1.26] Text truncation: shorten text that doesn't fit with an ellipsis |
+| ✅ 20 | [#289](https://github.com/KenSuenobu/rust-pushrod/issues/289) | pushrod: [1.26] Text truncation: shorten text that doesn't fit with an ellipsis (done) |
 | 21 | [#290](https://github.com/KenSuenobu/rust-pushrod/issues/290) | pushrod: [1.27] Wrapped text: multi-line labels that reflow |
 | 22 | [#21](https://github.com/KenSuenobu/rust-pushrod/issues/21) | pushrod: [1.5] Timers and idle callbacks |
 | 23 | [#134](https://github.com/KenSuenobu/rust-pushrod/issues/134) | pushrod: [10.6] Backend crates: keep SDL out of the core and the widgets |
@@ -624,10 +624,10 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] End, Start, and Middle modes cut on grapheme boundaries and never overflow the widget
-- [ ] Text that fits is drawn unchanged
-- [ ] `is_truncated()` reports shortening
-- [ ] Text and Button widgets default to End; paint tests cover all modes
+- [x] End, Start, and Middle modes cut on grapheme boundaries and never overflow the widget
+- [x] Text that fits is drawn unchanged
+- [x] `is_truncated()` reports shortening
+- [x] Text and Button widgets default to End; paint tests cover all modes
 
 ### Step 21: Wrapped text: multi-line labels that reflow
 

@@ -203,6 +203,34 @@ impl Painter for Sdl2Painter<'_> {
         text_size
     }
 
+    /// Measures one line of text with the font cache, without drawing it.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - The font.
+    /// * `msg` - The text.
+    ///
+    /// # Returns
+    ///
+    /// The width in pixels.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the font cannot be loaded.
+    fn text_width(&mut self, style: &TextStyle, msg: &str) -> u32 {
+        self.fonts
+            .layout(
+                self.canvas,
+                &style.font_name,
+                style.font_size,
+                to_sdl_font_style(style.font_style),
+                msg,
+                u32::MAX,
+            )
+            .size
+            .w
+    }
+
     /// Draws an image file scaled to a rectangle.
     ///
     /// # Arguments
