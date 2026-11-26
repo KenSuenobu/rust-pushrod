@@ -81,7 +81,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 42 | [#117](https://github.com/KenSuenobu/rust-pushrod/issues/117) | pushrod: [5.6] Row and column layouts (done) |
 | ✅ 43 | [#118](https://github.com/KenSuenobu/rust-pushrod/issues/118) | pushrod: [5.7] Form layout: aligned label and field rows (done) |
 | ✅ 44 | [#39](https://github.com/KenSuenobu/rust-pushrod/issues/39) | pushrod: [3.1] Scroll bar (done) |
-| 45 | [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) | pushrod: [5.3] Container: a scrollable viewport onto fixed-size content |
+| ✅ 45 | [#58](https://github.com/KenSuenobu/rust-pushrod/issues/58) | pushrod: [5.3] Container: a scrollable viewport onto fixed-size content (done) |
 | 46 | [#70](https://github.com/KenSuenobu/rust-pushrod/issues/70) | pushrod: [7.2] Golden-image rendering tests |
 | 47 | [#115](https://github.com/KenSuenobu/rust-pushrod/issues/115) | pushrod: [7.7] Performance benchmarks and budgets |
 | 48 | [#25](https://github.com/KenSuenobu/rust-pushrod/issues/25) | pushrod: [1.10] High-DPI rendering and window resize |
@@ -1025,15 +1025,15 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Children positioned relative to the content's 0,0; content size independent of the container size
-- [ ] Resizing the container changes only the visible area; moving it doesn't shift content
-- [ ] Scroll bars appear when needed (or always/never); wheel and keyboard pan; offset clamped to content bounds
-- [ ] `scroll_to`, `scroll_by`, `ensure_visible`, `viewport()`; focused widgets scrolled into view
-- [ ] Children clipped to and hit-tested through the viewport; panning doesn't repaint unchanged children
-- [ ] Content size modes Fixed, FitChildren, FollowWidth; works with a layout manager and with a loaded form
-- [ ] `ViewportChanged` emitted on pan and resize
-- [ ] Content larger than the GPU's maximum texture size works
-- [ ] Only visible children are drawn
+- [x] Children positioned relative to the content's 0,0; content size independent of the container size
+- [x] Resizing the container changes only the visible area; moving it doesn't shift content
+- [x] Scroll bars appear when needed (or always/never); wheel and keyboard pan; offset clamped to content bounds
+- [x] `scroll_to`, `scroll_by`, `ensure_visible`, `viewport()`; focused widgets scrolled into view
+- [x] Children clipped to and hit-tested through the viewport; panning doesn't repaint unchanged children
+- [ ] Content size modes Fixed, FitChildren, FollowWidth; works with a layout manager and with a loaded form (modes and layout manager done in #58; a loaded form waits for the form loader, 6.4 (#63))
+- [x] `ViewportChanged` emitted on pan and resize
+- [x] Content larger than the GPU's maximum texture size works
+- [x] Only visible children are drawn
 
 ### Step 46: Golden-image rendering tests
 

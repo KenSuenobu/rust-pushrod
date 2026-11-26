@@ -24,6 +24,7 @@
 pub use crate::boxed_label::BoxedLabel;
 pub use crate::button::Button;
 pub use crate::check_box::CheckBox;
+pub use crate::container::{Container, ContainerParts, ContentSize, ScrollBars};
 pub use crate::custom_paint::CustomPaint;
 pub use crate::frame::Frame;
 pub use crate::glyph_button::GlyphButton;

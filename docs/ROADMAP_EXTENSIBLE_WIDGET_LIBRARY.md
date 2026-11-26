@@ -1359,7 +1359,6 @@ Clip children to parents, composite widgets with retrievable parts, a scrollable
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 5.3 (#58) | Container: a scrollable viewport onto fixed-size content | A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. | `chassis`, `enhancement`, `layout`, `mvp`, `size/M`, `usability`, `widget` | N | v0.1 | M | `pushrod-widgets/src/container.rs (new)`, `src/cache.rs` |
 | 5.4 (#59) | Autoresizing (keep margins or stretch on resize) | Children keep margins or stretch when their parent is resized. | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `src/widget.rs`, `src/cache.rs` |
 | 5.8 (#119) | Grid layout | Rows and columns of cells with spans, per-row/column stretch, and alignment. | `enhancement`, `layout`, `parallelizable`, `size/M` | Y | N | M | `layout/grid.rs (new)` |
 | 5.9 (#120) | Stack layout (one child visible at a time) | Children occupy the same area; one is shown at a time (pages, wizards, tab contents). | `enhancement`, `layout`, `parallelizable`, `size/S` | Y | N | S | `layout/stack.rs (new)` |
@@ -1436,6 +1435,8 @@ Like every widget, it can also receive application-defined custom events in `han
 **Documentation.** Docusaurus page: `pushrod-docs/docs/guides/composite-widgets.md` ("Composite Widgets", Guides, new). Guides: 'Writing a composite widget' guide. Rustdoc: `composite` module. Examples: Composite example. Screenshots: n/a.
 
 ### 5.3 (#58): Container: a scrollable viewport onto fixed-size content
+
+**Status:** done (#58). `pushrod_widgets::container::Container`: a `Composite` built from `"content"` (a `Panel` the size of the viewport, which holds the children), `"vertical"` and `"horizontal"` (`ScrollBar`s), and `"corner"` (a `Frame`), returned by `TypedParts` as `ContainerParts { content, vertical, horizontal, corner }`; `Container::new(origin, viewport_size, content_size)` with `scroll_bars(ScrollBars::Auto/Always/Never)` and `content_mode(ContentSize::Fixed/FitChildren/FollowWidth { fit_height })`; `scroll_offset`, `scroll_to`, `scroll_by`, `ensure_visible`, `viewport`, `content_size`/`set_content_size`; the wheel, Page Up/Down, Home/End, and the arrow keys pan; a focused child is scrolled into view; emits `ViewportChanged` on pan and resize. The core gained what it needs: `Widget::child_offset` and `child_area` (set with `WidgetCache::set_child_offset` / `set_child_area`), so children are drawn, cropped, hit-tested, and laid out through a viewport without one content-sized texture; wheel input delivered as `Scrolled`; `Composite::sync_parts`; `Widget::descendant_changed`; and a composite's parts arranged again when it is resized. Placing a form loaded from a file in a container waits for the form loader (6.4 (#63)).
 
 A widget whose children live on a content area with its own size and 0,0 origin; the container's frame is a viewport panned by scroll bars. **Widget roadmap:** [`docs/widgets/container.md`](widgets/container.md) (look, behavior, events, acceptance criteria).
 

@@ -383,6 +383,9 @@ impl WidgetCache {
     /// [`Error::UnknownWidget`] if `composite` does not exist, [`Error::Composite`] if it is not
     /// a composite.
     pub fn arrange_parts(&mut self, composite: WidgetId) -> Result<usize> {
+        self.composite(composite)?;
+        self.sync_composite(composite);
+
         let owner = self.composite(composite)?;
         let placements: Vec<_> = owner
             .layout_parts()
@@ -415,15 +418,48 @@ impl WidgetCache {
         Ok(placed)
     }
 
+    /// Runs [`Composite::sync_parts`] for a composite, with the composite moved out of its slot
+    /// so it can reach its parts through the cache, and queues the events it emits.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of a composite.
+    fn sync_composite(&mut self, id: WidgetId) {
+        let parent = self.cache[id as usize].get_parent();
+        let mut widget = std::mem::replace(
+            &mut self.cache[id as usize],
+            Box::new(Vacant::new(id, parent)),
+        );
+        let mut ctx = EventCtx::default();
+
+        ctx.set_source(Some(id));
+
+        if let Some(composite) = widget.as_composite_mut() {
+            composite.sync_parts(self, &mut ctx);
+        }
+
+        self.cache[id as usize] = widget;
+
+        let events = self.finish(ctx);
+
+        for event in events {
+            self.queue_event(event);
+        }
+    }
+
     /// Arranges the parts of every composite that called
     /// [`Widget::request_arrange_parts`](crate::widget::Widget::request_arrange_parts), and
     /// clears the requests.  [`WidgetCache::draw_loop`] calls it before drawing.
-    pub(crate) fn arrange_requested_parts(&mut self) {
+    ///
+    /// # Returns
+    ///
+    /// `true` if any `Widget` had asked.
+    pub(crate) fn arrange_requested_parts(&mut self) -> bool {
         let requested: Vec<WidgetId> = (0..self.cache.len() as WidgetId)
             .filter(|&id| self.cache[id as usize].core().arrange_requested())
             .collect();
 
-        for id in requested {
+        for &id in &requested {
             self.cache[id as usize]
                 .core_mut()
                 .set_arrange_requested(false);
@@ -431,6 +467,8 @@ impl WidgetCache {
             // A `Widget` that is not a composite has no parts; its request is dropped.
             let _ = self.arrange_parts(id);
         }
+
+        !requested.is_empty()
     }
 
     /// Returns the composite that owns a part.
@@ -518,6 +556,7 @@ impl WidgetCache {
 
         self.children[parent as usize].retain(|&child| child != id);
         self.cache[parent as usize].request_layout();
+        self.notify_ancestors(id);
 
         let mut stack = vec![id];
         let mut removed = Vec::new();

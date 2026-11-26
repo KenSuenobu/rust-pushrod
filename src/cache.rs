@@ -50,6 +50,12 @@ use std::time::Duration;
 mod focus;
 mod layout;
 mod parts;
+mod scroll;
+
+/// The most times one frame lays out and arranges parts before drawing.  A composite whose
+/// parts depend on layout (a scrolling container that fits its content) settles in two or
+/// three passes; anything still pending waits for the next frame.
+const MAX_SETTLE_PASSES: usize = 4;
 
 /// The tree of `Widget`s in a window.
 ///
@@ -416,7 +422,8 @@ impl WidgetCache {
     /// # Returns
     ///
     /// The `Widget`'s upper left-hand corner in window coordinates: its origin plus the origins of
-    /// all of its ancestors.  Returns `(0, 0)` if the ID does not exist.
+    /// all of its ancestors, less how far each ancestor has scrolled its children
+    /// ([`Widget::child_offset`]).  Returns `(0, 0)` if the ID does not exist.
     pub fn absolute_origin(&self, id: WidgetId) -> Point {
         let mut origin = Point::new(0, 0);
         let mut current = id;
@@ -432,6 +439,13 @@ impl WidgetCache {
             }
 
             current = widget.get_parent();
+
+            if let Some(parent) = self.get(current) {
+                let offset = parent.child_offset();
+
+                origin.x -= offset.x;
+                origin.y -= offset.y;
+            }
         }
 
         origin
@@ -1014,6 +1028,8 @@ impl WidgetCache {
     ///   [`WidgetCache::propagate_with`]); hover events go to one `Widget`.
     /// - A mouse button press first focuses the nearest focusable `Widget` at or above the one
     ///   pressed.
+    /// - The wheel sends `Scrolled` to the `Widget` under the pointer (as of the last mouse
+    ///   event); it bubbles, so a scrolling container sees scrolls over its children.
     /// - Key presses and releases go to the focused `Widget` (or the root with no focus), then
     ///   Tab, the arrow keys, Return, and Escape act as described in [`WidgetCache::focus_next`],
     ///   [`WidgetCache::focus_in_group`], and [`WidgetCache::set_focus`].  Typed text goes to the
@@ -1136,6 +1152,12 @@ impl WidgetCache {
                 );
             }
 
+            InputEvent::Wheel { delta } => {
+                let target = self.current_widget_id;
+
+                self.propagate_with(target, &Event::Scrolled { id: target, delta }, &mut ctx);
+            }
+
             InputEvent::KeyDown {
                 key,
                 modifiers: keymod,
@@ -1215,8 +1237,9 @@ impl WidgetCache {
 
     /// Repaints changed `Widget`s and redraws the window if anything changed.
     ///
-    /// Containers whose layout is out of date are measured and arranged first, once, so painting
-    /// sees the final sizes (see the [`layout`](crate::layout) module).
+    /// Containers whose layout is out of date are measured and arranged first, and composites
+    /// that asked for it lay their parts out again, so painting sees the final sizes (see the
+    /// [`layout`](crate::layout) and [`composite`](crate::composite) modules).
     ///
     /// Every invalidated, visible `Widget` is repainted into its texture.  If any `Widget` changed (or
     /// a full redraw was requested), the window is cleared and every visible `Widget`'s texture is
@@ -1232,8 +1255,17 @@ impl WidgetCache {
     /// `true` if a frame was drawn and the backend should present it, `false` if nothing
     /// changed.
     pub fn draw_loop(&mut self, backend: &mut dyn Backend) -> bool {
-        self.run_layout(backend);
-        self.arrange_requested_parts();
+        self.notify_descendant_changes();
+
+        // Arranging parts can ask for layout (a resized part), and layout for arranging (a
+        // container that fits its content), so the two alternate until both are settled.
+        for _ in 0..MAX_SETTLE_PASSES {
+            self.run_layout(backend);
+
+            if !self.arrange_requested_parts() {
+                break;
+            }
+        }
 
         let order = self.draw_order();
         let mut visible = vec![false; self.cache.len()];

@@ -151,7 +151,7 @@ impl WidgetCache {
     /// The container's size hint; the default hint if it has no layout.
     fn measure_container(&mut self, container: WidgetId, p: &mut dyn Painter) -> SizeHint {
         let infos = self.child_infos(container, p);
-        let size = self.cache[container as usize].get_size();
+        let size = self.layout_area(container);
         let Some(layout) = self.cache[container as usize].core().layout_ref() else {
             return SizeHint::default();
         };
@@ -178,7 +178,7 @@ impl WidgetCache {
         arrange: &mut BTreeSet<(usize, WidgetId)>,
     ) {
         let infos = self.child_infos(container, p);
-        let Size { w, h } = self.cache[container as usize].get_size();
+        let Size { w, h } = self.layout_area(container);
         let Some(layout) = self.cache[container as usize].core().layout_ref() else {
             return;
         };
@@ -197,6 +197,22 @@ impl WidgetCache {
         }
 
         self.queue_event(Event::Engine(EngineEvent::LayoutChanged { container }));
+    }
+
+    /// Returns the size of the area a container's layout places its children on: its child
+    /// area if it has one (a scrolling viewport's content), otherwise its own size.
+    ///
+    /// # Arguments
+    ///
+    /// * `container` - The container.
+    ///
+    /// # Returns
+    ///
+    /// The size of the area.
+    fn layout_area(&self, container: WidgetId) -> Size {
+        let widget = &self.cache[container as usize];
+
+        widget.child_area().unwrap_or(widget.get_size())
     }
 
     /// Collects what a container's layout needs to know about its visible children.  A child

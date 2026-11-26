@@ -24,10 +24,11 @@ The `Composite` trait lives in `pushrod::composite`. The alert is built on it la
 flowchart TD
     A["engine.add_widget(composite)"] --> B["Composite gets its ID"]
     B --> C["build(parts): parts.add(name, widget)<br/>each part is a child with the next ID"]
-    C --> D["layout_parts(): rectangles for the parts"]
+    C --> S["sync_parts(cache, ctx): bring the parts up to date"]
+    S --> D["layout_parts(): rectangles for the parts"]
     D --> E["PartsArranged { id, placed }"]
-    F["ui.widgets().insert_part / remove_part<br/>insert_list_part / remove_list_part"] --> D
-    K["composite.request_arrange_parts()<br/>(laid out before the next frame)"] --> D
+    F["ui.widgets().insert_part / remove_part<br/>insert_list_part / remove_list_part"] --> S
+    K["composite.request_arrange_parts()<br/>(laid out before the next frame)"] --> S
     G["A part emits an event (Clicked)"] --> H["composite.handle_part_event(part, event, ctx)"]
     H --> I["The part's event: callbacks on the part's ID"]
     I --> J["The composite's translated events"]
@@ -39,6 +40,9 @@ flowchart TD
 - **Lists of parts.** Parts that form a list are named `"<kind>:<n>"` (`"button:0"`, `"item:3"`). `insert_list_part(composite, kind, index, widget)` and `remove_list_part(composite, kind, index)` add and remove items and renumber the list. `add_part`, `insert_part`, and `remove_part` work with any name. After every change the composite's `layout_parts` runs again.
 - **Part events reach the composite first.** `handle_part_event` sees each event a part emits and can emit its own through `ctx` (a scroll bar turns an arrow's `Clicked` into its own `ValueChanged`). The part's event is still delivered, so callbacks registered on the part's ID run, followed by the composite's events. Translation climbs through nested composites one level at a time; an event a composite emits for one of its own parts is not handed back to it.
 - **Moving parts from inside.** A composite has no access to the cache in `handle_event` or `handle_part_event`, so it cannot move its parts itself. When its own state changes where a part goes (a scroll bar's value moves its thumb), it calls `self.request_arrange_parts()`, and `layout_parts` runs again before the next frame is drawn. Several requests in one frame arrange the parts once.
+- **Changing parts from inside.** `sync_parts(cache, ctx)` runs just before `layout_parts`, every time the parts are arranged, with the whole cache at hand. The composite uses it to set a part's value, hide a part, or read what its parts hold: a [container](../widgets/container.md) sets its scroll bars' thumbs and pans its content there. While it runs the composite is out of the cache, so it reaches itself through `self`. Events emitted through `ctx` are delivered to the application.
+- **Resizing arranges the parts.** `set_size` on a composite (or a layout manager resizing it) lays its parts out again before the next frame, as `request_arrange_parts` does.
+- **Hearing about changes below.** `Widget::descendant_changed` is called on every widget above one that was added, removed, moved, resized, repainted, or given the focus, at most once per frame. A composite that follows its content overrides it to call `request_arrange_parts`.
 - **Removing.** `remove_part` removes the part and everything inside it and emits `WidgetRemoved` for each. Removed IDs are never reused: `get` returns `None`, and callbacks registered on them never run again. Focus on a removed widget is cleared (`FocusChanged`).
 
 ## Writing a composite widget
@@ -251,6 +255,7 @@ Inside a callback, the same calls go through `ui`: `ui.get_mut::<Text>(message)`
 |---|---|
 | `Composite::build(&mut self, parts)` | Creates the parts with `parts.add(name, widget) -> WidgetId`. Runs once, when the composite is added. |
 | `Composite::parts()` / `part(name)` | Every part as `(name, id)`; one part by name. |
+| `Composite::sync_parts(cache, ctx)` | Brings the parts up to date with the composite's state, with access to the cache; runs just before `layout_parts`. The default does nothing. |
 | `Composite::layout_parts()` | Rectangles (relative to the composite) for the parts; runs after the build and after every part change. |
 | `Composite::handle_part_event(part, event, ctx)` | Sees each event a part emits; emit translated events through `ctx`. |
 | `TypedParts::typed_parts()` | The composite's structure as a struct of IDs. |
@@ -259,7 +264,8 @@ Inside a callback, the same calls go through `ui`: `ui.get_mut::<Text>(message)`
 | `WidgetCache::add_part` / `insert_part` / `remove_part` | Add, insert at a position, or remove a part by name. |
 | `WidgetCache::insert_list_part` / `remove_list_part` | Add or remove an item of a `"<kind>:<n>"` list, and renumber it. |
 | `WidgetCache::arrange_parts(composite)` | Lay the parts out again, for example after resizing the composite. |
-| `Widget::request_arrange_parts()` | From inside the composite: lay the parts out again before the next frame. |
+| `Widget::request_arrange_parts()` | From inside the composite: lay the parts out again before the next frame. `set_size` asks for it too. |
+| `Widget::descendant_changed()` | Called when something below the widget changed; override it to follow the content. The default does nothing. |
 
 Errors are `Error::UnknownWidget` for an ID that does not exist and `Error::Composite { id, message }` for a widget that is not a composite, a part name already used, or a part that does not exist. `PartsBuilder::add` panics on a name already used, because that is a mistake in the composite's own code.
 
@@ -279,7 +285,7 @@ See [Engine events](../events/engine-events.md).
 
 ## Planned
 
-- The [scroll bar](../widgets/scroll-bar.md) is built on `Composite`, with its typed `ScrollBarParts`. The alert ([roadmap step 52](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/roadmaps/ORDER_OF_EXECUTION.md)) follows.
+- The [scroll bar](../widgets/scroll-bar.md) and the [container](../widgets/container.md) are built on `Composite`, with their typed `ScrollBarParts` and `ContainerParts`. The alert ([roadmap step 52](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/roadmaps/ORDER_OF_EXECUTION.md)) follows.
 - Form files store a composite's part overrides and added or removed parts once the form writer exists (step 65).
 
 Related: [Creating widgets](creating-widgets.md), [Widget tree and IDs](../concepts/widget-tree-and-ids.md), [Handling events](handling-events.md).

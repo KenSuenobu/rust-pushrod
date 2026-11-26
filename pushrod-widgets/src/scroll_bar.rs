@@ -418,8 +418,8 @@ impl ScrollBar {
         self
     }
 
-    /// Sets the width and height.  Set it before the scroll bar is added; to resize it later,
-    /// call `set_size` and then [`Widget::request_arrange_parts`].
+    /// Sets the width and height.  To resize the scroll bar after it is added, call
+    /// `set_size`; the parts follow before the next frame.
     ///
     /// # Arguments
     ///

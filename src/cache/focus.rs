@@ -108,6 +108,8 @@ impl WidgetCache {
         if let Some(id) = new {
             self.set_focused_state(id, true);
             self.notify(id, Event::FocusGained { id });
+            // A scrolling container above brings the focused `Widget` into view.
+            self.notify_ancestors(id);
         }
 
         self.text_input_wanted = new
