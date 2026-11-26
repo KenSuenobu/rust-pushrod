@@ -30,3 +30,4 @@
 [#290] Wrapped text: Word/Anywhere wrap, max_lines, height_for_width [kenji]
 [#21] Timers and idle callbacks: on_timer, on_idle, cancel_timer, Tick [kenji]
 [#134] pushrod-sdl2 backend crate; core and widgets are SDL-free [kenji]
+[#138] Errors: pushrod::Error, Result APIs, Error engine event [kenji]

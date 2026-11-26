@@ -41,6 +41,7 @@
 //! ```
 
 #![warn(missing_docs, clippy::missing_panics_doc, clippy::missing_errors_doc)]
+#![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
 mod backend;
 pub mod font;

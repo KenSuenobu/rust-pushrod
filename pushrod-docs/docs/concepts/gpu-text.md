@@ -63,10 +63,10 @@ use sdl2::render::Canvas;
 use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
 
-fn draw_label(canvas: &mut Canvas<Window>, fonts: &mut FontCache) {
-    let block = fonts.layout(canvas, "assets/OpenSans-Regular.ttf", 16, FontStyle::NORMAL, "Total: 42", 200);
+fn draw_label(canvas: &mut Canvas<Window>, fonts: &mut FontCache) -> Result<(), pushrod::error::Error> {
+    let block = fonts.layout(canvas, "assets/OpenSans-Regular.ttf", 16, FontStyle::NORMAL, "Total: 42", 200)?;
 
-    fonts.draw(canvas, &block, Point::new(4, 4), Color::RGBA(0, 0, 0, 255));
+    fonts.draw(canvas, &block, Point::new(4, 4), Color::RGBA(0, 0, 0, 255))
 }
 ```
 

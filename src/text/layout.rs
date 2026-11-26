@@ -241,14 +241,18 @@ impl LayoutCache {
         };
 
         if !matches!(&self.entry, Some((k, _)) if *k == key) {
-            self.layouts += 1;
-            self.entry = Some((key, engine.layout(text, style, max_width)));
+            self.entry = None;
         }
 
-        match &self.entry {
-            Some((_, laid)) => laid,
-            None => unreachable!("the entry was filled above"),
-        }
+        let layouts = &mut self.layouts;
+        let (_, laid) = self.entry.get_or_insert_with(|| {
+            *layouts += 1;
+            let laid = engine.layout(text, style, max_width);
+
+            (key, laid)
+        });
+
+        laid
     }
 
     /// Forgets the cached layout so the next [`get`](Self::get) lays out again.

@@ -81,7 +81,7 @@ struct Counter {
     clicks: u32,
 }
 
-fn main() {
+fn main() -> Result<(), pushrod::error::Error> {
 
     let mut engine: Engine<Counter> = Engine::new(size(400, 140), 60);
 
@@ -116,9 +116,11 @@ fn main() {
         }
     });
 
-    let state = pushrod_sdl2::run(engine, WindowSettings::new("Hello, Pushrod", size(400, 140)), Counter::default());
+    let state = pushrod_sdl2::run(engine, WindowSettings::new("Hello, Pushrod", size(400, 140)), Counter::default())?;
 
     println!("Clicked {} time(s) in total.", state.clicks);
+
+    Ok(())
 }
 ```
 
@@ -138,7 +140,7 @@ use pushrod::color::{Color, FontStyle};
 
 const FONT: &str = "assets/OpenSans-Regular.ttf";
 
-fn main() {
+fn main() -> Result<(), pushrod::error::Error> {
 
     let mut engine: Engine = Engine::new(size(400, 140), 60);
 
@@ -166,7 +168,7 @@ fn main() {
     ));
 
     let mut clicks = 0;
-    let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Hello, Pushrod", size(400, 140)));
+    let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Hello, Pushrod", size(400, 140)))?;
 
     // Your own event loop: next_event() waits for input, keeps the screen up to date,
     // and returns each event the widgets generate. It returns None when the window closes.
@@ -185,6 +187,8 @@ fn main() {
     }
 
     println!("Clicked {} time(s) in total.", clicks);
+
+    Ok(())
 }
 ```
 

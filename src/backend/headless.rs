@@ -31,6 +31,7 @@
 
 use super::{Backend, Waker};
 use crate::color::Color;
+use crate::error::Error;
 use crate::event::{EngineEvent, EventMask};
 use crate::geometry::{Point, Rect, Size};
 use crate::input::InputEvent;
@@ -182,7 +183,7 @@ impl Painter for RecordingPainter {
     /// # Errors
     ///
     /// Never fails.
-    fn image(&mut self, path: &str, bounds: Rect) -> Result<(), String> {
+    fn image(&mut self, path: &str, bounds: Rect) -> Result<(), Error> {
         self.calls.push(PaintCall::Image(path.to_string(), bounds));
         Ok(())
     }

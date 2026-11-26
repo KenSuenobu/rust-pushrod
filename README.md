@@ -76,13 +76,13 @@ let state = pushrod_sdl2::run(
     engine,
     WindowSettings::new("Clicks", size(800, 600)),
     AppState::default(),
-);
+)?;
 ```
 
 Prefer to run the loop yourself? Ask the engine for each event instead of registering callbacks:
 
 ```rust
-let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Clicks", size(800, 600)));
+let mut events = pushrod_sdl2::event_loop(&mut engine, WindowSettings::new("Clicks", size(800, 600)))?;
 
 while let Some(event) = engine.next_event(&mut events) {
     if let Event::Clicked { id, .. } = event {

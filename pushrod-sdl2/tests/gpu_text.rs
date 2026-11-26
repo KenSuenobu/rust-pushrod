@@ -49,7 +49,9 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
     canvas.clear();
 
     // Warm-up: the font loads and the glyphs rasterize.
-    let block = fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod", 240);
+    let block = fonts
+        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod", 240)
+        .unwrap();
     let warm = fonts.stats();
 
     assert_eq!(warm.fonts_loaded, 1);
@@ -60,13 +62,17 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
 
     // Repainting, with a different color each time, never loads or rasterizes anything.
     for color in [Color::RED, Color::GREEN, Color::BLUE] {
-        let again = fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod", 240);
+        let again = fonts
+            .layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod", 240)
+            .unwrap();
 
         assert_eq!(again, block);
 
         canvas.set_draw_color(Color::WHITE);
         canvas.clear();
-        fonts.draw(&mut canvas, &again, Point::new(4, 4), color);
+        fonts
+            .draw(&mut canvas, &again, Point::new(4, 4), color)
+            .unwrap();
 
         let ink = inked_pixels(&canvas);
 
@@ -88,40 +94,70 @@ fn text_is_rasterized_once_and_repainted_with_texture_copies() {
     }
 
     // Changing the text rasterizes only the glyphs that are new.
-    fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod!", 240);
+    fonts
+        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "Hello Pushrod!", 240)
+        .unwrap();
     assert_eq!(fonts.stats().glyphs_rasterized, 11);
     assert_eq!(fonts.stats().fonts_loaded, 1);
 
     // A new size or style is a new font and its own glyphs.
-    fonts.layout(&canvas, FONT, 24, FontStyle::NORMAL, "Hi", 240);
+    fonts
+        .layout(&canvas, FONT, 24, FontStyle::NORMAL, "Hi", 240)
+        .unwrap();
     assert_eq!(fonts.stats().fonts_loaded, 2);
 
     // Wrapping: a narrow width breaks into more lines, so the block is taller.
-    let wide = fonts.layout(
-        &canvas,
-        FONT,
-        16,
-        FontStyle::NORMAL,
-        "one two three four",
-        400,
-    );
-    let narrow = fonts.layout(
-        &canvas,
-        FONT,
-        16,
-        FontStyle::NORMAL,
-        "one two three four",
-        60,
-    );
+    let wide = fonts
+        .layout(
+            &canvas,
+            FONT,
+            16,
+            FontStyle::NORMAL,
+            "one two three four",
+            400,
+        )
+        .unwrap();
+    let narrow = fonts
+        .layout(
+            &canvas,
+            FONT,
+            16,
+            FontStyle::NORMAL,
+            "one two three four",
+            60,
+        )
+        .unwrap();
 
     assert!(narrow.size.h > wide.size.h);
     assert!(narrow.size.w <= 60 + 20);
 
     // Newlines always break.
-    let two = fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, "a\nb", 400);
-    let one = fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, "a", 400);
+    let two = fonts
+        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "a\nb", 400)
+        .unwrap();
+    let one = fonts
+        .layout(&canvas, FONT, 16, FontStyle::NORMAL, "a", 400)
+        .unwrap();
 
     assert_eq!(two.size.h, one.size.h * 2);
+
+    // A missing font is an error, not a panic, and loads nothing.  (Kept in this test because
+    // SDL2 can be initialized by only one test thread at a time.)
+    let loaded = fonts.stats().fonts_loaded;
+    let missing = fonts.layout(
+        &canvas,
+        "no/such/font.ttf",
+        16,
+        FontStyle::NORMAL,
+        "Hi",
+        100,
+    );
+
+    assert!(matches!(
+        missing,
+        Err(pushrod::error::Error::Font { ref path, .. }) if path == "no/such/font.ttf"
+    ));
+    assert_eq!(fonts.stats().fonts_loaded, loaded);
 }
 
 #[test]

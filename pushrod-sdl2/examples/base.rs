@@ -27,7 +27,7 @@ struct AppState {
     hover_enabled: bool,
 }
 
-pub fn main() {
+pub fn main() -> Result<(), pushrod::error::Error> {
     let mut engine: Engine<AppState> = Engine::new(size(800, 600), 30);
 
     // A gray panel.  Every other widget is a child of the panel, so their origins are relative
@@ -294,7 +294,9 @@ pub fn main() {
             hover_enabled: true,
             ..AppState::default()
         },
-    );
+    )?;
 
     eprintln!("[example] Exiting after {} click(s).", state.clicks);
+
+    Ok(())
 }

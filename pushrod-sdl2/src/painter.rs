@@ -22,6 +22,7 @@
 
 use crate::font::FontCache;
 use pushrod::color::{Color, FontStyle};
+use pushrod::error::Error;
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{self, CachePolicy, Painter, TextStyle};
 use sdl2::image::LoadTexture;
@@ -74,6 +75,7 @@ pub fn to_sdl_font_style(s: FontStyle) -> SdlFontStyle {
 pub struct Sdl2Painter<'a> {
     canvas: &'a mut Canvas<Window>,
     fonts: &'a mut FontCache,
+    errors: Vec<Error>,
 }
 
 impl Sdl2Painter<'_> {
@@ -93,7 +95,35 @@ impl<'a> Sdl2Painter<'a> {
     ///
     /// The new `Sdl2Painter`.
     pub fn new(canvas: &'a mut Canvas<Window>, fonts: &'a mut FontCache) -> Self {
-        Self { canvas, fonts }
+        Self {
+            canvas,
+            fonts,
+            errors: Vec::new(),
+        }
+    }
+
+    /// Removes and returns the drawing failures since the last call.
+    ///
+    /// The [`Painter`] methods return nothing for shape and text drawing, so a failure is
+    /// recorded here and the drawing is skipped.  The backend reports the errors to the engine as
+    /// [`EngineEvent::Error`](pushrod::event::EngineEvent::Error).
+    ///
+    /// # Returns
+    ///
+    /// The errors, in the order they happened; empty if drawing succeeded.
+    pub fn take_errors(&mut self) -> Vec<Error> {
+        std::mem::take(&mut self.errors)
+    }
+
+    /// Records a failed drawing call as a texture error.
+    ///
+    /// # Arguments
+    ///
+    /// * `result` - What `SDL2` returned.
+    fn check(&mut self, result: Result<(), String>) {
+        if let Err(message) = result {
+            self.errors.push(Error::texture(message));
+        }
     }
 }
 
@@ -123,13 +153,11 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// * `bounds` - The rectangle.
     /// * `color` - The fill color.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `SDL2` fails to draw.
     fn fill_rect(&mut self, bounds: Rect, color: Color) {
         self.canvas.set_draw_color(to_sdl_color(color));
-        self.canvas.fill_rect(to_sdl_rect(bounds)).unwrap();
+        let result = self.canvas.fill_rect(to_sdl_rect(bounds));
+
+        self.check(result);
     }
 
     /// Draws a rectangle outline.
@@ -138,13 +166,11 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// * `bounds` - The rectangle.
     /// * `color` - The line color.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `SDL2` fails to draw.
     fn rect(&mut self, bounds: Rect, color: Color) {
         self.canvas.set_draw_color(to_sdl_color(color));
-        self.canvas.draw_rect(to_sdl_rect(bounds)).unwrap();
+        let result = self.canvas.draw_rect(to_sdl_rect(bounds));
+
+        self.check(result);
     }
 
     /// Draws a line.
@@ -154,15 +180,13 @@ impl Painter for Sdl2Painter<'_> {
     /// * `from` - The start point.
     /// * `to` - The end point.
     /// * `color` - The line color.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `SDL2` fails to draw.
     fn line(&mut self, from: Point, to: Point, color: Color) {
         self.canvas.set_draw_color(to_sdl_color(color));
-        self.canvas
-            .draw_line(SdlPoint::new(from.x, from.y), SdlPoint::new(to.x, to.y))
-            .unwrap();
+        let result = self
+            .canvas
+            .draw_line(SdlPoint::new(from.x, from.y), SdlPoint::new(to.x, to.y));
+
+        self.check(result);
     }
 
     /// Draws text by copying glyphs from the font cache's atlas into the canvas.
@@ -176,29 +200,35 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// # Returns
     ///
-    /// The size of the text drawn.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the font cannot be loaded or `SDL2` fails to render or copy the text.
+    /// The size of the text drawn; zero if the font could not be loaded or the text could not be
+    /// drawn (the failure is recorded, see [`Sdl2Painter::take_errors`]).
     fn text(&mut self, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size {
-        let block = self.fonts.layout(
+        let block = match self.fonts.layout(
             self.canvas,
             &style.font_name,
             style.font_size,
             to_sdl_font_style(style.font_style),
             msg,
             bounds.w,
-        );
+        ) {
+            Ok(block) => block,
+            Err(error) => {
+                self.errors.push(error);
+
+                return Size::new(0, 0);
+            }
+        };
         let text_size = block.size;
         let dest = paint::align_text(bounds, text_size, style.justification);
 
-        self.fonts.draw(
+        if let Err(error) = self.fonts.draw(
             self.canvas,
             &block,
             Point::new(dest.x, dest.y),
             to_sdl_color(color),
-        );
+        ) {
+            self.errors.push(error);
+        }
 
         text_size
     }
@@ -213,21 +243,25 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// The line height in pixels.
     ///
-    /// # Panics
     ///
-    /// Panics if the font cannot be loaded.
+    /// Zero if the font cannot be loaded (the failure is recorded, see
+    /// [`Sdl2Painter::take_errors`]).
     fn line_height(&mut self, style: &TextStyle) -> u32 {
-        self.fonts
-            .layout(
-                self.canvas,
-                &style.font_name,
-                style.font_size,
-                to_sdl_font_style(style.font_style),
-                "A",
-                u32::MAX,
-            )
-            .size
-            .h
+        match self.fonts.layout(
+            self.canvas,
+            &style.font_name,
+            style.font_size,
+            to_sdl_font_style(style.font_style),
+            "A",
+            u32::MAX,
+        ) {
+            Ok(block) => block.size.h,
+            Err(error) => {
+                self.errors.push(error);
+
+                0
+            }
+        }
     }
 
     /// Measures one line of text with the font cache, without drawing it.
@@ -241,21 +275,25 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// The width in pixels.
     ///
-    /// # Panics
     ///
-    /// Panics if the font cannot be loaded.
+    /// Zero if the font cannot be loaded (the failure is recorded, see
+    /// [`Sdl2Painter::take_errors`]).
     fn text_width(&mut self, style: &TextStyle, msg: &str) -> u32 {
-        self.fonts
-            .layout(
-                self.canvas,
-                &style.font_name,
-                style.font_size,
-                to_sdl_font_style(style.font_style),
-                msg,
-                u32::MAX,
-            )
-            .size
-            .w
+        match self.fonts.layout(
+            self.canvas,
+            &style.font_name,
+            style.font_size,
+            to_sdl_font_style(style.font_style),
+            msg,
+            u32::MAX,
+        ) {
+            Ok(block) => block.size.w,
+            Err(error) => {
+                self.errors.push(error);
+
+                0
+            }
+        }
     }
 
     /// Draws an image file scaled to a rectangle.
@@ -271,14 +309,18 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// # Errors
     ///
-    /// Returns a message if the image cannot be loaded or copied.
-    fn image(&mut self, path: &str, bounds: Rect) -> Result<(), String> {
-        let texture = self.canvas.texture_creator().load_texture(path)?;
+    /// Returns [`Error::Image`] if the image cannot be loaded or copied.
+    fn image(&mut self, path: &str, bounds: Rect) -> Result<(), Error> {
+        let texture = self
+            .canvas
+            .texture_creator()
+            .load_texture(path)
+            .map_err(|message| Error::image(path, message))?;
         let result = self.canvas.copy(&texture, None, to_sdl_rect(bounds));
 
         unsafe { texture.destroy() };
 
-        result
+        result.map_err(|message| Error::image(path, message))
     }
 
     /// Fills a rectangle with a checkerboard of two colors.
@@ -288,10 +330,6 @@ impl Painter for Sdl2Painter<'_> {
     /// * `bounds` - The rectangle.
     /// * `first` - The corner pixel color.
     /// * `second` - The other color.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `SDL2` fails to draw.
     fn dither(&mut self, bounds: Rect, first: Color, second: Color) {
         self.fill_rect(bounds, second);
 
@@ -304,7 +342,9 @@ impl Painter for Sdl2Painter<'_> {
             .collect();
 
         self.canvas.set_draw_color(to_sdl_color(first));
-        self.canvas.draw_points(points.as_slice()).unwrap();
+        let result = self.canvas.draw_points(points.as_slice());
+
+        self.check(result);
     }
 
     /// Blends a color over every other pixel of a rectangle, leaving the rest untouched.
@@ -313,10 +353,6 @@ impl Painter for Sdl2Painter<'_> {
     ///
     /// * `bounds` - The rectangle.
     /// * `color` - The color to blend; its alpha sets the strength.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `SDL2` fails to draw.
     fn dither_overlay(&mut self, bounds: Rect, color: Color) {
         let points: Vec<SdlPoint> = (0..bounds.h as i32)
             .flat_map(|y| {
@@ -328,7 +364,9 @@ impl Painter for Sdl2Painter<'_> {
 
         self.canvas.set_blend_mode(BlendMode::Blend);
         self.canvas.set_draw_color(to_sdl_color(color));
-        self.canvas.draw_points(points.as_slice()).unwrap();
+        let result = self.canvas.draw_points(points.as_slice());
+
+        self.check(result);
         self.canvas.set_blend_mode(BlendMode::None);
     }
 

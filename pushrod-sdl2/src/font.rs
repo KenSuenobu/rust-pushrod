@@ -33,6 +33,7 @@
 //! `FontCache` must not be reused with a different canvas.
 
 use crate::ttf_layout::wrap_lines;
+use pushrod::error::Error;
 use pushrod::geometry::{Point, Rect, Size};
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::{BlendMode, Canvas, Texture, TextureAccess};
@@ -245,18 +246,19 @@ impl FontCache {
     ///
     /// * `key` - The font's path, size and style.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if SDL2_ttf cannot be initialized or the font file cannot be loaded.
-    fn ensure_face(&mut self, key: &FaceKey) {
+    /// Returns [`Error::Backend`] if SDL2_ttf cannot be initialized, or [`Error::Font`] if the
+    /// font file cannot be loaded.
+    fn ensure_face(&mut self, key: &FaceKey) -> Result<(), Error> {
         if self.faces.contains_key(key) {
-            return;
+            return Ok(());
         }
 
         let mut font = ttf_context()
-            .expect("SDL2_ttf must initialize")
+            .map_err(Error::backend)?
             .load_font(&key.path, key.size)
-            .expect("the font file must load");
+            .map_err(|message| Error::font(&key.path, message))?;
 
         font.set_style(FontStyle::from_bits_truncate(key.style));
 
@@ -275,6 +277,23 @@ impl FontCache {
             font_name: key.path.clone(),
             font_size: key.size,
         });
+
+        Ok(())
+    }
+
+    /// Returns a loaded face.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - The face to find.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Font`] if the face has not been loaded.
+    fn face_mut(&mut self, key: &FaceKey) -> Result<&mut Face, Error> {
+        self.faces
+            .get_mut(key)
+            .ok_or_else(|| Error::font(&key.path, "the font is not loaded"))
     }
 
     /// Rasterizes a glyph into the atlas if it is not there yet.
@@ -289,14 +308,20 @@ impl FontCache {
     ///
     /// The glyph's advance and atlas slot.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if SDL2 cannot create or update an atlas texture.
-    fn ensure_glyph(&mut self, c: &Canvas<Window>, key: &FaceKey, ch: char) -> Glyph {
-        let face = self.faces.get_mut(key).expect("the face is loaded");
+    /// Returns [`Error::Font`] if the face is not loaded, or [`Error::Texture`] if SDL2 cannot
+    /// create or update an atlas texture.
+    fn ensure_glyph(
+        &mut self,
+        c: &Canvas<Window>,
+        key: &FaceKey,
+        ch: char,
+    ) -> Result<Glyph, Error> {
+        let face = self.face_mut(key)?;
 
         if let Some(glyph) = face.glyphs.get(&ch) {
-            return *glyph;
+            return Ok(*glyph);
         }
 
         let advance = face.font.find_glyph_metrics(ch).map_or_else(
@@ -315,35 +340,39 @@ impl FontCache {
                 .and_then(|surface| surface.convert_format(PixelFormatEnum::ARGB8888).ok())
         };
 
-        let slot = surface.and_then(|surface| {
-            let (w, h) = (surface.width(), surface.height());
-            let page = self.pack(c, w, h)?;
-            let pitch = surface.pitch() as usize;
+        let slot = match surface {
+            Some(surface) => {
+                let (w, h) = (surface.width(), surface.height());
+                let pitch = surface.pitch() as usize;
 
-            surface.with_lock(|pixels| {
-                self.pages[page.page]
-                    .texture
-                    .update(
-                        sdl2::rect::Rect::new(page.rect.x, page.rect.y, w, h),
-                        pixels,
-                        pitch,
-                    )
-                    .expect("SDL2 must update the glyph atlas");
-            });
-            self.stats.glyphs_rasterized += 1;
+                match self.pack(c, w, h)? {
+                    Some(page) => {
+                        let target = &mut self.pages[page.page].texture;
 
-            Some(page)
-        });
+                        surface
+                            .with_lock(|pixels| {
+                                target.update(
+                                    sdl2::rect::Rect::new(page.rect.x, page.rect.y, w, h),
+                                    pixels,
+                                    pitch,
+                                )
+                            })
+                            .map_err(|e| Error::texture(e.to_string()))?;
+                        self.stats.glyphs_rasterized += 1;
+
+                        Some(page)
+                    }
+                    None => None,
+                }
+            }
+            None => None,
+        };
 
         let glyph = Glyph { advance, slot };
 
-        self.faces
-            .get_mut(key)
-            .expect("the face is loaded")
-            .glyphs
-            .insert(ch, glyph);
+        self.face_mut(key)?.glyphs.insert(ch, glyph);
 
-        glyph
+        Ok(glyph)
     }
 
     /// Reserves room for a glyph bitmap, adding an atlas page when none has room.
@@ -358,21 +387,21 @@ impl FontCache {
     ///
     /// The reserved slot, or `None` for an empty bitmap.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if SDL2 cannot create the atlas texture.
-    fn pack(&mut self, c: &Canvas<Window>, w: u32, h: u32) -> Option<Slot> {
+    /// Returns [`Error::Texture`] if SDL2 cannot create the atlas texture.
+    fn pack(&mut self, c: &Canvas<Window>, w: u32, h: u32) -> Result<Option<Slot>, Error> {
         if w == 0 || h == 0 {
-            return None;
+            return Ok(None);
         }
 
         if let Some(page) = self.pages.last_mut()
             && let Some(rect) = page.pack(w, h)
         {
-            return Some(Slot {
+            return Ok(Some(Slot {
                 page: self.pages.len() - 1,
                 rect,
-            });
+            }));
         }
 
         // A bitmap larger than a standard page gets a page of its own.
@@ -385,7 +414,7 @@ impl FontCache {
                 page_w,
                 page_h,
             )
-            .expect("SDL2 must create the glyph atlas");
+            .map_err(|e| Error::texture(e.to_string()))?;
 
         texture.set_blend_mode(BlendMode::Blend);
 
@@ -397,7 +426,9 @@ impl FontCache {
             cursor_y: 0,
             row_height: 0,
         };
-        let rect = page.pack(w, h).expect("a new page fits the bitmap");
+        let rect = page
+            .pack(w, h)
+            .ok_or_else(|| Error::texture("a glyph bitmap does not fit a new atlas page"))?;
 
         self.pages.push(page);
         self.stats.atlas_pages += 1;
@@ -405,10 +436,10 @@ impl FontCache {
             pages: self.pages.len(),
         });
 
-        Some(Slot {
+        Ok(Some(Slot {
             page: self.pages.len() - 1,
             rect,
-        })
+        }))
     }
 
     /// Lays text out with the font's metrics and kerning, rasterizing any glyph not yet in the
@@ -430,10 +461,11 @@ impl FontCache {
     ///
     /// The laid-out block, ready for [`FontCache::draw`].
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if SDL2_ttf cannot be initialized, the font file cannot be loaded, or SDL2 cannot
-    /// create or update an atlas texture.
+    /// Returns [`Error::Backend`] if SDL2_ttf cannot be initialized, [`Error::Font`] if the font
+    /// file cannot be loaded, or [`Error::Texture`] if SDL2 cannot create or update an atlas
+    /// texture.
     pub fn layout(
         &mut self,
         c: &Canvas<Window>,
@@ -442,21 +474,21 @@ impl FontCache {
         font_style: FontStyle,
         text: &str,
         width: u32,
-    ) -> GlyphBlock {
+    ) -> Result<GlyphBlock, Error> {
         let key = FaceKey {
             path: font_name.to_string(),
             size: font_size,
             style: font_style.bits(),
         };
 
-        self.ensure_face(&key);
+        self.ensure_face(&key)?;
 
         // Make sure every glyph exists first so measuring needs only the face.
         for ch in text.chars().filter(|ch| *ch != '\n') {
-            self.ensure_glyph(c, &key, ch);
+            self.ensure_glyph(c, &key, ch)?;
         }
 
-        let face = &self.faces[&key];
+        let face = self.face_mut(&key)?;
         let advance_of = |s: &str| -> u32 {
             let mut x = 0;
             let mut previous = None;
@@ -504,10 +536,10 @@ impl FontCache {
             block_width = block_width.max(x.max(0) as u32);
         }
 
-        GlyphBlock {
+        Ok(GlyphBlock {
             size: Size::new(block_width, face.line_height as u32 * ranges.len() as u32),
             glyphs,
-        }
+        })
     }
 
     /// Draws a laid-out block by copying glyph rectangles from the atlas.
@@ -522,16 +554,17 @@ impl FontCache {
     /// * `origin` - Where the block's top-left corner goes on the canvas.
     /// * `color` - The text color.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if SDL2 fails to copy a glyph.
+    /// Returns [`Error::Texture`] if SDL2 fails to copy a glyph, or [`Error::Font`] if the block
+    /// refers to an atlas page this cache does not have.
     pub fn draw(
         &mut self,
         c: &mut Canvas<Window>,
         block: &GlyphBlock,
         origin: Point,
         color: Color,
-    ) {
+    ) -> Result<(), Error> {
         for page in &mut self.pages {
             page.texture.set_color_mod(color.r, color.g, color.b);
             page.texture.set_alpha_mod(color.a);
@@ -551,8 +584,15 @@ impl FontCache {
                 glyph.source.h,
             );
 
-            c.copy(&self.pages[glyph.page].texture, source, dest)
-                .unwrap();
+            let page = self
+                .pages
+                .get(glyph.page)
+                .ok_or_else(|| Error::texture("the glyph's atlas page does not exist"))?;
+
+            c.copy(&page.texture, source, dest)
+                .map_err(Error::texture)?;
         }
+
+        Ok(())
     }
 }

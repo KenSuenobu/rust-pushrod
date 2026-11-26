@@ -38,6 +38,8 @@
 // Every public item is documented, including `# Panics` and `# Errors` sections where they
 // apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").
 #![warn(missing_docs, clippy::missing_panics_doc, clippy::missing_errors_doc)]
+// Library code returns `Error` instead of panicking; tests may unwrap.
+#![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
 pub mod appearance;
 pub mod backend;
@@ -45,6 +47,7 @@ pub mod cache;
 pub mod color;
 pub mod controllers;
 pub mod engine;
+pub mod error;
 pub mod event;
 pub mod geometry;
 pub mod input;

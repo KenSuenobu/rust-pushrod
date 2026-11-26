@@ -17,7 +17,7 @@ const FONT: &str = concat!(
     "/../assets/OpenSans-Regular.ttf"
 );
 
-fn main() {
+fn main() -> Result<(), pushrod::error::Error> {
     let sdl = sdl2::init().expect("SDL2 must initialize");
     let window = sdl
         .video()
@@ -43,13 +43,15 @@ fn main() {
         let mut y = 4;
 
         for (text, color) in lines {
-            let block = fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, text, 312);
+            let block = fonts.layout(&canvas, FONT, 16, FontStyle::NORMAL, text, 312)?;
 
-            fonts.draw(&mut canvas, &block, Point::new(4, y), color);
+            fonts.draw(&mut canvas, &block, Point::new(4, y), color)?;
             y += block.size.h as i32 + 4;
         }
 
         canvas.present();
         println!("frame {frame}: {:?}", fonts.stats());
     }
+
+    Ok(())
 }

@@ -33,13 +33,15 @@ use pushrod::engine::Engine;
 use pushrod::geometry::size;
 use pushrod_sdl2::{WindowSettings, run};
 
-fn main() {
+fn main() -> Result<(), pushrod::error::Error> {
     let engine: Engine<u32> = Engine::new(size(400, 300), 60);
 
     // Opens the window, runs until it closes, and returns the state.
-    let clicks = run(engine, WindowSettings::new("My app", size(400, 300)), 0);
+    let clicks = run(engine, WindowSettings::new("My app", size(400, 300)), 0)?;
 
     println!("{clicks}");
+
+    Ok(())
 }
 ```
 

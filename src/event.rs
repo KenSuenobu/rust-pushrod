@@ -82,6 +82,7 @@
 //! and `SystemEvent` is split into `PointerPressed`, `PointerReleased`, and `PointerMoved`.
 //! Window-system input arrives as a backend's [`InputEvent`](crate::input::InputEvent).
 
+use crate::error::Error;
 use crate::geometry::{Point, Size};
 use crate::input::{Key, Modifiers, MouseButton};
 use crate::timer::TimerId;
@@ -342,6 +343,8 @@ pub enum EngineEventKind {
     IdleRan,
     /// See [`EngineEvent::AnimationTicked`].
     AnimationTicked,
+    /// See [`EngineEvent::Error`].
+    Error,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -436,6 +439,12 @@ pub enum EngineEvent {
         /// The time since the previous frame's tick.
         elapsed: Duration,
     },
+    /// An operation failed while the run loop was running (a font that would not load, a texture
+    /// the driver could not create).  The loop keeps running; the failed drawing is skipped.
+    Error {
+        /// What failed.
+        error: Error,
+    },
 }
 
 impl EngineEvent {
@@ -458,6 +467,7 @@ impl EngineEvent {
             EngineEvent::TimerCancelled { .. } => EngineEventKind::TimerCancelled,
             EngineEvent::IdleRan { .. } => EngineEventKind::IdleRan,
             EngineEvent::AnimationTicked { .. } => EngineEventKind::AnimationTicked,
+            EngineEvent::Error { .. } => EngineEventKind::Error,
         }
     }
 }
@@ -1210,6 +1220,23 @@ mod mask_tests {
     fn engine_class_is_part_of_all() {
         assert!(EventMask::ALL.contains(EventMask::ENGINE));
         assert!(!(EventMask::ALL & !EventMask::ENGINE).intersects(EventMask::ENGINE));
+    }
+
+    #[test]
+    fn error_engine_events_have_their_own_kind() {
+        let failed = EngineEvent::Error {
+            error: Error::font("missing.ttf", "No such file"),
+        };
+
+        assert_eq!(failed.kind(), EngineEventKind::Error);
+        assert!(engine_filter_accepts(
+            Some(&[EngineEventKind::Error]),
+            &failed
+        ));
+        assert!(!engine_filter_accepts(
+            Some(&[EngineEventKind::FontLoaded]),
+            &failed
+        ));
     }
 
     #[test]
