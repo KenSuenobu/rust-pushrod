@@ -6,13 +6,16 @@ title: Golden-image rendering tests
 # Golden-image rendering tests
 
 Every widget, in every visual state that changes how it looks, is painted automatically and
-compared with a reference PNG (a *golden*). A change that alters how a widget draws fails the test
-until the golden is reviewed and updated.
+compared with a reference PNG (a *golden*). So are the main screens of the
+[reference application](../guides/reference-application.md). A change that alters how a widget
+draws fails the test until the golden is reviewed and updated.
 
 ## How it works
 
-The harness is [`pushrod-sdl2/tests/visual.rs`](https://github.com/KenSuenobu/rust-pushrod/blob/main/pushrod-sdl2/tests/visual.rs).
-It lives in the SDL backend crate because the core crate has no SDL dependency.
+The harness is [`pushrod-sdl2/tests/visual.rs`](https://github.com/KenSuenobu/rust-pushrod/blob/main/pushrod-sdl2/tests/visual.rs)
+for the widgets and [`pushrod-sdl2/tests/contacts.rs`](https://github.com/KenSuenobu/rust-pushrod/blob/main/pushrod-sdl2/tests/contacts.rs)
+for the reference application's screens; both compare images with `tests/support/golden.rs`.
+They live in the SDL backend crate because the core crate has no SDL dependency.
 
 ```mermaid
 flowchart LR
@@ -30,14 +33,15 @@ flowchart LR
 - A pixel matches when every channel is within 3 of the golden. A widget passes when at most 0.2%
   of its pixels differ by more.
 - Goldens are in `pushrod-sdl2/tests/golden/`, named `<widget>-<state>.png`, for example
-  `button-pressed.png`.
+  `button-pressed.png`. The reference application's screens are whole windows, drawn by the
+  `Sdl2Backend` with `SDL_RENDER_DRIVER=software`, named `contacts-<screen>.png`.
 
 ## Run them
 
 Text antialiasing differs between platforms, so the comparison only runs when asked for:
 
 ```bash
-PUSHROD_GOLDEN=1 cargo test -p pushrod-sdl2 --test visual
+PUSHROD_GOLDEN=1 cargo test -p pushrod-sdl2 --test visual --test contacts
 ```
 
 A plain `cargo test` skips the comparison (the tolerance helpers are still tested).
@@ -48,7 +52,7 @@ After an intended change to how a widget looks, regenerate, then **look at the c
 before committing them:
 
 ```bash
-UPDATE_GOLDEN=1 cargo test -p pushrod-sdl2 --test visual
+UPDATE_GOLDEN=1 cargo test -p pushrod-sdl2 --test visual --test contacts
 git diff --stat pushrod-sdl2/tests/golden
 ```
 
@@ -73,3 +77,7 @@ In CI, the **golden** job uploads that directory as the `golden-diff` artifact w
 Add a `case(...)` line to `cases()` in `visual.rs` with a new name, then run the update command
 above. Use the widget's builder methods and a `VisualState` flag (`HOVERED`, `PRESSED`,
 `FOCUSED`, `DISABLED`, `CHECKED`, `INDETERMINATE`); use fictional placeholder text only.
+
+To cover another screen of the reference application, add a `Screen` to
+`examples/contacts/window.rs` (its name, its window size, and how `act_out` reaches it with clicks
+and keys), then run the update command.

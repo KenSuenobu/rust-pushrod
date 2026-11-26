@@ -134,12 +134,12 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev xvfb
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Render every widget and compare with tests/golden
+      - name: Render every widget and the contacts screens, and compare with tests/golden
         env:
           SDL_VIDEODRIVER: x11
           PUSHROD_GOLDEN: "1"
           PUSHROD_GOLDEN_DIFF_DIR: ${{ github.workspace }}/golden-diff
-        run: xvfb-run -a cargo test -p pushrod-sdl2 --test visual
+        run: xvfb-run -a cargo test -p pushrod-sdl2 --test visual --test contacts
       - name: Upload diff images
         if: failure()
         uses: actions/upload-artifact@v4

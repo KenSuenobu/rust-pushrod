@@ -89,7 +89,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 50 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder (done) |
 | ✅ 51 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen (done) |
 | ✅ 52 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog (done) |
-| 53 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod |
+| ✅ 53 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod (done for v0.1; form-file version waits for #63) |
 | 54 | [#72](https://github.com/KenSuenobu/rust-pushrod/issues/72) | pushrod: [7.4] Guide: writing widgets and composites |
 | 55 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release |
 | **56** | checkpoint | **Pushrod v0.1 released** |
@@ -1150,10 +1150,10 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Runs on Linux, macOS, and Windows
-- [ ] Fully usable with the keyboard alone
+- [x] Runs on Linux, macOS, and Windows
+- [x] Fully usable with the keyboard alone
 - [ ] v0.2 version loads its window from a form file
-- [ ] Golden images in CI
+- [x] Golden images in CI
 
 ### Step 54: Guide: writing widgets and composites
 

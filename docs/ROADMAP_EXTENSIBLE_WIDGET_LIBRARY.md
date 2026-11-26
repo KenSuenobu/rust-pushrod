@@ -1969,7 +1969,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
 | 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
-| 7.10 (#140) | Reference application: a real app built only with Pushrod | A small but complete application, maintained in the repository, that exercises the MVP together and surfaces API problems early. | `example`, `mvp`, `parallelizable`, `quality`, `size/M`, `usability` | Y | v0.1 | M | `pushrod-widgets/examples/contacts/ (new)` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
 
@@ -2151,6 +2150,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Documentation.** Docusaurus page: `pushrod-docs/docs/getting-started/installation.md` ("Installation", Getting started, update). Guides: update the guide or concept page covering: installation. Rustdoc: feature flags. Examples: n/a. Screenshots: n/a.
 
 ### 7.10 (#140): Reference application: a real app built only with Pushrod
+
+**Status:** done for v0.1 (#140). `cargo run -p pushrod-sdl2 --example contacts` (in `pushrod-sdl2/examples/contacts/`, next to the other runnable examples, because `pushrod-widgets` has no backend): a contact-card editor built in code with a scrolling `Container` list, validated text fields, radio buttons, check boxes, a slider, default and cancel buttons, a delete alert, Tab access to every control, a resizable layout, and high-DPI drawing. `tests/contacts.rs` drives it from the keyboard headlessly and compares its four main screens with golden images in the CI `golden` job. The v0.2 criterion, loading the same window from a form file, waits for the form loader, 6.4 (#63).
 
 **Problem Statement.** The gallery shows widgets one at a time. Problems with focus, layout, dialogs, resizing, and API ergonomics only show up when widgets are combined into a real application.
 
