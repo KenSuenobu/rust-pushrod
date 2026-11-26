@@ -69,7 +69,7 @@ stateDiagram-v2
 ## Notes
 
 - Clicking **anywhere** on the widget, label included, toggles it. The click only counts if the mouse button is released while still over the check box; dragging off cancels it.
-- While the mouse button is held down the box is drawn solid black, with no mark.
+- While the mouse button is held down the box is drawn inverted: a black fill, with the check mark (or the dash) shown in white. An unchecked box is solid black.
 - Clicking or Tab-ing to it gives it keyboard focus; the focus outline and the dimmed look of a disabled widget are drawn by the core.
 - An indeterminate box is never reported as checked. A click or Space on it makes it checked and emits `Toggled { checked: true }`.
 - Only `CHECKED` is mirrored into the widget's `VisualState`. The core's `INDETERMINATE` overlay is a bar across the whole widget, which would strike through the label, so the dash is drawn inside the box by the widget.

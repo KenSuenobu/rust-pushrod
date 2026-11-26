@@ -230,12 +230,27 @@ fn indeterminate_draws_a_dash_inside_the_box() {
     assert_eq!(fills[1], Rect::new(4, 9, BOX_SIZE - 6, 2));
 }
 
-#[test]
-fn pressed_draws_a_solid_black_box_with_no_mark() {
-    let (mut cache, id) = with_box(CheckBox::new("x").checked(true));
+/// The colors the lines (the check mark) were drawn in.
+fn line_colors(check_box: &CheckBox) -> Vec<Color> {
+    painted(check_box)
+        .iter()
+        .filter_map(|c| match c {
+            PaintCall::Line(_, _, color) => Some(*color),
+            _ => None,
+        })
+        .collect()
+}
 
+fn press(cache: &mut WidgetCache) {
     cache.handle_event(motion(16, 20));
     cache.handle_event(down(16, 20));
+}
+
+#[test]
+fn pressed_unchecked_draws_a_solid_black_box() {
+    let (mut cache, id) = with_box(CheckBox::new("x"));
+
+    press(&mut cache);
 
     let check_box = get(&cache, id);
 
@@ -245,6 +260,42 @@ fn pressed_draws_a_solid_black_box_with_no_mark() {
         Color::BLACK
     )));
     assert_eq!(marks(check_box).1, 0);
+}
+
+#[test]
+fn pressed_checked_draws_the_check_inverted_inside_the_black_fill() {
+    let (mut cache, id) = with_box(CheckBox::new("x").checked(true));
+
+    assert!(
+        line_colors(get(&cache, id))
+            .iter()
+            .all(|c| *c == Color::BLACK)
+    );
+
+    press(&mut cache);
+
+    let check_box = get(&cache, id);
+
+    assert!(painted(check_box).contains(&PaintCall::FillRect(
+        Rect::new(1, 3, BOX_SIZE, BOX_SIZE),
+        Color::BLACK
+    )));
+    assert!(!line_colors(check_box).is_empty(), "the check stays");
+    assert!(line_colors(check_box).iter().all(|c| *c == Color::WHITE));
+}
+
+#[test]
+fn pressed_indeterminate_draws_a_white_dash_on_black() {
+    let (mut cache, id) = with_box(CheckBox::new("x").indeterminate());
+
+    press(&mut cache);
+
+    let calls = painted(get(&cache, id));
+
+    assert!(calls.contains(&PaintCall::FillRect(
+        Rect::new(4, 9, BOX_SIZE - 6, 2),
+        Color::WHITE
+    )));
 }
 
 #[test]

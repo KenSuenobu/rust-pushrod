@@ -21,7 +21,8 @@
 //!
 //! Clicking the box **or its label**, or pressing Space while it has the keyboard focus, toggles
 //! it and emits `Toggled { id, checked }`.  Activating an indeterminate box makes it checked.
-//! While the mouse button is held down on it, the box is drawn solid black.
+//! While the mouse button is held down on it, the box is drawn inverted: black, with its mark
+//! (if any) in white.
 //!
 //! The box is drawn by the widget itself: the core's `INDETERMINATE` overlay is a bar across the
 //! whole widget, which would strike through the label, so the indeterminate state is kept here
@@ -77,7 +78,7 @@ impl Widget for CheckBox {
     /// Draws the box (white inside, black frame), its mark, and the label.
     ///
     /// The mark is a check when checked, a dash when indeterminate, and nothing otherwise; while
-    /// pressed the box is solid black.  Colors set with [`Widget::set_style`] for the current
+    /// pressed the box is black and the mark is white.  Colors set with [`Widget::set_style`] for the current
     /// state override the label's color and the frame's color.
     ///
     /// # Arguments
@@ -99,20 +100,19 @@ impl Widget for CheckBox {
         p.fill_rect(square, inside);
         p.rect(square, frame);
 
-        if !self.pressed {
-            if self.indeterminate {
-                p.fill_rect(
-                    Rect::new(
-                        square.x + 3,
-                        square.y + square.h as i32 / 2 - 1,
-                        square.w - 6,
-                        2,
-                    ),
-                    mark,
-                );
-            } else if self.checked {
-                Self::paint_check(p, square, mark);
-            }
+        // The mark stays while pressed, inverted (white on black) like the box.
+        if self.indeterminate {
+            p.fill_rect(
+                Rect::new(
+                    square.x + 3,
+                    square.y + square.h as i32 / 2 - 1,
+                    square.w - 6,
+                    2,
+                ),
+                mark,
+            );
+        } else if self.checked {
+            Self::paint_check(p, square, mark);
         }
 
         let label_x = square.x + square.w as i32 + GAP;
