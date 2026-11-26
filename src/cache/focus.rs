@@ -284,6 +284,113 @@ impl WidgetCache {
         true
     }
 
+    /// Moves focus within the radio group and activates the member that received it, so an
+    /// arrow key selects as well as moves (a radio group's checked member follows the focus).
+    ///
+    /// # Arguments
+    ///
+    /// * `forward` - `true` for the next member, `false` for the previous.
+    /// * `ctx` - The context collecting generated events.
+    fn select_in_group(&mut self, forward: bool, ctx: &mut EventCtx) {
+        if self.focus_in_group(forward)
+            && let Some(id) = self.focused_widget_id
+        {
+            self.send(id, &Event::Activated { id }, EventPhase::Target, ctx);
+        }
+    }
+
+    /// Returns the checked member of the radio group under `parent`.
+    ///
+    /// A group is the [`Behavior::EXCLUSIVE`] children of one parent.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent` - The `Widget` the group's members are children of.
+    ///
+    /// # Returns
+    ///
+    /// The ID of the checked member, or `None` if none is checked.
+    pub fn checked_in_group(&self, parent: WidgetId) -> Option<WidgetId> {
+        self.children_of(parent).iter().copied().find(|&c| {
+            self.get(c).is_some_and(|w| {
+                w.behavior().contains(Behavior::EXCLUSIVE)
+                    && w.state().contains(VisualState::CHECKED)
+            })
+        })
+    }
+
+    /// Keeps radio groups to one checked member.  For each `Toggled { checked: true }` from an
+    /// [`Behavior::EXCLUSIVE`] `Widget`, every other checked exclusive sibling is cleared and a
+    /// `Toggled { checked: false }` for it follows the event that caused it.
+    ///
+    /// # Arguments
+    ///
+    /// * `events` - The events `Widget`s generated.
+    ///
+    /// # Returns
+    ///
+    /// The same events, with the clearing `Toggled` events added.
+    pub(super) fn apply_exclusive(&mut self, events: Vec<Event>) -> Vec<Event> {
+        let mut out = Vec::with_capacity(events.len());
+
+        for event in events {
+            let checked_id = match &event {
+                Event::Toggled { id, checked: true } => Some(*id),
+                _ => None,
+            };
+
+            out.push(event);
+
+            if let Some(id) = checked_id {
+                out.extend(self.clear_siblings(id));
+            }
+        }
+
+        out
+    }
+
+    /// Clears the checked exclusive siblings of `id`, returning a `Toggled(false)` for each.
+    fn clear_siblings(&mut self, id: WidgetId) -> Vec<Event> {
+        let Some(widget) = self.get(id) else {
+            return Vec::new();
+        };
+
+        if !widget.behavior().contains(Behavior::EXCLUSIVE) {
+            return Vec::new();
+        }
+
+        let parent = widget.get_parent();
+        let siblings: Vec<WidgetId> = self
+            .children_of(parent)
+            .iter()
+            .copied()
+            .filter(|&c| c != id)
+            .collect();
+        let mut cleared = Vec::new();
+
+        for sibling in siblings {
+            let Some(w) = self.get_mut(sibling) else {
+                continue;
+            };
+
+            if w.behavior().contains(Behavior::EXCLUSIVE)
+                && w.state().contains(VisualState::CHECKED)
+            {
+                let mut state = w.state();
+
+                state.set(VisualState::CHECKED, false);
+                w.set_state(state);
+                w.set_invalidated(true);
+                cleared.push(Event::Toggled {
+                    id: sibling,
+                    checked: false,
+                });
+            }
+        }
+
+        cleared
+    }
+
     /// Finds the `Widget` with `flag` that Return or Escape activates.
     ///
     /// The form is the nearest ancestor of the focused `Widget` (or the root) that contains an
@@ -385,10 +492,10 @@ impl WidgetCache {
                 self.focus_next(shift);
             }
             Key::Right | Key::Down if !command => {
-                self.focus_in_group(true);
+                self.select_in_group(true, ctx);
             }
             Key::Left | Key::Up if !command => {
-                self.focus_in_group(false);
+                self.select_in_group(false, ctx);
             }
             Key::Return | Key::KpEnter if !repeat && !command => {
                 self.trigger_action(false, ctx);

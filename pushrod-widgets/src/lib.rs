@@ -67,5 +67,6 @@ pub mod group_box;
 pub mod image_widget;
 pub mod panel;
 pub mod prelude;
+pub mod radio_button;
 pub mod separator;
 pub mod text;

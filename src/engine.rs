@@ -369,6 +369,20 @@ impl<'a> Ui<'a> {
         self.widgets.set_focus(id)
     }
 
+    /// Returns the checked member of the radio group under `parent`: the checked
+    /// [`Behavior::EXCLUSIVE`](crate::widget::Behavior::EXCLUSIVE) child.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent` - The `Widget` the group's members are children of.
+    ///
+    /// # Returns
+    ///
+    /// The ID of the checked member, or `None` if none is checked.
+    pub fn checked_in_group(&self, parent: WidgetId) -> Option<WidgetId> {
+        self.widgets.checked_in_group(parent)
+    }
+
     /// Returns the `Widget` that has the keyboard focus.
     ///
     /// # Returns

@@ -52,9 +52,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Exactly one exclusive sibling is checked after any change
-- [ ] Works for any widget with `EXCLUSIVE`
-- [ ] Arrow keys move within the group
+- [x] Exactly one exclusive sibling is checked after any change
+- [x] Works for any widget with `EXCLUSIVE`
+- [x] Arrow keys move within the group
 
 ## Depends on
 
