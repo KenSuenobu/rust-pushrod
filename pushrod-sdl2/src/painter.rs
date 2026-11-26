@@ -203,14 +203,7 @@ impl Painter for Sdl2Painter<'_> {
     /// The size of the text drawn; zero if the font could not be loaded or the text could not be
     /// drawn (the failure is recorded, see [`Sdl2Painter::take_errors`]).
     fn text(&mut self, bounds: Rect, style: &TextStyle, color: Color, msg: &str) -> Size {
-        let block = match self.fonts.layout(
-            self.canvas,
-            &style.font_name,
-            style.font_size,
-            to_sdl_font_style(style.font_style),
-            msg,
-            bounds.w,
-        ) {
+        let block = match self.fonts.layout(self.canvas, &style.font, msg, bounds.w) {
             Ok(block) => block,
             Err(error) => {
                 self.errors.push(error);
@@ -247,14 +240,7 @@ impl Painter for Sdl2Painter<'_> {
     /// Zero if the font cannot be loaded (the failure is recorded, see
     /// [`Sdl2Painter::take_errors`]).
     fn line_height(&mut self, style: &TextStyle) -> u32 {
-        match self.fonts.layout(
-            self.canvas,
-            &style.font_name,
-            style.font_size,
-            to_sdl_font_style(style.font_style),
-            "A",
-            u32::MAX,
-        ) {
+        match self.fonts.layout(self.canvas, &style.font, "A", u32::MAX) {
             Ok(block) => block.size.h,
             Err(error) => {
                 self.errors.push(error);
@@ -279,14 +265,7 @@ impl Painter for Sdl2Painter<'_> {
     /// Zero if the font cannot be loaded (the failure is recorded, see
     /// [`Sdl2Painter::take_errors`]).
     fn text_width(&mut self, style: &TextStyle, msg: &str) -> u32 {
-        match self.fonts.layout(
-            self.canvas,
-            &style.font_name,
-            style.font_size,
-            to_sdl_font_style(style.font_style),
-            msg,
-            u32::MAX,
-        ) {
+        match self.fonts.layout(self.canvas, &style.font, msg, u32::MAX) {
             Ok(block) => block.size.w,
             Err(error) => {
                 self.errors.push(error);

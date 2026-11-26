@@ -24,9 +24,10 @@
 //! selects it again.  `Clicked` is only generated if the mouse button is released while the
 //! button is still selected.
 
-use pushrod::color::{Color, FontStyle};
+use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::event::{Event, EventCtx, Propagation};
+use pushrod::font::Font;
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle, Truncate};
 use pushrod::widget::{VisualState, Widget, WidgetCore};
@@ -191,9 +192,8 @@ impl ButtonWidget {
     ///
     /// * `origin` - The upper left-hand corner, relative to the parent `Widget`.
     /// * `size` - The width and height in pixels.
-    /// * `font_name` - Path to the TrueType font file.
-    /// * `font_style` - The font style (normal, bold, italic, ...).
-    /// * `font_size` - The font size in points.
+    /// * `font` - The font handle: a registered family, size, and style.  `Font::default()` is
+    ///   the engine's default font, which needs no files.
     /// * `font_color` - The label color.
     /// * `justification` - The horizontal alignment of the label.
     /// * `msg` - The label.
@@ -203,13 +203,10 @@ impl ButtonWidget {
     /// # Returns
     ///
     /// The new `ButtonWidget`.
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         origin: Point,
         size: Size,
-        font_name: String,
-        font_style: FontStyle,
-        font_size: u16,
+        font: Font,
         font_color: Color,
         justification: TextJustify,
         msg: String,
@@ -223,7 +220,7 @@ impl ButtonWidget {
 
         Self {
             core,
-            style: TextStyle::new(font_name, font_style, font_size, font_color, justification),
+            style: TextStyle::new(font, font_color, justification),
             msg,
             border_width,
             selected: false,

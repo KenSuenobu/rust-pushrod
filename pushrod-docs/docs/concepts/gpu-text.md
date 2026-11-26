@@ -56,15 +56,16 @@ Loading a font and adding an atlas page are internal actions, so each emits an [
 Most code uses `paint::text`. Tools that draw into their own SDL2 canvas can use the cache directly, as the `gpu_text` example does (`cargo run -p pushrod-sdl2 --example gpu_text`), which prints the counters after the first and second frame: the second frame loads and rasterizes nothing.
 
 ```rust checked
+use pushrod::color::FontStyle;
+use pushrod::font::Font;
 use pushrod::geometry::Point;
 use pushrod_sdl2::font::FontCache;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
-use sdl2::ttf::FontStyle;
 use sdl2::video::Window;
 
 fn draw_label(canvas: &mut Canvas<Window>, fonts: &mut FontCache) -> Result<(), pushrod::error::Error> {
-    let block = fonts.layout(canvas, "assets/OpenSans-Regular.ttf", 16, FontStyle::NORMAL, "Total: 42", 200)?;
+    let block = fonts.layout(canvas, &Font::new("", 16, FontStyle::NORMAL), "Total: 42", 200)?;
 
     fonts.draw(canvas, &block, Point::new(4, 4), Color::RGBA(0, 0, 0, 255))
 }

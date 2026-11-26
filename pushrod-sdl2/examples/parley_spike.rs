@@ -31,6 +31,7 @@
 //! All sample text is fictional.
 
 use pushrod::color::{Color, FontStyle};
+use pushrod::font::Font;
 use pushrod::geometry::Point;
 use pushrod::paint::{TextJustify, TextStyle};
 use pushrod::text::raster::{GlyphCache, ShelfPacker};
@@ -156,13 +157,7 @@ impl Atlas {
 /// Builds a text style for the bundled font.
 fn style(size: u16) -> TextStyle {
     TextStyle {
-        font_name: concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../assets/OpenSans-Regular.ttf"
-        )
-        .to_string(),
-        font_style: FontStyle::NORMAL,
-        font_size: size,
+        font: Font::new("", size, FontStyle::NORMAL),
         font_color: Color {
             r: 0,
             g: 0,

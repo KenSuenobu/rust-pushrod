@@ -71,9 +71,8 @@ use pushrod::event::Event;
 use pushrod::geometry::{point, size};
 use pushrod_widgets::text_widget::TextJustify;
 use pushrod::widget::Widget;
-use pushrod::color::{Color, FontStyle};
-
-const FONT: &str = "assets/OpenSans-Regular.ttf";
+use pushrod::color::Color;
+use pushrod::font::Font;
 
 #[derive(Default)]
 struct AppState {
@@ -92,12 +91,12 @@ fn main() -> Result<(), pushrod::error::Error> {
 
     let save = engine.add_child_widget(
         panel_id,
-        ButtonWidget::new(point(20, 80), size(100, 28), FONT.into(), FontStyle::NORMAL, 14,
+        ButtonWidget::new(point(20, 80), size(100, 28), Font::default(),
             Color::BLACK, TextJustify::Center, "Save".into(), 2),
     );
     let quit = engine.add_child_widget(
         panel_id,
-        ButtonWidget::new(point(140, 80), size(100, 28), FONT.into(), FontStyle::NORMAL, 14,
+        ButtonWidget::new(point(140, 80), size(100, 28), Font::default(),
             Color::BLACK, TextJustify::Center, "Quit".into(), 2),
     );
 

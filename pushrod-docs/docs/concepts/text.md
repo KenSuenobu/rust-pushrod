@@ -52,10 +52,11 @@ Applications can implement `TextLayout` for another engine, such as Cosmic Text 
 
 ## Layout caching
 
-Laying text out is the expensive part, so give each widget a `LayoutCache`. It keeps the last `LaidOut` and lays out again only when the text, font name, font size, font style or width changes. Changing only the color or the justification does not.
+Laying text out is the expensive part, so give each widget a `LayoutCache`. It keeps the last `LaidOut` and lays out again only when the text, font (family, size or style) or width changes. Changing only the color or the justification does not.
 
 ```rust checked
 use pushrod::color::{Color, FontStyle};
+use pushrod::font::Font;
 use pushrod::geometry::{Point, Rect, Size};
 use pushrod::paint::{TextJustify, TextStyle};
 use pushrod::text::{LaidOut, LayoutCache, Line, TextGeometry, TextLayout};
@@ -93,9 +94,7 @@ impl TextLayout for FixedWidth {
 
 fn lay_out_twice() {
     let style = TextStyle {
-        font_name: "assets/OpenSans-Regular.ttf".to_string(),
-        font_style: FontStyle::NORMAL,
-        font_size: 16,
+        font: Font::new("", 16, FontStyle::NORMAL),
         font_color: Color::BLACK,
         justification: TextJustify::Left,
     };

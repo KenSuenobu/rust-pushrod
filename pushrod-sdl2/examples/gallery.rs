@@ -8,8 +8,9 @@
 //! frame, then add the widget (and its states) inside the tile's content area.  All sample
 //! data in this gallery is fictional.
 
-use pushrod::color::{Color, FontStyle};
+use pushrod::color::Color;
 use pushrod::engine::Engine;
+use pushrod::font::Font;
 use pushrod::geometry::{Point, point, size};
 use pushrod::paint::{Truncate, Wrap};
 use pushrod::widget::{Behavior, Widget, WidgetId};
@@ -18,11 +19,6 @@ use pushrod_widgets::base_widget::BaseWidget;
 use pushrod_widgets::box_widget::BoxWidget;
 use pushrod_widgets::button_widget::ButtonWidget;
 use pushrod_widgets::text_widget::{TextJustify, TextWidget};
-
-const FONT: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../assets/OpenSans-Regular.ttf"
-);
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
@@ -59,9 +55,7 @@ fn add_label(
     let mut label = TextWidget::new(
         origin,
         size(width, 18),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::WHITE,
         TextJustify::Left,
         String::from(text),
@@ -108,9 +102,7 @@ fn button(origin: Point, text: &str) -> ButtonWidget {
     ButtonWidget::new(
         origin,
         size(120, 24),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::BLACK,
         TextJustify::Center,
         String::from(text),
@@ -182,9 +174,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         let mut sample = TextWidget::new(
             point(10, 36 + i as i32 * 26),
             size(TILE_W - 20, 18),
-            String::from(FONT),
-            FontStyle::NORMAL,
-            14,
+            Font::default(),
             Color::WHITE,
             justify,
             String::from(text),
@@ -202,9 +192,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         let mut sample = TextWidget::new(
             point(10, 36 + i as i32 * 26),
             size(TILE_W - 20, 18),
-            String::from(FONT),
-            FontStyle::NORMAL,
-            14,
+            Font::default(),
             Color::WHITE,
             TextJustify::Left,
             String::from("Quarterly sales report for the western region.txt"),
@@ -219,9 +207,7 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     let mut paragraph = TextWidget::new(
         point(10, 32),
         size(TILE_W - 20, 110),
-        String::from(FONT),
-        FontStyle::NORMAL,
-        14,
+        Font::default(),
         Color::WHITE,
         TextJustify::Left,
         String::from(

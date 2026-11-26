@@ -33,8 +33,9 @@
 //! backend declares its [`CachePolicy`].  The [`RecordingPainter`](crate::backend::headless::RecordingPainter)
 //! records calls for unit tests, without a window.
 
-use crate::color::{Color, FontStyle};
+use crate::color::Color;
 use crate::error::Error;
+use crate::font::Font;
 use crate::geometry::{Point, Rect, Size};
 use crate::widget::VisualState;
 use unicode_segmentation::UnicodeSegmentation;
@@ -109,14 +110,8 @@ pub enum CachePolicy {
 /// The font and alignment used to draw text with [`text`].
 #[derive(Debug, Clone, PartialEq)]
 pub struct TextStyle {
-    /// Path to the TrueType font file.
-    pub font_name: String,
-
-    /// Font style (normal, bold, italic, ...)
-    pub font_style: FontStyle,
-
-    /// Font size in points.
-    pub font_size: u16,
+    /// The font: a registered family, size, and style (see [`crate::font`]).
+    pub font: Font,
 
     /// Text color.
     pub font_color: Color,
@@ -130,26 +125,16 @@ impl TextStyle {
     ///
     /// # Arguments
     ///
-    /// * `font_name` - Path to the TrueType font file.
-    /// * `font_style` - The font style (normal, bold, italic, ...).
-    /// * `font_size` - The font size in points.
+    /// * `font` - The font handle.
     /// * `font_color` - The text color.
     /// * `justification` - The horizontal alignment.
     ///
     /// # Returns
     ///
     /// The new `TextStyle`.
-    pub fn new(
-        font_name: String,
-        font_style: FontStyle,
-        font_size: u16,
-        font_color: Color,
-        justification: TextJustify,
-    ) -> Self {
+    pub fn new(font: Font, font_color: Color, justification: TextJustify) -> Self {
         Self {
-            font_name,
-            font_style,
-            font_size,
+            font,
             font_color,
             justification,
         }
@@ -749,12 +734,11 @@ pub fn align_text(bounds: Rect, text_size: Size, justification: TextJustify) -> 
 mod tests {
     use super::*;
     use crate::backend::headless::{PaintCall, RecordingPainter};
+    use crate::color::FontStyle;
 
     fn style(justification: TextJustify) -> TextStyle {
         TextStyle::new(
-            String::from("font.ttf"),
-            FontStyle::NORMAL,
-            10,
+            Font::new("font", 10, FontStyle::NORMAL),
             Color::BLACK,
             justification,
         )

@@ -49,6 +49,7 @@ pub mod controllers;
 pub mod engine;
 pub mod error;
 pub mod event;
+pub mod font;
 pub mod geometry;
 pub mod input;
 pub mod paint;

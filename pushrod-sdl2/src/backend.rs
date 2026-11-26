@@ -310,6 +310,10 @@ impl Backend for Sdl2Backend {
         raw.into_iter().filter_map(to_input_event).collect()
     }
 
+    fn set_fonts(&mut self, fonts: pushrod::font::FontRegistry) {
+        self.fonts.set_fonts(fonts);
+    }
+
     fn waker(&self) -> Option<Waker> {
         self.waker.clone()
     }

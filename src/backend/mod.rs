@@ -32,6 +32,7 @@ pub mod headless;
 
 use crate::color::Color;
 use crate::event::{EngineEvent, EventMask};
+use crate::font::FontRegistry;
 use crate::geometry::{Rect, Size};
 use crate::input::InputEvent;
 use crate::paint::{CachePolicy, Painter};
@@ -140,6 +141,17 @@ pub trait Backend {
 
     /// Finishes the frame and shows it.
     fn present(&mut self);
+
+    /// Gives the backend the engine's font registry, so it can resolve each [`Font`](crate::font::Font) to its file
+    /// or data.  The engine calls this when a run loop starts; a backend that draws no text
+    /// ignores it.
+    ///
+    /// # Arguments
+    ///
+    /// * `fonts` - The registry shared with the engine.
+    fn set_fonts(&mut self, fonts: FontRegistry) {
+        let _ = fonts;
+    }
 
     /// Returns the engine events the backend produced since the last call (fonts loaded, glyph
     /// atlas pages added).
