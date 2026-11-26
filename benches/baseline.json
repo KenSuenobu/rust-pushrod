@@ -1,0 +1,19 @@
+{
+  "platforms": {
+    "macos": {
+      "budget_tolerance": 0.1,
+      "timing_tolerance": 1.5,
+      "numbers": {
+        "event_dispatch_ns": 3700.3,
+        "frame_interactive_us": 13.6,
+        "frame_full_us": 7.6,
+        "text_atlas_warmup_us": 783.7,
+        "text_layout_cached_ns": 4437.1,
+        "form_load_us": 379.3,
+        "texture_bytes_per_widget": 113102.7,
+        "gallery_widgets": 148.0,
+        "gallery_binary_bytes": 1475088.0
+      }
+    }
+  }
+}
