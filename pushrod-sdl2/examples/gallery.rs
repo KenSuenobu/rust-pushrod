@@ -619,7 +619,12 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         form_layout.add_row(label, field);
     }
 
-    let remember = engine.add_child_widget(sheet, CheckBox::new("Remember me").checked(true));
+    let mut check = CheckBox::new("Remember me").checked(true);
+
+    // The check box shares the form's background too.
+    check.set_color(Color::RGBA(225, 225, 225, 255));
+
+    let remember = engine.add_child_widget(sheet, check);
 
     form_layout.add_full_row(remember);
     engine

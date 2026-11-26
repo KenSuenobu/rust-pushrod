@@ -117,7 +117,11 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         rows.push((label, field));
     }
 
-    let remember = engine.add_child_widget(form, CheckBox::new("Remember password").checked(true));
+    let mut check = CheckBox::new("Remember password").checked(true);
+
+    check.set_color(FORM_COLOR);
+
+    let remember = engine.add_child_widget(form, check);
 
     if let Some(widget) = engine.widgets().get_mut(form) {
         widget.set_layout(Box::new(form_layout(&rows, remember, false)));
