@@ -179,6 +179,8 @@ pub struct WidgetCore {
     layout_params: LayoutParams,
     layout: Option<LayoutSlot>,
     layout_dirty: bool,
+    /// Whether a composite asked for its parts to be laid out again before the next frame.
+    arrange_requested: bool,
 }
 
 /// Holds a container's layout manager, so `WidgetCore` can still derive `Debug`.
@@ -257,6 +259,24 @@ impl WidgetCore {
         self.layout_dirty = dirty;
     }
 
+    /// Returns whether the `Widget` (a composite) asked for its parts to be laid out again.
+    ///
+    /// # Returns
+    ///
+    /// `true` after [`Widget::request_arrange_parts`], until the `WidgetCache` arranges them.
+    pub(crate) fn arrange_requested(&self) -> bool {
+        self.arrange_requested
+    }
+
+    /// Sets or clears the arrange-parts request.
+    ///
+    /// # Arguments
+    ///
+    /// * `requested` - `true` if the parts must be laid out again.
+    pub(crate) fn set_arrange_requested(&mut self, requested: bool) {
+        self.arrange_requested = requested;
+    }
+
     /// Sets the event mask the `Widget` reports from [`Widget::event_mask`].
     ///
     /// Use it while building a `Widget`.  To change a mask after the `Widget` is in a window, use
@@ -315,6 +335,7 @@ impl WidgetCore {
             layout_params: LayoutParams::default(),
             layout: None,
             layout_dirty: false,
+            arrange_requested: false,
         }
     }
 }
@@ -850,6 +871,18 @@ pub trait Widget: Any {
     /// Setters that change a hint call it automatically.
     fn request_layout(&mut self) {
         self.core_mut().layout_dirty = true;
+    }
+
+    /// Asks the `WidgetCache` to lay a composite's parts out again with
+    /// [`Composite::layout_parts`] before the next frame is drawn, as
+    /// [`WidgetCache::arrange_parts`](crate::cache::WidgetCache::arrange_parts) does.
+    ///
+    /// A composite calls it when its own state moves a part, such as a scroll bar whose value
+    /// changed in `handle_event` and whose thumb must follow; it has no access to the cache
+    /// there.  Several requests before a frame arrange the parts once.  On a `Widget` that is not
+    /// a composite the request is dropped.
+    fn request_arrange_parts(&mut self) {
+        self.core_mut().arrange_requested = true;
     }
 
     /// Returns this `Widget` as a [`Composite`], if it is one.

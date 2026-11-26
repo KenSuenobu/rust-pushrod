@@ -292,3 +292,26 @@ fn arrow_points_the_right_way() {
     assert!(first('↑').y < 12 && first('↓').y >= 12);
     assert!(first('←').x < 12 && first('→').x >= 12);
 }
+
+#[test]
+fn font_and_glyph_color_are_set_after_creation() {
+    use pushrod::color::FontStyle;
+    use pushrod::font::Font;
+
+    let mut button = GlyphButton::new('+').size(20, 20);
+    button.set_invalidated(false);
+
+    button.set_font_color(Color::BLUE);
+    assert_eq!(button.get_font_color(), Color::BLUE);
+    assert!(button.is_invalidated());
+
+    button.set_invalidated(false);
+    button.set_font(Font::new("", 18, FontStyle::BOLD));
+    assert_eq!(button.get_font().size(), 18);
+    assert!(button.is_invalidated());
+    assert!(
+        painted(&button)
+            .iter()
+            .any(|call| matches!(call, PaintCall::Text(_, _, color) if *color == Color::BLUE))
+    );
+}

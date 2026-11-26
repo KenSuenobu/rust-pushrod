@@ -27,6 +27,7 @@ use pushrod_widgets::image_widget::{FitMode, ImageWidget};
 use pushrod_widgets::panel::Panel;
 use pushrod_widgets::progress_bar::ProgressBar;
 use pushrod_widgets::radio_button::RadioGroup;
+use pushrod_widgets::scroll_bar::ScrollBar;
 use pushrod_widgets::separator::Separator;
 use pushrod_widgets::slider::Slider;
 use pushrod_widgets::text::{Text, TextJustify};
@@ -632,6 +633,43 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         .get_mut(sheet)
         .unwrap()
         .set_layout(Box::new(form_layout));
+
+    // Scroll Bar: two vertical bars (a quarter and a tenth of the content visible) and two
+    // horizontal ones; moving any of them shows its value below.
+    let scroll_tile = add_tile(&mut engine, panel_id, 2, 6, "Scroll Bar");
+    let scroll_bars = [
+        ScrollBar::vertical().at(10, 32).size(16, 108).value(0.3),
+        ScrollBar::vertical()
+            .at(34, 32)
+            .size(16, 108)
+            .page_size(0.1)
+            .value(0.8),
+        ScrollBar::horizontal().at(62, 36).size(218, 16),
+        ScrollBar::horizontal()
+            .at(62, 62)
+            .size(218, 16)
+            .page_size(0.6)
+            .value(0.5),
+    ];
+    let scroll_value = add_label(
+        &mut engine,
+        scroll_tile,
+        point(62, 100),
+        218,
+        "Move a scroll bar",
+    );
+
+    for bar in scroll_bars {
+        let id = engine.add_child_widget(scroll_tile, bar);
+
+        engine.on_value_change(id, move |_state, ui| {
+            let value = ui.get::<ScrollBar>(id).map_or(0.0, |bar| bar.get_value());
+
+            if let Some(label) = ui.get_mut::<Text>(scroll_value) {
+                label.set_text(format!("Scroll bar {id}: {value:.2}"));
+            }
+        });
+    }
 
     let quit_id = engine.add_child_widget(
         panel_id,

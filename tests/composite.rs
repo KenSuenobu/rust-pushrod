@@ -61,6 +61,8 @@ struct Bar {
     parts: PartList,
     items: usize,
     label: WidgetId,
+    /// How far right the label is placed.
+    shift: i32,
 }
 
 /// The bar's structure.
@@ -77,6 +79,7 @@ impl Bar {
             parts: PartList::new(),
             items,
             label: 0,
+            shift: 0,
         }
     }
 }
@@ -121,7 +124,7 @@ impl Composite for Bar {
     }
 
     fn layout_parts(&self) -> Vec<(WidgetId, Rect)> {
-        let mut placed = vec![(self.label, Rect::new(0, 0, 100, 10))];
+        let mut placed = vec![(self.label, Rect::new(self.shift, 0, 100, 10))];
 
         for (index, id) in self.parts.list("item").into_iter().enumerate() {
             placed.push((id, Rect::new(index as i32 * 20, 10, 20, 10)));
@@ -546,4 +549,56 @@ fn engine_callbacks_see_parts_removed() {
     engine.run_idle(&mut removed);
 
     assert_eq!(removed, vec![4]);
+}
+
+#[test]
+fn a_requested_arrange_runs_once_before_the_next_frame() {
+    let mut cache = cache();
+    let bar = cache.add(Box::new(Bar::new(1)));
+    let mut backend = HeadlessBackend::new(size(200, 100));
+
+    cache.draw_loop(&mut backend);
+    let _ = engine_events(&mut cache);
+    assert!(!cache.needs_draw());
+
+    // The composite changes its own state and asks for its parts to follow.
+    let widget = cache.get_as_mut::<Bar>(bar).unwrap();
+    widget.shift = 30;
+    widget.request_arrange_parts();
+    widget.request_arrange_parts();
+
+    assert!(cache.needs_draw());
+    assert_eq!(cache.get(2).unwrap().get_origin(), point(0, 0));
+
+    cache.draw_loop(&mut backend);
+
+    assert_eq!(cache.get(2).unwrap().get_origin(), point(30, 0));
+    assert_eq!(
+        engine_events(&mut cache)
+            .into_iter()
+            .filter(|event| matches!(event, EngineEvent::PartsArranged { .. }))
+            .count(),
+        1
+    );
+    assert!(!cache.needs_draw());
+}
+
+#[test]
+fn an_arrange_request_on_a_plain_widget_is_dropped() {
+    let mut cache = cache();
+    let pad = cache.add(Box::new(Pad::new()));
+    let mut backend = HeadlessBackend::new(size(200, 100));
+
+    cache.draw_loop(&mut backend);
+    cache.get_mut(pad).unwrap().request_arrange_parts();
+    assert!(cache.needs_draw());
+
+    cache.draw_loop(&mut backend);
+
+    assert!(!cache.needs_draw());
+    assert!(
+        !engine_events(&mut cache)
+            .iter()
+            .any(|event| matches!(event, EngineEvent::PartsArranged { .. }))
+    );
 }

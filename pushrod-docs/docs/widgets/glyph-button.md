@@ -40,6 +40,8 @@ Register the click callback with `engine.on_click(id, ..)`, as for a `Button`.
 |---|---|
 | `set_glyph(glyph)` | Sets the character and invalidates the widget (only when it changed). |
 | `get_glyph()` | Returns the character. |
+| `set_font(font)` / `get_font()` | The glyph font; invalidates the widget. The four arrow characters are drawn as shapes, so the font changes only other glyphs. |
+| `set_font_color(color)` / `get_font_color()` | The glyph color; invalidates the widget. |
 | `is_selected()` | `true` while the button is drawn pressed. |
 
 ## Common methods

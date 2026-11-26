@@ -806,10 +806,9 @@ impl WidgetCache {
     /// `true` if a full redraw is pending, any `Widget` is invalidated, or layout is needed.
     pub fn needs_draw(&self) -> bool {
         self.needs_full_redraw
-            || self
-                .cache
-                .iter()
-                .any(|w| w.is_invalidated() || w.core().layout_dirty())
+            || self.cache.iter().any(|w| {
+                w.is_invalidated() || w.core().layout_dirty() || w.core().arrange_requested()
+            })
     }
 
     /// Sends an event to a `Widget`.  Disabled and hidden `Widget`s, and `Widget`s whose event mask
@@ -1234,6 +1233,7 @@ impl WidgetCache {
     /// changed.
     pub fn draw_loop(&mut self, backend: &mut dyn Backend) -> bool {
         self.run_layout(backend);
+        self.arrange_requested_parts();
 
         let order = self.draw_order();
         let mut visible = vec![false; self.cache.len()];
