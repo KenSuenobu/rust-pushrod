@@ -1231,7 +1231,6 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 4.1 (#48) | Progress bar | A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/progress_bar.rs (new)` |
 | 4.2 (#49) | Spin box | Numeric field with up/down arrows, range, and step. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/spin_box.rs (new)` |
 | 4.4 (#51) | Tab view | Tabs that switch between pages of controls. | `chassis`, `enhancement`, `layout`, `parallelizable`, `size/M`, `widget` | Y | N | M | `pushrod-widgets/src/tab_view.rs (new)` |
 | 4.5 (#52) | List view | Scrolling list with single/multiple selection, backed by a data source. | `chassis`, `enhancement`, `size/L`, `widget` | N | N | L | `pushrod-widgets/src/list_view.rs (new)` |
@@ -1242,6 +1241,8 @@ Progress bar, spin box, tab view, list view, table view, and combo box.
 | 4.12 (#294) | Arithmetic in number fields | Type a simple calculation into a number field and it is replaced by the result. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `pushrod-widgets/src/spin_box.rs`, `pushrod-widgets/src/text_field.rs`, `src/expr.rs (new)` |
 
 ### 4.1 (#48): Progress bar
+
+**Status:** done (#48). `pushrod_widgets::progress_bar::ProgressBar`: `ProgressBar::new(max)` (determinate, `value`) and `ProgressBar::indeterminate()`; `set_value(Option<f64>)` / `set_indeterminate()`; the busy block sweeps over `SWEEP` (1.5 s) each way on `Event::Tick` (the first tick is requested with `engine.widgets().request_animation(id)`); `set_outline_mode(true)` draws static stripes and stops ticking (the drawing-mode switch, 10.1 (#105), will call it); it emits no events; the gallery shows it.
 
 A bar showing how far along a task is; with no value it shows a busy animation (like HTML's progress element). **Widget roadmap:** [`docs/widgets/progress-bar.md`](widgets/progress-bar.md) (look, behavior, events, acceptance criteria).
 

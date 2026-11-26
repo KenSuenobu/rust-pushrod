@@ -50,9 +50,9 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Determinate fill proportional to value / max
-- [ ] `None` value shows the indeterminate animation without callbacks
-- [ ] Static in outline drawing mode
+- [x] Determinate fill proportional to value / max
+- [x] `None` value shows the indeterminate animation without callbacks
+- [x] Static in outline drawing mode
 
 ## Depends on
 

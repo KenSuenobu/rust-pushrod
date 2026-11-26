@@ -30,6 +30,7 @@ pub use crate::glyph_button::GlyphButton;
 pub use crate::group_box::GroupBox;
 pub use crate::image_widget::{FitMode, ImageWidget};
 pub use crate::panel::Panel;
+pub use crate::progress_bar::ProgressBar;
 pub use crate::radio_button::{RadioButton, RadioGroup};
 pub use crate::separator::Separator;
 pub use crate::text::Text;
