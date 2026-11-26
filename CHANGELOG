@@ -60,3 +60,4 @@
 [#66] Modal dialogs: ui.open_modal, dimmed blurred layers, GEM border [kenji]
 [#35] Alert dialog: one-call ui.alert with restylable parts [kenji]
 [#140] Reference app: contacts example, keyboard-only, golden images [kenji]
+[#72] Guide: writing widgets and composites, compiled samples per section [kenji]

@@ -120,6 +120,8 @@ impl Widget for PanelWidget {
 ```
 
 Interactive `Widget`s also implement `handle_event`, and call `ctx.emit(...)` to generate events.
+The guide [Writing widgets and composites](docs/WRITING_WIDGETS.md) covers the rest: events and
+callbacks, behavior and state, input controllers, composites, custom events, and testing.
 
 Pushrod requires Rust 1.100 or newer (edition 2024).
 

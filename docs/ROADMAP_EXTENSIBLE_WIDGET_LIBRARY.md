@@ -1966,7 +1966,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-sdl2/examples/gallery.rs (new)` |
-| 7.4 (#72) | Guide: writing widgets and composites | Step-by-step docs for extending Pushrod. | `documentation`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `docs/WRITING_WIDGETS.md (new)`, `src/lib.rs` |
 | 7.5 (#73) | Changelog, Cargo metadata, and crates.io release | Publish the modernized library (answers #1 and #8). | `ci`, `documentation`, `mvp`, `size/S` | N | v0.1 | S | `Cargo.toml`, `CHANGELOG.md (new)` |
 | 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
 
@@ -2031,6 +2030,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Documentation.** Docusaurus page: `pushrod-docs/docs/intro.md` ("Introduction (gallery screenshot)", Introduction, update). Guides: Screenshot + run command. Rustdoc: n/a. Examples: This is the example. Screenshots: Gallery screenshot.
 
 ### 7.4 (#72): Guide: writing widgets and composites
+
+**Status:** done (#72). [`docs/WRITING_WIDGETS.md`](WRITING_WIDGETS.md) maps the guide and its rules; the documentation site's *Creating widgets* page has a `rust checked` sample for every section (paint-only, events and callbacks, behavior and state, controllers, composites, custom events, testing with `Engine::dispatch` and `RecordingPainter`), compiled by `pushrod-doc-samples`. Linked from the README and the crate docs. The registry and properties chapter is filled in with 6.2 (#61) in v0.2.
 
 **Problem Statement.** Extending Pushrod is the point of the redesign; it needs end-to-end docs.
 
