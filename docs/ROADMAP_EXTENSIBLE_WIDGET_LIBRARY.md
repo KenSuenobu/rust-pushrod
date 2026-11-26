@@ -949,7 +949,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 | 2.11 (#37) | Menu bar and drop-down menus (drawn by Pushrod) | Menu bar with drop-down menus, separators, check marks, submenus, shortcuts, and mnemonics. | `chassis`, `enhancement`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/menu.rs (new)`, `src/cache.rs`, `src/engine.rs` |
 | 2.12 (#38) | File chooser dialog (drawn by Pushrod) | Choose a file or directory with a consistent look on every platform. | `chassis`, `enhancement`, `forms`, `parallelizable`, `size/L`, `widget` | Y | N | L | `pushrod-widgets/src/file_chooser.rs (new)` |
 | 2.13 (#77) | Tooltips | Short help text shown after the pointer rests on a widget. | `enhancement`, `parallelizable`, `size/S`, `usability`, `widget` | Y | N | S | `src/cache.rs`, `pushrod-widgets/src/tooltip.rs (new)` |
-| 2.14 (#83) | Separator line | Horizontal or vertical divider line. | `good first issue`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/separator.rs (new)` |
 | 2.15 (#84) | Toolbar | A row of icon/text buttons bound to actions. | `chassis`, `enhancement`, `parallelizable`, `size/M`, `widget` | Y | N | M | `pushrod-widgets/src/toolbar.rs (new)` |
 | 2.16 (#85) | Status bar | A strip at the bottom of the window for messages and status fields. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/status_bar.rs (new)` |
 | 2.17 (#86) | Switch (on/off slide toggle) | A sliding on/off switch for settings that take effect immediately. | `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/switch.rs (new)` |
@@ -1044,6 +1043,8 @@ Short help text shown after the pointer rests on a widget. **Widget roadmap:** [
 **Dependencies.** Requires 1.5 (#21), 5.1 (#56).
 
 ### 2.14 (#83): Separator line
+
+**Status:** done (#83). `pushrod_widgets::separator::Separator`: `horizontal(width)` / `vertical(height)` with `at`, `line_color`, `etched`; display only (empty event mask); the gallery shows it.
 
 Horizontal or vertical divider line. **Widget roadmap:** [`docs/widgets/separator.md`](widgets/separator.md) (look, behavior, events, acceptance criteria).
 

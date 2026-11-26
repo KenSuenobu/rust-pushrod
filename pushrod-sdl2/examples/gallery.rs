@@ -20,11 +20,12 @@ use pushrod_widgets::button::Button;
 use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
 use pushrod_widgets::panel::Panel;
+use pushrod_widgets::separator::Separator;
 use pushrod_widgets::text::{Text, TextJustify};
 
 /// Window size in pixels.
 const WINDOW_W: u32 = 640;
-const WINDOW_H: u32 = 740;
+const WINDOW_H: u32 = 910;
 
 /// Tile frame size in pixels, and the gap between tiles.
 const TILE_W: u32 = 290;
@@ -273,6 +274,22 @@ pub fn main() -> Result<(), pushrod::error::Error> {
     offline.set_color(Color::WHITE);
     offline.set_enabled(false);
     engine.add_child_widget(boxed_tile, offline);
+
+    // Separator: a horizontal line, a vertical line, and an etched pair (fictional layout).
+    let separator_tile = add_tile(&mut engine, panel_id, 0, 4, "Separator");
+    engine.add_child_widget(
+        separator_tile,
+        Separator::horizontal(TILE_W - 20).at(10, 50),
+    );
+    engine.add_child_widget(
+        separator_tile,
+        Separator::horizontal(TILE_W - 20).etched().at(10, 70),
+    );
+    engine.add_child_widget(
+        separator_tile,
+        Separator::vertical(60).line_color(Color::BLUE).at(70, 85),
+    );
+    engine.add_child_widget(separator_tile, Separator::vertical(60).etched().at(140, 85));
 
     let quit_id = engine.add_child_widget(
         panel_id,

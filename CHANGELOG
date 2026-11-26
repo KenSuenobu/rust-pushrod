@@ -35,3 +35,4 @@
 [#136] Short widget constructors, preludes, non_exhaustive enums, Debug [kenji]
 [#36] CustomPaint widget: closure-drawn, optional event closure [kenji]
 [#27] BoxedLabel widget: fill, centered text, border [kenji]
+[#83] Separator widget: horizontal/vertical line, optionally etched [kenji]
