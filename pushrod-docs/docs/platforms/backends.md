@@ -62,7 +62,8 @@ fn main() -> Result<(), pushrod::error::Error> {
 | `now()` | The clock. |
 | `paint_widget(id, size, paint)` | Paints one widget into its own texture, only when it was invalidated. A high-DPI backend makes the texture `size` times the scale factor. |
 | `release_widget(id)` | Destroys the texture of a widget that was [removed](../concepts/edit-the-widget-tree-at-run-time.md), before the next frame. Does nothing by default. |
-| `begin_frame(color)`, `draw_widget(id, source, dest)`, `present()` | Composes a frame by blitting cached textures; `source` and `dest` are logical and converted to physical pixels. |
+| `begin_frame(color)`, `draw_widget(id, source, dest)`, `present()` | Composes a frame by blitting cached textures; `source` and `dest` are logical and converted to physical pixels. The SDL2 backend composes into an offscreen frame texture and copies it to the window on `present`. |
+| `draw_backdrop(shade, blur)`, `fill_frame_rect(rect, color)` | Draw what lies beneath a [modal dialog](../forms/modal-dialogs.md#how-a-dialog-looks): darken and blur the frame so far (on the GPU, by scaling down and back up with linear filtering), and fill its border. Both do nothing by default. |
 | `take_notices()` | Engine events the backend produced (fonts loaded, atlas pages added). |
 | `clipboard_text()`, `set_clipboard_text(text)` | The clipboard. |
 | `open_url(url)` | Opens a URL in the default handler. |

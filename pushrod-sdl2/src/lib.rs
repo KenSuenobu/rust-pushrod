@@ -61,6 +61,7 @@
 #![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
 mod backend;
+mod compositor;
 pub mod font;
 pub mod image_cache;
 mod input;

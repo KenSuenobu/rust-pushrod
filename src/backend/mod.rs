@@ -192,6 +192,34 @@ pub trait Backend {
     ///   both with [`to_physical`](crate::geometry::to_physical).
     fn draw_widget(&mut self, id: WidgetId, source: Rect, dest: Rect);
 
+    /// Darkens and softens everything drawn into the frame so far, before a modal dialog's
+    /// layer is drawn on top (see [`ModalStyle`](crate::cache::ModalStyle)).  Called once per
+    /// open dialog, so nested dialogs stack the effect.
+    ///
+    /// The work must stay on the GPU: blurring is done by scaling the frame down and back up
+    /// with linear filtering, never by touching pixels on the CPU.  The default does nothing,
+    /// for a backend that cannot compose effects.
+    ///
+    /// # Arguments
+    ///
+    /// * `shade` - A color blended over the whole frame; its alpha sets how much it darkens.
+    /// * `blur` - How much to soften, in halvings of resolution; `0` keeps the frame sharp.
+    fn draw_backdrop(&mut self, shade: Color, blur: u8) {
+        let _ = (shade, blur);
+    }
+
+    /// Fills a rectangle of the frame with a color, blending it when the color is translucent.
+    /// Used for the borders drawn around modal dialogs.  The default does nothing, for a backend
+    /// that cannot draw outside `Widget` textures.
+    ///
+    /// # Arguments
+    ///
+    /// * `rect` - The area, in logical window coordinates.
+    /// * `color` - The fill color.
+    fn fill_frame_rect(&mut self, rect: Rect, color: Color) {
+        let _ = (rect, color);
+    }
+
     /// Finishes the frame and shows it.
     fn present(&mut self);
 

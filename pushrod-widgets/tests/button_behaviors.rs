@@ -261,3 +261,64 @@ fn builders_set_the_matching_flags() {
 
     assert!(!Button::new("x").is_checked());
 }
+
+/// Counts the `DialogDismissRequested` events among `events` and the cache's queued events.
+fn dismiss_requests(cache: &mut WidgetCache, events: &[Event]) -> usize {
+    let queued = cache.take_pending_events();
+
+    events
+        .iter()
+        .chain(queued.iter())
+        .filter(|e| matches!(e, Event::Engine(EngineEvent::DialogDismissRequested { .. })))
+        .count()
+}
+
+#[test]
+fn a_dismiss_button_closes_its_modal_dialog_with_one_request() {
+    let mut cache = WidgetCache::new();
+
+    cache.add(Box::new(Panel::new().at(0, 0).size(300, 200)));
+
+    let dialog = cache.add_child(0, Box::new(Panel::new().at(0, 0).size(200, 100)));
+    let ok = cache.add_child(
+        dialog,
+        Box::new(
+            Button::new("OK")
+                .at(10, 10)
+                .size(100, 20)
+                .default_action()
+                .dismisses_dialog(),
+        ),
+    );
+
+    // By mouse.
+    cache.open_modal(dialog).unwrap();
+    // Buttons do not take focus, so nothing has it; Return still reaches the dialog's default.
+    assert_eq!(cache.focused(), None);
+    assert!(!cache.is_inert(ok));
+
+    let events = click(&mut cache);
+
+    assert_eq!(dismiss_requests(&mut cache, &events), 1);
+    assert_eq!(cache.top_modal(), None);
+    assert!(cache.get(dialog).unwrap().is_hidden());
+
+    // By Return: `Activated`, `Clicked`, and the button's request close the dialog once.
+    cache.open_modal(dialog).unwrap();
+    cache.take_pending_events();
+
+    let events = cache.handle_event(key(Key::Return));
+    let queued = cache.take_pending_events();
+    let closed = queued
+        .iter()
+        .filter(|e| matches!(e, Event::Engine(EngineEvent::ModalClosed { .. })))
+        .count();
+    let requests = events
+        .iter()
+        .chain(queued.iter())
+        .filter(|e| matches!(e, Event::Engine(EngineEvent::DialogDismissRequested { .. })))
+        .count();
+
+    assert_eq!((requests, closed), (1, 1));
+    assert_eq!(cache.top_modal(), None);
+}

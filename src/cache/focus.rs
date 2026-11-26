@@ -70,9 +70,12 @@ impl WidgetCache {
         self.move_focus(None);
     }
 
-    /// Returns whether a `Widget` can take focus now.
+    /// Returns whether a `Widget` can take focus now: it is focusable, nothing above it is
+    /// hidden, and no modal dialog blocks it.
     fn can_focus(&self, id: WidgetId) -> bool {
-        self.get(id).is_some_and(|w| w.is_focusable()) && !self.hidden_above(id)
+        self.get(id).is_some_and(|w| w.is_focusable())
+            && !self.hidden_above(id)
+            && !self.is_inert(id)
     }
 
     /// Returns whether any ancestor of a `Widget` is hidden.
@@ -207,11 +210,12 @@ impl WidgetCache {
     ///
     /// # Returns
     ///
-    /// The focused `Widget`, or the root with no focus.
+    /// The focused `Widget`, or with no focus the root of the top modal dialog (the window's
+    /// root when no dialog is open).
     pub(super) fn key_target(&self) -> WidgetId {
         self.focused_widget_id
             .filter(|&id| self.can_focus(id))
-            .unwrap_or(ROOT_WIDGET_ID)
+            .unwrap_or_else(|| self.input_root())
     }
 
     /// The members of the radio group a `Widget` belongs to, in ID order.
@@ -247,7 +251,11 @@ impl WidgetCache {
     }
 
     /// Every `Widget` Tab visits, in ID order.
-    fn tab_stops(&self) -> Vec<WidgetId> {
+    ///
+    /// # Returns
+    ///
+    /// One `Widget` per focus group that can take focus now; empty if none can.
+    pub(super) fn tab_stops(&self) -> Vec<WidgetId> {
         (0..self.cache.len() as WidgetId)
             .filter(|&id| self.can_focus(id) && self.group_stop(id) == id)
             .collect()
@@ -431,7 +439,8 @@ impl WidgetCache {
     /// Finds the `Widget` with `flag` that Return or Escape activates.
     ///
     /// The form is the nearest ancestor of the focused `Widget` (or the root) that contains an
-    /// enabled, visible `Widget` with the flag; the first one in ID order wins.
+    /// enabled, visible `Widget` with the flag; the first one in ID order wins.  While a modal
+    /// dialog is open the search stops at the dialog's root.
     fn find_action(&self, flag: Behavior) -> Option<WidgetId> {
         let start = self.key_target();
         let mut forms = vec![start];
@@ -440,6 +449,7 @@ impl WidgetCache {
 
         forms
             .into_iter()
+            .take_while(|&form| !self.is_inert(form))
             .find_map(|form| self.action_in(form, flag))
     }
 

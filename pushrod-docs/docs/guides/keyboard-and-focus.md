@@ -8,7 +8,7 @@ description: How a widget gets the keyboard, how Tab and the arrow keys move foc
 
 One widget at a time has the **keyboard focus**. Key presses and typed text go to it, and a dotted outline is drawn on it (`VisualState::FOCUSED`, drawn by `paint::state_overlay`). With no focus, key presses go to the root widget, so Return and Escape still work in a form.
 
-A widget can take focus when it is `Behavior::FOCUSABLE`, enabled, and not hidden (nor inside a hidden parent).
+A widget can take focus when it is `Behavior::FOCUSABLE`, enabled, not hidden (nor inside a hidden parent), and not made inert by an open [modal dialog](#dialogs).
 
 ## Moving focus
 
@@ -40,6 +40,18 @@ flowchart TD
 - Key repeat does not activate a button.
 
 The activated widget receives no key; the application hears `Event::Activated { id }`, so register it with `engine.on_activate(id, ...)`.
+
+## Dialogs
+
+While a [modal dialog](../forms/modal-dialogs.md) is open, the keyboard belongs to it:
+
+- Opening the dialog focuses its first focusable widget in Tab order, or clears the focus if it has none.
+- Tab, Shift-Tab, and the arrow keys only visit widgets inside the dialog. Widgets outside it cannot take focus, by click or by `set_focus`.
+- With no focus, keys go to the dialog's root instead of the window's root.
+- Return and Escape search only the dialog for its default and cancel widgets, so the main window's default button is never pressed by mistake.
+- Closing the dialog gives focus back to the widget that had it before.
+
+A dialog's default and cancel buttons usually also have `Behavior::DISMISSES_DIALOG` (`Button::dismisses_dialog`), so Return and Escape close it. See [Modal dialogs](../forms/modal-dialogs.md).
 
 ## Events
 

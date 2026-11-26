@@ -333,6 +333,11 @@ pub struct HeadlessBackend {
     pub texture_sizes: HashMap<WidgetId, Size>,
     /// Every `Widget` whose texture was released ([`Backend::release_widget`]), in order.
     pub released: Vec<WidgetId>,
+    /// Every modal backdrop drawn ([`Backend::draw_backdrop`]), in order: how many entries
+    /// [`draws`](HeadlessBackend::draws) had when it was drawn, the shade, and the blur.
+    pub backdrops: Vec<(usize, Color, u8)>,
+    /// Every rectangle filled into the frame ([`Backend::fill_frame_rect`]), in order.
+    pub frame_fills: Vec<(Rect, Color)>,
 }
 
 impl HeadlessBackend {
@@ -552,6 +557,27 @@ impl Backend for HeadlessBackend {
     fn draw_widget(&mut self, id: WidgetId, source: Rect, dest: Rect) {
         self.draw_sources.push((id, source));
         self.draws.push((id, dest));
+    }
+
+    /// Records the backdrop in [`HeadlessBackend::backdrops`], with the number of draws before
+    /// it, so tests can check what lies beneath each dialog.
+    ///
+    /// # Arguments
+    ///
+    /// * `shade` - The color that would be blended over the frame.
+    /// * `blur` - How many halvings the frame would be softened by.
+    fn draw_backdrop(&mut self, shade: Color, blur: u8) {
+        self.backdrops.push((self.draws.len(), shade, blur));
+    }
+
+    /// Records the fill in [`HeadlessBackend::frame_fills`].
+    ///
+    /// # Arguments
+    ///
+    /// * `rect` - The area, in logical window coordinates.
+    /// * `color` - The fill color.
+    fn fill_frame_rect(&mut self, rect: Rect, color: Color) {
+        self.frame_fills.push((rect, color));
     }
 
     /// Counts a presented frame in [`HeadlessBackend::frames`].

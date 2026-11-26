@@ -87,7 +87,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 48 | [#25](https://github.com/KenSuenobu/rust-pushrod/issues/25) | pushrod: [1.10] High-DPI rendering and window resize (done) |
 | ✅ 49 | [#139](https://github.com/KenSuenobu/rust-pushrod/issues/139) | pushrod: [7.9] Easy installation: bundled SDL, static linking, and platform guides (done) |
 | ✅ 50 | [#23](https://github.com/KenSuenobu/rust-pushrod/issues/23) | pushrod: [1.8] Edit the widget tree at run time: remove, reparent, reorder (done) |
-| 51 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen |
+| ✅ 51 | [#66](https://github.com/KenSuenobu/rust-pushrod/issues/66) | pushrod: [6.7] Modal dialogs: run a form until a dismissing control is chosen (done) |
 | 52 | [#35](https://github.com/KenSuenobu/rust-pushrod/issues/35) | pushrod: [2.9] Alert dialog |
 | 53 | [#140](https://github.com/KenSuenobu/rust-pushrod/issues/140) | pushrod: [7.10] Reference application: a real app built only with Pushrod |
 | 54 | [#72](https://github.com/KenSuenobu/rust-pushrod/issues/72) | pushrod: [7.4] Guide: writing widgets and composites |
@@ -1117,10 +1117,10 @@ Everything needed to build and ship real dialog-style applications with Pushrod,
 
 **Show on video:**
 
-- [ ] Input blocked outside the top modal
-- [ ] Dismissing control reported
-- [ ] Nested modals
-- [ ] Emits the corresponding `EngineEvent` (9.10)
+- [x] Input blocked outside the top modal
+- [x] Dismissing control reported
+- [x] Nested modals
+- [x] Emits the corresponding `EngineEvent` (9.10)
 
 ### Step 52: Alert dialog
 

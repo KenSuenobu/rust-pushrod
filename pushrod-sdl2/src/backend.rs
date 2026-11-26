@@ -16,6 +16,7 @@
 //! The `SDL2` [`Backend`]: window, canvas, input pump, per-widget textures, clipboard, and URLs,
 //! plus [`run`] and [`event_loop`], which build a window and start the engine's loop on it.
 
+use crate::compositor::Compositor;
 use crate::font::{FontCache, FontNotice};
 use crate::image_cache::ImageCache;
 use crate::input::{Wake, to_input_event, types_to_disable};
@@ -27,7 +28,7 @@ use pushrod::color::Color;
 use pushrod::engine::{Engine, EventLoop};
 use pushrod::error::Error;
 use pushrod::event::{EngineEvent, EventMask};
-use pushrod::geometry::{Rect, Size, to_physical_size};
+use pushrod::geometry::{Rect, Size, to_physical, to_physical_size};
 use pushrod::input::InputEvent;
 use pushrod::paint::{CachePolicy, Painter};
 use pushrod::widget::WidgetId;
@@ -37,7 +38,7 @@ use sdl2::clipboard::ClipboardUtil;
 use sdl2::image::SaveSurface;
 use sdl2::keyboard::TextInputUtil;
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::render::Canvas;
+use sdl2::render::{BlendMode, Canvas};
 use sdl2::surface::Surface;
 use sdl2::video::Window;
 use std::collections::{HashMap, HashSet};
@@ -96,12 +97,14 @@ impl WindowSettings {
 /// The `SDL2` [`Backend`].
 ///
 /// Each `Widget` paints into its own GPU texture, only when invalidated, and frames are composed
-/// by copying the cached textures to the window.  Text comes from the glyph atlas in the
+/// by copying the cached textures into an offscreen frame texture, which is copied to the window
+/// when presented.  Modal backdrops darken and blur that frame on the GPU.  Text comes from the glyph atlas in the
 /// [`FontCache`].
 pub struct Sdl2Backend {
     _sdl: Sdl,
     // Declared before `canvas` so the cached textures are freed while the renderer lives.
     images: ImageCache,
+    compositor: Compositor,
     canvas: Canvas<Window>,
     pump: EventPump,
     text_input: TextInputUtil,
@@ -238,6 +241,7 @@ impl Sdl2Backend {
             _sdl: sdl,
             canvas,
             images: ImageCache::new(),
+            compositor: Compositor::default(),
             waker,
             textures: HashMap::new(),
             fonts: FontCache::new(),
@@ -247,7 +251,7 @@ impl Sdl2Backend {
         })
     }
 
-    /// Saves what the window currently shows as an image.
+    /// Saves the last composed frame (what the window shows once it is presented) as an image.
     ///
     /// # Arguments
     ///
@@ -267,10 +271,13 @@ impl Sdl2Backend {
             .output_size()
             .map_err(|m| Error::image(path, m))?;
         let mut pixels = self
-            .canvas
-            .read_pixels(None, PixelFormatEnum::ABGR8888)
+            .compositor
+            .read_frame(&mut self.canvas, |canvas| {
+                // The window shows no transparency, so the image is saved opaque too.
+                canvas.read_pixels(None, PixelFormatEnum::RGB24)
+            })
             .map_err(|m| Error::image(path, m))?;
-        let surface = Surface::from_data(&mut pixels, w, h, w * 4, PixelFormatEnum::ABGR8888)
+        let surface = Surface::from_data(&mut pixels, w, h, w * 3, PixelFormatEnum::RGB24)
             .map_err(|m| Error::image(path, m))?;
 
         surface.save(path).map_err(|m| Error::image(path, m))
@@ -464,7 +471,14 @@ impl Backend for Sdl2Backend {
         }
     }
 
+    /// The frame is composed offscreen; if its texture cannot be created, the error is reported
+    /// through [`Backend::take_notices`] and the frame is drawn straight to the window, without
+    /// backdrop blur.
     fn begin_frame(&mut self, clear: Color) {
+        if let Err(message) = self.compositor.begin(&mut self.canvas) {
+            self.report(Error::texture(message));
+        }
+
         self.canvas.set_draw_color(to_sdl_color(clear));
         self.canvas.clear();
     }
@@ -485,7 +499,45 @@ impl Backend for Sdl2Backend {
         }
     }
 
+    /// The blur scales the frame down by halves and back up with linear filtering, all on the
+    /// GPU.  A failure is reported through [`Backend::take_notices`].
+    fn draw_backdrop(&mut self, shade: Color, blur: u8) {
+        if let Err(message) = self
+            .compositor
+            .backdrop(&mut self.canvas, to_sdl_color(shade), blur)
+        {
+            self.report(Error::texture(message));
+        }
+    }
+
+    /// The rectangle is converted to physical pixels.  A failure is reported through
+    /// [`Backend::take_notices`].
+    fn fill_frame_rect(&mut self, rect: Rect, color: Color) {
+        let blend = if color.a < 255 {
+            BlendMode::Blend
+        } else {
+            BlendMode::None
+        };
+
+        self.canvas.set_blend_mode(blend);
+        self.canvas.set_draw_color(to_sdl_color(color));
+
+        let filled = self
+            .canvas
+            .fill_rect(to_sdl_rect(to_physical(rect, self.scale)));
+
+        self.canvas.set_blend_mode(BlendMode::None);
+
+        if let Err(message) = filled {
+            self.report(Error::texture(message));
+        }
+    }
+
     fn present(&mut self) {
+        if let Err(message) = self.compositor.finish(&mut self.canvas) {
+            self.report(Error::texture(message));
+        }
+
         self.canvas.present();
     }
 

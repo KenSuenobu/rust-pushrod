@@ -577,6 +577,7 @@ impl WidgetCache {
             self.animating.retain(|&animating| animating != current);
             self.engine_filters.remove(&current);
             self.layout_hints.remove(&current);
+            self.forget_modal(current);
 
             if self.captured_widget_id == Some(current) {
                 self.captured_widget_id = None;
