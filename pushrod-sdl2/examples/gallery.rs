@@ -19,6 +19,7 @@ use pushrod_widgets::boxed_label::BoxedLabel;
 use pushrod_widgets::button::Button;
 use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::frame::Frame;
+use pushrod_widgets::group_box::GroupBox;
 use pushrod_widgets::panel::Panel;
 use pushrod_widgets::separator::Separator;
 use pushrod_widgets::text::{Text, TextJustify};
@@ -290,6 +291,20 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         Separator::vertical(60).line_color(Color::BLUE).at(70, 85),
     );
     engine.add_child_widget(separator_tile, Separator::vertical(60).etched().at(140, 85));
+
+    // GroupBox: a titled frame that holds child widgets (fictional dialog).
+    let group_tile = add_tile(&mut engine, panel_id, 1, 4, "Group Box");
+    let group = engine.add_child_widget(
+        group_tile,
+        GroupBox::new("Size").at(10, 36).size(TILE_W - 20, 104),
+    );
+    engine.add_child_widget(
+        group,
+        Text::new("Small, medium, large")
+            .at(12, 24)
+            .size(TILE_W - 44, 18),
+    );
+    engine.add_child_widget(group, button(point(12, 56), "Apply"));
 
     let quit_id = engine.add_child_widget(
         panel_id,

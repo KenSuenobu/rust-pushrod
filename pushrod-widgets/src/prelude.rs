@@ -25,6 +25,7 @@ pub use crate::boxed_label::BoxedLabel;
 pub use crate::button::Button;
 pub use crate::custom_paint::CustomPaint;
 pub use crate::frame::Frame;
+pub use crate::group_box::GroupBox;
 pub use crate::panel::Panel;
 pub use crate::separator::Separator;
 pub use crate::text::Text;

@@ -61,6 +61,7 @@ pub mod boxed_label;
 pub mod button;
 pub mod custom_paint;
 pub mod frame;
+pub mod group_box;
 pub mod panel;
 pub mod prelude;
 pub mod separator;

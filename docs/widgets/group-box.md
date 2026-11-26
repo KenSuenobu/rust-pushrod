@@ -52,8 +52,8 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Title interrupts the border
-- [ ] Works as the parent of a radio group
+- [x] Title interrupts the border
+- [x] Works as the parent of a radio group
 
 ## Depends on
 
