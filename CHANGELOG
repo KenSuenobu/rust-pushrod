@@ -40,3 +40,4 @@
 [#33] ImageWidget: PNG/BMP with center/stretch/fit/tile, missing-file box [kenji]
 [#28] GlyphButton widget: one-character button, activate-on-press repeat [kenji]
 [#29] Button behaviors: default ring, cancel, toggle, press, dismiss [kenji]
+[#30] CheckBox widget: toggle by click or Space, indeterminate state [kenji]

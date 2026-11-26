@@ -938,7 +938,6 @@ The widgets every dialog needs: labels, buttons, check boxes, radio groups, text
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 2.4 (#30) | Check box with indeterminate state | Box with a check mark and label; toggles checked; optional mixed state. | `chassis`, `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/check_box.rs (new)` |
 | 2.5 (#31) | Radio buttons and radio groups | One-of-many selection among sibling widgets. | `enhancement`, `mvp`, `parallelizable`, `size/S`, `widget` | Y | v0.1 | S | `pushrod-widgets/src/radio_button.rs (new)`, `src/cache.rs` |
 | 2.6 (#32) | Text field: single-line entry with input masks, validation, and numeric mode | Single-line text entry with caret, selection, clipboard, input mask, validator, and numeric mode. | `chassis`, `enhancement`, `mvp`, `size/L`, `widget` | N | v0.1 | L | `pushrod-widgets/src/text_field.rs (new)`, `src/paint.rs` |
 | 2.8 (#34) | Icon widget (picture with caption) | Picture with a caption, selectable and double-clickable, like desktop icons. | `chassis`, `enhancement`, `parallelizable`, `size/S`, `widget` | Y | N | S | `pushrod-widgets/src/icon_widget.rs (new)` |
@@ -982,6 +981,8 @@ A push button that runs an action when clicked; it can also be a dialog's defaul
 **Dependencies.** Requires 1.1 (#19), 1.6 (#22).
 
 ### 2.4 (#30): Check box with indeterminate state
+
+**Status:** done (#30), except the mnemonic toggle, which arrives with 1.12 (#76). `pushrod_widgets::check_box::CheckBox`: `new(label)` with `at`, `size`, `font`, `font_color`, `checked`, `indeterminate`; click on the box or label, or Space when focused, toggles and emits `Toggled`; an indeterminate box becomes checked; the dash is drawn by the widget (the core's `INDETERMINATE` overlay spans the whole widget); the gallery shows it.
 
 Box with a check mark and label; toggles checked; optional mixed state. **Widget roadmap:** [`docs/widgets/check-box.md`](widgets/check-box.md) (look, behavior, events, acceptance criteria).
 
