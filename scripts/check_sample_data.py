@@ -17,7 +17,7 @@ import sys
 
 # Files that legitimately contain "@" or are generated/binary.
 SKIP_PATH = re.compile(
-    r"^(Cargo\.toml|pushrod-widgets/Cargo\.toml|Cargo\.lock|LICENSE)$|package-lock\.json|\.(png|ttf)$"
+    r"^(Cargo\.toml|pushrod-widgets/Cargo\.toml|pushrod-sdl2/Cargo\.toml|Cargo\.lock|LICENSE)$|package-lock\.json|\.(png|ttf)$"
 )
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 RESERVED_DOMAINS = {"example.com", "example.org", "example.net"}
