@@ -93,7 +93,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 54 | [#72](https://github.com/KenSuenobu/rust-pushrod/issues/72) | pushrod: [7.4] Guide: writing widgets and composites (done; registry chapter waits for #61) |
 | ✅ 55 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release (done; publishing runs when v0.1.0 is tagged) |
 | **56** | checkpoint | **Pushrod v0.1 released** |
-| 57 | [#114](https://github.com/KenSuenobu/rust-pushrod/issues/114) | pushrod: [7.6] Module boundaries and written specs with conformance tests |
+| ✅ 57 | [#114](https://github.com/KenSuenobu/rust-pushrod/issues/114) | pushrod: [7.6] Module boundaries and written specs with conformance tests (done; the form file format spec waits for #62) |
 | 58 | [#112](https://github.com/KenSuenobu/rust-pushrod/issues/112) | pushrod: [1.19] Input method (IME) support: composition text and candidate window |
 | 59 | [#76](https://github.com/KenSuenobu/rust-pushrod/issues/76) | pushrod: [1.12] Keyboard mnemonics: underlined shortcut letters |
 | 60 | [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) | pushrod: [6.1] Widget registry and factory |
@@ -1200,9 +1200,9 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 **Show on video:**
 
-- [ ] Specs for widget, events, paint, and forms
-- [ ] Engine and design layer separated in module layout
-- [ ] Conformance tests for each stated guarantee run in CI
+- [x] Specs for widget, events, paint, and forms
+- [x] Engine and design layer separated in module layout
+- [x] Conformance tests for each stated guarantee run in CI
 
 ### Step 58: Input method (IME) support: composition text and candidate window
 

@@ -1,6 +1,6 @@
 {
   "name": "pushrod-docs",
-  "version": "0.43.1",
+  "version": "0.44.1",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
