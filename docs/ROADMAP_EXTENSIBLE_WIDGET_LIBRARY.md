@@ -1706,6 +1706,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 ### 6.3 (#62): Form file format (binary, versioned)
 
+**Status:** done (#62). `pushrod::form` (`FormFile`, `ObjectRecord`, `Property`, `FormError`) writes and reads the `PRSC` version 1 format specified in `docs/FORM_FORMAT.md`: header with section offsets, form table, object table, tag-length-value property blocks (named values, container layout, child layout), string and image pools, and ID and action symbols. Unknown tags and value kinds are skipped, a newer version is rejected, and damaged files are errors, never panics. Loading, writing from widgets, and ID constants are 6.4 through 6.6.
+
 **Problem Statement.** Designed forms must be stored compactly and loaded quickly, with programs referring to objects only by number, as every classic system did.
 
 **Solution / Scope.** Header (magic `PRSC`, version, offsets); form table (name, root); object table (type, parent, first child, next sibling, origin, size, behavior, state, anchors, property offset); tag-length-value property blocks so new properties don't break old readers; string pool; image pool; symbol table (names for IDs and actions). Little-endian, std only. Specified in `docs/FORM_FORMAT.md`. Layouts are stored too: a container's layout kind and parameters, and each child's layout parameters (stretch, alignment, margins, grid cell).
@@ -2074,7 +2076,7 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 
 ### 7.6 (#114): Module boundaries and written specs with conformance tests
 
-**Status:** done (#114). Specs for modules, widgets, events, painting, and forms are in `docs/specs/`; `tests/conformance/` holds 27 conformance tests that run in CI with `cargo test --workspace`. The engine and design layer are separated by crate (`pushrod` and `pushrod-widgets`) and, inside `pushrod`, by a rule that the engine modules never use `appearance`, enforced by `boundaries.rs`. The form file format is specified when 6.3 lands.
+**Status:** done (#114). Specs for modules, widgets, events, painting, and forms are in `docs/specs/`; `tests/conformance/` holds 27 conformance tests that run in CI with `cargo test --workspace`. The engine and design layer are separated by crate (`pushrod` and `pushrod-widgets`) and, inside `pushrod`, by a rule that the engine modules never use `appearance`, enforced by `boundaries.rs`. The form file format is specified in `docs/FORM_FORMAT.md` (#62).
 
 **Problem Statement.** Contributors (human or AI-assisted) work best against modules with clear boundaries and written contracts. Pushrod's contracts (what a widget must do, how events are routed, what a painter must provide, the form file format) live only in code and issue text.
 

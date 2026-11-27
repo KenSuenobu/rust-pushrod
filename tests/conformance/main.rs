@@ -22,5 +22,6 @@
 mod boundaries;
 mod common;
 mod events;
+mod forms;
 mod paint;
 mod widget;

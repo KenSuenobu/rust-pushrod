@@ -11,7 +11,7 @@ copies that directory and runs it to prove it keeps the same contracts.
 | [widget.md](widget.md) | The widget core, identity, behavior, invalidation, and parts | `tests/conformance/widget.rs` |
 | [events.md](events.md) | The event vocabulary, phases, masks, engine events, and ordering | `tests/conformance/events.rs` |
 | [paint.md](paint.md) | The `Painter` trait and the cache policy | `tests/conformance/paint.rs` |
-| [forms.md](forms.md) | Forms, modal dialogs, and where the form file format will be specified | none yet (see the spec) |
+| [forms.md](forms.md) | Forms, modal dialogs, and the form file format | `tests/conformance/forms.rs` |
 
 Run the suite with `cargo test --test conformance`; CI runs it with `cargo test --workspace`.
 

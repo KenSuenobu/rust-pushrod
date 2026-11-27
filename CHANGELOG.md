@@ -22,6 +22,7 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [#76] Keyboard mnemonics: underlined letters, Alt+letter activation [kenji]
 - [#60] WidgetRegistry: create widgets by type name; standard set registered [kenji]
 - [#61] Property introspection: list and set widget properties by name [kenji]
+- [#62] Versioned binary form file format with reader and writer (pushrod::form) [kenji]
 
 ### Changed
 
