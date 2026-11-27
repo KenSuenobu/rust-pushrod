@@ -74,6 +74,6 @@ stateDiagram-v2
 - An indeterminate box is never reported as checked. A click or Space on it makes it checked and emits `Toggled { checked: true }`.
 - Only `CHECKED` is mirrored into the widget's `VisualState`. The core's `INDETERMINATE` overlay is a bar across the whole widget, which would strike through the label, so the dash is drawn inside the box by the widget.
 
-## Planned
+## Mnemonic
 
-Toggling with a keyboard mnemonic arrives with the [mnemonics issue](https://github.com/KenSuenobu/rust-pushrod/issues/76); see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).
+A `_` before a character in the label (`CheckBox::new("_Remember me")`) underlines it, and Alt plus that letter toggles the box. See [Keyboard mnemonics](../concepts/keyboard-mnemonics.md).

@@ -65,6 +65,25 @@ impl Widget for Text {
         &mut self.core
     }
 
+    /// Returns the keyboard mnemonic marked with `_` in the label (see
+    /// [`paint::parse_mnemonic`]).
+    ///
+    /// # Returns
+    ///
+    /// The lowercased mnemonic character, or `None` if the label has none.
+    fn mnemonic(&self) -> Option<char> {
+        paint::mnemonic_of(&self.msg)
+    }
+
+    /// A label's mnemonic moves focus to the next focusable widget instead of activating it.
+    ///
+    /// # Returns
+    ///
+    /// Always `false`.
+    fn mnemonic_activates(&self) -> bool {
+        false
+    }
+
     /// Measures the text for a layout manager, through the painter's text layout.
     ///
     /// The preferred size is the text on its natural lines (one per `\n`, at most

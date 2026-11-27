@@ -83,3 +83,18 @@ An input method composes text before it commits it.
 - Callbacks and the event loop see **the same events in the same order**: what `Engine::run`
   delivers to `on_event` is what `Engine::next_event` returns.
 - A widget's callbacks never run after its `Removed` event, and its ID is never reused.
+
+## Mnemonics
+
+A label marks a keyboard shortcut with `_` before a character (`"_Save"`); `__` is a literal
+underscore.
+
+- `paint::text` omits the marker and draws a one-pixel underline under the character.
+- Alt plus the letter (or the bare letter when no text editor has the focus) is handled after the
+  key press has propagated and nothing stopped it. Ctrl or Cmd held means no mnemonic.
+- The search covers the open top modal dialog, or the whole window when none is open; hidden and
+  disabled widgets are skipped.
+- A widget that activates (`Widget::mnemonic_activates`) receives `Event::Activated`; a label
+  moves focus to the next focusable widget instead.
+- The engine emits `MnemonicActivated { id, key }`; when two widgets share a key, the lowest ID
+  wins and debug builds also emit `MnemonicConflict { key, ids }`.

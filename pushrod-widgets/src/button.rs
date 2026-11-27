@@ -84,6 +84,16 @@ impl Widget for Button {
         &mut self.core
     }
 
+    /// Returns the keyboard mnemonic marked with `_` in the label (see
+    /// [`paint::parse_mnemonic`]).
+    ///
+    /// # Returns
+    ///
+    /// The lowercased mnemonic character, or `None` if the label has none.
+    fn mnemonic(&self) -> Option<char> {
+        paint::mnemonic_of(&self.msg)
+    }
+
     /// Draws the button: a fill, the label inset by the border width, and a one-pixel frame.
     ///
     /// When selected, the colors are inverted (black background, white text).  Colors, border and

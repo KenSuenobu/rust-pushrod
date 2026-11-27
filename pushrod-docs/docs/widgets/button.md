@@ -108,6 +108,10 @@ The application also still receives `Event::Activated { id }` when Return or Esc
 
 Behavior: pressing the mouse button inverts the button (black background, white text). Dragging off it restores the normal look and dragging back inverts it again. The click only counts if the mouse button is released while the button is still inverted.
 
+## Mnemonic
+
+A `_` before a character in the label (`Button::new("_Save")`) underlines it, and Alt plus that letter clicks the button. See [Keyboard mnemonics](../concepts/keyboard-mnemonics.md).
+
 ## Planned
 
-Per-state colors and keyboard mnemonics are planned; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).
+Per-state colors are planned; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).

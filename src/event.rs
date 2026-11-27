@@ -375,6 +375,10 @@ pub enum EngineEventKind {
     CompositionUpdated,
     /// See [`EngineEvent::CompositionEnded`].
     CompositionEnded,
+    /// See [`EngineEvent::MnemonicActivated`].
+    MnemonicActivated,
+    /// See [`EngineEvent::MnemonicConflict`].
+    MnemonicConflict,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -582,6 +586,22 @@ pub enum EngineEvent {
         /// `true` if the text was committed, `false` if it was cancelled.
         committed: bool,
     },
+    /// A mnemonic key (Alt plus the underlined letter) activated a `Widget`: a button was
+    /// clicked, a check box toggled, or, for a label, focus moved to the next focusable `Widget`.
+    MnemonicActivated {
+        /// The `Widget` whose label declared the mnemonic.
+        id: WidgetId,
+        /// The mnemonic character, lowercased.
+        key: char,
+    },
+    /// Two or more `Widget`s in the same form (the open modal dialog, or the window) declare the
+    /// same mnemonic.  Only sent by debug builds, when the key is pressed; the lowest ID wins.
+    MnemonicConflict {
+        /// The shared mnemonic character, lowercased.
+        key: char,
+        /// The `Widget`s that declare it, lowest ID first.
+        ids: Vec<WidgetId>,
+    },
 }
 
 impl EngineEvent {
@@ -620,6 +640,8 @@ impl EngineEvent {
             EngineEvent::CompositionStarted { .. } => EngineEventKind::CompositionStarted,
             EngineEvent::CompositionUpdated { .. } => EngineEventKind::CompositionUpdated,
             EngineEvent::CompositionEnded { .. } => EngineEventKind::CompositionEnded,
+            EngineEvent::MnemonicActivated { .. } => EngineEventKind::MnemonicActivated,
+            EngineEvent::MnemonicConflict { .. } => EngineEventKind::MnemonicConflict,
         }
     }
 }

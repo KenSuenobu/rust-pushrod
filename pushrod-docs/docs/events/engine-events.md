@@ -51,6 +51,8 @@ flowchart TD
 | `CompositionStarted { id }` | An input method began composing text for the focused widget `id`. See [Text input and IME](../guides/text-input-and-ime.md). |
 | `CompositionUpdated { id, text, cursor }` | The composition text of `id` changed; `cursor` is the input method's `(start, length)` inside `text`, in characters. |
 | `CompositionEnded { id, committed }` | The composition ended: `committed` is `true` when the final text arrived as `TextEntered`, `false` when it was cancelled (the focus moved, or something other than the commit followed an empty composition). |
+| `MnemonicActivated { id, key }` | A mnemonic key (Alt plus an underlined letter) activated the widget `id`. See [Keyboard mnemonics](../concepts/keyboard-mnemonics.md). |
+| `MnemonicConflict { key, ids }` | Debug builds only: two or more widgets in the active form declare the mnemonic `key`; the lowest ID wins. |
 | `Error { error }` | Something failed while the loop was running (a font would not load, a texture could not be created). The loop keeps going. See [Errors](../guides/creating-an-application.md#errors). |
 
 More variants are added by the features that need them (menus, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.

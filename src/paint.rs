@@ -441,6 +441,9 @@ pub fn pressed_colors(pressed: bool, background: Color, foreground: Color) -> (C
 /// rectangle, `truncate` shortens it with an ellipsis (see [`fit_text`]).  An empty string, or a
 /// rectangle with no width, draws nothing.
 ///
+/// A `_` before a character in `msg` marks it as a keyboard mnemonic: the marker is not drawn and
+/// the character is underlined (`__` draws a literal underscore).  See [`parse_mnemonic`].
+///
 /// # Arguments
 ///
 /// * `p` - The painter, targeting the `Widget`.
@@ -461,16 +464,18 @@ pub fn text(
     msg: &str,
     truncate: Truncate,
 ) -> TextDrawn {
-    if msg.is_empty() || bounds.w == 0 {
+    let (plain, mnemonic) = parse_mnemonic(msg);
+
+    if plain.is_empty() || bounds.w == 0 {
         return TextDrawn {
             size: Size::new(0, 0),
             truncated: false,
         };
     }
 
-    let shortened = fit_text(msg, bounds.w, truncate, &mut |s| p.text_width(style, s));
+    let shortened = fit_text(&plain, bounds.w, truncate, &mut |s| p.text_width(style, s));
     let truncated = shortened.is_some();
-    let drawn = shortened.as_deref().unwrap_or(msg);
+    let drawn = shortened.as_deref().unwrap_or(&plain);
 
     if drawn.is_empty() {
         return TextDrawn {
@@ -479,10 +484,106 @@ pub fn text(
         };
     }
 
-    TextDrawn {
-        size: p.text(bounds, style, color, drawn),
-        truncated,
+    let size = p.text(bounds, style, color, drawn);
+
+    if let Some(index) = mnemonic {
+        underline_mnemonic(p, bounds, style, color, drawn, index, size);
     }
+
+    TextDrawn { size, truncated }
+}
+
+/// Splits a label into the text to draw and the position of its mnemonic.
+///
+/// A `_` before a character marks it as the keyboard shortcut (`"_Save"`); `__` is a literal
+/// underscore.  A `_` at the end of the text, or before a space, is dropped and marks nothing.  If
+/// there are several markers, the first one counts.
+///
+/// # Arguments
+///
+/// * `label` - The label, possibly with markers.
+///
+/// # Returns
+///
+/// The text with the markers removed, and the byte offset in that text of the mnemonic character
+/// (`None` if the label has no mnemonic).
+pub fn parse_mnemonic(label: &str) -> (String, Option<usize>) {
+    if !label.contains('_') {
+        return (label.to_string(), None);
+    }
+
+    let mut plain = String::with_capacity(label.len());
+    let mut mnemonic = None;
+    let mut chars = label.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c != '_' {
+            plain.push(c);
+            continue;
+        }
+
+        match chars.peek().copied() {
+            Some('_') => {
+                chars.next();
+                plain.push('_');
+            }
+            Some(next) if !next.is_whitespace() && mnemonic.is_none() => {
+                mnemonic = Some(plain.len());
+            }
+            _ => {}
+        }
+    }
+
+    (plain, mnemonic)
+}
+
+/// Returns the keyboard shortcut a label declares.
+///
+/// # Arguments
+///
+/// * `label` - The label, possibly with a `_` marker (see [`parse_mnemonic`]).
+///
+/// # Returns
+///
+/// The mnemonic character, lowercased so it matches [`Key::Char`](crate::input::Key::Char);
+/// `None` if the label has none.
+pub fn mnemonic_of(label: &str) -> Option<char> {
+    let (plain, index) = parse_mnemonic(label);
+
+    plain[index?..]
+        .chars()
+        .next()
+        .and_then(|c| c.to_lowercase().next())
+}
+
+/// Draws a one-pixel line under the mnemonic character of text that [`text`] just drew.
+///
+/// Skipped when the character is not on the first line, or was cut off by truncation.
+fn underline_mnemonic(
+    p: &mut dyn Painter,
+    bounds: Rect,
+    style: &TextStyle,
+    color: Color,
+    drawn: &str,
+    index: usize,
+    size: Size,
+) {
+    let Some(c) = drawn.get(index..).and_then(|rest| rest.chars().next()) else {
+        return;
+    };
+
+    if drawn[..index].contains('\n') || c == '\n' || size.h > p.line_height(style) * 3 / 2 {
+        return;
+    }
+
+    let before = p.text_width(style, &drawn[..index]) as i32;
+    let width = p
+        .text_width(style, &drawn[index..index + c.len_utf8()])
+        .max(1);
+    let origin = align_text(bounds, size, style.justification);
+    let y = origin.y + size.h as i32 - 1;
+
+    p.fill_rect(Rect::new(origin.x + before, y, width, 1), color);
 }
 
 /// Shortens text so it fits a width, cutting on grapheme boundaries and marking the cut with an
@@ -1283,5 +1384,99 @@ mod tests {
             20
         );
         assert_eq!(height_for_width(&mut p, &s, "", 50, Wrap::Word, None), 0);
+    }
+
+    #[test]
+    fn a_marker_is_removed_and_the_character_after_it_is_the_mnemonic() {
+        assert_eq!(parse_mnemonic("_Save"), ("Save".to_string(), Some(0)));
+        assert_eq!(parse_mnemonic("Save _as"), ("Save as".to_string(), Some(5)));
+        assert_eq!(parse_mnemonic("Plain"), ("Plain".to_string(), None));
+    }
+
+    #[test]
+    fn a_double_underscore_is_a_literal_underscore() {
+        assert_eq!(parse_mnemonic("a__b"), ("a_b".to_string(), None));
+        assert_eq!(parse_mnemonic("__x _y"), ("_x y".to_string(), Some(3)));
+    }
+
+    #[test]
+    fn a_stray_marker_marks_nothing() {
+        assert_eq!(parse_mnemonic("end_"), ("end".to_string(), None));
+        assert_eq!(parse_mnemonic("a _ b"), ("a  b".to_string(), None));
+    }
+
+    #[test]
+    fn only_the_first_marker_counts() {
+        assert_eq!(
+            parse_mnemonic("_One _two"),
+            ("One two".to_string(), Some(0))
+        );
+    }
+
+    #[test]
+    fn mnemonics_are_lowercased_and_may_be_multibyte() {
+        assert_eq!(mnemonic_of("_Save"), Some('s'));
+        assert_eq!(mnemonic_of("Caf_é"), Some('é'));
+        assert_eq!(mnemonic_of("Save"), None);
+        assert_eq!(mnemonic_of(""), None);
+    }
+
+    #[test]
+    fn text_draws_the_label_without_its_marker_and_underlines_the_letter() {
+        let mut p = RecordingPainter::default();
+        let drawn = text(
+            &mut p,
+            Rect::new(0, 0, 100, 20),
+            &style(TextJustify::Left),
+            Color::BLACK,
+            "_Save",
+            Truncate::None,
+        );
+
+        assert!(drawn.size.w > 0);
+        assert!(
+            p.calls
+                .iter()
+                .any(|c| matches!(c, PaintCall::Text(_, t, _) if t == "Save"))
+        );
+        assert_eq!(
+            p.calls
+                .iter()
+                .filter(|c| matches!(c, PaintCall::FillRect(r, _) if r.h == 1))
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn text_without_a_mnemonic_draws_no_underline() {
+        let mut p = RecordingPainter::default();
+
+        text(
+            &mut p,
+            Rect::new(0, 0, 100, 20),
+            &style(TextJustify::Left),
+            Color::BLACK,
+            "Save",
+            Truncate::None,
+        );
+
+        assert!(!p.calls.iter().any(|c| matches!(c, PaintCall::FillRect(..))));
+    }
+
+    #[test]
+    fn a_mnemonic_cut_off_by_truncation_is_not_underlined() {
+        let mut p = RecordingPainter::default();
+
+        text(
+            &mut p,
+            Rect::new(0, 0, 30, 20),
+            &style(TextJustify::Left),
+            Color::BLACK,
+            "Some long labe_l",
+            Truncate::End,
+        );
+
+        assert!(!p.calls.iter().any(|c| matches!(c, PaintCall::FillRect(..))));
     }
 }

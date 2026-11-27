@@ -746,6 +746,30 @@ pub trait Widget: Any {
         self.behavior().contains(Behavior::FOCUSABLE) && self.is_enabled() && !self.is_hidden()
     }
 
+    /// Returns the keyboard mnemonic the `Widget`'s label declares.
+    ///
+    /// A label marks its shortcut with `_` (`"_Save"`).  Alt plus that letter activates the
+    /// `Widget` (see [`Widget::mnemonic_activates`]).  Override it in `Widget`s with a label, usually
+    /// with [`paint::mnemonic_of`](crate::paint::mnemonic_of); the default is `None`.
+    ///
+    /// # Returns
+    ///
+    /// The lowercased mnemonic character, or `None` if the `Widget` has none.
+    fn mnemonic(&self) -> Option<char> {
+        None
+    }
+
+    /// Returns what the `Widget`'s mnemonic does.
+    ///
+    /// # Returns
+    ///
+    /// `true` (the default) if the mnemonic activates the `Widget`, which is sent
+    /// [`Event::Activated`] (a button clicks, a check box toggles).  `false` if the `Widget` is a
+    /// label, so the mnemonic moves keyboard focus to the next focusable `Widget` after it.
+    fn mnemonic_activates(&self) -> bool {
+        true
+    }
+
     /// Returns whether the `Widget` is a text editor.
     ///
     /// While a `Widget` that returns `true` has the keyboard focus, the `Engine` asks the
