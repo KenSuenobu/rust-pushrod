@@ -385,6 +385,8 @@ pub enum EngineEventKind {
     AccessibilityChanged,
     /// See [`EngineEvent::AccessActionPerformed`].
     AccessActionPerformed,
+    /// See [`EngineEvent::FormLoaded`].
+    FormLoaded,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -630,6 +632,16 @@ pub enum EngineEvent {
         /// What was asked of it.
         action: crate::accessibility::AccessActionKind,
     },
+    /// A form was loaded from a form file with `Engine::load_form`.  Sent after the
+    /// [`EngineEvent::WidgetAdded`] events of the form's widgets.
+    FormLoaded {
+        /// The form's name.
+        form: String,
+        /// The widget made from the form's root object.
+        root: WidgetId,
+        /// How many widgets the form created.
+        widgets: usize,
+    },
 }
 
 impl EngineEvent {
@@ -673,6 +685,7 @@ impl EngineEvent {
             EngineEvent::MnemonicConflict { .. } => EngineEventKind::MnemonicConflict,
             EngineEvent::AccessibilityChanged { .. } => EngineEventKind::AccessibilityChanged,
             EngineEvent::AccessActionPerformed { .. } => EngineEventKind::AccessActionPerformed,
+            EngineEvent::FormLoaded { .. } => EngineEventKind::FormLoaded,
         }
     }
 }

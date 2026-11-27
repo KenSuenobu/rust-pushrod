@@ -31,8 +31,10 @@
 //! ```
 
 pub mod format;
+pub mod loader;
 
 pub use format::{
     ChildLayout, FORMAT_VERSION, FormEntry, FormError, FormFile, FormValue, ImageEntry, LayoutSpec,
     MAGIC, NO_OBJECT, ObjectRecord, Property, Symbol, SymbolKind,
 };
+pub use loader::FormHandle;

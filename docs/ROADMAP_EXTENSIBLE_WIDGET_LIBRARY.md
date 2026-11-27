@@ -1747,6 +1747,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 ### 6.4 (#63): Form loader: build a form from a file with stable IDs
 
+**Status:** done (#63). `Engine::load_form(&file, "main")` and `load_form_into(parent, ..)` create widgets through the engine's `widget_registry()`, apply properties, geometry, flags, and layout (`pushrod::form::loader`), and return a `FormHandle` (`id(number)`, `named(symbol)`, `action(symbol)`, `root`). Loading is all or nothing, and errors name the object, type, and property. Emits `EngineEvent::FormLoaded`. Layout kind codes: `1` column, `2` row; grid cells and anchors are stored, not applied. Not done: precomputing static text layouts and textures at load. See `pushrod-widgets/examples/form.rs`.
+
 **Problem Statement.** The point of form files is that code doesn't rebuild the UI: the application loads the form and attaches callbacks.
 
 **Solution / Scope.** `Engine::load_form(file, "main") -> FormHandle` creates widgets via the registry, applies properties, and maps form-local object numbers to `WidgetId`s (`form.id(main::OK)`). Emits its engine event (9.10 (#109)). Forms are mostly static: at load, precompute what can't change (text layouts of fixed labels, static textures) so the dynamic work at run time is only what the application actually changes. Forms are normally obtained through the resource manager (`resources.form(ids::forms::MAIN)`, 6.10 (#153)).
