@@ -99,13 +99,17 @@ Every widget also has the methods of the `Widget` trait: `get_id`, `get_parent`,
 
 | Event | Emitted when | Callback |
 |---|---|---|
-| `Event::TextChanged { id }` | After every edit: typing, deleting, cutting, pasting, and the clear button. Not after `set_text`. | `engine.on_text_change(id, ..)` |
+| `Event::TextChanged { id }` | After every edit: typing, deleting, cutting, pasting, and the clear button. Not after `set_text`, and not while an input method is composing (only when the composition is committed). | `engine.on_text_change(id, ..)` |
 | `Event::EditingFinished { id }` | The user presses Return, or the field loses the keyboard focus. Validate here. | `engine.on_editing_finished(id, ..)` |
 | `Event::KeyPressed { id, key, modifiers, repeat }` | A key goes down while the field has the focus. | `engine.on_key_press(id, ..)` |
 | `Event::AccessoryClicked { id, which }` | A search or custom accessory is clicked; `which` is `AccessorySide::Leading` or `Trailing`. Clear and reveal act on their own and do not send it. | `engine.on_event(..)` |
 | `Event::FocusGained` / `FocusLost { id }` | Keyboard focus moves to or from it. | `engine.on_focus_change(id, ..)` |
 
 Return is not consumed, so a default button in the same dialog still activates.
+
+## Input methods (IME)
+
+With an input method (Chinese, Japanese, Korean, ...) the field shows the composition text underlined at the caret, and the input method's own selection with a thicker underline. The composition is not part of `text()` and sends no `TextChanged` until it is committed. A password field never shows a composition. The field reports its caret so the operating system's candidate window appears beside it and follows it. See [Text input and IME](../guides/text-input-and-ime.md).
 
 ## Keys and mouse
 

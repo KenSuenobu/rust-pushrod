@@ -94,7 +94,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 55 | [#73](https://github.com/KenSuenobu/rust-pushrod/issues/73) | pushrod: [7.5] Changelog, Cargo metadata, and crates.io release (done; publishing runs when v0.1.0 is tagged) |
 | **56** | checkpoint | **Pushrod v0.1 released** |
 | ✅ 57 | [#114](https://github.com/KenSuenobu/rust-pushrod/issues/114) | pushrod: [7.6] Module boundaries and written specs with conformance tests (done; the form file format spec waits for #62) |
-| 58 | [#112](https://github.com/KenSuenobu/rust-pushrod/issues/112) | pushrod: [1.19] Input method (IME) support: composition text and candidate window |
+| ✅ 58 | [#112](https://github.com/KenSuenobu/rust-pushrod/issues/112) | pushrod: [1.19] Input method (IME) support: composition text and candidate window (done for TextField; the text area and a real-IME check by hand are pending) |
 | 59 | [#76](https://github.com/KenSuenobu/rust-pushrod/issues/76) | pushrod: [1.12] Keyboard mnemonics: underlined shortcut letters |
 | 60 | [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) | pushrod: [6.1] Widget registry and factory |
 | 61 | [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) | pushrod: [6.2] Property introspection: list, get, and set widget properties by name |
@@ -1218,7 +1218,7 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 - [ ] Japanese and Chinese input methods compose and commit correctly in a text field
 - [ ] Candidate window appears at the caret and follows it
-- [ ] Composition never fires `TextChanged` until committed
+- [x] Composition never fires `TextChanged` until committed
 
 ### Step 59: Keyboard mnemonics: underlined shortcut letters
 

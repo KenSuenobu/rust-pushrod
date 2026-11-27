@@ -19,7 +19,7 @@ use pushrod::event::{Event, EventCtx, EventMask, EventPhase, Propagation};
 use pushrod::geometry::{point, size};
 use pushrod::paint::Painter;
 use pushrod::root_widget::RootWidget;
-use pushrod::widget::{Widget, WidgetCore, WidgetId};
+use pushrod::widget::{Behavior, Widget, WidgetCore, WidgetId};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -139,14 +139,16 @@ pub fn probe_with_mask(
     let mut core = WidgetCore::new(point(0, 0), size(50, 50));
 
     core.set_event_mask(mask);
-    cache.add_child(
-        parent,
-        Box::new(Probe {
-            core,
-            name,
-            capture,
-            stops_in,
-            log: log.clone(),
-        }),
-    )
+
+    let mut probe = Probe {
+        core,
+        name,
+        capture,
+        stops_in,
+        log: log.clone(),
+    };
+
+    // Focusable, so a test can give it the keyboard.
+    probe.set_behavior(Behavior::FOCUSABLE);
+    cache.add_child(parent, Box::new(probe))
 }

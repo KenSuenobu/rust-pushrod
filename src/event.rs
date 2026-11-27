@@ -55,7 +55,8 @@
 //! | Pointer | `Scrolled` | The wheel or trackpad scrolls over a widget. |
 //! | Keyboard | `KeyPressed` | A key goes down (or repeats) while a widget has the keyboard. |
 //! | Keyboard | `KeyReleased` | A key goes up. |
-//! | Keyboard | `TextEntered` | Text is typed (after input-method composition). |
+//! | Keyboard | `TextComposing` | The input method's pre-edit text changes; it is not field content until committed. |
+//! | Keyboard | `TextEntered` | Text is typed, or an input-method composition is committed. |
 //! | Focus | `FocusGained` | A widget becomes the keyboard focus. |
 //! | Focus | `FocusLost` | A widget stops being the keyboard focus. |
 //! | Semantic | `Activated` | A widget is activated (button, menu item, Return on a default action). |
@@ -207,7 +208,7 @@ impl EventMask {
     pub const SCROLL: EventMask = EventMask(1 << 3);
     /// Key presses and releases ([`Event::KeyPressed`], [`Event::KeyReleased`]).
     pub const KEYBOARD: EventMask = EventMask(1 << 4);
-    /// Text input ([`Event::TextEntered`]).
+    /// Text input and input-method composition ([`Event::TextEntered`], [`Event::TextComposing`]).
     pub const TEXT: EventMask = EventMask(1 << 5);
     /// Keyboard focus changes ([`Event::FocusGained`], [`Event::FocusLost`]).
     pub const FOCUS: EventMask = EventMask(1 << 6);
@@ -368,6 +369,12 @@ pub enum EngineEventKind {
     ScaleFactorChanged,
     /// See [`EngineEvent::MinimumWindowSizeChanged`].
     MinimumWindowSizeChanged,
+    /// See [`EngineEvent::CompositionStarted`].
+    CompositionStarted,
+    /// See [`EngineEvent::CompositionUpdated`].
+    CompositionUpdated,
+    /// See [`EngineEvent::CompositionEnded`].
+    CompositionEnded,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -551,6 +558,30 @@ pub enum EngineEvent {
         /// The new minimum size, in logical pixels.
         size: Size,
     },
+    /// An input method began composing text for a widget.
+    CompositionStarted {
+        /// The widget the composition is for.
+        id: WidgetId,
+    },
+    /// The composition text of a widget changed.  Sent after [`EngineEvent::CompositionStarted`],
+    /// once for each change.
+    CompositionUpdated {
+        /// The widget the composition is for.
+        id: WidgetId,
+        /// The composition text so far.
+        text: String,
+        /// The input method's cursor or selection inside `text` as `(start, length)` in
+        /// characters, if it reported one.
+        cursor: Option<(usize, usize)>,
+    },
+    /// A composition ended: it was committed as typed text, or it was cancelled (emptied, or the
+    /// widget lost the keyboard focus).
+    CompositionEnded {
+        /// The widget the composition was for.
+        id: WidgetId,
+        /// `true` if the text was committed, `false` if it was cancelled.
+        committed: bool,
+    },
 }
 
 impl EngineEvent {
@@ -586,6 +617,9 @@ impl EngineEvent {
             EngineEvent::MinimumWindowSizeChanged { .. } => {
                 EngineEventKind::MinimumWindowSizeChanged
             }
+            EngineEvent::CompositionStarted { .. } => EngineEventKind::CompositionStarted,
+            EngineEvent::CompositionUpdated { .. } => EngineEventKind::CompositionUpdated,
+            EngineEvent::CompositionEnded { .. } => EngineEventKind::CompositionEnded,
         }
     }
 }
@@ -628,6 +662,8 @@ pub enum EventKind {
     KeyReleased,
     /// See [`Event::TextEntered`].
     TextEntered,
+    /// See [`Event::TextComposing`].
+    TextComposing,
     /// See [`Event::FocusGained`].
     FocusGained,
     /// See [`Event::FocusLost`].
@@ -694,7 +730,7 @@ impl EventKind {
             K::PointerEntered | K::PointerExited => Some(EventMask::HOVER),
             K::Scrolled => Some(EventMask::SCROLL),
             K::KeyPressed | K::KeyReleased => Some(EventMask::KEYBOARD),
-            K::TextEntered => Some(EventMask::TEXT),
+            K::TextEntered | K::TextComposing => Some(EventMask::TEXT),
             K::FocusGained | K::FocusLost => Some(EventMask::FOCUS),
             K::WindowResized | K::WindowFocusChanged => Some(EventMask::WINDOW),
             K::PropertyChanged
@@ -743,6 +779,7 @@ impl EventKind {
                 | EventKind::KeyPressed
                 | EventKind::KeyReleased
                 | EventKind::TextEntered
+                | EventKind::TextComposing
         )
     }
 }
@@ -840,6 +877,20 @@ pub enum Event {
         id: WidgetId,
         /// The text typed.
         text: String,
+    },
+    /// The input method changed the composition (pre-edit) text of widget `id`.
+    ///
+    /// The composition is shown, usually underlined, but it is not the widget's content until it
+    /// is committed, which arrives as [`Event::TextEntered`].  Empty `text` means the composition
+    /// ended or was cancelled.
+    TextComposing {
+        /// The widget with the keyboard.
+        id: WidgetId,
+        /// The composition text so far.
+        text: String,
+        /// The input method's cursor or selection inside `text` as `(start, length)` in
+        /// characters, if it reported one.
+        cursor: Option<(usize, usize)>,
     },
 
     // ---- Focus ----
@@ -1041,6 +1092,7 @@ impl Event {
             Event::KeyPressed { .. } => EventKind::KeyPressed,
             Event::KeyReleased { .. } => EventKind::KeyReleased,
             Event::TextEntered { .. } => EventKind::TextEntered,
+            Event::TextComposing { .. } => EventKind::TextComposing,
             Event::FocusGained { .. } => EventKind::FocusGained,
             Event::FocusLost { .. } => EventKind::FocusLost,
             Event::Activated { .. } => EventKind::Activated,
@@ -1087,6 +1139,7 @@ impl Event {
             | Event::KeyPressed { id, .. }
             | Event::KeyReleased { id, .. }
             | Event::TextEntered { id, .. }
+            | Event::TextComposing { id, .. }
             | Event::FocusGained { id }
             | Event::FocusLost { id }
             | Event::Activated { id }
@@ -1483,6 +1536,41 @@ mod mask_tests {
             Some(&[EngineEventKind::ModalClosed]),
             &opened
         ));
+    }
+
+    #[test]
+    fn composition_events_have_their_own_kinds_and_the_text_class() {
+        let started = EngineEvent::CompositionStarted { id: 3 };
+        let updated = EngineEvent::CompositionUpdated {
+            id: 3,
+            text: "に".to_string(),
+            cursor: Some((1, 0)),
+        };
+        let ended = EngineEvent::CompositionEnded {
+            id: 3,
+            committed: false,
+        };
+        let composing = Event::TextComposing {
+            id: 3,
+            text: "に".to_string(),
+            cursor: None,
+        };
+
+        assert_eq!(started.kind(), EngineEventKind::CompositionStarted);
+        assert_eq!(updated.kind(), EngineEventKind::CompositionUpdated);
+        assert_eq!(ended.kind(), EngineEventKind::CompositionEnded);
+        assert!(engine_filter_accepts(
+            Some(&[EngineEventKind::CompositionEnded]),
+            &ended
+        ));
+        assert!(!engine_filter_accepts(
+            Some(&[EngineEventKind::CompositionEnded]),
+            &started
+        ));
+        assert_eq!(composing.kind(), EventKind::TextComposing);
+        assert_eq!(composing.widget(), Some(3));
+        assert_eq!(EventKind::TextComposing.mask_class(), Some(EventMask::TEXT));
+        assert!(EventKind::TextComposing.propagates());
     }
 
     #[test]

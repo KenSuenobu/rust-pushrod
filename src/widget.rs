@@ -760,6 +760,19 @@ pub trait Widget: Any {
         false
     }
 
+    /// Returns where the text caret is, relative to the `Widget`'s upper left-hand corner.
+    ///
+    /// The `Engine` gives it to the backend while the `Widget` has the keyboard focus, so the
+    /// platform's input-method candidate window appears next to the caret and follows it.  A text
+    /// editor reports the caret as of its latest paint; the default is `None`.
+    ///
+    /// # Returns
+    ///
+    /// The caret rectangle in logical pixels, or `None` if the `Widget` has no caret.
+    fn text_input_rect(&self) -> Option<Rect> {
+        None
+    }
+
     /// Returns whether the `Widget` needs to be repainted.
     ///
     /// # Returns

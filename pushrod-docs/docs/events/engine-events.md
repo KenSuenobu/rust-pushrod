@@ -48,6 +48,9 @@ flowchart TD
 | `IdleRan { callbacks }` | The idle callbacks ran because no events were waiting. |
 | `ScaleFactorChanged { old_percent, new_percent }` | The window's scale factor changed (it moved to a display with another pixel density, or opened on a high-DPI one), and every widget was invalidated to repaint at the new resolution. `100` is 1x, `200` is 2x. See [Window resize and high-DPI rendering](../concepts/window-resize-and-high-dpi-rendering.md). |
 | `MinimumWindowSizeChanged { size }` | The root layout's minimum size changed and was given to the backend as the window's minimum size. |
+| `CompositionStarted { id }` | An input method began composing text for the focused widget `id`. See [Text input and IME](../guides/text-input-and-ime.md). |
+| `CompositionUpdated { id, text, cursor }` | The composition text of `id` changed; `cursor` is the input method's `(start, length)` inside `text`, in characters. |
+| `CompositionEnded { id, committed }` | The composition ended: `committed` is `true` when the final text arrived as `TextEntered`, `false` when it was cancelled (the focus moved, or something other than the commit followed an empty composition). |
 | `Error { error }` | Something failed while the loop was running (a font would not load, a texture could not be created). The loop keeps going. See [Errors](../guides/creating-an-application.md#errors). |
 
 More variants are added by the features that need them (menus, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.

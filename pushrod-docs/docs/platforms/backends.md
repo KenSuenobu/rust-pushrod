@@ -57,6 +57,7 @@ fn main() -> Result<(), pushrod::error::Error> {
 | `set_minimum_window_size(size)` | The smallest size the user can resize the window to; the engine passes the root layout's minimum. Ignored by default. |
 | `set_event_mask(mask)` | Tells the backend which input classes the application wants. |
 | `set_text_input(active)` | Starts or stops text input while a text editor has focus. |
+| `set_text_input_rect(rect)` | Gives the caret rectangle (window coordinates, logical pixels) so the platform's input-method candidate window sits next to it. Optional: the default ignores it. |
 | `poll_events(wait)` | Returns waiting `InputEvent`s, optionally blocking for the first one. |
 | `waker()` | A function other threads call to wake the loop. |
 | `now()` | The clock. |

@@ -185,6 +185,11 @@ impl Sdl2Backend {
             sdl2::hint::set("SDL_WINDOWS_DPI_SCALING", "1");
         }
 
+        // Let the platform show its own input-method candidate window next to the caret.
+        if std::env::var_os("SDL_IME_SHOW_UI").is_none() {
+            sdl2::hint::set("SDL_IME_SHOW_UI", "1");
+        }
+
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let mut builder = video.window(&settings.title, settings.size.w, settings.size.h);
@@ -374,6 +379,10 @@ impl Backend for Sdl2Backend {
         } else {
             self.text_input.stop();
         }
+    }
+
+    fn set_text_input_rect(&mut self, rect: Rect) {
+        self.text_input.set_rect(to_sdl_rect(rect));
     }
 
     fn poll_events(&mut self, wait: Option<Duration>) -> Vec<InputEvent> {

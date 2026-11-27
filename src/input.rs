@@ -153,6 +153,18 @@ pub enum InputEvent {
     },
     /// Text was typed.
     Text(String),
+    /// The input method changed its composition (pre-edit) text.
+    ///
+    /// The text is not part of any field's content until it is committed, which arrives as
+    /// [`InputEvent::Text`].  An empty `text` means the composition ended or was cancelled.
+    Composition {
+        /// The composition text so far.
+        text: String,
+        /// Where the input method's cursor or selection starts inside `text`, in characters.
+        start: i32,
+        /// How many characters the input method's selection covers (zero for a plain cursor).
+        length: i32,
+    },
     /// Another thread asked the loop to wake; see [`Backend::waker`](crate::backend::Backend::waker).
     Wake,
 }
@@ -176,7 +188,7 @@ impl InputEvent {
             InputEvent::MouseMove { .. } => Some(EventMask::POINTER_MOTION | EventMask::HOVER),
             InputEvent::Wheel { .. } => Some(EventMask::SCROLL),
             InputEvent::KeyDown { .. } | InputEvent::KeyUp { .. } => Some(EventMask::KEYBOARD),
-            InputEvent::Text(_) => Some(EventMask::TEXT),
+            InputEvent::Text(_) | InputEvent::Composition { .. } => Some(EventMask::TEXT),
             InputEvent::FocusChanged(_) => Some(EventMask::WINDOW),
             InputEvent::Wake => Some(EventMask::CUSTOM),
         }
@@ -205,6 +217,15 @@ mod tests {
 
         assert_eq!(down.class(), Some(EventMask::KEYBOARD));
         assert_eq!(InputEvent::Text("a".into()).class(), Some(EventMask::TEXT));
+        assert_eq!(
+            InputEvent::Composition {
+                text: "に".into(),
+                start: 1,
+                length: 0
+            }
+            .class(),
+            Some(EventMask::TEXT)
+        );
         assert_eq!(InputEvent::Wake.class(), Some(EventMask::CUSTOM));
         assert_eq!(
             InputEvent::FocusChanged(true).class(),

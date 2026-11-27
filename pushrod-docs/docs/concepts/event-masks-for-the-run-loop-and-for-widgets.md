@@ -21,7 +21,7 @@ An event is handled only if its class is in **both** masks. Everything else is d
 | `HOVER` | `PointerEntered`, `PointerExited` |
 | `SCROLL` | `Scrolled` |
 | `KEYBOARD` | `KeyPressed`, `KeyReleased` |
-| `TEXT` | `TextEntered` |
+| `TEXT` | `TextEntered`, `TextComposing` |
 | `FOCUS` | `FocusGained`, `FocusLost` |
 | `WINDOW` | `WindowResized`, `WindowFocusChanged` |
 | `LIFECYCLE` | `Shown`, `Hidden`, `Resized`, `Moved`, `Removed`, `PropertyChanged`, `ViewportChanged` |
