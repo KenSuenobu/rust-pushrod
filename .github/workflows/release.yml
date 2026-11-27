@@ -1,12 +1,18 @@
 name: Release
 
-# Publishes pushrod, pushrod-widgets, and pushrod-sdl2 to crates.io when a version tag (v0.1.0,
-# v0.2.0, ...) is pushed. Needs the repository secret CARGO_REGISTRY_TOKEN. A published version
-# can be yanked but never replaced, so the release checks run first and nothing uploads unless
-# they pass. See the documentation site's "Changelog, Cargo metadata, and crates.io release" page.
+# Publishes pushrod, pushrod-widgets, and pushrod-sdl2 to crates.io when a push to main carries a
+# crate version that is not on crates.io yet, which is what merging a semver bump does. Pushes
+# that leave the version alone do nothing. Needs the repository secret CARGO_REGISTRY_TOKEN. A
+# published version can be yanked but never replaced, so the release checks run first and nothing
+# uploads unless they pass. After publishing, the commit is tagged vX.Y.Z. See the documentation
+# site's "Changelog, Cargo metadata, and crates.io release" page.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -21,19 +27,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install SDL2
-        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - uses: dtolnay/rust-toolchain@stable
-      - name: Tag matches the crate version; changelog has the version section
-        run: python3 scripts/check_release.py --tag "$GITHUB_REF_NAME"
+      - name: Is this version already on crates.io?
+        id: version
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | python3 -c 'import json,sys; print(next(p["version"] for p in json.load(sys.stdin)["packages"] if p["name"] == "pushrod"))')
+          status=$(curl -s -o /dev/null -w '%{http_code}' -A 'pushrod-release-workflow' "https://crates.io/api/v1/crates/pushrod/$version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          case "$status" in
+            200) echo "pushrod $version is published; nothing to do"; echo "publish=false" >> "$GITHUB_OUTPUT" ;;
+            404) echo "pushrod $version is new; releasing"; echo "publish=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "crates.io answered $status"; exit 1 ;;
+          esac
+      - name: Install SDL2
+        if: steps.version.outputs.publish == 'true'
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+      - name: Version matches the crates and has a changelog section
+        if: steps.version.outputs.publish == 'true'
+        run: python3 scripts/check_release.py --tag "v${{ steps.version.outputs.version }}"
       - name: Tests
+        if: steps.version.outputs.publish == 'true'
         run: cargo test --workspace
       - name: Package and build every published crate
+        if: steps.version.outputs.publish == 'true'
         run: cargo publish --workspace --dry-run
       - name: Publish (pushrod, then pushrod-widgets, then pushrod-sdl2)
+        if: steps.version.outputs.publish == 'true'
         run: cargo publish --workspace
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Tag the release
+        if: steps.version.outputs.publish == 'true'
+        run: |
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Changelog, Cargo metadata, and crates.io release
-description: How the changelog is written, which Cargo metadata the published crates carry, and how a version tag publishes them to crates.io.
+description: How the changelog is written, which Cargo metadata the published crates carry, and how bumping the version publishes them to crates.io.
 ---
 
 # Changelog, Cargo metadata, and crates.io release
@@ -77,19 +77,22 @@ cargo publish --workspace --dry-run
 ## Publishing a release
 
 Publishing to crates.io is permanent. A version can be *yanked* (hidden from new projects) but
-never deleted or replaced, so a release goes through a pull request first and is then tagged.
+never deleted or replaced, so a release goes through a pull request first. Merging a version bump
+to `main` publishes it; no one tags or runs anything by hand.
 
 ```mermaid
 flowchart TD
   pr[Pull request: bump the version, rename Unreleased to the version] --> merge[Merge to main]
-  merge --> tag[Push the tag vX.Y.Z]
-  tag --> check[check_release.py --tag vX.Y.Z]
+  merge --> new{Is the version already on crates.io?}
+  new -- yes --> skip[Nothing to do]
+  new -- no --> check[check_release.py --tag vX.Y.Z]
   check --> test[cargo test --workspace]
   test --> dry[cargo publish --workspace --dry-run]
   dry --> publish[cargo publish --workspace]
   publish --> core[pushrod]
   core --> widgets[pushrod-widgets]
   widgets --> sdl2[pushrod-sdl2]
+  sdl2 --> tag[Tag the commit vX.Y.Z]
   check -- fails --> stop[Nothing is published]
   test -- fails --> stop
   dry -- fails --> stop
@@ -100,19 +103,14 @@ flowchart TD
 2. **In the same pull request, rename** `## [Unreleased]` in `CHANGELOG.md` to
    `## [X.Y.Z] - YYYY-MM-DD`, and add a new, empty `## [Unreleased]` above it.
 3. **Merge** once CI passes.
-4. **Tag the merge commit and push the tag**:
-
-   ```bash
-   git checkout main && git pull
-   git tag v0.1.0
-   git push origin v0.1.0
-   ```
-
-5. The [Release workflow](https://github.com/KenSuenobu/rust-pushrod/blob/main/.github/workflows/release.yml)
-   runs on the tag. `check_release.py --tag v0.1.0` stops the release unless the tag matches the
-   crate version and the changelog has a `## [0.1.0]` section. The workflow then runs the tests and
-   the dry run again, and publishes with `cargo publish --workspace`.
-6. **Check** that each crate's page on crates.io shows the new version, and that docs.rs has
+4. The [Release workflow](https://github.com/KenSuenobu/rust-pushrod/blob/main/.github/workflows/release.yml)
+   runs on every push to `main`. It asks crates.io whether `pushrod` at the crate version exists.
+   If it does (any merge that leaves the version alone), the workflow stops. If not, it runs
+   `check_release.py --tag vX.Y.Z`, which stops the release unless the changelog has an
+   `## [X.Y.Z]` section, then the tests and the dry run, then `cargo publish --workspace`, and
+   finally tags the commit `vX.Y.Z`. It can also be started by hand (**Run workflow**), which
+   retries a release that failed.
+5. **Check** that each crate's page on crates.io shows the new version, and that docs.rs has
    finished building its API reference (usually within an hour).
 
 `cargo publish --workspace` uploads the crates in dependency order: `pushrod`, then
@@ -138,22 +136,14 @@ placeholder.
 ### If a release goes wrong
 
 If the Release workflow fails before publishing, nothing was uploaded. Fix the problem in a pull
-request, delete the tag (`git push origin :refs/tags/v0.1.0`), and tag again.
+request; the next push to `main` retries, because the version is still not on crates.io.
 
-If it fails part way, after `pushrod` is uploaded, don't tag again: crates.io refuses a version
-that already exists. Publish the rest by hand, in order, from the tagged commit:
+If it fails part way, after `pushrod` is uploaded, the workflow no longer retries: crates.io
+refuses a version that already exists, and the version check sees `pushrod` as published. Publish
+the rest by hand, in order, from the merge commit, then push the tag:
 
 ```bash
 cargo publish -p pushrod-widgets
 cargo publish -p pushrod-sdl2
+git tag v0.1.0 && git push origin v0.1.0
 ```
-
-If a published version is broken, yank it so new projects don't pick it up, then release a fixed
-patch version:
-
-```bash
-cargo yank --version 0.1.0 pushrod-sdl2
-```
-
-Applications that already use a yanked version keep building, because their `Cargo.lock` still
-names it.
