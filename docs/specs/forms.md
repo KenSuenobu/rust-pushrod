@@ -1,7 +1,6 @@
 # Spec: forms
 
-Forms are widget trees run as dialogs. Today Pushrod defines the runtime half; the file half is
-not built yet.
+Forms are widget trees run as dialogs. Pushrod defines the runtime half and the file format.
 
 ## What is specified now
 
@@ -14,7 +13,16 @@ not built yet.
 
 ## The form file format
 
-*(not yet specified, not yet tested)* The binary form file format, its loader and writer, and the
-generated ID constants are roadmap items 6.3 through 6.5. When the format lands, this spec links
-to its definition and `tests/conformance/` gains a conformance test that loads a form written
-with fictional sample data and checks the widget tree it produces.
+The binary form file format is defined in [`docs/FORM_FORMAT.md`](../FORM_FORMAT.md) and
+implemented by `pushrod::form` (`FormFile::to_bytes` and `FormFile::from_bytes`).
+
+- A form file **must** start with the magic `PRSC` and a `u16` version, and a reader **must**
+  reject a newer version than it supports.
+- Objects **must** be referred to by number (their index in the object table), and a reader
+  **must** reject a file whose links, indexes, or offsets are inconsistent instead of panicking.
+- A reader **must** skip property tags it does not know, so new properties do not break old
+  readers.
+- The loader, writer, and generated ID constants are roadmap items 6.4 through 6.6.
+
+The guide is [Form file format](../../pushrod-docs/docs/forms/form-file-format.md).
+Conformance: `tests/conformance/forms.rs`.

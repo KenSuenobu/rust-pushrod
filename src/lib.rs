@@ -77,6 +77,7 @@ pub mod engine;
 pub mod error;
 pub mod event;
 pub mod font;
+pub mod form;
 pub mod geometry;
 pub mod input;
 pub mod layout;
