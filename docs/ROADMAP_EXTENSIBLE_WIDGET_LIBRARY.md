@@ -1651,7 +1651,6 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 6.1 (#60) | Widget registry and factory | Create widgets by type name, the prerequisite for loading forms. | `chassis`, `core`, `enhancement`, `forms`, `mvp`, `size/S` | N | v0.2 | S | `src/registry.rs (new)` |
 | 6.2 (#61) | Property introspection: list, get, and set widget properties by name | Each widget describes its properties for saving, loading, bindings, and the Chassis inspector. | `chassis`, `core`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.2 | M | `src/widget.rs`, `src/properties.rs (new)`, `pushrod-widgets (all widgets)` |
 | 6.3 (#62) | Form file format (binary, versioned) | The binary file that stores forms: object table by ID, string and image pools, symbols. | `chassis`, `enhancement`, `forms`, `mvp`, `size/L` | N | v0.2 | L | `docs/FORM_FORMAT.md (new)`, `form/format.rs (new)` |
 | 6.4 (#63) | Form loader: build a form from a file with stable IDs | Load a form and attach callbacks by ID or name. | `chassis`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.2 | M | `form/loader.rs (new)`, `src/engine.rs` |
@@ -1665,6 +1664,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 | 6.13 (#156) | Event metadata in the widget registry | Each registered widget type declares the events it emits, its default event, and each event's payload, so tools like Chassis can list them. | `chassis`, `enhancement`, `events`, `forms`, `parallelizable`, `size/M` | Y | N | M | `src/registry.rs`, `pushrod-widgets (all widgets)` |
 
 ### 6.1 (#60): Widget registry and factory
+
+**Status:** done (#60). `pushrod::registry::WidgetRegistry` (`register`, `create`, `contains`, `names`) maps type names to constructors taking `Properties` (a name-to-`PropertyValue` map: bool, int, float, text, color); `create` applies the common `x`, `y`, `width`, `height`, `color`, and `hidden` properties. `pushrod_widgets::register` adds fourteen `pushrod.*` types. Unknown names are `Error::UnknownWidgetType`, bad properties `Error::Property`. Property introspection (get/set/list) is 6.2 (#61).
 
 **Problem Statement.** A form file stores 'a button with these properties'. Loading it needs to construct widgets from a type name, including application-defined widgets.
 

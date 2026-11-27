@@ -74,8 +74,11 @@ pub mod panel;
 pub mod prelude;
 pub mod progress_bar;
 pub mod radio_button;
+pub mod registry;
 pub mod scroll_bar;
 pub mod separator;
 pub mod slider;
 pub mod text;
 pub mod text_field;
+
+pub use registry::register;
