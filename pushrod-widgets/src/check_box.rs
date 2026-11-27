@@ -75,6 +75,16 @@ impl Widget for CheckBox {
         &mut self.core
     }
 
+    /// Returns the keyboard mnemonic marked with `_` in the label (see
+    /// [`paint::parse_mnemonic`]).
+    ///
+    /// # Returns
+    ///
+    /// The lowercased mnemonic character, or `None` if the label has none.
+    fn mnemonic(&self) -> Option<char> {
+        paint::mnemonic_of(&self.label)
+    }
+
     /// Draws the box (white inside, black frame), its mark, and the label.
     ///
     /// The mark is a check when checked, a dash when indeterminate, and nothing otherwise; while
@@ -141,6 +151,15 @@ impl Widget for CheckBox {
     /// [`Propagation::Stop`] for the pointer events and the Space key press it handles;
     /// otherwise [`Propagation::Continue`].
     fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
+        // A mnemonic key (Alt plus the underlined letter) toggles the check box.
+        if let Event::Activated { id } = event {
+            if *id == self.get_id() {
+                self.toggle(ctx);
+            }
+
+            return Propagation::Continue;
+        }
+
         if let Event::KeyPressed {
             key: Key::Char(' '),
             repeat: false,

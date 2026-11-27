@@ -113,4 +113,4 @@ Checking is done by the widget; clearing the siblings is done by the core. When 
 
 ## Planned
 
-Toggling with a keyboard mnemonic arrives with the [mnemonics issue](https://github.com/KenSuenobu/rust-pushrod/issues/76); see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).
+This widget does not declare a mnemonic yet. Put a `_` in a [Text](text.md) label beside it to give it one: Alt plus the letter focuses it. See [Keyboard mnemonics](../concepts/keyboard-mnemonics.md).

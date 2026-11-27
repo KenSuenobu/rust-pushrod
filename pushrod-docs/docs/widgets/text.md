@@ -57,6 +57,10 @@ Every widget also has the methods of the `Widget` trait: `get_id`, `get_parent`,
 
 Text wraps at the widget's width and is centered vertically when it fits. Set the background color to match the parent when the label sits on a colored panel.
 
+## Mnemonic
+
+A `_` before a character (`Text::new("_Name")`) underlines it, and Alt plus that letter moves focus to the next focusable widget, which makes a label a shortcut to its field. See [Keyboard mnemonics](../concepts/keyboard-mnemonics.md).
+
 ## Planned
 
-Text layout with full international support, mnemonics, and a boxed-label variant are planned; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).
+Text layout with full international support and a boxed-label variant are planned; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md).

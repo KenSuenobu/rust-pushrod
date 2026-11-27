@@ -190,7 +190,6 @@ Shared behavior every widget gets for free: behavior flags and visual states, ev
 | 1.7 (#3) | GPU text: font cache with a glyph atlas texture | Load each font once, rasterize glyphs once into a GPU atlas, and draw text by blitting glyphs. | `core`, `enhancement`, `mvp`, `parallelizable`, `performance`, `size/M` | Y | v0.1 | M | `src/font.rs`, `src/paint.rs`, `src/cache.rs`, `src/engine.rs` |
 | 1.9 (#24) | Dirty-rectangle redraw | Only re-blit the screen regions that changed. | `core`, `parallelizable`, `performance`, `size/M` | Y | N | M | `src/cache.rs`, `src/engine.rs` |
 | 1.11 (#26) | Application lifecycle: startup and close-request callbacks | Run code before the first frame; confirm or veto closing the window. | `core`, `enhancement`, `parallelizable`, `size/S`, `usability` | Y | N | S | `src/engine.rs` |
-| 1.12 (#76) | Keyboard mnemonics: underlined shortcut letters | Alt+letter (or the letter alone in dialogs) activates a control, shown by an underlined character. | `core`, `enhancement`, `mvp`, `size/S`, `usability` | N | v0.2 | S | `src/paint.rs`, `src/cache.rs`, `pushrod-widgets/src/button.rs`, `pushrod-widgets/src/text.rs` |
 | 1.13 (#78) | Custom application events with payloads | Applications and widgets fire their own typed events; the core ignores them but delivers them to handle_event and callbacks. | `core`, `enhancement`, `events`, `mvp`, `parallelizable`, `size/M` | Y | v0.1 | M | `src/event.rs`, `src/engine.rs`, `src/cache.rs` |
 | 1.14 (#80) | Accessibility: expose widgets to screen readers | Publish roles, names, states, and actions of widgets to the platform accessibility APIs. | `core`, `enhancement`, `mvp`, `parallelizable`, `size/L`, `usability` | Y | v0.2 | L | `src/accessibility.rs (new)`, `src/widget.rs`, `src/engine.rs` |
 | 1.15 (#81) | Undo and redo command stack | An application-level undo stack that text fields and actions can use. | `chassis`, `core`, `enhancement`, `parallelizable`, `size/M`, `usability` | Y | N | M | `src/undo.rs (new)`, `src/engine.rs` |
@@ -482,6 +481,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/application-lifecycle.md` ("Application lifecycle", Concepts, new). Guides: Lifecycle section. Rustdoc: `on_start`, `on_close_request`. Examples: Quit confirmation using an alert (2.9 (#35)). Screenshots: n/a.
 
 ### 1.12 (#76): Keyboard mnemonics: underlined shortcut letters
+
+**Status:** done (#76). `paint::parse_mnemonic` and `paint::mnemonic_of` read the `_` marker (`__` is a literal underscore); `paint::text` omits it and underlines the character. `Widget::mnemonic` and `Widget::mnemonic_activates` let a widget declare one; `Button`, `CheckBox` and `Text` do. The core searches the top modal dialog (or the window) on Alt+letter, or the bare letter when no text editor has focus: buttons click, check boxes toggle, and a label focuses the next focusable widget. It emits `EngineEvent::MnemonicActivated`, and debug builds emit `EngineEvent::MnemonicConflict` for a duplicate; `WidgetCache::mnemonic_conflicts` lists duplicates in any build. See `pushrod-widgets/examples/mnemonics.rs`.
 
 **Problem Statement.** Keyboard users need a direct way to reach a control without tabbing through every field. Most desktop toolkits mark a letter in the label as its keyboard equivalent.
 
@@ -982,7 +983,7 @@ A push button that runs an action when clicked; it can also be a dialog's defaul
 
 ### 2.4 (#30): Check box with indeterminate state
 
-**Status:** done (#30), except the mnemonic toggle, which arrives with 1.12 (#76). `pushrod_widgets::check_box::CheckBox`: `new(label)` with `at`, `size`, `font`, `font_color`, `checked`, `indeterminate`; click on the box or label, or Space when focused, toggles and emits `Toggled`; an indeterminate box becomes checked; the dash is drawn by the widget (the core's `INDETERMINATE` overlay spans the whole widget); the gallery shows it.
+**Status:** done (#30), including the mnemonic toggle (#76). `pushrod_widgets::check_box::CheckBox`: `new(label)` with `at`, `size`, `font`, `font_color`, `checked`, `indeterminate`; click on the box or label, or Space when focused, toggles and emits `Toggled`; an indeterminate box becomes checked; the dash is drawn by the widget (the core's `INDETERMINATE` overlay spans the whole widget); the gallery shows it.
 
 Box with a check mark and label; toggles checked; optional mixed state. **Widget roadmap:** [`docs/widgets/check-box.md`](widgets/check-box.md) (look, behavior, events, acceptance criteria).
 

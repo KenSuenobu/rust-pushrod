@@ -556,7 +556,126 @@ impl WidgetCache {
             {
                 self.trigger_action(true, ctx);
             }
+            Key::Char(c) if !repeat => {
+                self.trigger_mnemonic(c, modifiers, ctx);
+            }
             _ => {}
         }
+    }
+
+    /// Returns the `Widget`s that declare mnemonics in the active form, by character.
+    ///
+    /// The active form is the open modal dialog, or the whole window when none is open.  Hidden,
+    /// disabled, and non-existent `Widget`s are skipped.
+    ///
+    /// # Returns
+    ///
+    /// Each mnemonic character in use with the IDs of the `Widget`s that declare it, lowest ID
+    /// first; the characters are in ascending order.
+    fn mnemonic_table(&self) -> Vec<(char, Vec<WidgetId>)> {
+        let mut found: Vec<(char, WidgetId)> = Vec::new();
+        let mut stack = vec![self.input_root()];
+
+        while let Some(id) = stack.pop() {
+            let Some(widget) = self.get(id) else {
+                continue;
+            };
+
+            if widget.is_hidden() {
+                continue;
+            }
+
+            if let Some(key) = widget.mnemonic().filter(|_| widget.is_enabled()) {
+                found.push((key, id));
+            }
+
+            stack.extend(self.children_of(id));
+        }
+
+        found.sort_unstable();
+
+        let mut table: Vec<(char, Vec<WidgetId>)> = Vec::new();
+
+        for (key, id) in found {
+            match table.last_mut() {
+                Some((last, ids)) if *last == key => ids.push(id),
+                _ => table.push((key, vec![id])),
+            }
+        }
+
+        table
+    }
+
+    /// Returns the mnemonics that more than one `Widget` in the active form declares.
+    ///
+    /// # Returns
+    ///
+    /// Each duplicated character with the IDs that declare it, lowest ID first.  Empty when every
+    /// mnemonic is unique.
+    pub fn mnemonic_conflicts(&self) -> Vec<(char, Vec<WidgetId>)> {
+        self.mnemonic_table()
+            .into_iter()
+            .filter(|(_, ids)| ids.len() > 1)
+            .collect()
+    }
+
+    /// Activates the `Widget` whose mnemonic matches a key press, if there is one.
+    ///
+    /// Alt plus the letter always works.  The bare letter works too, unless a text editor has the
+    /// keyboard focus (it would be typed) or another modifier is held.  A `Widget` that
+    /// [`mnemonic_activates`](crate::widget::Widget::mnemonic_activates) is sent
+    /// [`Event::Activated`]; any other (a label) moves focus to the next focusable `Widget`
+    /// after it, wrapping to the first.  Debug builds also report duplicate mnemonics.
+    ///
+    /// # Arguments
+    ///
+    /// * `c` - The character of the key pressed.
+    /// * `modifiers` - The modifier keys held.
+    /// * `ctx` - The context collecting generated events.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a `Widget` was activated.
+    fn trigger_mnemonic(&mut self, c: char, modifiers: Modifiers, ctx: &mut EventCtx) -> bool {
+        let alt = modifiers.contains(Modifiers::ALT);
+
+        if modifiers.intersects(Modifiers::CTRL | Modifiers::GUI) || !c.is_alphanumeric() {
+            return false;
+        }
+
+        if !alt && self.text_input_wanted {
+            return false;
+        }
+
+        let key = c.to_lowercase().next().unwrap_or(c);
+        let Some((_, ids)) = self.mnemonic_table().into_iter().find(|(k, _)| *k == key) else {
+            return false;
+        };
+
+        if cfg!(debug_assertions) && ids.len() > 1 {
+            self.queue_event(Event::Engine(EngineEvent::MnemonicConflict {
+                key,
+                ids: ids.clone(),
+            }));
+        }
+
+        let id = ids[0];
+        let activates = self.get(id).is_some_and(|w| w.mnemonic_activates());
+
+        if activates {
+            self.send(id, &Event::Activated { id }, EventPhase::Target, ctx);
+        } else {
+            let next = (id + 1..self.cache.len() as WidgetId)
+                .chain(0..id)
+                .find(|&candidate| self.can_focus(candidate));
+
+            if let Some(next) = next {
+                self.set_focus(next);
+            }
+        }
+
+        self.queue_event(Event::Engine(EngineEvent::MnemonicActivated { id, key }));
+
+        true
     }
 }

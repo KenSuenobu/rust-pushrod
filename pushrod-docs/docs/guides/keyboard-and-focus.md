@@ -41,6 +41,10 @@ flowchart TD
 
 The activated widget receives no key; the application hears `Event::Activated { id }`, so register it with `engine.on_activate(id, ...)`.
 
+## Mnemonics
+
+A label can underline a letter that reaches its widget directly: `Button::new("_Save")`, then Alt+S. See [Keyboard mnemonics](../concepts/keyboard-mnemonics.md).
+
 ## Dialogs
 
 While a [modal dialog](../forms/modal-dialogs.md) is open, the keyboard belongs to it:
