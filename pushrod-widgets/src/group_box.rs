@@ -20,9 +20,14 @@
 //! empty event mask, so it receives no input and emits no events.
 
 use pushrod::color::Color;
+use pushrod::error::Result;
 use pushrod::font::Font;
 use pushrod::geometry::{Rect, point, size};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle, Truncate};
+use pushrod::properties::{
+    Property, core_properties, expect_color, expect_text, set_core_property, track,
+};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{Widget, WidgetCore};
 
 /// Distance from the left edge to the start of the title's gap, in pixels.
@@ -67,6 +72,51 @@ impl Widget for GroupBox {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::text("title", self.get_title()));
+        list.push(Property::color("border_color", self.border_color));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "title" => {
+                let t = expect_text(name, value)?.to_string();
+
+                track(self, |w| w.set_title(t))
+            }
+            "border_color" => {
+                let c = expect_color(name, value)?;
+
+                track(self, |w| w.set_border_color(c))
+            }
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Fills the background, draws the title, then the border with a gap behind the title.

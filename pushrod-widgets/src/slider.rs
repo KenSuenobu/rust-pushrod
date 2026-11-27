@@ -36,11 +36,16 @@
 //! A horizontal slider has its minimum on the left; a vertical one has it at the bottom.
 
 use pushrod::color::Color;
+use pushrod::error::Result;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::font::Font;
 use pushrod::geometry::{Rect, point, size};
 use pushrod::input::{Key, MouseButton};
 use pushrod::paint::{self, Painter, TextJustify, TextStyle, Truncate};
+use pushrod::properties::{
+    Property, core_properties, expect_float, read_only, set_core_property, track,
+};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{Behavior, Widget, WidgetCore};
 
 /// The thickness of the knob along the track, in pixels.
@@ -109,6 +114,67 @@ impl Widget for Slider {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::float("min", self.min));
+        list.push(Property::float("max", self.max));
+        list.push(Property::float("step", self.get_step()));
+        list.push(Property::float("value", self.get_value()));
+        list.push(Property::bool("vertical", self.is_vertical()));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "min" => {
+                let n = expect_float(name, value)?;
+                let max = self.max;
+
+                track(self, |w| w.set_range(n, max))
+            }
+            "max" => {
+                let n = expect_float(name, value)?;
+                let min = self.min;
+
+                track(self, |w| w.set_range(min, n))
+            }
+            "step" => {
+                let n = expect_float(name, value)?;
+
+                track(self, |w| w.set_step(n))
+            }
+            "value" => {
+                let n = expect_float(name, value)?;
+
+                track(self, |w| w.set_value(n))
+            }
+            "vertical" => Err(read_only(name)),
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Draws the track, the tick marks, the knob, and (with `show_value`) the value text.

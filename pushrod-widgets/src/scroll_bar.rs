@@ -48,10 +48,15 @@ use crate::glyph_button::GlyphButton;
 use pushrod::appearance::StateStyle;
 use pushrod::color::Color;
 use pushrod::composite::{Composite, PartList, PartsBuilder, TypedParts};
+use pushrod::error::Result;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{Rect, point, size};
 use pushrod::input::MouseButton;
 use pushrod::paint::{self, Painter};
+use pushrod::properties::{
+    Property, core_properties, expect_float, read_only, set_core_property, track,
+};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{VisualState, Widget, WidgetCore, WidgetId};
 
 /// The default thickness of a scroll bar (its width when vertical), in pixels.
@@ -154,6 +159,59 @@ impl Widget for ScrollBar {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::float("value", self.get_value()));
+        list.push(Property::float("step", self.get_step()));
+        list.push(Property::float("page_size", self.get_page_size()));
+        list.push(Property::bool("vertical", self.is_vertical()));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "value" => {
+                let n = expect_float(name, value)?;
+
+                track(self, |w| w.set_value(n))
+            }
+            "step" => {
+                let n = expect_float(name, value)?;
+
+                track(self, |w| w.set_step(n))
+            }
+            "page_size" => {
+                let n = expect_float(name, value)?;
+
+                track(self, |w| w.set_page_size(n))
+            }
+            "vertical" => Err(read_only(name)),
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Fills the background (transparent unless set with `set_color`); the parts draw the rest.

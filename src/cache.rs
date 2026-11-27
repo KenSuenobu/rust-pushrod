@@ -42,6 +42,7 @@ use crate::geometry::{Point, Rect, make_rect, point};
 use crate::input::InputEvent;
 use crate::layout::SizeHint;
 use crate::paint::{self, CachePolicy};
+use crate::registry::PropertyValue;
 use crate::widget::{Behavior, ROOT_WIDGET_ID, VisualState, Widget, WidgetId};
 use std::any::Any;
 use std::collections::{HashMap, HashSet};
@@ -348,6 +349,42 @@ impl WidgetCache {
             Some(widget) => Some(widget.as_mut()),
             None => None,
         }
+    }
+
+    /// Sets a `Widget`'s property by name, and queues
+    /// [`EngineEvent::PropertyChanged`] when the value changed.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the `Widget` already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::UnknownWidget`] if the `Widget` does not exist, or the
+    /// [`Error::Property`] from [`Widget::set_property`].
+    pub fn set_property(
+        &mut self,
+        id: WidgetId,
+        name: &str,
+        value: &PropertyValue,
+    ) -> Result<bool> {
+        let widget = self.get_mut(id).ok_or(Error::UnknownWidget { id })?;
+        let changed = widget.set_property(name, value)?;
+
+        if changed {
+            self.queue_event(Event::Engine(EngineEvent::PropertyChanged {
+                id,
+                name: name.to_string(),
+            }));
+        }
+
+        Ok(changed)
     }
 
     /// Retrieves a `Widget` by ID as its concrete type.

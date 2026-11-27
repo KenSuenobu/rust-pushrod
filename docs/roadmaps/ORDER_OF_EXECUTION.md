@@ -1261,9 +1261,9 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 **Show on video:**
 
-- [ ] Every built-in lists and sets all properties
-- [ ] Round-trip test
-- [ ] `PropertyChanged` emitted on change
+- [x] Every built-in lists and sets all properties
+- [x] Round-trip test
+- [x] `PropertyChanged` emitted on change
 
 ### Step 62: Accessibility: expose widgets to screen readers
 

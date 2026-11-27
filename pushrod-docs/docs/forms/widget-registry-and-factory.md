@@ -110,6 +110,6 @@ pub fn register(registry: &mut WidgetRegistry) {
 | `Error::UnknownWidgetType` | The type name is not registered |
 | `Error::Property` | A constructor's required property is missing or has the wrong kind |
 
-Property introspection (listing, getting, and setting properties on a live widget) is a later step; the registry only builds widgets.
+The registry only builds widgets. To list and change the properties of a live widget, see [Property introspection](property-introspection.md).
 
 Run `cargo run -p pushrod-widgets --example registry` to see a form built from type names.

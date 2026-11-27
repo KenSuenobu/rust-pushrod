@@ -355,6 +355,8 @@ pub enum EngineEventKind {
     ModalOpened,
     /// See [`EngineEvent::ModalClosed`].
     ModalClosed,
+    /// See [`EngineEvent::PropertyChanged`].
+    PropertyChanged,
     /// See [`EngineEvent::TimerFired`].
     TimerFired,
     /// See [`EngineEvent::TimerCancelled`].
@@ -516,6 +518,14 @@ pub enum EngineEvent {
         /// `Widget` that closed it.
         dismissed_by: WidgetId,
     },
+    /// A widget's property was changed by name with `Engine::set_widget_property`.  Not sent
+    /// when the value was already the one given.
+    PropertyChanged {
+        /// The widget whose property changed.
+        id: WidgetId,
+        /// The property's name.
+        name: String,
+    },
     /// A timer registered with `Engine::on_timer` fired and its callback ran.
     TimerFired {
         /// The timer that fired.
@@ -628,6 +638,7 @@ impl EngineEvent {
             EngineEvent::DialogDismissRequested { .. } => EngineEventKind::DialogDismissRequested,
             EngineEvent::ModalOpened { .. } => EngineEventKind::ModalOpened,
             EngineEvent::ModalClosed { .. } => EngineEventKind::ModalClosed,
+            EngineEvent::PropertyChanged { .. } => EngineEventKind::PropertyChanged,
             EngineEvent::TimerFired { .. } => EngineEventKind::TimerFired,
             EngineEvent::TimerCancelled { .. } => EngineEventKind::TimerCancelled,
             EngineEvent::IdleRan { .. } => EngineEventKind::IdleRan,

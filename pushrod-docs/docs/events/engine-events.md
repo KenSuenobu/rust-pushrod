@@ -42,6 +42,7 @@ flowchart TD
 | `ModalOpened { root }` | A [modal dialog](../forms/modal-dialogs.md) opened with `open_modal`; only its subtree receives input now. |
 | `DialogDismissRequested { id }` | A `DISMISSES_DIALOG` widget was clicked or activated. Inside the top modal dialog it closes the dialog; elsewhere it changes nothing. |
 | `ModalClosed { root, dismissed_by }` | A modal dialog closed because `dismissed_by` was chosen. Its root is hidden again and its `open_modal` callback has run. |
+| `PropertyChanged { id, name }` | A widget's property was changed by name with `set_widget_property` and the value really changed. See [Property introspection](../forms/property-introspection.md). |
 | `TimerFired { id, repeat }` | A timer's callback ran. See [Timers and idle callbacks](../concepts/timers-and-idle-callbacks.md). |
 | `TimerCancelled { id }` | A waiting timer was cancelled with `cancel_timer`. |
 | `AnimationTicked { recipients, elapsed }` | `Tick` was delivered to the `recipients` widgets that asked for animation. |

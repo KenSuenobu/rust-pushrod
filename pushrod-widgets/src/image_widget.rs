@@ -23,9 +23,12 @@
 
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
+use pushrod::error::Result;
 use pushrod::event::{Event, EventCtx, Propagation};
 use pushrod::geometry::{Rect, Size, point, size};
 use pushrod::paint::{self, Painter};
+use pushrod::properties::{Property, core_properties, expect_text, set_core_property, track};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{Widget, WidgetCore};
 
 /// The most tiles one paint draws, so a tiny image in a huge widget cannot stall painting.
@@ -182,6 +185,45 @@ impl Widget for ImageWidget {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::text("path", self.path()));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "path" => {
+                let t = expect_text(name, value)?.to_string();
+
+                track(self, |w| w.set_path(t))
+            }
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Fills the background, then draws the image per the fit mode, or a crossed box if the file

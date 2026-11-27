@@ -65,6 +65,7 @@ use crate::event::{
 use crate::font::FontRegistry;
 use crate::geometry::{Point, Rect, Size};
 use crate::input::{InputEvent, Key, Modifiers};
+use crate::registry::PropertyValue;
 use crate::root_widget::RootWidget;
 use crate::timer::TimerSchedule;
 use crate::widget::{Widget, WidgetId};
@@ -432,6 +433,32 @@ impl<'a, S> Ui<'a, S> {
     /// The [`WidgetCache`] holding every `Widget` in the window.
     pub fn widgets(&mut self) -> &mut WidgetCache {
         self.widgets
+    }
+
+    /// Sets a `Widget`'s property by name, and emits
+    /// [`EngineEvent::PropertyChanged`] when the value changed.  See
+    /// [`Engine::set_widget_property`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the `Widget` already had it.
+    ///
+    /// # Errors
+    ///
+    /// The same as [`Engine::set_widget_property`].
+    pub fn set_widget_property(
+        &mut self,
+        id: WidgetId,
+        name: &str,
+        value: &PropertyValue,
+    ) -> Result<bool> {
+        self.widgets.set_property(id, name, value)
     }
 
     /// Gives the keyboard focus to a `Widget`.  See [`WidgetCache::set_focus`].
@@ -1125,6 +1152,34 @@ impl<S> Engine<S> {
     /// The [`WidgetCache`] holding every `Widget` in the window.
     pub fn widgets(&mut self) -> &mut WidgetCache {
         &mut self.widget_cache
+    }
+
+    /// Sets a `Widget`'s property by name, and emits
+    /// [`EngineEvent::PropertyChanged`] when the value changed.  See
+    /// [`properties`](crate::properties).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The ID of the `Widget`.
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the `Widget` already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::UnknownWidget`](crate::error::Error::UnknownWidget) if the `Widget` does
+    /// not exist, or [`Error::Property`](crate::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    pub fn set_widget_property(
+        &mut self,
+        id: WidgetId,
+        name: &str,
+        value: &PropertyValue,
+    ) -> Result<bool> {
+        self.widget_cache.set_property(id, name, value)
     }
 
     /// Stores a callback in the registry under `(id, kind)`.

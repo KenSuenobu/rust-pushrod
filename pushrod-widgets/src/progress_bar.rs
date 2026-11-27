@@ -35,9 +35,14 @@
 //! a custom event.
 
 use pushrod::color::Color;
+use pushrod::error::Result;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{Rect, point, size};
 use pushrod::paint::{self, Painter};
+use pushrod::properties::{
+    Property, core_properties, expect_bool, expect_float, set_core_property, track,
+};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{Widget, WidgetCore};
 use std::time::Duration;
 
@@ -88,6 +93,69 @@ impl Widget for ProgressBar {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::float("max", self.max()));
+        list.push(Property::float("value", self.get_value().unwrap_or(0.0)));
+        list.push(Property::bool("indeterminate", self.is_indeterminate()));
+        list.push(Property::bool("outline", self.is_outline_mode()));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "max" => {
+                let n = expect_float(name, value)?;
+
+                track(self, |w| w.set_max(n))
+            }
+            "value" => {
+                let n = expect_float(name, value)?;
+
+                track(self, |w| w.set_value(Some(n)))
+            }
+            "indeterminate" => {
+                let b = expect_bool(name, value)?;
+
+                track(self, |w| {
+                    if b {
+                        w.set_indeterminate();
+                    } else if w.is_indeterminate() {
+                        w.set_value(Some(0.0));
+                    }
+                })
+            }
+            "outline" => {
+                let b = expect_bool(name, value)?;
+
+                track(self, |w| w.set_outline_mode(b))
+            }
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Draws the white track with a black frame, then the fill (determinate), the moving block
