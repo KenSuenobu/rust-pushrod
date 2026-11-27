@@ -35,7 +35,7 @@
 //! property and send [`Event::ValueChanged`](crate::event::Event::ValueChanged) /
 //! [`Event::TextChanged`](crate::event::Event::TextChanged).
 //!
-//! With the `accesskit` cargo feature, [`AccessUpdate::to_accesskit`] converts an update to an
+//! With the `accesskit` cargo feature, `AccessUpdate::to_accesskit` converts an update to an
 //! [AccessKit](https://github.com/AccessKit/accesskit) `TreeUpdate`, which a platform adapter
 //! publishes to Windows, macOS, and Linux accessibility APIs.
 //!
