@@ -202,7 +202,7 @@ jobs:
   release:
     name: Release readiness (metadata, changelog, cargo publish --dry-run)
     # Packages and builds the three published crates exactly as crates.io would receive them,
-    # without uploading anything. Publishing itself is .github/workflows/release.yml, on a v* tag.
+    # without uploading anything. Publishing itself is .github/workflows/release.yml, when a version bump reaches main.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
