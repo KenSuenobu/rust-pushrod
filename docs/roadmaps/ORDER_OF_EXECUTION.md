@@ -1247,9 +1247,9 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 **Show on video:**
 
-- [ ] All built-ins registered
-- [ ] Custom widgets registrable
-- [ ] Unknown names are errors, not panics
+- [x] All built-ins registered
+- [x] Custom widgets registrable
+- [x] Unknown names are errors, not panics
 
 ### Step 61: Property introspection: list, get, and set widget properties by name
 

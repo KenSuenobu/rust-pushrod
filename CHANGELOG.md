@@ -20,6 +20,7 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [#114] Specs in docs/specs and conformance tests in tests/conformance [kenji]
 - [#112] IME: composition text, caret candidate window, composition events [kenji]
 - [#76] Keyboard mnemonics: underlined letters, Alt+letter activation [kenji]
+- [#60] WidgetRegistry: create widgets by type name; standard set registered [kenji]
 
 ### Changed
 

@@ -91,6 +91,19 @@ pub enum Error {
         /// What went wrong.
         message: String,
     },
+    /// A widget type name is not registered in the
+    /// [`WidgetRegistry`](crate::registry::WidgetRegistry).
+    UnknownWidgetType {
+        /// The type name that was not found.
+        name: String,
+    },
+    /// A property a widget constructor needs is missing or has the wrong kind.
+    Property {
+        /// The property name.
+        name: String,
+        /// What went wrong.
+        message: String,
+    },
 }
 
 /// The result of a fallible Pushrod function.
@@ -211,6 +224,36 @@ impl Error {
             message: message.into(),
         }
     }
+
+    /// Creates a [`Error::UnknownWidgetType`].
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The type name that is not registered.
+    ///
+    /// # Returns
+    ///
+    /// The error.
+    pub fn unknown_widget_type(name: impl Into<String>) -> Self {
+        Error::UnknownWidgetType { name: name.into() }
+    }
+
+    /// Creates a [`Error::Property`].
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `message` - What went wrong.
+    ///
+    /// # Returns
+    ///
+    /// The error.
+    pub fn property(name: impl Into<String>, message: impl Into<String>) -> Self {
+        Error::Property {
+            name: name.into(),
+            message: message.into(),
+        }
+    }
 }
 
 impl fmt::Display for Error {
@@ -233,6 +276,10 @@ impl fmt::Display for Error {
             Error::Composite { id, message } => write!(f, "composite {id}: {message}"),
             Error::FormFile { path, message } => write!(f, "form file \"{path}\": {message}"),
             Error::Tree { id, message } => write!(f, "widget {id}: {message}"),
+            Error::UnknownWidgetType { name } => {
+                write!(f, "widget type \"{name}\" is not registered")
+            }
+            Error::Property { name, message } => write!(f, "property \"{name}\": {message}"),
         }
     }
 }
