@@ -18,6 +18,7 @@ A change cannot merge while any job fails. The badge at the top of the
 | **Documentation site** | Ubuntu | `npm ci && npm run build` in `pushrod-docs/`; broken links fail the build |
 | **Golden-image rendering tests** | Ubuntu with Xvfb | `PUSHROD_GOLDEN=1 xvfb-run -a cargo test -p pushrod-sdl2 --test visual --test contacts` (every widget, and the [reference application](../guides/reference-application.md)'s screens); on failure the diff images are uploaded as the `golden-diff` artifact (see [Golden-image rendering tests](golden-image-rendering-tests.md)) |
 | **Performance benchmarks** | Ubuntu | `python3 scripts/check_benchmarks.py`: a budget over its tolerance fails, a slow timing warns; the results are uploaded as the `benchmark-results` artifact (see [Performance benchmarks and budgets](performance-benchmarks-and-budgets.md)) |
+| **Conformance** | the **Rust** job | `cargo test --workspace` includes `tests/conformance/`, which checks every guarantee in the [specifications](specs.md) |
 | **Sample data** | Ubuntu | `python3 scripts/check_sample_data.py` |
 | **Release readiness** | Ubuntu | `python3 scripts/test_check_release.py`, `python3 scripts/check_release.py` (matching versions, crates.io metadata, an `Unreleased` changelog section), and `cargo publish --workspace --dry-run` (see [Changelog, Cargo metadata, and crates.io release](changelog-cargo-metadata-and-crates-io-release.md)) |
 

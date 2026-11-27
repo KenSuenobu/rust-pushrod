@@ -1966,7 +1966,6 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
 | 7.3 (#71) | Widget gallery example | One window showing every widget and state. | `documentation`, `enhancement`, `good first issue`, `mvp`, `parallelizable`, `size/S` | Y | v0.1 | S | `pushrod-sdl2/examples/gallery.rs (new)` |
-| 7.6 (#114) | Module boundaries and written specs with conformance tests | Specify each module's contract (widget, events, paint, form format) in docs/specs and test against it. | `ci`, `documentation`, `enhancement`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `docs/specs/ (new)`, `tests/conformance/ (new)` |
 
 ### 7.1 (#69): CI: build, test, clippy, fmt, doc with SDL2
 
@@ -2068,6 +2067,8 @@ CI, golden-image tests, a widget gallery, a guide for writing widgets, a changel
 **Documentation.** Docusaurus page: `pushrod-docs/docs/contributing/changelog-cargo-metadata-and-crates-io-release.md` ("Changelog, Cargo metadata, and crates.io release", Contributing, new). Guides: Install from crates.io. Rustdoc: docs.rs build. Examples: n/a. Screenshots: n/a.
 
 ### 7.6 (#114): Module boundaries and written specs with conformance tests
+
+**Status:** done (#114). Specs for modules, widgets, events, painting, and forms are in `docs/specs/`; `tests/conformance/` holds 27 conformance tests that run in CI with `cargo test --workspace`. The engine and design layer are separated by crate (`pushrod` and `pushrod-widgets`) and, inside `pushrod`, by a rule that the engine modules never use `appearance`, enforced by `boundaries.rs`. The form file format is specified when 6.3 lands.
 
 **Problem Statement.** Contributors (human or AI-assisted) work best against modules with clear boundaries and written contracts. Pushrod's contracts (what a widget must do, how events are routed, what a painter must provide, the form file format) live only in code and issue text.
 

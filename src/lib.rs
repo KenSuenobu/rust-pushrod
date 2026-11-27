@@ -47,6 +47,13 @@
 //! covers painting, events and callbacks, behavior and state, input controllers, composites,
 //! custom events, and testing with [`Engine::dispatch`](engine::Engine::dispatch), with a
 //! compiled sample for each.
+//!
+//! # Specifications
+//!
+//! The contracts a widget library or backend must keep are written in
+//! [`docs/specs`](https://github.com/KenSuenobu/rust-pushrod/tree/main/docs/specs): module
+//! boundaries, widgets, events, painting, and forms.  Each guarantee is checked by a conformance
+//! test in `tests/conformance/`, which uses only this crate's public API.
 
 // Every public item is documented, including `# Panics` and `# Errors` sections where they
 // apply.  scripts/check_docs.py checks the rest (see CONTRIBUTING.md, "Code documentation").
