@@ -317,6 +317,8 @@ pub struct HeadlessBackend {
     pub mask: Option<EventMask>,
     /// Whether text input is currently on.
     pub text_input: bool,
+    /// The caret rectangle the engine last gave the backend for the candidate window.
+    pub text_input_rect: Option<Rect>,
     /// The clipboard contents.
     pub clipboard: Option<String>,
     /// The URLs the engine asked to open.
@@ -468,6 +470,15 @@ impl Backend for HeadlessBackend {
     /// * `active` - Whether text input is on.
     fn set_text_input(&mut self, active: bool) {
         self.text_input = active;
+    }
+
+    /// Records the caret rectangle.
+    ///
+    /// # Arguments
+    ///
+    /// * `rect` - The caret rectangle in window coordinates.
+    fn set_text_input_rect(&mut self, rect: Rect) {
+        self.text_input_rect = Some(rect);
     }
 
     /// Returns the scripted events, all at once; it never waits.  With an empty script the

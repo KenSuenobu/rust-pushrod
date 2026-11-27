@@ -346,3 +346,40 @@ fn callbacks_and_the_event_loop_see_the_same_sequence() {
     assert!(!by_loop.is_empty());
     assert_eq!(*by_callback.borrow(), by_loop);
 }
+
+/// Events spec, "Composition": a composition emits `CompositionStarted`, one `CompositionUpdated`
+/// per change, and `CompositionEnded` (committed) when the final text arrives; the widget sees the
+/// composition as `TextComposing` and the commit as `TextEntered`.
+#[test]
+fn a_composition_emits_started_updated_and_ended() {
+    let log: PhaseLog = Rc::default();
+    let mut cache = cache();
+    let field = probe(&mut cache, 0, "field", false, None, &log);
+
+    cache.set_focus(field);
+    cache.take_pending_events();
+    cache.handle_event(InputEvent::Composition {
+        text: "に".to_string(),
+        start: 1,
+        length: 0,
+    });
+    cache.handle_event(InputEvent::Text("日".to_string()));
+
+    let kinds: Vec<_> = cache
+        .take_pending_events()
+        .iter()
+        .filter_map(|event| match event {
+            Event::Engine(engine) => Some(engine.kind()),
+            _ => None,
+        })
+        .collect();
+
+    assert_eq!(
+        kinds,
+        vec![
+            EngineEventKind::CompositionStarted,
+            EngineEventKind::CompositionUpdated,
+            EngineEventKind::CompositionEnded,
+        ]
+    );
+}

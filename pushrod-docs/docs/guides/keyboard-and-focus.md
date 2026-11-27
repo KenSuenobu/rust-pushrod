@@ -61,7 +61,7 @@ Focus changes deliver `Event::FocusLost` to the old widget, then `Event::FocusGa
 
 ## Text input
 
-A widget that edits text overrides `Widget::accepts_text_input` to return `true`. While it has focus the engine starts SDL text input, so typed characters arrive as `Event::TextEntered`; focus moving elsewhere stops it.
+A widget that edits text overrides `Widget::accepts_text_input` to return `true`. While it has focus the engine starts SDL text input, so typed characters arrive as `Event::TextEntered`; focus moving elsewhere stops it. Input methods for Chinese, Japanese, Korean and other languages work too: see [Text input and IME](text-input-and-ime.md).
 
 ## Example
 

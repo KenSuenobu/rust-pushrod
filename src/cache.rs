@@ -93,6 +93,8 @@ pub struct WidgetCache {
     engine_filters: HashMap<WidgetId, Vec<EngineEventKind>>,
     focused_widget_id: Option<WidgetId>,
     text_input_wanted: bool,
+    composing: Option<WidgetId>,
+    composition_cleared: bool,
     animating: Vec<WidgetId>,
     clipboard_snapshot: Option<String>,
     clipboard_write: Option<String>,
@@ -143,6 +145,8 @@ impl WidgetCache {
             engine_filters: HashMap::new(),
             focused_widget_id: None,
             text_input_wanted: false,
+            composing: None,
+            composition_cleared: false,
             animating: Vec::new(),
             clipboard_snapshot: None,
             clipboard_write: None,
@@ -1093,6 +1097,14 @@ impl WidgetCache {
             return self.finish(ctx);
         }
 
+        // A cleared composition is committed by the text that follows at once (`Text`); any other
+        // event means it was cancelled.
+        if self.composition_cleared
+            && !matches!(event, InputEvent::Text(_) | InputEvent::Composition { .. })
+        {
+            self.end_composition(false);
+        }
+
         match event {
             InputEvent::MouseDown {
                 position: Point { x, y },
@@ -1222,8 +1234,33 @@ impl WidgetCache {
             }
 
             InputEvent::Text(text) => {
+                self.end_composition(true);
+
                 if let Some(target) = self.focused_widget_id {
                     self.propagate_with(target, &Event::TextEntered { id: target, text }, &mut ctx);
+                }
+            }
+
+            InputEvent::Composition {
+                text,
+                start,
+                length,
+            } => {
+                if let Some(target) = self.focused_widget_id {
+                    self.track_composition(target, &text, start, length);
+
+                    let cursor =
+                        (!text.is_empty()).then(|| (start.max(0) as usize, length.max(0) as usize));
+
+                    self.propagate_with(
+                        target,
+                        &Event::TextComposing {
+                            id: target,
+                            text,
+                            cursor,
+                        },
+                        &mut ctx,
+                    );
                 }
             }
 
@@ -1231,6 +1268,89 @@ impl WidgetCache {
         }
 
         self.finish(ctx)
+    }
+
+    /// Follows an input method's composition for `target` and queues the composition engine
+    /// events: `CompositionStarted` on the first non-empty text, `CompositionUpdated` on every
+    /// non-empty text.  An empty text only marks the composition cleared; whether it ended by
+    /// commit or by cancel is decided by what comes next (see [`WidgetCache::end_composition`]).
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - The focused `Widget`.
+    /// * `text` - The composition text.
+    /// * `start` - Where the input method's cursor or selection starts, in characters.
+    /// * `length` - How many characters the selection covers.
+    fn track_composition(&mut self, target: WidgetId, text: &str, start: i32, length: i32) {
+        if text.is_empty() {
+            self.composition_cleared = self.composing == Some(target);
+            return;
+        }
+
+        if self.composition_cleared || self.composing.is_some_and(|id| id != target) {
+            self.end_composition(false);
+        }
+
+        if self.composing != Some(target) {
+            self.composing = Some(target);
+            self.queue_event(Event::Engine(EngineEvent::CompositionStarted {
+                id: target,
+            }));
+        }
+
+        self.queue_event(Event::Engine(EngineEvent::CompositionUpdated {
+            id: target,
+            text: text.to_string(),
+            cursor: Some((start.max(0) as usize, length.max(0) as usize)),
+        }));
+    }
+
+    /// Ends the composition in progress, if any, and queues `CompositionEnded`.  Called with
+    /// `committed` set when the input method's final text arrives, and cleared when the composition
+    /// is cancelled: the keyboard focus moved, or something other than the commit followed an
+    /// empty composition.
+    ///
+    /// # Arguments
+    ///
+    /// * `committed` - `true` if the text was committed.
+    pub(crate) fn end_composition(&mut self, committed: bool) {
+        self.composition_cleared = false;
+
+        if let Some(id) = self.composing.take() {
+            self.queue_event(Event::Engine(EngineEvent::CompositionEnded {
+                id,
+                committed,
+            }));
+        }
+    }
+
+    /// Returns where the focused text editor's caret is, in window coordinates, for the platform's
+    /// candidate window.
+    ///
+    /// # Returns
+    ///
+    /// The rectangle, or `None` when no focused `Widget` is a text editor that reports one (see
+    /// [`Widget::text_input_rect`]).
+    pub fn focused_text_input_rect(&self) -> Option<Rect> {
+        let id = self.focused_widget_id?;
+        let local = self.get(id)?.text_input_rect()?;
+        let origin = self.absolute_origin(id);
+
+        Some(Rect::new(
+            local.x + origin.x,
+            local.y + origin.y,
+            local.w,
+            local.h,
+        ))
+    }
+
+    /// Returns the `Widget` an input method is composing text for.
+    ///
+    /// # Returns
+    ///
+    /// The ID, or `None` when nothing is being composed.
+    pub fn composing(&self) -> Option<WidgetId> {
+        self.composing
     }
 
     /// Sets or clears one [`VisualState`] flag on a `Widget`, repainting it only if its look

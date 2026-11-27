@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 title: Composite Widgets
 description: Build widgets from parts that applications can find, restyle, add, and remove.
 ---

@@ -63,7 +63,7 @@ use crate::event::{
     engine_filter_accepts,
 };
 use crate::font::FontRegistry;
-use crate::geometry::{Point, Size};
+use crate::geometry::{Point, Rect, Size};
 use crate::input::{InputEvent, Key, Modifiers};
 use crate::root_widget::RootWidget;
 use crate::timer::TimerSchedule;
@@ -501,6 +501,7 @@ pub struct Engine<S = ()> {
     custom_budget: usize,
     text_input_active: bool,
     text_input_pending: Option<bool>,
+    text_input_rect: Option<Rect>,
     timers: TimerSchedule,
     timer_callbacks: HashMap<TimerId, TimerCallback<S>>,
     idle_callbacks: Vec<IdleCallback<S>>,
@@ -568,6 +569,7 @@ impl<S> Engine<S> {
             custom_budget: MAX_CUSTOM_EVENTS_PER_FRAME,
             text_input_active: false,
             text_input_pending: None,
+            text_input_rect: None,
             timers: TimerSchedule::default(),
             timer_callbacks: HashMap::new(),
             idle_callbacks: Vec::new(),
@@ -959,6 +961,25 @@ impl<S> Engine<S> {
         if self.widget_cache.text_input_wanted() {
             self.widget_cache
                 .set_clipboard_snapshot(backend.clipboard_text());
+        }
+    }
+
+    /// Gives the backend the focused text editor's caret rectangle when it moved, so the
+    /// platform's candidate window follows it.  Run after painting, since a field scrolls its
+    /// text while it paints.
+    ///
+    /// # Arguments
+    ///
+    /// * `backend` - The backend to update.
+    fn sync_text_input_rect(&mut self, backend: &mut dyn Backend) {
+        let rect = self.widget_cache.focused_text_input_rect();
+
+        if rect != self.text_input_rect {
+            if let Some(rect) = rect {
+                backend.set_text_input_rect(rect);
+            }
+
+            self.text_input_rect = rect;
         }
     }
 
@@ -1935,6 +1956,7 @@ impl<S> Engine<S> {
             }
 
             self.sync_minimum_size(backend);
+            self.sync_text_input_rect(backend);
 
             let elapsed = backend.now().saturating_duration_since(start);
 
@@ -2040,6 +2062,7 @@ impl<S> Engine<S> {
             }
 
             self.sync_minimum_size(events.backend.as_mut());
+            self.sync_text_input_rect(events.backend.as_mut());
 
             // Animation ticks, and (with state) due timers, run once per pass.
             let now = Instant::now();

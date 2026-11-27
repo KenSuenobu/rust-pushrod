@@ -49,7 +49,8 @@ Positions are `Point`s in window coordinates.
 |---|---|
 | `KeyPressed { id, key, modifiers, repeat }` | A key goes down (`repeat` is `true` for auto-repeat). |
 | `KeyReleased { id, key, modifiers }` | A key goes up. |
-| `TextEntered { id, text }` | Text is typed. |
+| `TextComposing { id, text, cursor }` | The input method changed its composition (pre-edit) text; empty `text` means it ended. Not field content until committed. See [Text input and IME](../guides/text-input-and-ime.md). |
+| `TextEntered { id, text }` | Text is typed, or an input-method composition is committed. |
 
 ## Focus
 

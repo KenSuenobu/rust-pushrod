@@ -111,6 +111,16 @@ pub trait Backend {
     /// * `active` - `true` while a text editor has focus.
     fn set_text_input(&mut self, active: bool);
 
+    /// Tells the backend where the text caret is, so the platform's input-method candidate window
+    /// appears next to it.  The default ignores it.
+    ///
+    /// # Arguments
+    ///
+    /// * `rect` - The caret rectangle in window coordinates, in logical pixels.
+    fn set_text_input_rect(&mut self, rect: Rect) {
+        let _ = rect;
+    }
+
     /// Collects waiting input.
     ///
     /// # Arguments

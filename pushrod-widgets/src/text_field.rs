@@ -24,6 +24,11 @@
 //!   word); with Shift they extend the selection.  Clicking places the caret, dragging selects,
 //!   a double click selects a word, a triple click selects all.  The caret blinks while the
 //!   field has the focus.
+//! * **Input methods (IME):** the composition text is drawn underlined at the caret and stays
+//!   out of [`TextField::text`] (and sends no `TextChanged`) until it is committed; a password
+//!   field never shows it.  The caret is reported through
+//!   [`Widget::text_input_rect`], so the platform's
+//!   candidate window follows it.  See the guide *Text Input and IME*.
 //! * **Clipboard:** Ctrl or Command with `A` (select all), `C` (copy), `X` (cut) and `V`
 //!   (paste).  A password field neither copies nor cuts.
 //! * **Restricting input:** a [`Mask`] (`"99/99/9999"`) or a [`Validator`] refuses any edit that
@@ -96,6 +101,20 @@ struct Metrics {
     label_width: u32,
     widths: Vec<u32>,
     line_height: u32,
+    /// The caret as drawn at the last paint, in the field's own coordinates.
+    caret: Option<Rect>,
+}
+
+/// The input method's composition (pre-edit) text: shown at the caret, underlined, but not part of
+/// the field's text until it is committed.
+#[derive(Debug, Clone, PartialEq)]
+struct Preedit {
+    /// The composition text.
+    chars: Vec<char>,
+    /// The input method's cursor inside the composition, in characters.
+    cursor: usize,
+    /// How many characters the input method has selected from the cursor (zero for none).
+    selected: usize,
 }
 
 /// A single-line text entry.  See the [module documentation](self) for its behavior.
@@ -131,6 +150,7 @@ pub struct TextField {
     dragging: bool,
     scroll: Cell<i32>,
     metrics: RefCell<Metrics>,
+    preedit: Option<Preedit>,
 }
 
 impl Widget for TextField {
@@ -204,7 +224,15 @@ impl Widget for TextField {
         p.rect(layout.edit, ink);
 
         // Measure the shown text once; the caret, the selection and the mouse all use it.
-        let shown = self.shown();
+        let mut shown = self.shown();
+        let preedit = self.active_preedit().cloned();
+        let (insert_at, _) = self.selection();
+
+        // The composition is drawn inline at the selection start, ahead of the text after it.
+        if let Some(preedit) = &preedit {
+            shown.splice(insert_at..insert_at, preedit.chars.iter().copied());
+        }
+
         let widths: Vec<u32> = (0..=shown.len())
             .map(|n| {
                 let prefix: String = shown[..n].iter().collect();
@@ -217,7 +245,11 @@ impl Widget for TextField {
         let room = layout.text.w as i32;
 
         // Keep the caret in view.
-        let caret_x = widths[self.caret.min(shown.len())] as i32;
+        let caret_index = match &preedit {
+            Some(preedit) => insert_at + preedit.cursor.min(preedit.chars.len()),
+            None => self.caret.min(shown.len()),
+        };
+        let caret_x = widths[caret_index] as i32;
         let mut scroll = self.scroll.get();
 
         if caret_x - scroll > room {
@@ -267,7 +299,32 @@ impl Widget for TextField {
 
             let (from, to) = self.selection();
 
-            if from != to {
+            if let Some(preedit) = &preedit {
+                // Underline the composition; the input method's selection gets a thicker line.
+                let end = insert_at + preedit.chars.len();
+                let y = line_y + line_height as i32 - 1;
+
+                p.line(
+                    point(origin + widths[insert_at] as i32, y),
+                    point(origin + widths[end] as i32, y),
+                    ink,
+                );
+
+                if preedit.selected > 0 {
+                    let first = insert_at + preedit.cursor.min(preedit.chars.len());
+                    let last = (first + preedit.selected).min(end);
+
+                    p.fill_rect(
+                        Rect::new(
+                            origin + widths[first] as i32,
+                            y - 1,
+                            widths[last] - widths[first],
+                            2,
+                        ),
+                        ink,
+                    );
+                }
+            } else if from != to {
                 let left = origin + widths[from] as i32;
                 let width = widths[to] - widths[from];
                 let chosen: String = shown[from..to].iter().collect();
@@ -284,8 +341,10 @@ impl Widget for TextField {
             }
         }
 
-        if self.focused && self.caret_on && self.anchor == self.caret {
-            p.fill_rect(Rect::new(origin + caret_x, line_y, 1, line_height), ink);
+        let caret_rect = Rect::new(origin + caret_x, line_y, 1, line_height);
+
+        if self.focused && self.caret_on && (self.anchor == self.caret || preedit.is_some()) {
+            p.fill_rect(caret_rect, ink);
         }
 
         p.clip(None);
@@ -307,6 +366,18 @@ impl Widget for TextField {
         metrics.label_width = label_width;
         metrics.widths = widths;
         metrics.line_height = line_height;
+        metrics.caret = Some(caret_rect);
+    }
+
+    /// Returns where the caret was drawn at the last paint, so the platform's input-method
+    /// candidate window can sit next to it.  With a composition showing, the caret is at the
+    /// input method's cursor inside it.
+    ///
+    /// # Returns
+    ///
+    /// The caret rectangle in the field's own coordinates, or `None` before the first paint.
+    fn text_input_rect(&self) -> Option<Rect> {
+        self.metrics.borrow().caret
     }
 
     /// Edits the text for typed text and keys, places the caret and selects with the mouse, blinks
@@ -325,7 +396,12 @@ impl Widget for TextField {
     /// the focus order still sees them.
     fn handle_event(&mut self, event: &Event, ctx: &mut EventCtx) -> Propagation {
         match event {
+            Event::TextComposing { text, cursor, .. } => {
+                self.compose(text, *cursor);
+                Propagation::Stop
+            }
             Event::TextEntered { text, .. } => {
+                self.preedit = None;
                 self.type_text(text, ctx);
                 Propagation::Stop
             }
@@ -363,6 +439,7 @@ impl Widget for TextField {
             Event::FocusLost { .. } => {
                 self.focused = false;
                 self.dragging = false;
+                self.preedit = None;
                 self.anchor = self.caret;
                 self.set_invalidated(true);
                 ctx.emit(Event::EditingFinished { id: self.get_id() });
@@ -431,6 +508,7 @@ impl TextField {
             dragging: false,
             scroll: Cell::new(0),
             metrics: RefCell::new(Metrics::default()),
+            preedit: None,
         };
 
         field.set_behavior(Behavior::FOCUSABLE);
@@ -718,6 +796,35 @@ impl TextField {
             vec![MASK_CHAR; self.chars.len()]
         } else {
             self.chars.clone()
+        }
+    }
+
+    /// Returns the composition to show: none for a password field, which never displays what the
+    /// input method is composing.
+    fn active_preedit(&self) -> Option<&Preedit> {
+        self.preedit.as_ref().filter(|_| !self.password)
+    }
+
+    /// Records the input method's composition text, or clears it when `text` is empty.  The
+    /// composition stays out of `chars`, so no change is reported until it is committed.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The composition text so far; empty when the composition ended.
+    /// * `cursor` - The input method's cursor or selection as `(start, length)` in characters.
+    fn compose(&mut self, text: &str, cursor: Option<(usize, usize)>) {
+        let chars: Vec<char> = text.chars().collect();
+        let (cursor, selected) = cursor.unwrap_or((chars.len(), 0));
+        let preedit = (!chars.is_empty()).then(|| Preedit {
+            cursor: cursor.min(chars.len()),
+            selected,
+            chars,
+        });
+
+        if preedit != self.preedit {
+            self.preedit = preedit;
+            self.restart_blink();
+            self.set_invalidated(true);
         }
     }
 

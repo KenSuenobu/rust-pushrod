@@ -189,6 +189,16 @@ pub(crate) fn to_input_event(event: Event) -> Option<InputEvent> {
             modifiers: to_modifiers(keymod),
         },
         Event::TextInput { text, .. } => InputEvent::Text(text),
+        Event::TextEditing {
+            text,
+            start,
+            length,
+            ..
+        } => InputEvent::Composition {
+            text,
+            start,
+            length,
+        },
         other if other.as_user_event_type::<Wake>().is_some() => InputEvent::Wake,
         _ => return None,
     })
@@ -269,6 +279,35 @@ mod tests {
 
         assert!(!types.contains(&EventType::Quit));
         assert!(!types.contains(&EventType::Window));
+    }
+
+    #[test]
+    fn input_method_events_convert() {
+        let editing = Event::TextEditing {
+            timestamp: 0,
+            window_id: 0,
+            text: "にほん".to_string(),
+            start: 2,
+            length: 1,
+        };
+        let commit = Event::TextInput {
+            timestamp: 0,
+            window_id: 0,
+            text: "日本".to_string(),
+        };
+
+        assert_eq!(
+            to_input_event(editing),
+            Some(InputEvent::Composition {
+                text: "にほん".to_string(),
+                start: 2,
+                length: 1
+            })
+        );
+        assert_eq!(
+            to_input_event(commit),
+            Some(InputEvent::Text("日本".to_string()))
+        );
     }
 
     #[test]

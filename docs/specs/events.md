@@ -62,6 +62,20 @@ reparented, focus changed, a timer fired, a broadcast, ...).
 - A widget's response to an engine event is **never broadcast again**, so engine events cannot
   loop.
 
+## Composition
+
+An input method composes text before it commits it.
+
+- A composition arrives as `InputEvent::Composition` and reaches the **focused widget only**, as
+  `Event::TextComposing { id, text, cursor }` (class `TEXT`, propagating like `TextEntered`).
+  Empty `text` means the composition was cleared.
+- The committed text arrives as `Event::TextEntered`, so a widget never sees composition text as
+  content.
+- The engine emits `CompositionStarted` on the first non-empty text, `CompositionUpdated` for every
+  non-empty text, and `CompositionEnded { committed }`: `true` when `TextEntered` follows the
+  composition, `false` when it is cancelled (the focus moved, or an event other than the commit
+  followed the empty text).
+
 ## Ordering guarantees
 
 - A broadcast visits parents before children, and siblings in the order they were added.

@@ -102,6 +102,7 @@ impl WidgetCache {
         }
 
         self.focused_widget_id = new;
+        self.end_composition(false);
 
         if let Some(id) = old {
             self.set_focused_state(id, false);
