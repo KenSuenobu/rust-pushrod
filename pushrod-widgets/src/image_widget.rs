@@ -21,6 +21,7 @@
 //! [`Fit`](FitMode::Fit) (keeping the aspect ratio), or [`Tile`](FitMode::Tile).  A file that
 //! cannot be loaded draws a crossed box instead of failing.
 
+use pushrod::accessibility::{AccessActions, AccessInfo, Role};
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::error::Result;
@@ -224,6 +225,28 @@ impl Widget for ImageWidget {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let mut info = AccessInfo::of(self, Role::Image);
+
+        // The tooltip is the best description of a picture; the file name is the fallback.
+        info.name = if info.description.is_empty() {
+            self.path.rsplit('/').next().unwrap_or_default().to_string()
+        } else {
+            info.description.clone()
+        };
+
+        if self.clickable {
+            info.actions |= AccessActions::CLICK;
+        }
+
+        info
     }
 
     /// Fills the background, then draws the image per the fit mode, or a crossed box if the file

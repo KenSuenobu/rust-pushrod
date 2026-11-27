@@ -28,6 +28,7 @@
 //! whole widget, which would strike through the label, so the indeterminate state is kept here
 //! and only `CHECKED` is mirrored into the widget's `VisualState`.
 
+use pushrod::accessibility::{AccessActions, AccessInfo, Role, Toggled};
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::error::Result;
@@ -139,6 +140,24 @@ impl Widget for CheckBox {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let toggled = if self.indeterminate {
+            Toggled::Mixed
+        } else {
+            self.checked.into()
+        };
+
+        AccessInfo::of(self, Role::CheckBox)
+            .with_name(&self.label)
+            .with_toggled(toggled)
+            .with_actions(AccessActions::CLICK | AccessActions::FOCUS)
     }
 
     /// Draws the box (white inside, black frame), its mark, and the label.

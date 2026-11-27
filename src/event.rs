@@ -381,6 +381,10 @@ pub enum EngineEventKind {
     MnemonicActivated,
     /// See [`EngineEvent::MnemonicConflict`].
     MnemonicConflict,
+    /// See [`EngineEvent::AccessibilityChanged`].
+    AccessibilityChanged,
+    /// See [`EngineEvent::AccessActionPerformed`].
+    AccessActionPerformed,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -612,6 +616,20 @@ pub enum EngineEvent {
         /// The `Widget`s that declare it, lowest ID first.
         ids: Vec<WidgetId>,
     },
+    /// Assistive technology (a screen reader) started or stopped using the window.  While it is
+    /// active the `Engine` publishes the accessibility tree; while it is not, it builds none.
+    AccessibilityChanged {
+        /// `true` once the accessibility tree is being published.
+        active: bool,
+    },
+    /// An accessibility action from assistive technology was performed on a `Widget`: the same
+    /// events a click, focus change, or edit produces follow it.
+    AccessActionPerformed {
+        /// The `Widget` the action was for.
+        id: WidgetId,
+        /// What was asked of it.
+        action: crate::accessibility::AccessActionKind,
+    },
 }
 
 impl EngineEvent {
@@ -653,6 +671,8 @@ impl EngineEvent {
             EngineEvent::CompositionEnded { .. } => EngineEventKind::CompositionEnded,
             EngineEvent::MnemonicActivated { .. } => EngineEventKind::MnemonicActivated,
             EngineEvent::MnemonicConflict { .. } => EngineEventKind::MnemonicConflict,
+            EngineEvent::AccessibilityChanged { .. } => EngineEventKind::AccessibilityChanged,
+            EngineEvent::AccessActionPerformed { .. } => EngineEventKind::AccessActionPerformed,
         }
     }
 }

@@ -79,7 +79,15 @@ impl WidgetCache {
     }
 
     /// Returns whether any ancestor of a `Widget` is hidden.
-    fn hidden_above(&self, id: WidgetId) -> bool {
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget` to check.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a parent, grandparent, or higher ancestor is hidden.
+    pub(super) fn hidden_above(&self, id: WidgetId) -> bool {
         self.ancestors(id)
             .iter()
             .any(|&a| self.get(a).is_some_and(|w| w.is_hidden()))

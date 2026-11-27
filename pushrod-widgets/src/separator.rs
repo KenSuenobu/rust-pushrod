@@ -18,6 +18,7 @@
 //! A display-only divider: a one pixel horizontal or vertical line, optionally etched as two
 //! lines (a dark line beside a white one) so it reads as a groove.
 
+use pushrod::accessibility::{AccessInfo, Role};
 use pushrod::color::Color;
 use pushrod::error::Result;
 use pushrod::geometry::{point, size};
@@ -118,6 +119,15 @@ impl Widget for Separator {
             "vertical" => Err(read_only(name)),
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        AccessInfo::of(self, Role::Separator)
     }
 
     /// Draws the line (and, when etched, the white line beside it).

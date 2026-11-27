@@ -30,6 +30,7 @@
 
 pub mod headless;
 
+use crate::accessibility::AccessUpdate;
 use crate::color::Color;
 use crate::event::{EngineEvent, EventMask};
 use crate::font::FontRegistry;
@@ -50,6 +51,21 @@ pub type Waker = Arc<dyn Fn() + Send + Sync>;
 /// cached textures.  Window creation happens when the backend is built (each backend has its own
 /// settings); [`Backend::resize_window`] changes it afterward.
 pub trait Backend {
+    /// Publishes accessibility changes to the platform's assistive technology.
+    ///
+    /// The `Engine` calls it once per frame, only while assistive technology is active, and only
+    /// when something changed.  The default ignores the update; a backend with a platform
+    /// adapter converts it (see `AccessUpdate::to_accesskit`, with the `accesskit` feature) and
+    /// reports the adapter's requests as [`InputEvent::AccessibilityActivated`] and
+    /// [`InputEvent::AccessAction`].
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - The nodes that changed.
+    fn publish_accessibility(&mut self, update: &AccessUpdate) {
+        let _ = update;
+    }
+
     /// Returns how this backend caches painted `Widget`s.
     ///
     /// # Returns

@@ -45,6 +45,7 @@
 
 use crate::frame::Frame;
 use crate::glyph_button::GlyphButton;
+use pushrod::accessibility::{AccessActions, AccessInfo, NumericValue, Role};
 use pushrod::appearance::StateStyle;
 use pushrod::color::Color;
 use pushrod::composite::{Composite, PartList, PartsBuilder, TypedParts};
@@ -212,6 +213,24 @@ impl Widget for ScrollBar {
             "vertical" => Err(read_only(name)),
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let numeric = NumericValue {
+            value: self.value,
+            min: 0.0,
+            max: 1.0,
+            step: Some(self.step),
+        };
+
+        AccessInfo::of(self, Role::ScrollBar)
+            .with_numeric(numeric)
+            .with_actions(AccessActions::SET_VALUE)
     }
 
     /// Fills the background (transparent unless set with `set_color`); the parts draw the rest.

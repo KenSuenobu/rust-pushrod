@@ -28,6 +28,7 @@
 //! [`RadioGroup`] builds a column of labeled radio buttons in one call.  Ask which one is checked
 //! with `ui.checked_in_group(parent)`.
 
+use pushrod::accessibility::{AccessActions, AccessInfo, Role};
 use pushrod::cache::WidgetCache;
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
@@ -125,6 +126,18 @@ impl Widget for RadioButton {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        AccessInfo::of(self, Role::RadioButton)
+            .with_name(&self.label)
+            .with_toggled(self.is_checked().into())
+            .with_actions(AccessActions::CLICK | AccessActions::FOCUS)
     }
 
     /// Draws the circle (white inside, black ring), its dot when checked, and the label.

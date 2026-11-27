@@ -105,3 +105,4 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [0] Roadmap: text truncation and wrapping in the MVP, the Pushrod Showcase (Epic 12), and eight more extra widgets [kenji]
 - [0] Roadmap: Chassis AI assistant through MCP (Epic 9, nine issues, v2) [kenji]
 - [#72] Guide: writing widgets and composites, compiled samples per section [kenji]
+- [#80] Accessibility tree with incremental updates and actions via AccessKit [kenji]

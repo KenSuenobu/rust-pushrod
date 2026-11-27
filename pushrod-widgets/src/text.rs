@@ -18,6 +18,7 @@
 //! This is a simple system `Widget` that fills its background like the `Panel`, and draws a
 //! text message with a given font name, style, color, and message on top of it.
 
+use pushrod::accessibility::{AccessInfo, Role};
 use pushrod::color::Color;
 use pushrod::error::Result;
 use pushrod::font::Font;
@@ -186,6 +187,15 @@ impl Widget for Text {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        AccessInfo::of(self, Role::Label).with_name(&self.msg)
     }
 
     /// Fills the background with the widget's color, then draws the text.

@@ -35,6 +35,7 @@ name = "pushrod"
 path = "src/lib.rs"
 
 [dependencies]
+accesskit = { version = "0.25", optional = true }
 bitflags = "2"
 # Optional text layout engine (shaping, bidi, line breaking, font fallback) and glyph rasterizer.
 parley = { version = "0.13", optional = true }
@@ -45,6 +46,8 @@ unicode-segmentation = "1"
 default = []
 # Lay out text with Parley and rasterize glyphs with swash instead of SDL2_ttf.
 parley = ["dep:parley", "dep:swash"]
+# Convert accessibility updates to AccessKit trees (`AccessUpdate::to_accesskit`).
+accesskit = ["dep:accesskit"]
 
 # docs.rs documents the optional Parley text engine too.
 [package.metadata.docs.rs]

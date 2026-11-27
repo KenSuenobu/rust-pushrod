@@ -107,6 +107,16 @@ pub enum InputEvent {
     ScaleChanged(f32),
     /// The window gained or lost keyboard focus.
     FocusChanged(bool),
+    /// Assistive technology started (`true`) or stopped (`false`) using the window.  The
+    /// `Engine` builds the accessibility tree only while it is active.
+    AccessibilityActivated(bool),
+    /// Assistive technology asked a `Widget` to act.
+    AccessAction {
+        /// The `Widget` the request is for.
+        id: crate::widget::WidgetId,
+        /// What it is asked to do.
+        action: crate::accessibility::AccessAction,
+    },
     /// A mouse button went down.
     MouseDown {
         /// The pointer position.
@@ -181,7 +191,9 @@ impl InputEvent {
             InputEvent::Quit
             | InputEvent::Exposed
             | InputEvent::Resized(_)
-            | InputEvent::ScaleChanged(_) => None,
+            | InputEvent::ScaleChanged(_)
+            | InputEvent::AccessibilityActivated(_)
+            | InputEvent::AccessAction { .. } => None,
             InputEvent::MouseDown { .. } | InputEvent::MouseUp { .. } => {
                 Some(EventMask::POINTER_BUTTONS)
             }

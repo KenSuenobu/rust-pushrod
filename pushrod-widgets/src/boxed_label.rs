@@ -19,6 +19,7 @@
 //! `paint::fill`, `paint::text`, and `paint::border` helpers.  It is the reference example of
 //! composing paint helpers into a widget.
 
+use pushrod::accessibility::{AccessInfo, Role};
 use pushrod::color::Color;
 use pushrod::error::Result;
 use pushrod::font::Font;
@@ -112,6 +113,15 @@ impl Widget for BoxedLabel {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        AccessInfo::of(self, Role::Label).with_name(&self.msg)
     }
 
     /// Fills the background, draws the centered text inside the border, then the border.

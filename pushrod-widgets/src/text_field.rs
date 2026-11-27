@@ -44,6 +44,7 @@
 //! consumed, so a default button still sees it.  A clickable accessory emits
 //! `AccessoryClicked { id, which }`.
 
+use pushrod::accessibility::{AccessActions, AccessInfo, Role, TextSelection};
 use pushrod::color::Color;
 use pushrod::error::Result;
 use pushrod::event::{AccessorySide, Event, EventCtx, EventMask, Propagation};
@@ -221,6 +222,39 @@ impl Widget for TextField {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let name = self
+            .label
+            .as_deref()
+            .filter(|l| !l.is_empty())
+            .unwrap_or(&self.placeholder);
+        let (role, value) = if self.password && !self.revealed {
+            // Never expose a password: only how many characters there are.
+            (
+                Role::PasswordInput,
+                MASK_CHAR.to_string().repeat(self.chars.len()),
+            )
+        } else if self.password {
+            (Role::PasswordInput, self.text())
+        } else {
+            (Role::TextInput, self.text())
+        };
+
+        AccessInfo::of(self, role)
+            .with_name(name)
+            .with_value(value)
+            .with_selection(TextSelection {
+                anchor: self.anchor,
+                caret: self.caret,
+            })
+            .with_actions(AccessActions::FOCUS | AccessActions::CLICK | AccessActions::SET_TEXT)
     }
 
     /// Draws the label, the edit area with its one-pixel border, the accessories, and the text

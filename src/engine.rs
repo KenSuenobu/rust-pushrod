@@ -54,6 +54,7 @@
 //! pushrod_sdl2::run(engine, pushrod_sdl2::WindowSettings::new("app", size(400, 200)), AppState::default());
 //! ```
 
+use crate::accessibility::{AccessAction, AccessTree, AccessUpdate};
 use crate::backend::{Backend, Waker};
 use crate::cache::WidgetCache;
 use crate::color::Color;
@@ -529,6 +530,8 @@ pub struct Engine<S = ()> {
     text_input_active: bool,
     text_input_pending: Option<bool>,
     text_input_rect: Option<Rect>,
+    /// The accessibility tree, built only while assistive technology is active.
+    accessibility: Option<AccessTree>,
     timers: TimerSchedule,
     timer_callbacks: HashMap<TimerId, TimerCallback<S>>,
     idle_callbacks: Vec<IdleCallback<S>>,
@@ -597,6 +600,7 @@ impl<S> Engine<S> {
             text_input_active: false,
             text_input_pending: None,
             text_input_rect: None,
+            accessibility: None,
             timers: TimerSchedule::default(),
             timer_callbacks: HashMap::new(),
             idle_callbacks: Vec::new(),
@@ -658,6 +662,78 @@ impl<S> Engine<S> {
     /// ```
     pub fn set_event_mask(&mut self, mask: EventMask) {
         set_loop_mask(&mut self.event_mask, &mut self.widget_cache, mask);
+    }
+
+    /// Starts or stops publishing the accessibility tree.
+    ///
+    /// Backends call this (through [`InputEvent::AccessibilityActivated`]) when a screen reader
+    /// connects or leaves.  While inactive, the `Engine` builds no tree and pays nothing.  The
+    /// first [`Engine::accessibility_update`] after activation holds the whole tree.  A change
+    /// queues [`EngineEvent::AccessibilityChanged`].
+    ///
+    /// # Arguments
+    ///
+    /// * `active` - `true` when assistive technology needs the tree.
+    pub fn set_accessibility_active(&mut self, active: bool) {
+        if active == self.accessibility.is_some() {
+            return;
+        }
+
+        self.accessibility = active.then(AccessTree::new);
+        self.widget_cache
+            .queue_event(Event::Engine(EngineEvent::AccessibilityChanged { active }));
+    }
+
+    /// Returns whether the accessibility tree is being published.
+    ///
+    /// # Returns
+    ///
+    /// `true` while assistive technology is active.
+    pub fn is_accessibility_active(&self) -> bool {
+        self.accessibility.is_some()
+    }
+
+    /// Returns what changed in the accessibility tree since the last call.
+    ///
+    /// # Returns
+    ///
+    /// The changed nodes (all of them the first time), or `None` if assistive technology is not
+    /// active or nothing changed.
+    pub fn accessibility_update(&mut self) -> Option<AccessUpdate> {
+        self.accessibility.as_mut()?.update(&self.widget_cache)
+    }
+
+    /// Performs a request from assistive technology, calling the same callbacks that user input
+    /// calls.  See [`WidgetCache::perform_access_action`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget` the request is for.
+    /// * `action` - What it is asked to do.
+    /// * `state` - The application state passed to the callbacks.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the action was performed; `false` if the `Widget` refused it.
+    pub fn perform_access_action(
+        &mut self,
+        id: WidgetId,
+        action: AccessAction,
+        state: &mut S,
+    ) -> bool {
+        self.custom_budget = MAX_CUSTOM_EVENTS_PER_FRAME;
+
+        let Some(events) = self.widget_cache.perform_access_action(id, &action) else {
+            return false;
+        };
+
+        for event in self.expand_custom(events) {
+            self.fire(&event, state);
+        }
+
+        self.flush_pending(state);
+
+        true
     }
 
     /// Returns the run loop's event mask.
@@ -1827,6 +1903,16 @@ impl<S> Engine<S> {
                 .widget_cache
                 .broadcast(&Event::WindowFocusChanged { focused }),
 
+            InputEvent::AccessibilityActivated(active) => {
+                self.set_accessibility_active(active);
+                Vec::new()
+            }
+
+            InputEvent::AccessAction { id, action } => self
+                .widget_cache
+                .perform_access_action(id, &action)
+                .unwrap_or_default(),
+
             // A wake-up only ends the wait; the posted events are drained by the loop.
             InputEvent::Wake => Vec::new(),
 
@@ -2013,6 +2099,10 @@ impl<S> Engine<S> {
             self.sync_minimum_size(backend);
             self.sync_text_input_rect(backend);
 
+            if let Some(update) = self.accessibility_update() {
+                backend.publish_accessibility(&update);
+            }
+
             let elapsed = backend.now().saturating_duration_since(start);
 
             if !idle && elapsed < frame_time {
@@ -2118,6 +2208,10 @@ impl<S> Engine<S> {
 
             self.sync_minimum_size(events.backend.as_mut());
             self.sync_text_input_rect(events.backend.as_mut());
+
+            if let Some(update) = self.accessibility_update() {
+                events.backend.publish_accessibility(&update);
+            }
 
             // Animation ticks, and (with state) due timers, run once per pass.
             let now = Instant::now();

@@ -42,6 +42,7 @@
 use crate::boxed_label::BoxedLabel;
 use crate::button::Button;
 use crate::text::Text;
+use pushrod::accessibility::{AccessInfo, Role};
 use pushrod::cache::WidgetCache;
 use pushrod::color::{Color, FontStyle};
 use pushrod::composite::{Composite, PartList, PartsBuilder, TypedParts};
@@ -224,6 +225,18 @@ impl Widget for Alert {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let mut info = AccessInfo::of(self, Role::Dialog).with_name(&self.title);
+
+        info.description = self.message.clone();
+        info
     }
 
     /// Fills the alert with its color; the parts draw themselves on top.

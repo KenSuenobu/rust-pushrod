@@ -21,6 +21,7 @@
 //! background with `ui.get_mut::<RootWidget>(ROOT_WIDGET_ID).unwrap().set_color(..)`, or
 //! [`Engine::set_background`](crate::engine::Engine::set_background).
 
+use crate::accessibility::{AccessInfo, Role};
 use crate::color::Color;
 use crate::geometry::{Point, Size};
 use crate::paint::{self, Painter};
@@ -52,6 +53,15 @@ impl Widget for RootWidget {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Describes the root `Widget` as the application window.
+    ///
+    /// # Returns
+    ///
+    /// A [`Role::Window`] node.
+    fn accessibility(&self) -> AccessInfo {
+        AccessInfo::of(self, Role::Window)
     }
 
     /// Fills the window with the root `Widget`'s color.

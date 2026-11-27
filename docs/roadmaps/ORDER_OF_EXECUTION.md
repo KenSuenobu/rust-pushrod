@@ -98,7 +98,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 59 | [#76](https://github.com/KenSuenobu/rust-pushrod/issues/76) | pushrod: [1.12] Keyboard mnemonics: underlined shortcut letters |
 | ✅ 60 | [#60](https://github.com/KenSuenobu/rust-pushrod/issues/60) | pushrod: [6.1] Widget registry and factory |
 | ✅ 61 | [#61](https://github.com/KenSuenobu/rust-pushrod/issues/61) | pushrod: [6.2] Property introspection: list, get, and set widget properties by name |
-| 62 | [#80](https://github.com/KenSuenobu/rust-pushrod/issues/80) | pushrod: [1.14] Accessibility: expose widgets to screen readers |
+| ✅ 62 | [#80](https://github.com/KenSuenobu/rust-pushrod/issues/80) | pushrod: [1.14] Accessibility: expose widgets to screen readers |
 | 63 | [#62](https://github.com/KenSuenobu/rust-pushrod/issues/62) | pushrod: [6.3] Form file format (binary, versioned) |
 | 64 | [#63](https://github.com/KenSuenobu/rust-pushrod/issues/63) | pushrod: [6.4] Form loader: build a form from a file with stable IDs |
 | 65 | [#64](https://github.com/KenSuenobu/rust-pushrod/issues/64) | pushrod: [6.5] Form writer: save a widget subtree to a file |
@@ -1276,8 +1276,8 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 **Show on video:**
 
 - [ ] A screen reader announces focused buttons, check boxes, and text fields with name and state
-- [ ] Accessibility actions trigger the same callbacks as user input
-- [ ] Updates are incremental (changed nodes only) and the tree is only built when assistive technology is active
+- [x] Accessibility actions trigger the same callbacks as user input
+- [x] Updates are incremental (changed nodes only) and the tree is only built when assistive technology is active
 
 ### Step 63: Form file format (binary, versioned)
 

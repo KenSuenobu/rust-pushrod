@@ -84,6 +84,17 @@ An input method composes text before it commits it.
   delivers to `on_event` is what `Engine::next_event` returns.
 - A widget's callbacks never run after its `Removed` event, and its ID is never reused.
 
+## Accessibility
+
+- The `Engine` builds no accessibility tree until assistive technology is active
+  (`InputEvent::AccessibilityActivated(true)`); `AccessibilityChanged { active }` is emitted when
+  that changes.
+- `Widget::accessibility` describes a widget (role, name, value, state, actions); every update
+  holds only the nodes whose description, bounds, children, or focus changed, keyed by `WidgetId`.
+- An accessibility action takes the path of user input (`Click` sends `Activated`, `Focus` moves
+  focus, `SetValue`/`SetText` set the property and send `ValueChanged`/`TextChanged`), is refused
+  by a disabled, hidden, or modal-blocked widget, and emits `AccessActionPerformed { id, action }`.
+
 ## Mnemonics
 
 A label marks a keyboard shortcut with `_` before a character (`"_Save"`); `__` is a literal

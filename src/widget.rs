@@ -44,6 +44,7 @@
 //! If the compiler is happy, the `Widget` is complete: there are no lists of `Widget` types to
 //! update elsewhere in the library.
 
+use crate::accessibility::{AccessInfo, Role};
 use crate::appearance::{Appearance, StateStyle};
 use crate::color::Color;
 use crate::composite::Composite;
@@ -827,6 +828,25 @@ pub trait Widget: Any {
     /// label, so the mnemonic moves keyboard focus to the next focusable `Widget` after it.
     fn mnemonic_activates(&self) -> bool {
         true
+    }
+
+    /// Describes the `Widget` to assistive technology such as a screen reader.
+    ///
+    /// The default is a [`Role::Generic`] node named by the
+    /// tooltip, that is checked when the `Widget` is a [`Behavior::TOGGLE`] in the
+    /// [`VisualState::CHECKED`] state, and that accepts focus when it is focusable.  Override it
+    /// to give the `Widget` a [`Role`], a name, a value, and the
+    /// actions it accepts; keep it cheap and free of side effects, since the `Engine` calls it
+    /// to detect changes only while assistive technology is active.
+    ///
+    /// # Returns
+    ///
+    /// What a screen reader is told about the `Widget`.
+    fn accessibility(&self) -> AccessInfo {
+        let mut info = AccessInfo::of(self, Role::Generic);
+
+        info.name = info.description.clone();
+        info
     }
 
     /// Returns whether the `Widget` is a text editor.

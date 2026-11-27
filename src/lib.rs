@@ -66,6 +66,7 @@
 // Library code returns `Error` instead of panicking; tests may unwrap.
 #![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
+pub mod accessibility;
 pub mod appearance;
 pub mod backend;
 pub mod cache;
