@@ -19,10 +19,15 @@
 //! text message with a given font name, style, color, and message on top of it.
 
 use pushrod::color::Color;
+use pushrod::error::Result;
 use pushrod::font::Font;
 use pushrod::geometry::{Rect, point, size};
 use pushrod::layout::SizeHint;
 use pushrod::paint::{self, Painter, TextStyle, Truncate, Wrap};
+use pushrod::properties::{
+    Property, core_properties, expect_color, expect_text, set_core_property, track,
+};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{Widget, WidgetCore};
 use std::cell::Cell;
 
@@ -136,6 +141,51 @@ impl Widget for Text {
             size(width, height),
             size(pushrod::layout::UNBOUNDED, pushrod::layout::UNBOUNDED),
         )
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::text("text", self.get_text()));
+        list.push(Property::color("font_color", self.get_font_color()));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "text" => {
+                let t = expect_text(name, value)?.to_string();
+
+                track(self, |w| w.set_text(t))
+            }
+            "font_color" => {
+                let c = expect_color(name, value)?;
+
+                track(self, |w| w.set_font_color(c))
+            }
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Fills the background with the widget's color, then draws the text.

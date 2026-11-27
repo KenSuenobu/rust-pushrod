@@ -48,10 +48,13 @@ use crate::appearance::{Appearance, StateStyle};
 use crate::color::Color;
 use crate::composite::Composite;
 use crate::controllers::{Controller, ControllerEvent, Controllers};
+use crate::error::Result;
 use crate::event::{Event, EventCtx, EventMask, Propagation};
 use crate::geometry::{Point, Rect, Size};
 use crate::layout::{Layout, LayoutParams, SizeHint};
 use crate::paint::Painter;
+use crate::properties::{Property, core_properties, set_core_property};
+use crate::registry::PropertyValue;
 use bitflags::bitflags;
 use std::any::Any;
 
@@ -171,6 +174,8 @@ pub struct WidgetCore {
     appearance: Appearance,
     event_mask: EventMask,
     invalidated: bool,
+    /// The tooltip text; empty for none.
+    tooltip: String,
     controllers: Controllers,
     /// The size the application asked for; unlike `size`, a layout never changes it, so the
     /// default size hint does not depend on where a layout placed the `Widget`.
@@ -337,6 +342,7 @@ impl WidgetCore {
             appearance: Appearance::default(),
             event_mask: EventMask::NONE,
             invalidated: true,
+            tooltip: String::new(),
             controllers: Controllers::default(),
             requested_size: size,
             hint_override: None,
@@ -572,6 +578,59 @@ pub trait Widget: Any {
     fn set_color(&mut self, color: Color) {
         self.core_mut().color = color;
         self.set_invalidated(true);
+    }
+
+    /// Returns the `Widget`'s tooltip text.
+    ///
+    /// # Returns
+    ///
+    /// The text, or an empty string if there is none.
+    fn tooltip(&self) -> &str {
+        &self.core().tooltip
+    }
+
+    /// Sets the `Widget`'s tooltip text.  It does not change how the `Widget` looks.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The tooltip text; empty for none.
+    fn set_tooltip(&mut self, text: &str) {
+        self.core_mut().tooltip = text.to_string();
+    }
+
+    /// Lists the `Widget`'s properties: name, kind, and current value.
+    ///
+    /// The default lists the core properties (see [`properties`](crate::properties)).  A widget
+    /// with properties of its own overrides this to add them to [`core_properties`], and
+    /// [`set_property`](Widget::set_property) to set them.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        core_properties(self)
+    }
+
+    /// Sets a property by name.  Setting it to the value it already has changes nothing.
+    ///
+    /// To also emit [`EngineEvent::PropertyChanged`](crate::event::EngineEvent::PropertyChanged),
+    /// call [`Engine::set_widget_property`](crate::engine::Engine::set_widget_property).
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the `Widget` already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](crate::error::Error::Property) if there is no such property,
+    /// it is read only, or the value has the wrong kind or is out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        set_core_property(self, name, value)
     }
 
     /// Returns whether the `Widget` is hidden.

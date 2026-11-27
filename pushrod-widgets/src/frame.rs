@@ -19,8 +19,13 @@
 //! border of a specific width and color on top of it.
 
 use pushrod::color::Color;
+use pushrod::error::Result;
 use pushrod::geometry::{point, size};
 use pushrod::paint::{self, Painter};
+use pushrod::properties::{
+    Property, core_properties, expect_color, expect_int, set_core_property, track,
+};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{Widget, WidgetCore};
 
 /// A filled rectangle with a border of any width and color.
@@ -61,6 +66,55 @@ impl Widget for Frame {
     /// The `WidgetCore`.
     fn core_mut(&mut self) -> &mut WidgetCore {
         &mut self.core
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::int(
+            "border_width",
+            i64::from(self.get_border_width()),
+        ));
+        list.push(Property::color("border_color", self.get_border_color()));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "border_width" => {
+                let n = u8::try_from(expect_int(name, value)?)
+                    .map_err(|_| pushrod::error::Error::property(name, "expected 0 to 255"))?;
+
+                track(self, |w| w.set_border_width(n))
+            }
+            "border_color" => {
+                let c = expect_color(name, value)?;
+
+                track(self, |w| w.set_border_color(c))
+            }
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Fills the box with its color, then draws the border inside its edges.

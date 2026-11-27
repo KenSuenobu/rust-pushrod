@@ -81,6 +81,7 @@ pub mod input;
 pub mod layout;
 pub mod paint;
 pub mod prelude;
+pub mod properties;
 pub mod registry;
 pub mod root_widget;
 pub mod text;

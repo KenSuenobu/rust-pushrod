@@ -1651,7 +1651,6 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 | Issue | Title | Summary | Labels | Parallel | MVP | Complexity | Affected modules |
 |---|---|---|---|---|---|---|---|
-| 6.2 (#61) | Property introspection: list, get, and set widget properties by name | Each widget describes its properties for saving, loading, bindings, and the Chassis inspector. | `chassis`, `core`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.2 | M | `src/widget.rs`, `src/properties.rs (new)`, `pushrod-widgets (all widgets)` |
 | 6.3 (#62) | Form file format (binary, versioned) | The binary file that stores forms: object table by ID, string and image pools, symbols. | `chassis`, `enhancement`, `forms`, `mvp`, `size/L` | N | v0.2 | L | `docs/FORM_FORMAT.md (new)`, `form/format.rs (new)` |
 | 6.4 (#63) | Form loader: build a form from a file with stable IDs | Load a form and attach callbacks by ID or name. | `chassis`, `enhancement`, `forms`, `mvp`, `size/M` | N | v0.2 | M | `form/loader.rs (new)`, `src/engine.rs` |
 | 6.5 (#64) | Form writer: save a widget subtree to a file | Serialize any subtree into the form format. | `chassis`, `enhancement`, `forms`, `mvp`, `parallelizable`, `size/M` | Y | v0.2 | M | `form/writer.rs (new)` |
@@ -1684,6 +1683,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 **Documentation.** Docusaurus page: `pushrod-docs/docs/forms/widget-registry-and-factory.md` ("Widget registry and factory", Forms, new). Guides: Forms section. Rustdoc: `registry` module. Examples: n/a. Screenshots: n/a.
 
 ### 6.2 (#61): Property introspection: list, get, and set widget properties by name
+
+**Status:** done (#61). `Widget::properties()` lists `Property { name, kind, value }` and `Widget::set_property(name, &PropertyValue) -> Result<bool>` sets one (`true` when it changed); every standard widget implements both, with the core properties from `pushrod::properties`. `Engine::set_widget_property` (and `Ui::set_widget_property`) emit `EngineEvent::PropertyChanged { id, name }` when the value changed. `anchors` are the widget's layout parameters (`stretch`, margins, alignments); `tooltip` is stored on `WidgetCore`, and showing it is not part of this step.
 
 **Problem Statement.** Saving and loading forms, property bindings (9.6 (#98)), and Chassis's inspector need to enumerate and change properties without knowing the concrete type.
 

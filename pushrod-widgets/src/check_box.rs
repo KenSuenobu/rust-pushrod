@@ -30,11 +30,16 @@
 
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
+use pushrod::error::Result;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::font::Font;
 use pushrod::geometry::{Rect, Size, point, size};
 use pushrod::input::Key;
 use pushrod::paint::{self, Painter, TextJustify, TextStyle, Truncate};
+use pushrod::properties::{
+    Property, core_properties, expect_bool, expect_text, set_core_property, track,
+};
+use pushrod::registry::PropertyValue;
 use pushrod::widget::{Behavior, VisualState, Widget, WidgetCore};
 
 /// The width and height of the box, in pixels.
@@ -83,6 +88,57 @@ impl Widget for CheckBox {
     /// The lowercased mnemonic character, or `None` if the label has none.
     fn mnemonic(&self) -> Option<char> {
         paint::mnemonic_of(&self.label)
+    }
+
+    /// Lists the widget's properties: the core properties, then its own.
+    ///
+    /// # Returns
+    ///
+    /// The properties.
+    fn properties(&self) -> Vec<Property> {
+        let mut list = core_properties(self);
+
+        list.push(Property::text("text", self.get_text()));
+        list.push(Property::bool("checked", self.checked));
+        list.push(Property::bool("indeterminate", self.indeterminate));
+
+        list
+    }
+
+    /// Sets a property by name; the widget's own, or else a core property.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The property name.
+    /// * `value` - The new value.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the value changed, `false` if the widget already had it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::Property`](pushrod::error::Error::Property) if there is no such
+    /// property, it is read only, or the value is the wrong kind or out of range.
+    fn set_property(&mut self, name: &str, value: &PropertyValue) -> Result<bool> {
+        match name {
+            "text" => {
+                let t = expect_text(name, value)?.to_string();
+
+                track(self, |w| w.set_text(t))
+            }
+            "checked" => {
+                let b = expect_bool(name, value)?;
+
+                track(self, |w| w.set_checked(b))
+            }
+            "indeterminate" => {
+                let b = expect_bool(name, value)?;
+
+                track(self, |w| w.set_indeterminate(b))
+            }
+            _ => set_core_property(self, name, value),
+        }
     }
 
     /// Draws the box (white inside, black frame), its mark, and the label.
