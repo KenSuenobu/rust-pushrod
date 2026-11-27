@@ -19,6 +19,7 @@
 //! Children are added to it like to any other widget (`Engine::add_child_widget`); it has an
 //! empty event mask, so it receives no input and emits no events.
 
+use pushrod::accessibility::{AccessInfo, Role};
 use pushrod::color::Color;
 use pushrod::error::Result;
 use pushrod::font::Font;
@@ -117,6 +118,15 @@ impl Widget for GroupBox {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        AccessInfo::of(self, Role::Group).with_name(&self.title)
     }
 
     /// Fills the background, draws the title, then the border with a gap behind the title.

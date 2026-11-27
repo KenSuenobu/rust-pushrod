@@ -35,6 +35,7 @@
 //!
 //! A horizontal slider has its minimum on the left; a vertical one has it at the bottom.
 
+use pushrod::accessibility::{AccessActions, AccessInfo, NumericValue, Role};
 use pushrod::color::Color;
 use pushrod::error::Result;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
@@ -175,6 +176,25 @@ impl Widget for Slider {
             "vertical" => Err(read_only(name)),
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let numeric = NumericValue {
+            value: self.value,
+            min: self.min,
+            max: self.max,
+            step: (self.step > 0.0).then_some(self.step),
+        };
+
+        AccessInfo::of(self, Role::Slider)
+            .with_numeric(numeric)
+            .with_value(self.value.to_string())
+            .with_actions(AccessActions::FOCUS | AccessActions::SET_VALUE)
     }
 
     /// Draws the track, the tick marks, the knob, and (with `show_value`) the value text.

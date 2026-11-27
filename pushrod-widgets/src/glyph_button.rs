@@ -29,6 +29,7 @@
 //! The repeat is driven by the core's animation ticks (`Event::Tick`), so it needs no timer from
 //! the application.
 
+use pushrod::accessibility::{AccessActions, AccessInfo, Role};
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::error::Result;
@@ -195,6 +196,18 @@ impl Widget for GlyphButton {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let mut info = AccessInfo::of(self, Role::Button).with_name(&self.glyph.to_string());
+
+        info.actions |= AccessActions::CLICK;
+        info
     }
 
     /// Draws the button: a fill, the centered glyph, and a one-pixel frame.

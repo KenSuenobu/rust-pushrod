@@ -34,6 +34,7 @@
 //! The bar emits no events and takes no input; set it with [`ProgressBar::set_value`], often from
 //! a custom event.
 
+use pushrod::accessibility::{AccessInfo, NumericValue, Role};
 use pushrod::color::Color;
 use pushrod::error::Result;
 use pushrod::event::{Event, EventCtx, EventMask, Propagation};
@@ -156,6 +157,27 @@ impl Widget for ProgressBar {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let mut info = AccessInfo::of(self, Role::ProgressIndicator);
+
+        // A busy (indeterminate) bar has no value to announce.
+        if let Some(value) = self.value {
+            info = info.with_numeric(NumericValue {
+                value,
+                min: 0.0,
+                max: self.max,
+                step: None,
+            });
+        }
+
+        info
     }
 
     /// Draws the white track with a black frame, then the fill (determinate), the moving block

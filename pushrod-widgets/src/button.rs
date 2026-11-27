@@ -38,6 +38,7 @@
 //! | `ACTIVATE_ON_PRESS` ([`Button::activate_on_press`]) | normal | on press, not on release | as above |
 //! | `DISMISSES_DIALOG` ([`Button::dismisses_dialog`]) | normal | as above, then asks to close | also `EngineEvent::DialogDismissRequested` |
 
+use pushrod::accessibility::{AccessActions, AccessInfo, Role};
 use pushrod::color::Color;
 use pushrod::controllers::{ClickController, ControllerEvent};
 use pushrod::error::Result;
@@ -149,6 +150,22 @@ impl Widget for Button {
             }
             _ => set_core_property(self, name, value),
         }
+    }
+
+    /// Describes the widget to a screen reader.
+    ///
+    /// # Returns
+    ///
+    /// The widget's role, name, value, state, and actions.
+    fn accessibility(&self) -> AccessInfo {
+        let mut info = AccessInfo::of(self, Role::Button).with_name(&self.msg);
+
+        if self.behavior().contains(Behavior::TOGGLE) {
+            info = info.with_toggled(self.checked.into());
+        }
+
+        info.actions |= AccessActions::CLICK;
+        info
     }
 
     /// Draws the button: a fill, the label inset by the border width, and a one-pixel frame.

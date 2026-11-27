@@ -37,6 +37,8 @@ bundled = ["sdl2/bundled"]
 static-link = ["sdl2/static-link"]
 # Lay out text with Parley and rasterize glyphs with swash.
 parley = ["pushrod/parley"]
+# Convert accessibility updates to AccessKit trees.
+accesskit = ["pushrod/accesskit"]
 
 # docs.rs documents the optional Parley text engine too (not `bundled`, which needs CMake).
 [package.metadata.docs.rs]
