@@ -75,11 +75,17 @@ mod tag {
 
 /// The value kinds of a named property.
 mod kind {
+    /// A true or false value: one byte.
     pub const BOOL: u8 = 0;
+    /// A whole number: `i64`.
     pub const INT: u8 = 1;
+    /// A number with a fractional part: `f64`.
     pub const FLOAT: u8 = 2;
+    /// Text: a string index.
     pub const TEXT: u8 = 3;
+    /// A color: red, green, blue, alpha bytes.
     pub const COLOR: u8 = 4;
+    /// An image: an index into the image pool.
     pub const IMAGE: u8 = 5;
 }
 
@@ -129,6 +135,15 @@ impl FormError {
 }
 
 impl fmt::Display for FormError {
+    /// Writes a one-line, human-readable description of the error.
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter.
+    ///
+    /// # Returns
+    ///
+    /// The formatting result.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             FormError::BadMagic => write!(f, "not a form file (missing PRSC magic)"),
