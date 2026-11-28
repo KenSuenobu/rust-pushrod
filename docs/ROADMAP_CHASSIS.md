@@ -492,11 +492,13 @@ Project model, open and save, the project drawer, and editors for forms, strings
 
 **Acceptance Criteria.**
 
-- Loads a project directory and reports its forms, resources, and handlers
-- Ownership rules documented and enforced (Chassis writes only generated files and stubs)
-- Unit tests cover the model without a window
+- [x] Loads a project directory and reports its forms, resources, and handlers
+- [x] Ownership rules documented and enforced (Chassis writes only generated files and stubs)
+- [x] Unit tests cover the model without a window
 
 **Parallelism / Dependencies.** Not parallelizable. Pushrod: Pushrod 6.10 [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) Resource manager: load resource sets and get resources by ID, Pushrod 6.11 [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) Resource kinds: strings, images, icons, files, menus, and alerts, Pushrod 6.12 [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) Typed resource IDs: generated constants per resource kind
+
+**Status:** done (#164). `chassis/src/project/mod.rs`: `Project::load` reports forms, resource counts, and handlers (tree-sitter); `ownership`, `write_generated`, `create_stub`, `save_resources`, and `create_resource_file` enforce the ownership rules. Docs: `pushrod-docs/docs/chassis/projects-and-resources.md`.
 
 **Technical Stack.** Rust, toml_edit, tree-sitter
 

@@ -116,7 +116,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 77 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
 | **78** | checkpoint | **Pushrod Showcase released** |
 | ✅ 79 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
-| 80 | [#164](https://github.com/KenSuenobu/rust-pushrod/issues/164) | chassis: [2.1] Project model |
+| ✅ 80 | [#164](https://github.com/KenSuenobu/rust-pushrod/issues/164) | chassis: [2.1] Project model |
 | 81 | [#165](https://github.com/KenSuenobu/rust-pushrod/issues/165) | chassis: [6.1] Code generation rules |
 | 82 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
 | 83 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
@@ -1531,9 +1531,9 @@ Project model, resource access, code generation, and a command-line generator, a
 
 **Show on video:**
 
-- [ ] Loads a project directory and reports its forms, resources, and handlers
-- [ ] Ownership rules documented and enforced (Chassis writes only generated files and stubs)
-- [ ] Unit tests cover the model without a window
+- [x] Loads a project directory and reports its forms, resources, and handlers
+- [x] Ownership rules documented and enforced (Chassis writes only generated files and stubs)
+- [x] Unit tests cover the model without a window
 
 ### Step 81: Code generation rules
 

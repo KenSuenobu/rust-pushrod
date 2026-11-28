@@ -1,6 +1,6 @@
 [package]
 name = "pushrod-sdl2"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
 description = "SDL2 backend for the Pushrod UI library: window, input, GPU textures, and text"
 readme = "README.md"
@@ -18,7 +18,7 @@ name = "pushrod_sdl2"
 path = "src/lib.rs"
 
 [dependencies]
-pushrod = { path = "..", version = "0.3.1" }
+pushrod = { path = "..", version = "0.3.2" }
 
 # sdl2 0.39.0 doesn't compile with `unsafe_textures`; stay on 0.38 until a fixed release.
 [dependencies.sdl2]
@@ -26,7 +26,7 @@ version = "0.38"
 features = ["ttf", "image", "unsafe_textures"]
 
 [dev-dependencies]
-pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.1" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.2" }
 
 [features]
 default = []
