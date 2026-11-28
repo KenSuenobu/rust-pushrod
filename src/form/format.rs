@@ -127,7 +127,7 @@ impl FormError {
     /// # Returns
     ///
     /// The error.
-    fn invalid(message: impl Into<String>) -> Self {
+    pub(super) fn invalid(message: impl Into<String>) -> Self {
         FormError::Invalid {
             message: message.into(),
         }
@@ -297,6 +297,27 @@ impl ObjectRecord {
             anchors: 0,
             properties: Vec::new(),
         }
+    }
+}
+
+/// The number of a widget inside a form: its object number in the form file.  Generated ID
+/// constants (see [`codegen`](super::codegen)) have this type, so a callback attaches by number
+/// and a renamed or removed widget breaks the build instead of attaching to the wrong widget.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct FormIndex(pub u32);
+
+impl From<FormIndex> for u32 {
+    /// Converts an index to its object number.
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - The index.
+    ///
+    /// # Returns
+    ///
+    /// The object number.
+    fn from(index: FormIndex) -> u32 {
+        index.0
     }
 }
 

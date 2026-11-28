@@ -70,6 +70,7 @@ The runnable version is `pushrod-widgets/examples/form.rs`: `cargo run -p pushro
 | --- | --- |
 | `form.root()` | The widget made from the form's root object |
 | `form.id(number)` | The widget for a form-local object number (an ID constant), or `None` |
+| `form.widget(main::OK_BUTTON)` | The widget for a generated [`FormIndex` constant](./generate-id-constants-from-a-form-file.md), or `None` |
 | `form.named("OK_BUTTON")` | The widget for a name in the file's symbol table, or `None` |
 | `form.action("save")` | The number of an action symbol, or `None` |
 | `form.name()`, `form.len()` | The form's name and how many widgets it created |
@@ -112,4 +113,5 @@ A successful load queues `EngineEvent::FormLoaded { form, root, widgets }` after
 ## See also
 
 - [Form file format](./form-file-format.md): the file this page loads.
+- [Generate ID constants](./generate-id-constants-from-a-form-file.md): names for the object numbers.
 - [Widget registry and factory](./widget-registry-and-factory.md): how a type name becomes a widget.

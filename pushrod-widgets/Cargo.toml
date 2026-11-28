@@ -20,6 +20,9 @@ path = "src/lib.rs"
 [dependencies]
 pushrod = { path = "..", version = "0.1.0" }
 
+[build-dependencies]
+pushrod = { path = "..", version = "0.1.0" }
+
 [dev-dependencies]
 accesskit = "0.25"
 

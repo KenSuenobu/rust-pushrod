@@ -105,6 +105,19 @@ impl FormHandle {
         self.ids.get(&number).copied()
     }
 
+    /// Returns the widget made from a generated ID constant.
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - A [`FormIndex`](super::FormIndex) constant from the generated ID module.
+    ///
+    /// # Returns
+    ///
+    /// The widget's ID, or `None` if the object is not part of this form.
+    pub fn widget(&self, index: super::FormIndex) -> Option<WidgetId> {
+        self.id(index.0)
+    }
+
     /// Returns the widget a symbol name refers to.
     ///
     /// # Arguments
