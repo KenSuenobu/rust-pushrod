@@ -1276,6 +1276,8 @@ Tabs that switch between pages of controls. **Widget roadmap:** [`docs/widgets/t
 
 ### 4.5 (#52): List view
 
+**Status:** done (#52). `pushrod_widgets::list_view::{ListView, ListModel, ModelChange, VecModel, SelectionMode, RowStyle, ListViewParts}`: `ListView::new(model)` with `at`, `size`, `selection_mode`, `row_height`, `max_visible_rows`, `type_ahead_timeout`, and `row_style`; a `Composite` of a recycled pool of `ListRow` parts (`row:0` ...) and a `"scroll"` `ScrollBar`, so 10,000 rows cost one screenful of widgets. Models report `Inserted`, `Removed`, `Changed`, and `Reset` ranges that the view applies to its selection and scroll position; single, range, and multiple selection (Shift and Ctrl clicks), arrows, Page, Home, End, type-ahead, Return and double-click activate; emits `SelectionChanged`, `Activated`, and `ViewportChanged`. The core gained `InputEvent::ModifiersChanged` and `EventCtx::modifiers()` (the SDL backend reports the held keys before each press), since pointer events carried no modifiers. Tests in `pushrod-widgets/tests/list_view.rs`; example `pushrod-widgets/examples/list_view.rs`. Docs: `pushrod-docs/docs/widgets/list-view.md`.
+
 Scrolling list with single/multiple selection, backed by a data source. **Widget roadmap:** [`docs/widgets/list-view.md`](widgets/list-view.md) (look, behavior, events, acceptance criteria).
 
 **Dependencies.** Requires 1.6 (#22), 5.3 (#58), 5.2 (#57).

@@ -108,6 +108,8 @@ assert!(backend.frames > 0);
 
 `backend.painted` lists every widget paint and its `PaintCall`s, `backend.draws` the textures composed into each frame, and `backend.frames` the frames presented. `HeadlessBackend::with_scale_factor(size, 2.0)` and `backend.set_scale_factor(scale)` pretend to be a high-DPI window; `backend.texture_sizes` and `backend.minimum_size` record the physical texture sizes and the minimum window size. To dispatch one event without a loop, call `engine.dispatch(event, &mut state)`.
 
+Pointer events carry no modifier keys. A backend sends `InputEvent::ModifiersChanged(modifiers)` before each mouse press (the SDL2 backend does), and a widget reads the keys with `EventCtx::modifiers()`, for example to tell a Shift-click from a click. Key events update the same value.
+
 ## Rendering rules
 
 The SDL2 backend keeps today's design: one GPU texture per widget, repainted only when the widget is invalidated, frames composed by blitting, and text from the glyph atlas (see [GPU text](../concepts/gpu-text.md)). Pushrod never uses OS-native menus, dialogs, or controls. On a high-DPI display each texture is rendered at physical resolution and the glyphs are rasterized at the scaled font size, so nothing is stretched; see [Window resize and high-DPI rendering](../concepts/window-resize-and-high-dpi-rendering.md).

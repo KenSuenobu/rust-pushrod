@@ -89,6 +89,8 @@ pub struct WidgetCache {
     children: Vec<Vec<WidgetId>>,
     current_widget_id: WidgetId,
     captured_widget_id: Option<WidgetId>,
+    /// The modifier keys last reported, for [`EventCtx::modifiers`].
+    held_modifiers: crate::input::Modifiers,
     needs_full_redraw: bool,
     cache_policy: CachePolicy,
     pending_events: Vec<Event>,
@@ -142,6 +144,7 @@ impl WidgetCache {
             children: Vec::new(),
             current_widget_id: ROOT_WIDGET_ID,
             captured_widget_id: None,
+            held_modifiers: crate::input::Modifiers::empty(),
             needs_full_redraw: true,
             cache_policy: CachePolicy::TextureCache,
             pending_events: Vec::new(),
@@ -1132,6 +1135,14 @@ impl WidgetCache {
     pub fn handle_event(&mut self, event: InputEvent) -> Vec<Event> {
         let mut ctx = EventCtx::default();
 
+        match &event {
+            InputEvent::ModifiersChanged(modifiers)
+            | InputEvent::KeyDown { modifiers, .. }
+            | InputEvent::KeyUp { modifiers, .. } => self.held_modifiers = *modifiers,
+            _ => {}
+        }
+
+        ctx.set_modifiers(self.held_modifiers);
         ctx.set_clipboard_snapshot(self.clipboard_snapshot.clone());
 
         if self.cache.is_empty() {
