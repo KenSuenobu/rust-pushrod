@@ -41,6 +41,7 @@
 //! assert_eq!(FormFile::from_bytes(&bytes).unwrap(), file);
 //! ```
 
+use super::resources::Resources;
 use crate::color::Color;
 use std::collections::HashMap;
 use std::fmt;
@@ -57,8 +58,11 @@ pub const NO_OBJECT: u32 = u32::MAX;
 /// The property-block offset that means "this object has no properties".
 const NO_PROPERTIES: u32 = u32::MAX;
 
-/// The size of the header in bytes.
+/// The size of the header in bytes when the file has no resources.
 const HEADER_LEN: usize = 56;
+
+/// The size of the header in bytes when the file has a resource section.
+const HEADER_LEN_RESOURCES: usize = 64;
 
 /// The size of one object record in bytes.
 const OBJECT_LEN: usize = 48;
@@ -370,6 +374,8 @@ pub struct FormFile {
     pub images: Vec<ImageEntry>,
     /// The symbol table.
     pub symbols: Vec<Symbol>,
+    /// The resource tables: strings, images, icons, files, menus, and alerts.
+    pub resources: Resources,
 }
 
 impl FormFile {
@@ -511,7 +517,8 @@ impl FormFile {
     }
 
     /// Checks that the file is consistent: every number is in range, every link agrees with its
-    /// parent, no object is reached twice, and every image reference exists.
+    /// parent, no object is reached twice, every image reference exists, and the resources are
+    /// consistent ([`Resources::validate`]).
     ///
     /// # Returns
     ///
@@ -598,7 +605,7 @@ impl FormFile {
                 )));
             }
         }
-        Ok(())
+        self.resources.validate()
     }
 
     /// Writes the file as bytes in the current format version.
@@ -676,19 +683,28 @@ impl FormFile {
         }
 
         let strings = pool.into_bytes()?;
-        let sections = [&forms, &objects, &props, &strings, &images, &symbols];
+        let resources = self.resources.to_section()?;
+        let mut sections = vec![&forms, &objects, &props, &strings, &images, &symbols];
+        // The resource section needs a longer header; a file without resources keeps the short
+        // one, so it is byte-for-byte what a reader without resource support expects.
+        let header_len = if self.resources.is_empty() {
+            HEADER_LEN
+        } else {
+            sections.push(&resources);
+            HEADER_LEN_RESOURCES
+        };
         let mut out = Vec::new();
         out.extend_from_slice(&MAGIC);
         out.extend_from_slice(&FORMAT_VERSION.to_le_bytes());
-        out.extend_from_slice(&(HEADER_LEN as u16).to_le_bytes());
-        let mut offset = HEADER_LEN;
-        for s in sections {
+        out.extend_from_slice(&(header_len as u16).to_le_bytes());
+        let mut offset = header_len;
+        for s in &sections {
             put_u32(&mut out, to_u32(offset, "file")?);
             put_u32(&mut out, to_u32(s.len(), "section")?);
             offset += s.len();
         }
         to_u32(offset, "file")?;
-        for s in sections {
+        for s in &sections {
             out.extend_from_slice(s);
         }
         Ok(out)
@@ -739,6 +755,12 @@ impl FormFile {
         let strings = section("string pool")?;
         let images = section("image pool")?;
         let symbols = section("symbol table")?;
+        // A header long enough for it names the resource section; a shorter one has none.
+        let resources = if header_len >= HEADER_LEN_RESOURCES {
+            section("resource section")?
+        } else {
+            &[]
+        };
 
         let pool = read_strings(strings)?;
         let mut file = FormFile::new();
@@ -795,18 +817,38 @@ impl FormFile {
             file.symbols.push(Symbol { kind, id, name });
         }
 
+        file.resources = Resources::from_section(resources)?;
+
         file.validate()?;
         Ok(file)
     }
 }
 
 /// Converts a length to `u32`, or reports the format limit.
-fn to_u32(n: usize, what: &'static str) -> Result<u32, FormError> {
+///
+/// # Arguments
+///
+/// * `n` - The length.
+/// * `what` - What the length measures, for the error.
+///
+/// # Returns
+///
+/// The length as `u32`.
+///
+/// # Errors
+///
+/// [`FormError::TooLarge`] when `n` does not fit.
+pub(super) fn to_u32(n: usize, what: &'static str) -> Result<u32, FormError> {
     u32::try_from(n).map_err(|_| FormError::TooLarge { what })
 }
 
 /// Appends a little-endian `u32`.
-fn put_u32(out: &mut Vec<u8>, v: u32) {
+///
+/// # Arguments
+///
+/// * `out` - The bytes to append to.
+/// * `v` - The value.
+pub(super) fn put_u32(out: &mut Vec<u8>, v: u32) {
     out.extend_from_slice(&v.to_le_bytes());
 }
 
@@ -1002,25 +1044,50 @@ fn read_named(body: &mut Reader<'_>, pool: &ReadPool) -> Result<Option<Property>
 }
 
 /// A bounds-checked cursor over bytes.
-struct Reader<'a> {
+pub(super) struct Reader<'a> {
     bytes: &'a [u8],
     at: usize,
     what: &'static str,
 }
 
 impl<'a> Reader<'a> {
-    /// Creates a reader; `what` names the data in errors.
-    fn new(bytes: &'a [u8], what: &'static str) -> Self {
+    /// Creates a reader.
+    ///
+    /// # Arguments
+    ///
+    /// * `bytes` - The bytes to read.
+    /// * `what` - What the bytes are, for errors.
+    ///
+    /// # Returns
+    ///
+    /// The reader, positioned at the start.
+    pub(super) fn new(bytes: &'a [u8], what: &'static str) -> Self {
         Reader { bytes, at: 0, what }
     }
 
     /// Whether every byte has been read.
-    fn is_empty(&self) -> bool {
+    ///
+    /// # Returns
+    ///
+    /// `true` when nothing remains.
+    pub(super) fn is_empty(&self) -> bool {
         self.at >= self.bytes.len()
     }
 
     /// Takes the next `n` bytes.
-    fn take(&mut self, n: usize) -> Result<&'a [u8], FormError> {
+    ///
+    /// # Arguments
+    ///
+    /// * `n` - The number of bytes.
+    ///
+    /// # Returns
+    ///
+    /// The bytes.
+    ///
+    /// # Errors
+    ///
+    /// [`FormError::Truncated`] when fewer than `n` remain.
+    pub(super) fn take(&mut self, n: usize) -> Result<&'a [u8], FormError> {
         let end = self
             .at
             .checked_add(n)
@@ -1046,17 +1113,41 @@ impl<'a> Reader<'a> {
     }
 
     /// Reads one byte.
-    fn u8(&mut self) -> Result<u8, FormError> {
+    ///
+    /// # Returns
+    ///
+    /// The byte.
+    ///
+    /// # Errors
+    ///
+    /// [`FormError::Truncated`] when none remains.
+    pub(super) fn u8(&mut self) -> Result<u8, FormError> {
         Ok(self.array::<1>()?[0])
     }
 
     /// Reads a little-endian `u16`.
-    fn u16(&mut self) -> Result<u16, FormError> {
+    ///
+    /// # Returns
+    ///
+    /// The value.
+    ///
+    /// # Errors
+    ///
+    /// [`FormError::Truncated`] when too few bytes remain.
+    pub(super) fn u16(&mut self) -> Result<u16, FormError> {
         Ok(u16::from_le_bytes(self.array()?))
     }
 
     /// Reads a little-endian `u32`.
-    fn u32(&mut self) -> Result<u32, FormError> {
+    ///
+    /// # Returns
+    ///
+    /// The value.
+    ///
+    /// # Errors
+    ///
+    /// [`FormError::Truncated`] when too few bytes remain.
+    pub(super) fn u32(&mut self) -> Result<u32, FormError> {
         Ok(u32::from_le_bytes(self.array()?))
     }
 
@@ -1067,7 +1158,19 @@ impl<'a> Reader<'a> {
 
     /// Reads an entry count and checks the rest of the data could hold that many entries of at
     /// least `min_size` bytes, so a lying count cannot force a huge allocation.
-    fn count(&mut self, min_size: usize) -> Result<usize, FormError> {
+    ///
+    /// # Arguments
+    ///
+    /// * `min_size` - The smallest size of one entry in bytes.
+    ///
+    /// # Returns
+    ///
+    /// The count.
+    ///
+    /// # Errors
+    ///
+    /// [`FormError::Truncated`] when the data cannot hold that many entries.
+    pub(super) fn count(&mut self, min_size: usize) -> Result<usize, FormError> {
         let n = self.u32()? as usize;
         let remaining = self.bytes.len() - self.at;
         if n.checked_mul(min_size).is_none_or(|need| need > remaining) {

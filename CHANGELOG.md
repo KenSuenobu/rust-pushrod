@@ -110,3 +110,4 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [#63] Form loader: Engine::load_form builds a form from a file with stable IDs [kenji]
 - [#64] Form writer: FormWriter saves a widget subtree to a form file [kenji]
 - [#65] Form codegen: write_ids and pushrod-form-ids emit FormIndex constants [kenji]
+- [#154] Resource kinds: strings, images, icons, files, menus, alerts with stable IDs [kenji]

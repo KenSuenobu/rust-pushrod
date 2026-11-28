@@ -16,6 +16,7 @@ flowchart TB
     H --> S["String pool"]
     H --> I["Image pool"]
     H --> Y["Symbols: ID and action names"]
+    H --> R["Resource tables: strings, images, icons, files, menus, alerts"]
     O -->|"property offset"| P
     O -->|"type name"| S
     P -->|"names, text"| S
@@ -31,6 +32,7 @@ flowchart TB
 | String pool | Every string once; other sections store indexes |
 | Image pool | Encoded images (for example PNG files), stored untouched |
 | Symbol table | Names for object numbers (`OK_BUTTON`) and for actions (`save`) |
+| Resource tables | Strings, images, icons, files, menus, and alerts, each entry with a stable ID and a name (optional) |
 
 ## Write and read a form
 
@@ -73,10 +75,91 @@ fn main() {
 
 The same program is the `form_format` example: `cargo run --example form_format`.
 
+## Resources
+
+Besides forms, a file carries **resources**: the data an application ships with its forms. Each kind is a `ResourceTable` in `FormFile::resources`, and every entry has a numeric **ID** and a **name**.
+
+| Kind | Table | Entry holds |
+| --- | --- | --- |
+| Strings | `resources.strings` | UTF-8 text for labels and messages |
+| Images | `resources.images` | Encoded image data, such as PNG, decoded on first use |
+| Icons | `resources.icons` | An image ID, an optional mask image, an optional selected-state image, and a caption |
+| Files | `resources.files` | A MIME type and opaque bytes (license text, templates, sample files) |
+| Menus | `resources.menus` | A menu bar or context menu: commands (label, action name, shortcut, enabled), separators, and submenus |
+| Alerts | `resources.alerts` | A kind (info, warning, error, question) and string IDs for the title, the message, and the buttons |
+
+**IDs never change.** They start at 1, are assigned once, and are never reused or renumbered. Removing or reordering entries leaves every other ID alone, and the table saves its next ID so a removed ID stays retired. Code and saved settings that hold an ID stay valid.
+
+```mermaid
+flowchart LR
+    A["Alert SAVE_FAILED"] -->|"title, message, buttons"| S["Strings"]
+    I["Icon APP"] -->|"image, mask, selected"| M["Images"]
+    U["Menu MAIN_MENU"] -->|"action names"| X["Actions bound by name"]
+```
+
+```rust checked title="src/main.rs"
+use pushrod::form::{
+    AlertKind, AlertResource, FileResource, FormFile, IconResource, MenuItem, MenuKind,
+    MenuResource,
+};
+
+fn main() {
+    let mut file = FormFile::new();
+    let r = &mut file.resources;
+
+    let title = r.strings.add("SAVE_TITLE", "Save failed".to_string()).unwrap();
+    let message = r.strings.add("SAVE_MESSAGE", "The file could not be saved.".to_string()).unwrap();
+    let retry = r.strings.add("RETRY", "Retry".to_string()).unwrap();
+    r.alerts
+        .add(
+            "SAVE_FAILED",
+            AlertResource { kind: AlertKind::Error, title, message, buttons: vec![retry] },
+        )
+        .unwrap();
+
+    let logo = r.images.add("LOGO", vec![0x89, b'P', b'N', b'G']).unwrap();
+    r.icons
+        .add(
+            "APP",
+            IconResource { image: logo, mask: None, selected: None, caption: "Sample".to_string() },
+        )
+        .unwrap();
+    r.files
+        .add(
+            "LICENSE",
+            FileResource { mime: "text/plain".to_string(), data: b"Sample license".to_vec() },
+        )
+        .unwrap();
+    r.menus
+        .add(
+            "MAIN_MENU",
+            MenuResource {
+                kind: MenuKind::Bar,
+                items: vec![MenuItem::Submenu {
+                    label: "File".to_string(),
+                    items: vec![MenuItem::command("Quit", "quit")],
+                }],
+            },
+        )
+        .unwrap();
+
+    // Removing an entry never renumbers the others, and its ID is not handed out again.
+    r.strings.remove(retry);
+    let later = r.strings.add("LATER", "Later".to_string()).unwrap();
+    assert_eq!(later, retry + 1);
+
+    let loaded = FormFile::from_bytes(&file.to_bytes().unwrap()).unwrap();
+    assert_eq!(loaded, file);
+}
+```
+
+Names are unique within a table, an icon's image IDs and an alert's string IDs must exist, and menus nest at most 16 levels; `FormFile::to_bytes` and `FormFile::from_bytes` reject a file that breaks any of these. The `form_format` example prints the resources it writes.
+
 ## Versions and unknown properties
 
 - The header carries a version. A reader accepts its own version and older, and returns `FormError::UnsupportedVersion` for a newer file.
 - Properties are **tag-length-value** entries, so adding a property in a later version does not break older readers: they skip tags (and value kinds) they do not know.
+- Resource tables are tag-length-value too, and menu items inside a menu carry their own length, so a reader skips a table or an item kind it does not know. A file with resources has a longer header, which a reader written before resources existed accepts and ignores; a file without resources is unchanged.
 
 ## Damaged files
 

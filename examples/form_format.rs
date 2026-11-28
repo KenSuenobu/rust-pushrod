@@ -18,7 +18,8 @@
 //! Run it with `cargo run --example form_format`.
 
 use pushrod::form::{
-    FORMAT_VERSION, FormFile, FormValue, LayoutSpec, NO_OBJECT, ObjectRecord, Property, SymbolKind,
+    AlertKind, AlertResource, FORMAT_VERSION, FormFile, FormValue, LayoutSpec, MenuItem, MenuKind,
+    MenuResource, NO_OBJECT, ObjectRecord, Property, SymbolKind,
 };
 
 fn main() {
@@ -50,6 +51,39 @@ fn main() {
     file.add_symbol(SymbolKind::Id, ok, "OK_BUTTON");
     file.add_symbol(SymbolKind::Action, 1, "confirm");
 
+    // Resources: strings, an alert that refers to them, and a menu, each with a stable ID.
+    let title = file
+        .resources
+        .strings
+        .add("SAVE_TITLE", "Save failed".to_string());
+    let message = file
+        .resources
+        .strings
+        .add("SAVE_MESSAGE", "Sample message".to_string());
+    let (title, message) = (title.unwrap(), message.unwrap());
+    file.resources
+        .alerts
+        .add(
+            "SAVE_FAILED",
+            AlertResource {
+                kind: AlertKind::Error,
+                title,
+                message,
+                buttons: vec![],
+            },
+        )
+        .unwrap();
+    file.resources
+        .menus
+        .add(
+            "MAIN_MENU",
+            MenuResource {
+                kind: MenuKind::Bar,
+                items: vec![MenuItem::command("Quit", "quit")],
+            },
+        )
+        .unwrap();
+
     let bytes = file.to_bytes().expect("the sample form is consistent");
     println!("Form file version {FORMAT_VERSION}, {} bytes", bytes.len());
 
@@ -67,5 +101,13 @@ fn main() {
             object.properties.len()
         );
     }
+    for s in &loaded.resources.strings {
+        println!("string {} is {}: {}", s.id, s.name, s.value);
+    }
+    println!(
+        "{} alert(s), {} menu(s)",
+        loaded.resources.alerts.len(),
+        loaded.resources.menus.len()
+    );
     println!("OK_BUTTON is object {}", loaded.id_of("OK_BUTTON").unwrap());
 }

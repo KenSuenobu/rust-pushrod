@@ -34,6 +34,7 @@
 pub mod codegen;
 pub mod format;
 pub mod loader;
+pub mod resources;
 pub mod writer;
 
 pub use format::{
@@ -41,4 +42,8 @@ pub use format::{
     LayoutSpec, MAGIC, NO_OBJECT, ObjectRecord, Property, Symbol, SymbolKind,
 };
 pub use loader::FormHandle;
+pub use resources::{
+    AlertKind, AlertResource, FileResource, IconResource, MAX_MENU_DEPTH, MenuItem, MenuKind,
+    MenuResource, ResourceEntry, ResourceTable, Resources,
+};
 pub use writer::FormWriter;

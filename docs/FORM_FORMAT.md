@@ -16,13 +16,14 @@ standard library only by `pushrod::form` (`FormFile::to_bytes`, `FormFile::from_
 | String pool               |
 | Image pool                |
 | Symbols (ID and action)   |
+| Resource tables (optional)|
 +---------------------------+
 ```
 
 Sections follow the header in the order above. A reader finds them only through the header's
 offsets, so writers may add padding or new sections after a future version bump.
 
-## Header (56 bytes)
+## Header (56 or 64 bytes)
 
 | Offset | Size | Field |
 | --- | --- | --- |
@@ -35,8 +36,12 @@ offsets, so writers may add padding or new sections after a future version bump.
 | 32 | 8 | String pool: offset, size |
 | 40 | 8 | Image pool: offset, size |
 | 48 | 8 | Symbol table: offset, size |
+| 56 | 8 | Resource section: offset, size (only when the header length is `64`) |
 
-Offsets are from the start of the file. Every section must lie inside the file.
+Offsets are from the start of the file. Every section must lie inside the file. A file with no
+resources has a 56-byte header and is exactly what a reader written before resources existed
+expects; a file with resources has a 64-byte header, which such a reader accepts and ignores (it
+only requires the length to be at least `56`).
 
 ## Versioning
 
@@ -110,6 +115,58 @@ encoded image data (for example a PNG file), stored untouched.
 `count: u32`, then per symbol 9 bytes: `kind: u8` (`0` ID, `1` action), `id: u32`, `name: u32`
 (string index). An ID symbol names an object number (`OK_BUTTON` → 2); an action symbol names an
 action number a program binds to by name.
+
+## Resource section
+
+Resources are the data a program ships next to its forms: strings, images, icons, files, menus,
+and alerts. The section is a list of **tables** in tag-length-value form: `tag: u16`,
+`length: u32`, then `length` bytes. A reader skips a tag it does not know, so tables added later
+do not break older readers. A table that is empty is not written, and a known tag may appear once.
+
+| Tag | Table | Value of an entry |
+| --- | --- | --- |
+| 1 | Strings | `text` |
+| 2 | Images | `data` (for example a PNG file) |
+| 3 | Icons | `image: u32`, `mask: u32`, `selected: u32` (image IDs, `0` for none), `caption` |
+| 4 | Files | `mime`, `data` |
+| 5 | Menus | `kind: u8` (`0` menu bar, `1` context menu), then an item list |
+| 6 | Alerts | `kind: u8` (`0` info, `1` warning, `2` error, `3` question), `title: u32`, `message: u32`, `count: u32`, then `count` button `u32`s (all string IDs) |
+
+Here `text`, `mime`, and names are a `u32` length and that many UTF-8 bytes (stored inline, not in
+the string pool), and `data` is a `u32` length and that many bytes.
+
+### Table body and stable IDs
+
+A table body is `next_id: u32`, `count: u32`, then per entry `id: u32`, `name` (a string), and the
+kind's value. IDs are assigned once, starting at `1`, and **never reused or renumbered**:
+
+- Adding an entry gives it `next_id`, then `next_id` moves up by one.
+- Removing or reordering entries changes no other entry's ID, and `next_id` is saved, so the ID of
+  a removed entry stays retired even when it was the last one.
+- A reader rejects `0`, a repeated ID, an ID at or above `next_id`, and a repeated name within a
+  table.
+
+Names are unique within a table, so one name finds one resource (`SAVE_FAILED`).
+
+### Menu items
+
+An item list is `count: u32`, then per item `kind: u8`, `length: u32`, and `length` bytes, so a
+reader skips an item kind it does not know.
+
+| Kind | Item | Body |
+| --- | --- | --- |
+| 0 | Command | `label`, `action` (the action name a program binds to), `flags: u8` (bit 0: enabled, bit 1: a shortcut follows), then `shortcut` when flagged |
+| 1 | Separator | empty |
+| 2 | Submenu | `label`, then an item list |
+
+Menus nest at most 16 levels; a reader and a writer reject deeper ones.
+
+### References
+
+An icon's image IDs name entries of the image table, and an alert's title, message, and button IDs
+name entries of the string table. A reader and a writer reject an ID that names nothing. Alerts
+refer to strings, rather than holding text, so a string table per language can replace the strings
+later without touching the alerts.
 
 ## Reading safely
 
