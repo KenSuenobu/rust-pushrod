@@ -364,3 +364,40 @@ fn it_works_on_another_widget_type() {
     assert_eq!(state.panel.selected, Some(slider));
     assert!(state.panel.editors.iter().any(|e| e.name == "value"));
 }
+
+#[test]
+fn the_panel_follows_the_mockup_layout() {
+    let (mut engine, mut state) = start("Button");
+    let normal = page_button(&mut engine, &state, "Normal");
+
+    click(&mut engine, &mut state, normal);
+
+    let frame = engine.widgets().get(state.panel.list).unwrap().get_parent();
+    let at = |engine: &mut Engine<ShowcaseState>, id: WidgetId| {
+        let origin = engine.widgets().absolute_origin(id);
+        let extent = engine.widgets().get(id).unwrap().get_size();
+
+        (origin, extent)
+    };
+    let (page, page_size) = at(&mut engine, state.shell.page_area);
+    let (list, list_size) = at(&mut engine, frame);
+    let (status, _) = at(&mut engine, state.panel.status);
+    let (reset, _) = at(&mut engine, state.panel.reset);
+
+    // A third column to the right of the page, not a strip under it.
+    assert!(list.x >= page.x + page_size.w as i32);
+    // The list fills the column; status and Reset follow it, Reset last.
+    assert!(status.y >= list.y + list_size.h as i32);
+    assert!(reset.y > status.y);
+    assert_eq!(reset.x, list.x);
+
+    // Every editor sits at the right edge of its row, after the name.
+    let right_edge = list.x + list_size.w as i32;
+
+    for editor in &state.panel.editors {
+        let (origin, extent) = at(&mut engine, editor.id);
+
+        assert!(origin.x >= list.x + 100, "{} too far left", editor.name);
+        assert!(origin.x + extent.w as i32 <= right_edge, "{}", editor.name);
+    }
+}

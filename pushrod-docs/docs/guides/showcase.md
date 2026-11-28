@@ -25,11 +25,11 @@ cargo run -p pushrod-showcase
 
 ## Changing a property live
 
-Below the page is the **Properties** panel. It starts empty: *Click a widget on the page to select it.*
+On the right of the window is the **Properties** panel, a column with the heading at the top, one row per property (name on the left, editor on the right), the status line, and **Reset** at the bottom. It starts empty: *Click a widget on the page to select it.*
 
 ![The property panel: a button selected on its page, with its text and disabled flag changed (the design mockup)](/img/screenshots/showcase-property-panel.png)
 
-- **Click any widget on the page** to select it. A blue outline is drawn around it and the panel lists every property the widget reports through introspection (`Widget::properties`), so it works for any registered widget with no code for that widget.
+- **Click any widget on the page** to select it. An outline is drawn around it and the panel lists every property the widget reports through introspection (`Widget::properties`), so it works for any registered widget with no code for that widget.
 - **Edit a property.** The editor depends on the kind of value:
 
 | Kind | Editor |
@@ -40,7 +40,7 @@ Below the page is the **Properties** panel. It starts empty: *Click a widget on 
 | Color (`color`) | A text field holding `#rrggbb` or `#rrggbbaa`. |
 | A choice (`align_horizontal`, `align_vertical`) | A button; each click shows the next of `start`, `center`, `end`, `fill`. |
 
-- The line next to the title reports `Set <name>.` after an edit, or the error when the widget refuses the value (for example a width that is out of range).
+- The status line above **Reset** reports `Set <name>.` after an edit, or the error when the widget refuses the value (for example a width that is out of range).
 - **Click Reset** to rebuild the page and clear the selection. Opening another page does the same.
 
 Each edit goes through `Ui::set_widget_property`, so it emits a `PropertyChanged` engine event like any other property change. The panel is `pushrod-showcase/src/property_panel.rs`.
@@ -50,7 +50,7 @@ flowchart LR
     C[Press on a page widget] -->|capture phase| R[PageRoot posts PickRequest]
     R --> S[select_widget]
     S -->|properties| L[One editor per property]
-    S --> O[Blue outline]
+    S --> O[Outline]
     L -->|edit| A[Ui::set_widget_property]
     A -->|PropertyChanged| E[Widget redraws]
     X[Reset] --> P[select_page rebuilds the page]

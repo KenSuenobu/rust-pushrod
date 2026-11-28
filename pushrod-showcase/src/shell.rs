@@ -36,7 +36,7 @@ use pushrod_widgets::text_field::TextField;
 use std::path::PathBuf;
 
 /// The window's starting size, in pixels.
-pub const WINDOW_W: u32 = 900;
+pub const WINDOW_W: u32 = 1180;
 pub const WINDOW_H: u32 = 640;
 
 /// The width of the page list, in pixels.
@@ -232,7 +232,19 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
     }
 
     let page_area = add_scroller(cache, right, ContentSize::FitChildren);
-    let panel = property_panel::build(cache, right);
+
+    // Far right: the property panel, as in the roadmap mockup.
+    let props = add_panel(
+        cache,
+        ROOT_WIDGET_ID,
+        Box::new(Column::new().spacing(8).margins(Margin::all(12))),
+        LayoutParams {
+            alignment: Alignment::new(Align::Start, Align::Fill),
+            ..LayoutParams::default()
+        },
+        property_panel::PANEL_W + 24,
+    );
+    let panel = property_panel::build(cache, props);
     let shell = Shell {
         search,
         list,

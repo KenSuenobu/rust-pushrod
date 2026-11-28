@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! The property panel: click a widget on a page to select it (it gets a blue outline), then
+//! The property panel: click a widget on a page to select it (it gets an outline), then
 //! change any of its properties live.
 //!
 //! The panel lists the selected widget's [`properties`](pushrod::widget::Widget::properties)
@@ -28,7 +28,7 @@ use pushrod::color::Color;
 use pushrod::event::{Event, EventCtx, EventMask, EventPhase, EventTarget, Propagation};
 use pushrod::geometry::{Size, point};
 use pushrod::input::MouseButton;
-use pushrod::layout::{Column, Margin, Row};
+use pushrod::layout::{Align, Alignment, Column, LayoutParams, Margin, Row};
 use pushrod::paint::{self, Painter};
 use pushrod::properties::{Property, PropertyKind};
 use pushrod::registry::PropertyValue;
@@ -40,16 +40,20 @@ use pushrod_widgets::frame::Frame;
 use pushrod_widgets::text::Text;
 use pushrod_widgets::text_field::TextField;
 
-/// The height of the scrolling property list, in pixels.
-const LIST_H: u32 = 170;
+/// The width of the panel's column, in pixels.
+pub const PANEL_W: u32 = 276;
+/// The starting height of the scrolling property list; it stretches to fill the column.
+const LIST_H: u32 = 200;
 /// The height of one property row, in pixels.
 const ROW_H: u32 = 24;
 /// The width of a property's name, in pixels.
-const NAME_W: u32 = 150;
+const NAME_W: u32 = 110;
 /// The width of a property's editor, in pixels.
-const EDITOR_W: u32 = 200;
+const EDITOR_W: u32 = 160;
 /// The thickness of the selection outline, in pixels.
-const OUTLINE: u32 = 2;
+const OUTLINE: u32 = 1;
+/// The gap between the selected widget and its outline, in pixels.
+const GAP: u32 = 4;
 /// The properties edited by cycling through fixed choices, with the choices.
 const CHOICES: [(&str, &[&str]); 2] = [
     ("align_horizontal", &["start", "center", "end", "fill"]),
@@ -329,56 +333,48 @@ fn in_subtree(ui: &mut ShowcaseUi<'_>, root: WidgetId, id: WidgetId) -> bool {
     false
 }
 
-/// Builds the panel's widgets below the page area: a header row (title, status, **Reset**) and
-/// the scrolling property list.
+/// Builds the panel's widgets, top to bottom, as in the roadmap mockup: the **Properties**
+/// heading, the scrolling property list (a name on the left and its editor on the right), the
+/// status text, and the **Reset** button at the bottom.
 ///
 /// # Arguments
 ///
 /// * `cache` - The widget tree.
-/// * `parent` - The column the panel goes in.
+/// * `parent` - The column on the right of the window the panel goes in.
 ///
 /// # Returns
 ///
 /// The panel, with no selection.
 pub fn build(cache: &mut pushrod::cache::WidgetCache, parent: WidgetId) -> PropertyPanel {
-    let header = add_panel(
-        cache,
+    let heading = pushrod::font::Font::new("", 16, pushrod::color::FontStyle::NORMAL);
+    let title = cache.add_child(
         parent,
-        Box::new(Row::new().spacing(8)),
-        fill_width(),
-        400,
+        Box::new(Text::new("Properties").size(PANEL_W, 24).font(heading)),
     );
 
-    if let Some(panel) = cache.get_mut(header) {
-        panel.set_size(pushrod::geometry::size(400, ROW_H));
+    if let Some(widget) = cache.get_mut(title) {
+        widget.set_layout_params(fill_width());
     }
 
-    let heading = pushrod::font::Font::new("", 14, pushrod::color::FontStyle::BOLD);
-
-    cache.add_child(
-        header,
-        Box::new(Text::new("Properties").size(90, 20).font(heading)),
-    );
-
-    let status = cache.add_child(
-        header,
-        Box::new(Text::new("Click a widget on the page to select it.").size(280, 20)),
-    );
-    let reset = cache.add_child(header, Box::new(Button::new("Reset").size(70, ROW_H)));
     let container = cache.add_child(
         parent,
         Box::new(
             Container::new(
                 point(0, 0),
-                pushrod::geometry::size(400, LIST_H),
+                pushrod::geometry::size(PANEL_W, LIST_H),
                 pushrod::geometry::size(0, 0),
             )
             .content_mode(ContentSize::FollowWidth { fit_height: true }),
         ),
     );
 
+    // The list takes all the height the status and Reset do not.
     if let Some(widget) = cache.get_mut(container) {
-        widget.set_layout_params(fill_width());
+        widget.set_layout_params(LayoutParams {
+            stretch: 1,
+            alignment: Alignment::new(Align::Fill, Align::Fill),
+            ..LayoutParams::default()
+        });
     }
 
     let list = cache.get_as::<Container>(container).map_or(container, |c| {
@@ -386,8 +382,20 @@ pub fn build(cache: &mut pushrod::cache::WidgetCache, parent: WidgetId) -> Prope
     });
 
     if let Some(content) = cache.get_mut(list) {
-        content.set_layout(Box::new(Column::new().spacing(2).margins(Margin::all(4))));
+        content.set_layout(Box::new(Column::new().spacing(4).margins(Margin::all(0))));
     }
+
+    let mut note = Text::new("").size(PANEL_W, 20);
+
+    note.set_font_color(Color::GRAY);
+
+    let status = cache.add_child(parent, Box::new(note));
+
+    if let Some(widget) = cache.get_mut(status) {
+        widget.set_layout_params(fill_width());
+    }
+
+    let reset = cache.add_child(parent, Box::new(Button::new("Reset").size(100, 28)));
 
     PropertyPanel {
         reset,
@@ -474,14 +482,23 @@ fn add_row(state: &mut ShowcaseState, ui: &mut ShowcaseUi<'_>, property: &Proper
         state.panel.list,
         Box::new(Row::new().spacing(8)),
         fill_width(),
-        NAME_W + EDITOR_W + 8,
+        PANEL_W,
     );
 
     if let Some(panel) = cache.get_mut(row) {
-        panel.set_size(pushrod::geometry::size(NAME_W + EDITOR_W + 8, ROW_H));
+        panel.set_size(pushrod::geometry::size(PANEL_W, ROW_H));
     }
 
-    cache.add_child(row, Box::new(Text::new(&property.name).size(NAME_W, 20)));
+    // The name takes the space the editor leaves, so the editors line up on the right.
+    let name = cache.add_child(row, Box::new(Text::new(&property.name).size(NAME_W, 20)));
+
+    if let Some(widget) = cache.get_mut(name) {
+        widget.set_layout_params(LayoutParams {
+            stretch: 1,
+            alignment: Alignment::new(Align::Fill, Align::Center),
+            ..LayoutParams::default()
+        });
+    }
 
     let kind = editor_for(property);
     let editor = match kind {
@@ -532,19 +549,21 @@ fn draw_outline(state: &mut ShowcaseState, ui: &mut ShowcaseUi<'_>) {
     let origin = cache.absolute_origin(selected);
     let base = cache.absolute_origin(root);
     let (x, y) = (origin.x - base.x, origin.y - base.y);
-    let (w, h, t) = (extent.w, extent.h, OUTLINE);
-    let pad = t as i32;
+    // The outline sits GAP pixels outside the widget, like the dotted box in the mockup.
+    let (t, g) = (OUTLINE, GAP);
+    let (w, h) = (extent.w + 2 * g, extent.h + 2 * g);
+    let (x, y) = (x - g as i32, y - g as i32);
     let strips = [
-        (x - pad, y - pad, w + 2 * t, t),
-        (x - pad, y + h as i32, w + 2 * t, t),
-        (x - pad, y, t, h),
+        (x - t as i32, y - t as i32, w + 2 * t, t),
+        (x - t as i32, y + h as i32, w + 2 * t, t),
+        (x - t as i32, y, t, h),
         (x + w as i32, y, t, h),
     ];
 
     for (sx, sy, sw, sh) in strips {
         let mut strip = Frame::new().at(sx, sy).size(sw, sh).border_width(0);
 
-        strip.set_color(Color::BLUE);
+        strip.set_color(Color::BLACK);
         state
             .panel
             .outline
