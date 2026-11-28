@@ -143,7 +143,7 @@ pub const MOD_FILE: &str = "src/generated/mod.rs";
 ///
 /// [`ProjectError::Resources`] if the project has no resource file or the IDs cannot be
 /// generated (a name that is not a usable Rust identifier), the errors of
-/// [`match_handlers`](crate::codegen::wiring::match_handlers), and those of
+/// [`match_handlers`], and those of
 /// [`format_source`].
 pub fn render(
     project: &Project,
