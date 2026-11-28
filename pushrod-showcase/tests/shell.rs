@@ -30,7 +30,7 @@ use pushrod_widgets::text::Text;
 
 /// Builds the shell headlessly and runs the first idle pass.
 fn start(settings_path: Option<std::path::PathBuf>) -> (Engine<ShowcaseState>, ShowcaseState) {
-    let mut engine: Engine<ShowcaseState> = Engine::new(size(900, 640), 30);
+    let mut engine: Engine<ShowcaseState> = Engine::new(size(900, 1400), 30);
     let mut state = shell::build(&mut engine, settings_path);
 
     engine.run_idle(&mut state);
@@ -40,7 +40,7 @@ fn start(settings_path: Option<std::path::PathBuf>) -> (Engine<ShowcaseState>, S
 
 /// Draws frames until the layout settles, so widgets have their places.
 fn settle(engine: &mut Engine<ShowcaseState>) {
-    let mut backend = HeadlessBackend::new(size(900, 640));
+    let mut backend = HeadlessBackend::new(size(900, 1400));
 
     for _ in 0..3 {
         engine.widgets().draw_loop(&mut backend);

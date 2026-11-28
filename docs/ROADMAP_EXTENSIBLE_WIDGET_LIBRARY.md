@@ -2957,11 +2957,13 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![12.6 step set 1: The Form layout page at two window widths](mockups/12.6-1.png)
 
+**Status:** done (#300). New pages: Appearance, Focus and Tab, Dialogs and Alerts (Core); Form Layout (Layouts); Form from a Resource File, Strings and Images by ID (Forms and resources). Text and Row and Column already existed. The form page's width slider stands in for resizing the window. The forms come from `pushrod-showcase/resources/showcase.prsc`, written by `resources::build` (`cargo run -p pushrod-showcase --example make_resources`). Pages live flat in `src/pages/`, like the others, not in a `core/` folder.
+
 **Acceptance Criteria.**
 
-- A page for each MVP core feature listed
-- Layout pages reflow when resized
-- The forms page loads a real resource file
+- [x] A page for each MVP core feature listed
+- [x] Layout pages reflow when resized
+- [x] The forms page loads a real resource file
 
 **Parallelism / Dependencies.** Parallelizable. Requires 12.1 (#295), 5.7 (#118), 6.7 (#66), 6.10 (#153).
 

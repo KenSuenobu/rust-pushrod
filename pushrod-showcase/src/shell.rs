@@ -27,8 +27,11 @@ use pushrod::composite::TypedParts;
 use pushrod::engine::{Engine, Ui};
 use pushrod::event::Event;
 use pushrod::font::Font;
+use pushrod::geometry::{Rect, Size};
 use pushrod::geometry::{point, size};
-use pushrod::layout::{Align, Alignment, Column, LayoutParams, Margin, Row};
+use pushrod::layout::{
+    Align, Alignment, ChildInfo, Column, Layout, LayoutParams, Margin, Row, SizeHint,
+};
 use pushrod::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
 use pushrod_widgets::button::Button;
 use pushrod_widgets::container::{Container, ContentSize};
@@ -47,6 +50,69 @@ const LIST_W: u32 = 240;
 
 /// The callback handle type pages are built with.
 pub type ShowcaseUi<'a> = Ui<'a, ShowcaseState>;
+
+/// The `stretch` value that marks a child of the window as floating: a dialog that places itself
+/// and must stay out of the window's row.
+pub const FLOATING: u32 = u32::MAX;
+
+/// The window's layout: a row for the shell's columns, and no opinion about floating children.
+///
+/// A modal alert is added to the window and centers itself.  Left to a plain [`Row`] it would
+/// join the row, so the alert is marked with [`FLOATING`] and this layout leaves it alone.
+#[derive(Debug)]
+struct WindowLayout {
+    /// The row that places everything else.
+    row: Row,
+}
+
+impl WindowLayout {
+    /// Splits out the children the row places.
+    ///
+    /// # Arguments
+    ///
+    /// * `children` - Every visible child.
+    ///
+    /// # Returns
+    ///
+    /// The children that are not floating.
+    fn placed(children: &[ChildInfo]) -> Vec<ChildInfo> {
+        children
+            .iter()
+            .copied()
+            .filter(|child| child.params.stretch != FLOATING)
+            .collect()
+    }
+}
+
+impl Layout for WindowLayout {
+    /// Measures the children the row places.
+    ///
+    /// # Arguments
+    ///
+    /// * `children` - The visible children.
+    /// * `available` - The window's size.
+    ///
+    /// # Returns
+    ///
+    /// The row's size hint.
+    fn measure(&self, children: &[ChildInfo], available: Size) -> SizeHint {
+        self.row.measure(&Self::placed(children), available)
+    }
+
+    /// Places the children the row places; a floating child keeps its position.
+    ///
+    /// # Arguments
+    ///
+    /// * `children` - The visible children, floating ones last (they are added last).
+    /// * `bounds` - The window's area.
+    ///
+    /// # Returns
+    ///
+    /// One rectangle per placed child; floating children get none.
+    fn arrange(&self, children: &[ChildInfo], bounds: Rect) -> Vec<Rect> {
+        self.row.arrange(&Self::placed(children), bounds)
+    }
+}
 
 /// The IDs of the shell's own widgets.
 #[derive(Debug, Copy, Clone)]
@@ -199,7 +265,9 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
     let cache = engine.widgets();
 
     if let Some(root) = cache.get_mut(ROOT_WIDGET_ID) {
-        root.set_layout(Box::new(Row::new().spacing(0)));
+        root.set_layout(Box::new(WindowLayout {
+            row: Row::new().spacing(0),
+        }));
     }
 
     // Left: the search field above the page list.
@@ -319,6 +387,12 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
         showing_source: false,
     };
 
+    // The resource file and its form: loaded once, borrowed by the Forms page.
+    let _ = crate::resources::preload(engine);
+
+    // The resource file and its form: loaded once, borrowed by the Forms page.
+    let _ = crate::resources::preload(engine);
+
     rebuild_list(engine.widgets(), &mut state, "");
 
     engine.on_idle(|state, ui| {
@@ -350,6 +424,12 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
     engine.on_event(|state, ui, event| {
         property_panel::handle(state, ui, event);
         event_log::handle(state, ui, event);
+
+        if let (Some(root), Some(index)) = (state.page_root, state.selected)
+            && let Some(page) = state.registry.get(index)
+        {
+            page.handle_event(ui, root, event);
+        }
 
         if let Event::Toggled { id, checked } = event
             && *id == state.shell.source
@@ -467,6 +547,10 @@ pub fn select_page(state: &mut ShowcaseState, ui: &mut ShowcaseUi<'_>, index: us
     };
 
     if let Some(old) = state.page_root.take() {
+        if let Some(previous) = state.selected.and_then(|i| state.registry.get(i)) {
+            previous.leave(ui, old);
+        }
+
         let _ = ui.widgets().remove(old);
     }
 

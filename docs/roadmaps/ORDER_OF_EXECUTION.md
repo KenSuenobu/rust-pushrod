@@ -112,7 +112,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 73 | [#297](https://github.com/KenSuenobu/rust-pushrod/issues/297) | pushrod: [12.3] Showcase property panel: change any property live |
 | ✅ 74 | [#298](https://github.com/KenSuenobu/rust-pushrod/issues/298) | pushrod: [12.4] Showcase event log |
 | ✅ 75 | [#299](https://github.com/KenSuenobu/rust-pushrod/issues/299) | pushrod: [12.5] Showcase source view: the code for each page |
-| 76 | [#300](https://github.com/KenSuenobu/rust-pushrod/issues/300) | pushrod: [12.6] Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources |
+| ✅ 76 | [#300](https://github.com/KenSuenobu/rust-pushrod/issues/300) | pushrod: [12.6] Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources |
 | 77 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
 | **78** | checkpoint | **Pushrod Showcase released** |
 | 79 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
@@ -1481,9 +1481,9 @@ One application that shows every widget and core feature live, with a property p
 
 **Show on video:**
 
-- [ ] A page for each MVP core feature listed
-- [ ] Layout pages reflow when resized
-- [ ] The forms page loads a real resource file
+- [x] A page for each MVP core feature listed
+- [x] Layout pages reflow when resized
+- [x] The forms page loads a real resource file
 
 ### Step 77: Showcase in CI: scripted tour, golden screenshots, and documentation images
 
