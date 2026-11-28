@@ -56,6 +56,7 @@ flowchart TD
 | `MnemonicConflict { key, ids }` | Debug builds only: two or more widgets in the active form declare the mnemonic `key`; the lowest ID wins. |
 | `AccessibilityChanged { active }` | Assistive technology (a screen reader) started (`true`) or stopped (`false`) using the window; the accessibility tree is built only while active. See [Accessibility](../concepts/accessibility.md). |
 | `AccessActionPerformed { id, action }` | An accessibility action (`Click`, `Focus`, `SetValue`, `SetText`) was performed on the widget `id`. |
+| `FormLoaded { form, root, widgets }` | A form was loaded with `Engine::load_form`; `root` is the widget made from the form's root object and `widgets` is how many widgets it created. See [Loading forms](../forms/loading-forms.md). |
 | `Error { error }` | Something failed while the loop was running (a font would not load, a texture could not be created). The loop keeps going. See [Errors](../guides/creating-an-application.md#errors). |
 
 More variants are added by the features that need them (menus, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.

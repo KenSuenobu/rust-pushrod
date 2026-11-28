@@ -64,9 +64,10 @@ use crate::event::{
     engine_filter_accepts,
 };
 use crate::font::FontRegistry;
+use crate::form::{FormFile, FormHandle};
 use crate::geometry::{Point, Rect, Size};
 use crate::input::{InputEvent, Key, Modifiers};
-use crate::registry::PropertyValue;
+use crate::registry::{PropertyValue, WidgetRegistry};
 use crate::root_widget::RootWidget;
 use crate::timer::TimerSchedule;
 use crate::widget::{Widget, WidgetId};
@@ -520,6 +521,7 @@ pub struct Engine<S = ()> {
     widget_cache: WidgetCache,
     event_mask: EventMask,
     registry: Registry<S>,
+    widget_registry: WidgetRegistry,
     next_callback_id: u64,
     event_callbacks: Vec<EventCallback<S>>,
     engine_callbacks: Vec<(Option<Vec<EngineEventKind>>, EngineEventCallback<S>)>,
@@ -590,6 +592,7 @@ impl<S> Engine<S> {
             widget_cache,
             event_mask: EventMask::ALL,
             registry: HashMap::new(),
+            widget_registry: WidgetRegistry::new(),
             next_callback_id: 0,
             event_callbacks: Vec::new(),
             engine_callbacks: Vec::new(),
@@ -1219,6 +1222,70 @@ impl<S> Engine<S> {
         widget: W,
     ) -> Result<WidgetId> {
         self.widget_cache.try_add_child(parent, Box::new(widget))
+    }
+
+    /// Returns the registry that creates widgets by type name when a form is loaded.
+    ///
+    /// # Returns
+    ///
+    /// The [`WidgetRegistry`]; it starts empty.  Add the standard widgets with
+    /// `pushrod_widgets::register`.
+    pub fn widget_registry(&mut self) -> &mut WidgetRegistry {
+        &mut self.widget_registry
+    }
+
+    /// Loads a form from a form file, as a child of the root `Widget`.
+    ///
+    /// Creates each object through the [`widget_registry`](Engine::widget_registry), applies its
+    /// properties, and queues [`EngineEvent::FormLoaded`].  See [`form::loader`](crate::form::loader).
+    ///
+    /// # Arguments
+    ///
+    /// * `file` - The form file.
+    /// * `name` - The form's name in the file.
+    ///
+    /// # Returns
+    ///
+    /// The [`FormHandle`] mapping object numbers and symbol names to widget IDs.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error naming the object and property if the file is invalid, the form is
+    /// missing, a widget type is not registered, or a property is wrong.  The window is unchanged
+    /// on error.
+    pub fn load_form(&mut self, file: &FormFile, name: &str) -> Result<FormHandle> {
+        self.load_form_into(crate::widget::ROOT_WIDGET_ID, file, name)
+    }
+
+    /// Loads a form as a child of a given `Widget`, such as a tab page or a container.
+    ///
+    /// # Arguments
+    ///
+    /// * `parent` - The parent `Widget`.
+    /// * `file` - The form file.
+    /// * `name` - The form's name in the file.
+    ///
+    /// # Returns
+    ///
+    /// The [`FormHandle`] for the new widgets.
+    ///
+    /// # Errors
+    ///
+    /// As [`load_form`](Engine::load_form), and [`Error::UnknownWidget`](crate::error::Error::UnknownWidget)
+    /// if `parent` does not exist.
+    pub fn load_form_into(
+        &mut self,
+        parent: WidgetId,
+        file: &FormFile,
+        name: &str,
+    ) -> Result<FormHandle> {
+        crate::form::loader::load(
+            &mut self.widget_cache,
+            &self.widget_registry,
+            parent,
+            file,
+            name,
+        )
     }
 
     /// Returns the window's widget tree.

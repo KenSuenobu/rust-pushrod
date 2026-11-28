@@ -22,7 +22,9 @@ implemented by `pushrod::form` (`FormFile::to_bytes` and `FormFile::from_bytes`)
   **must** reject a file whose links, indexes, or offsets are inconsistent instead of panicking.
 - A reader **must** skip property tags it does not know, so new properties do not break old
   readers.
-- The loader, writer, and generated ID constants are roadmap items 6.4 through 6.6.
+- `Engine::load_form` builds a form through the widget registry, all or nothing, errors name the
+  object and property, and it emits `FormLoaded { form, root, widgets }`.
+- The writer and generated ID constants are roadmap items 6.5 and 6.6.
 
 The guide is [Form file format](../../pushrod-docs/docs/forms/form-file-format.md).
 Conformance: `tests/conformance/forms.rs`.

@@ -259,4 +259,4 @@ Every workaround above marks something the library should make easier. Each is a
 
 ## Next: loading the window from a form file
 
-In the v0.2 stage the same window will be loaded from a form file instead of being built in code. That waits for the [form loader](https://github.com/KenSuenobu/rust-pushrod/issues/63).
+In the v0.2 stage the same window will be loaded from a form file instead of being built in code. The [form loader](../forms/loading-forms.md) is ready; the application still needs a form file written by the form writer.
