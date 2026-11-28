@@ -1787,6 +1787,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 ### 6.6 (#65): Generate ID constants from a form file
 
+**Status:** done (#65). `pushrod::form::codegen`: `generate_ids(&FormFile)` returns the source, `write_ids(file, out_rs)` (for `build.rs`, rewrites only on change) writes it, and the `pushrod-form-ids <form-file> <out.rs>` command does the same. One `pub mod` per form (`snake_case`) with one `pub const NAME: FormIndex` per ID symbol of an object in that form; deterministic and rustfmt-clean; unusable or colliding names are errors. New `FormIndex` newtype and `FormHandle::widget(FormIndex)`. `pushrod-widgets/build.rs` generates the constants the `form` example uses. No engine event (offline build step). Docs: `pushrod-docs/docs/forms/generate-id-constants-from-a-form-file.md`.
+
 **Problem Statement.** Callbacks attach by ID; names keep code readable, and renaming in the designer should break the build rather than silently attach to the wrong widget.
 
 **Solution / Scope.** `pushrod::form::codegen::write_ids(file, out_rs)` for build.rs plus a small CLI; generates `pub mod main { pub const OK: FormIndex = FormIndex(5); }`. Extended to every resource kind, with typed IDs, by 6.12 (#155).
