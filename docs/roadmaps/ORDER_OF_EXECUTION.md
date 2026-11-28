@@ -119,7 +119,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 80 | [#164](https://github.com/KenSuenobu/rust-pushrod/issues/164) | chassis: [2.1] Project model |
 | ✅ 81 | [#165](https://github.com/KenSuenobu/rust-pushrod/issues/165) | chassis: [6.1] Code generation rules |
 | ✅ 82 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
-| 83 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
+| ✅ 83 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
 | **84** | checkpoint | **Chassis M1: core without UI complete** |
 | 85 | [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) | pushrod: [9.5] Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons |
 | 86 | [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) | pushrod: [9.8] Drag and drop within the application |
@@ -1571,8 +1571,8 @@ Project model, resource access, code generation, and a command-line generator, a
 
 **Show on video:**
 
-- [ ] Output identical to what the UI generates
-- [ ] `chassis check` exits non-zero on problems
+- [x] Output identical to what the UI generates
+- [x] `chassis check` exits non-zero on problems
 
 ### Step 84: Checkpoint: Chassis M1: core without UI complete
 
