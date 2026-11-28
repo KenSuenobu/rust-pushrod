@@ -1,0 +1,2 @@
+# Golden files compare byte for byte with generated output, which always uses \n.
+chassis/tests/wired/generated/*.rs text eol=lf

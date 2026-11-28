@@ -14,10 +14,11 @@ name = "chassis"
 path = "src/lib.rs"
 
 [dependencies]
-pushrod = { path = "..", version = "0.3.3" }
+pushrod = { path = "..", version = "0.3.4" }
 toml_edit = "0.25"
 tree-sitter = "0.27"
 tree-sitter-rust = "0.24"
 
 [dev-dependencies]
 tempfile = "3"
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.4" }

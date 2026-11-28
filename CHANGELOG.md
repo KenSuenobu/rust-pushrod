@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-11-27
+
+### Added
+
+- [#166] chassis: generated event wiring registers handlers by widget ID [kenji]
+
 ## [0.3.3] - 2026-11-27
 
 ### Added
