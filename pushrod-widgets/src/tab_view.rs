@@ -69,6 +69,7 @@
 //! ```
 
 use pushrod::accessibility::{AccessInfo, Role};
+use pushrod::appearance::StateStyle;
 use pushrod::cache::WidgetCache;
 use pushrod::color::Color;
 use pushrod::composite::{Composite, PartList, PartsBuilder, TypedParts};
@@ -77,7 +78,7 @@ use pushrod::event::{Event, EventCtx, EventMask, Propagation};
 use pushrod::geometry::{Rect, point, size};
 use pushrod::input::{Key, Modifiers};
 use pushrod::paint::{self, Painter};
-use pushrod::widget::{Behavior, Widget, WidgetCore, WidgetId};
+use pushrod::widget::{Behavior, VisualState, Widget, WidgetCore, WidgetId};
 
 use crate::button::Button;
 use crate::panel::Panel;
@@ -102,6 +103,15 @@ const TAB_MIN_WIDTH: u32 = 56;
 
 /// The width of the border drawn around the pages, in pixels.
 const BORDER: u32 = 1;
+
+/// How much lower the tabs that are not shown sit than the shown tab, in pixels.
+const TAB_RAISE: u32 = 3;
+
+/// The tabs that are not shown, and the default for the view and the shown tab.
+const TAB_IDLE: Color = Color::RGB(200, 200, 200);
+
+/// The default color of the view, its pages, and the shown tab.
+const PAGE_COLOR: Color = Color::RGB(235, 235, 235);
 
 /// Returns the width a tab is given for its label.
 ///
@@ -153,6 +163,8 @@ pub struct TabView {
     reported: Option<WidgetId>,
     /// The width of each tab, from its label, as last arranged.
     widths: Vec<u32>,
+    /// The widths the outlines were last drawn with.
+    painted_widths: Vec<u32>,
 }
 
 impl Widget for TabView {
@@ -192,28 +204,56 @@ impl Widget for TabView {
     fn paint(&self, p: &mut dyn Painter) {
         let frame = self.get_size();
         let style = self.style();
+        let color = style.border_color.unwrap_or(Color::BLACK);
+        let line = |p: &mut dyn Painter, x: i32, y: i32, w: u32, h: u32| {
+            p.fill_rect(Rect::new(x, y, w, h), color);
+        };
 
         paint::fill(p, style.background.unwrap_or(self.get_color()));
 
-        if frame.h <= TAB_HEIGHT || frame.w == 0 {
+        if frame.h <= TAB_HEIGHT || frame.w < 2 {
             return;
         }
 
-        let color = style.border_color.unwrap_or(Color::BLACK);
-        let top = TAB_HEIGHT - BORDER;
-        let height = frame.h - top;
-        let edge = BORDER.min(frame.w);
+        // The border around the pages: left, right, and bottom whole; the top is broken under
+        // the shown tab, which is open at the bottom and joins the page.
+        let top = (TAB_HEIGHT - 1) as i32;
+        let (w, h) = (frame.w, frame.h);
+        let shown = self.selected_page();
+        let mut gap = None;
 
-        p.fill_rect(Rect::new(0, top as i32, frame.w, BORDER), color);
-        p.fill_rect(Rect::new(0, top as i32, edge, height), color);
-        p.fill_rect(
-            Rect::new((frame.w - edge) as i32, top as i32, edge, height),
-            color,
-        );
-        p.fill_rect(
-            Rect::new(0, (frame.h - BORDER.min(height)) as i32, frame.w, BORDER),
-            color,
-        );
+        line(p, 0, top, 1, h - top as u32);
+        line(p, w as i32 - 1, top, 1, h - top as u32);
+        line(p, 0, h as i32 - 1, w, 1);
+
+        // Each tab's outline: top, left, and right; the bottom is the page's top edge.
+        for (i, rect) in self.tab_rects().into_iter().enumerate() {
+            let raised = shown == Some(i);
+            let (x, y, tw) = (rect.x, rect.y, rect.w);
+
+            line(p, x, y, tw, 1);
+            line(p, x, y, 1, top as u32 - y as u32 + 1);
+            line(p, x + tw as i32 - 1, y, 1, top as u32 - y as u32 + 1);
+
+            if raised {
+                gap = Some((x + 1, tw.saturating_sub(2)));
+            }
+        }
+
+        // The page's top edge, but not under the shown tab.
+        match gap {
+            Some((gx, gw)) => {
+                line(p, 0, top, gx.max(0) as u32, 1);
+                line(
+                    p,
+                    gx + gw as i32,
+                    top,
+                    (w as i32 - gx - gw as i32).max(0) as u32,
+                    1,
+                );
+            }
+            None => line(p, 0, top, w, 1),
+        }
     }
 
     /// Switches pages on Ctrl+Tab (next) and Ctrl+Shift+Tab (previous), wrapping around, when the
@@ -350,6 +390,13 @@ impl Composite for TabView {
             self.request_arrange_parts();
         }
 
+        // The outlines depend on the widths and on which tab is shown.
+        if self.reported != Some(shown) || self.painted_widths != self.widths {
+            self.painted_widths = self.widths.clone();
+            self.set_invalidated(true);
+            self.request_arrange_parts();
+        }
+
         for &page in &parts.pages {
             if let Some(widget) = cache.get_mut(page)
                 && widget.is_hidden() != (page != shown)
@@ -392,14 +439,28 @@ impl Composite for TabView {
             frame.w.saturating_sub(2 * BORDER),
             frame.h.saturating_sub(TAB_HEIGHT + BORDER),
         );
+        let shown = self.selected_page();
         let mut placed = Vec::new();
-        let mut x = 0;
 
-        for (i, id) in self.parts.list(TAB_LIST).into_iter().enumerate() {
-            let width = self.widths.get(i).copied().unwrap_or(TAB_MIN_WIDTH);
+        // A tab's button sits inside its outline; the shown tab reaches down over the page's
+        // top edge.
+        for (i, (id, rect)) in self
+            .parts
+            .list(TAB_LIST)
+            .into_iter()
+            .zip(self.tab_rects())
+            .enumerate()
+        {
+            let height = if shown == Some(i) {
+                rect.h - 1
+            } else {
+                rect.h - 2
+            };
 
-            placed.push((id, Rect::new(x, 0, width, TAB_HEIGHT)));
-            x += width as i32;
+            placed.push((
+                id,
+                Rect::new(rect.x + 1, rect.y + 1, rect.w.saturating_sub(2), height),
+            ));
         }
 
         placed.extend(self.parts.list(PAGE_LIST).into_iter().map(|id| (id, body)));
@@ -440,13 +501,16 @@ impl TypedParts for TabView {
     }
 }
 
-/// Creates a page: a transparent panel that fills the area under the tabs.
+/// Creates a page: a panel in the view's color that fills the area under the tabs.
 ///
 /// # Returns
 ///
 /// The panel.
 fn new_page() -> Panel {
-    Panel::new()
+    let mut page = Panel::new();
+
+    page.set_color(PAGE_COLOR);
+    page
 }
 
 /// Creates a tab: a focusable toggle button, inverted while its page is shown.
@@ -465,10 +529,54 @@ fn new_tab(title: &str) -> Button {
 
     // Focusable, so the keyboard reaches the tabs (Tab, then Space or Return, or Ctrl+Tab).
     tab.set_behavior(tab.behavior() | Behavior::FOCUSABLE);
+
+    // The view draws each tab's outline, so the button draws none: gray when idle, the page's
+    // color when shown.
+    for (state, color) in [
+        (VisualState::empty(), TAB_IDLE),
+        (VisualState::CHECKED, PAGE_COLOR),
+    ] {
+        tab.set_style(
+            state,
+            StateStyle {
+                background: Some(color),
+                foreground: Some(Color::BLACK),
+                border_width: Some(0),
+                ..StateStyle::default()
+            },
+        );
+    }
+
     tab
 }
 
 impl TabView {
+    /// Returns each tab's outline, left to right: the shown tab is taller and open at the
+    /// bottom, the others sit lower.
+    ///
+    /// # Returns
+    ///
+    /// The outlines, in the view's coordinates.
+    fn tab_rects(&self) -> Vec<Rect> {
+        let shown = self.selected_page();
+        let mut x = 0;
+
+        (0..self.parts.list(TAB_LIST).len())
+            .map(|i| {
+                let width = self.widths.get(i).copied().unwrap_or(TAB_MIN_WIDTH);
+                let (y, h) = if shown == Some(i) {
+                    (0, TAB_HEIGHT + 1)
+                } else {
+                    (TAB_RAISE, TAB_HEIGHT - TAB_RAISE)
+                };
+                let rect = Rect::new(x, y as i32, width, h);
+
+                x += width as i32;
+                rect
+            })
+            .collect()
+    }
+
     /// Creates a tab view with no pages, 200 by 150 pixels at the upper left-hand corner of its
     /// parent.  Add pages with [`TabView::with_page`] before it is added to a window, or
     /// [`TabView::add_page`] after.
@@ -481,7 +589,7 @@ impl TabView {
 
         core.set_event_mask(EventMask::KEYBOARD);
 
-        Self {
+        let mut view = Self {
             core,
             parts: PartList::new(),
             pending: Vec::new(),
@@ -489,7 +597,11 @@ impl TabView {
             index_hint: 0,
             reported: None,
             widths: Vec::new(),
-        }
+            painted_widths: Vec::new(),
+        };
+
+        view.set_color(PAGE_COLOR);
+        view
     }
 
     /// Sets the upper left-hand corner, relative to the parent `Widget`.

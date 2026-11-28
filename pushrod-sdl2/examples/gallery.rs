@@ -739,20 +739,22 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         .unwrap_or_default();
 
     if let [general, advanced, about] = pages[..] {
-        engine.add_child_widget(
-            general,
-            CheckBox::new("Check for updates").at(10, 10).size(200, 20),
-        );
-        engine.add_child_widget(
-            general,
-            CheckBox::new("Show hints").at(10, 36).size(200, 20),
-        );
-        engine.add_child_widget(advanced, Text::new("Cache size").at(10, 10).size(120, 20));
+        // Controls on a page take the page's color, so no white boxes show.
+        let page_color = Color::RGB(235, 235, 235);
+        let mut updates = CheckBox::new("Check for updates").at(10, 10).size(200, 20);
+        let mut hints = CheckBox::new("Show hints").at(10, 36).size(200, 20);
+        let mut cache = Text::new("Cache size").at(10, 10).size(120, 20);
+        let mut version = Text::new("Sample Settings 1.0").at(10, 10).size(200, 20);
+
+        updates.set_color(page_color);
+        hints.set_color(page_color);
+        cache.set_color(page_color);
+        version.set_color(page_color);
+        engine.add_child_widget(general, updates);
+        engine.add_child_widget(general, hints);
+        engine.add_child_widget(advanced, cache);
         engine.add_child_widget(advanced, TextField::new().at(10, 36).size(120, 24));
-        engine.add_child_widget(
-            about,
-            Text::new("Sample Settings 1.0").at(10, 10).size(200, 20),
-        );
+        engine.add_child_widget(about, version);
     }
 
     let quit_id = engine.add_child_widget(

@@ -10,7 +10,7 @@ description: Tabs above a stack of pages, one page shown at a time, switched by 
 
 It is a [composite widget](../guides/composite-widgets.md). Each page is a `Panel` and each tab is a toggle `Button`, all with their own IDs, so you add controls to a page and restyle a tab with the normal API.
 
-![A tab view with tabs General, Advanced, and About; General is shown in black and its page holds two check boxes](/img/screenshots/tab-view.png)
+![A tab view with tabs General, Advanced, and About; General is raised and joined to its page, which holds two check boxes](/img/screenshots/tab-view.png)
 
 ```mermaid
 flowchart LR
@@ -113,8 +113,8 @@ Every widget also has the methods of the `Widget` trait: `get_id`, `get_parent`,
 
 | Name | Field of `TabViewParts` | Widget | Default look |
 |---|---|---|---|
-| `"tab:0"`, `"tab:1"`, ... | `tabs` | [`Button`](button.md) (toggle) | A white tab with black text; the shown page's tab is black with white text. Each is 24 pixels high and as wide as its label needs. |
-| `"page:0"`, `"page:1"`, ... | `pages` | [`Panel`](panel.md) | Transparent, filling the area under the tabs inside a one-pixel black border. Only the shown page is visible. |
+| `"tab:0"`, `"tab:1"`, ... | `tabs` | [`Button`](button.md) (toggle) | A light gray tab with black text and a one-pixel black outline. The shown tab is raised, takes the page's color, and is open at the bottom so it joins the page. Each tab is as wide as its label needs. |
+| `"page:0"`, `"page:1"`, ... | `pages` | [`Panel`](panel.md) | Light gray (the view's color), filling the area under the tabs inside a one-pixel black border. Only the shown page is visible. Controls you add should share its color. |
 
 Every part can be retrieved and restyled with the usual calls, such as `ui.get_mut::<Button>(tab)` for a tab's font, color, and text, or `set_color` on a page:
 
