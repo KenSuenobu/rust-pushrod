@@ -107,7 +107,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 68 | [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) | pushrod: [6.12] Typed resource IDs: generated constants per resource kind |
 | ✅ 69 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
 | **70** | checkpoint | **Pushrod v0.2 released: the Pushrod MVP is complete** |
-| 71 | [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) | pushrod: [12.1] Showcase application shell |
+| ✅ 71 | [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) | pushrod: [12.1] Showcase application shell |
 | 72 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
 | 73 | [#297](https://github.com/KenSuenobu/rust-pushrod/issues/297) | pushrod: [12.3] Showcase property panel: change any property live |
 | 74 | [#298](https://github.com/KenSuenobu/rust-pushrod/issues/298) | pushrod: [12.4] Showcase event log |
@@ -1400,9 +1400,9 @@ One application that shows every widget and core feature live, with a property p
 
 **Show on video:**
 
-- [ ] `cargo run -p pushrod-showcase` opens the shell with grouped pages
-- [ ] Search filters the page list
-- [ ] Adding a page needs only an implementation of `Page` and one registration line
+- [x] `cargo run -p pushrod-showcase` opens the shell with grouped pages
+- [x] Search filters the page list
+- [x] Adding a page needs only an implementation of `Page` and one registration line
 - [ ] Gallery example content available as pages
 
 ### Step 72: Showcase pages for every standard widget, with a completeness test

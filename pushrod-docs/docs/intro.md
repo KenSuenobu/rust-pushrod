@@ -28,6 +28,7 @@ Every built-in widget, and its states, in the widget gallery (`cargo run -p push
 - [Creating an application](./guides/creating-an-application.md): the engine, application state, and the widget tree.
 - [Handling events](./guides/handling-events.md): how events flow and how callbacks work.
 - [Creating widgets](./guides/creating-widgets.md): write and test your own widget.
+- [The Pushrod Showcase](/guides/showcase): a searchable demo of the widgets; run `cargo run -p pushrod-showcase`.
 - [Widgets](/widgets): every built-in widget, one page each. The gallery example shows them all in one window; run `cargo run -p pushrod-sdl2 --example gallery`, or add `-- --screenshot <file.png>` to save a frame.
 
 Pushrod is being modernized; see the [roadmap](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md) for what's planned, and the [widget roadmaps](https://github.com/KenSuenobu/rust-pushrod/blob/main/docs/widgets/README.md) for how each planned widget will look and respond.
