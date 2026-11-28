@@ -1479,9 +1479,29 @@ pub struct EventCtx {
     animating: Vec<WidgetId>,
     clipboard: Option<String>,
     clipboard_write: Option<String>,
+    modifiers: Modifiers,
 }
 
 impl EventCtx {
+    /// Returns the modifier keys held while the event happened, for a `Widget` that reacts to
+    /// Shift-click or Ctrl-click (pointer events carry no modifiers of their own).
+    ///
+    /// # Returns
+    ///
+    /// The modifiers last reported by the backend or by a key event.
+    pub fn modifiers(&self) -> Modifiers {
+        self.modifiers
+    }
+
+    /// Records the modifier keys held, for [`EventCtx::modifiers`].
+    ///
+    /// # Arguments
+    ///
+    /// * `modifiers` - The modifiers held.
+    pub(crate) fn set_modifiers(&mut self, modifiers: Modifiers) {
+        self.modifiers = modifiers;
+    }
+
     /// Returns the text on the system clipboard, for a `Widget` that pastes.
     ///
     /// The engine refreshes a copy of the clipboard while a text editor has the keyboard focus,

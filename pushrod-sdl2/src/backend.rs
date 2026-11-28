@@ -478,6 +478,17 @@ impl Backend for Sdl2Backend {
             &mut self.drop_pending,
         );
 
+        // Pointer events carry no modifiers, so report the keys held before each press.
+        if events
+            .iter()
+            .any(|e| matches!(e, InputEvent::MouseDown { .. }))
+        {
+            let keys = self.pump.keyboard_state();
+            let held = crate::input::scancode_modifiers(|code| keys.is_scancode_pressed(code));
+
+            events = crate::input::with_modifiers(events, held);
+        }
+
         // SDL2 has no scale-change event: moving the window to a display with another pixel
         // density changes its drawable size, so the scale is compared after every poll.
         let scale = Self::read_scale(&self.canvas);

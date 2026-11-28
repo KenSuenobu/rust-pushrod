@@ -184,6 +184,10 @@ pub enum InputEvent {
     },
     /// Another thread asked the loop to wake; see [`Backend::waker`](crate::backend::Backend::waker).
     Wake,
+    /// The modifier keys held right now.  A backend sends it before a mouse press, because
+    /// pointer events carry no modifiers; `Widget`s read them with
+    /// [`EventCtx::modifiers`](crate::event::EventCtx::modifiers) (Shift-click, Ctrl-click).
+    ModifiersChanged(Modifiers),
 }
 
 impl InputEvent {
@@ -201,6 +205,7 @@ impl InputEvent {
             | InputEvent::ScaleChanged(_)
             | InputEvent::AccessibilityActivated(_)
             | InputEvent::AccessAction { .. }
+            | InputEvent::ModifiersChanged(_)
             | InputEvent::FilesDropped { .. } => None,
             InputEvent::MouseDown { .. } | InputEvent::MouseUp { .. } => {
                 Some(EventMask::POINTER_BUTTONS)

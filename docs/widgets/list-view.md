@@ -53,11 +53,11 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Smooth with 10,000 rows
-- [ ] Selection modes and keyboard navigation
-- [ ] Model change notifications update the view
-- [ ] Parts are retrievable and modifiable as described
-- [ ] Range-based model notifications; row widgets recycled while scrolling
+- [x] Smooth with 10,000 rows
+- [x] Selection modes and keyboard navigation
+- [x] Model change notifications update the view
+- [x] Parts are retrievable and modifiable as described
+- [x] Range-based model notifications; row widgets recycled while scrolling
 
 ## Depends on
 

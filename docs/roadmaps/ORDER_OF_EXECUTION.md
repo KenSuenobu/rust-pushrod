@@ -125,7 +125,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 86 | [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) | pushrod: [9.8] Drag and drop within the application |
 | ✅ 87 | [#81](https://github.com/KenSuenobu/rust-pushrod/issues/81) | pushrod: [1.15] Undo and redo command stack |
 | ✅ 88 | [#59](https://github.com/KenSuenobu/rust-pushrod/issues/59) | pushrod: [5.4] Autoresizing (keep margins or stretch on resize) |
-| 89 | [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) | pushrod: [4.5] List view |
+| ✅ 89 | [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) | pushrod: [4.5] List view |
 | 90 | [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) | pushrod: [4.4] Tab view |
 | 91 | [#92](https://github.com/KenSuenobu/rust-pushrod/issues/92) | pushrod: [4.9] Table view |
 | 92 | [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) | pushrod: [3.10] Expander (collapsible section) |
@@ -1654,11 +1654,11 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 
 **Show on video:**
 
-- [ ] Smooth with 10,000 rows
-- [ ] Selection modes and keyboard navigation
-- [ ] Model change notifications update the view
-- [ ] Parts are retrievable and modifiable as described
-- [ ] Range-based model notifications; row widgets recycled while scrolling
+- [x] Smooth with 10,000 rows
+- [x] Selection modes and keyboard navigation
+- [x] Model change notifications update the view
+- [x] Parts are retrievable and modifiable as described
+- [x] Range-based model notifications; row widgets recycled while scrolling
 
 ### Step 90: Tab view
 

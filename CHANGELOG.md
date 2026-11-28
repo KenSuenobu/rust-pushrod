@@ -15,11 +15,17 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
-## [0.3.10] - 2026-11-28
+## [0.3.11] - 2026-11-28
 
 ### Fixed
 
 - [0] Windows resize live while the edge is dragged, via an SDL2 event watch, instead of stretching until release, presenting with vsync so the window does not wobble [kenji]
+
+## [0.3.10] - 2026-11-28
+
+### Added
+
+- [#52] List view: virtualized, model-backed rows with selection and type-ahead [kenji]
 
 ## [0.3.9] - 2026-11-28
 
