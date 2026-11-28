@@ -73,6 +73,6 @@ impl Page for TextFieldPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("text_field.rs")
+        crate::source_view::build_source("text_field.rs")
     }
 }

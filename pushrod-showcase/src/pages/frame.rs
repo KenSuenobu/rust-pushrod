@@ -62,6 +62,6 @@ impl Page for FramePage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("frame.rs")
+        crate::source_view::build_source("frame.rs")
     }
 }

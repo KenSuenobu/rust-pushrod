@@ -92,6 +92,6 @@ impl Page for ImageWidgetPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("image_widget.rs")
+        crate::source_view::build_source("image_widget.rs")
     }
 }

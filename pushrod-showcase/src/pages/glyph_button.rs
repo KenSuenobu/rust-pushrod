@@ -85,6 +85,6 @@ impl Page for GlyphButtonPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("glyph_button.rs")
+        crate::source_view::build_source("glyph_button.rs")
     }
 }

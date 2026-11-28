@@ -93,6 +93,6 @@ impl Page for SliderPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("slider.rs")
+        crate::source_view::build_source("slider.rs")
     }
 }

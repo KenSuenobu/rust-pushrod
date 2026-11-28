@@ -72,6 +72,6 @@ impl Page for RowAndColumnPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("row_and_column.rs")
+        crate::source_view::build_source("row_and_column.rs")
     }
 }

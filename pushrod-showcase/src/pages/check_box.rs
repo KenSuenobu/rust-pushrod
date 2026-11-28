@@ -90,6 +90,6 @@ impl Page for CheckBoxPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("check_box.rs")
+        crate::source_view::build_source("check_box.rs")
     }
 }

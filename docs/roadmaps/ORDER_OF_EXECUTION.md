@@ -111,7 +111,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 72 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
 | ✅ 73 | [#297](https://github.com/KenSuenobu/rust-pushrod/issues/297) | pushrod: [12.3] Showcase property panel: change any property live |
 | ✅ 74 | [#298](https://github.com/KenSuenobu/rust-pushrod/issues/298) | pushrod: [12.4] Showcase event log |
-| 75 | [#299](https://github.com/KenSuenobu/rust-pushrod/issues/299) | pushrod: [12.5] Showcase source view: the code for each page |
+| ✅ 75 | [#299](https://github.com/KenSuenobu/rust-pushrod/issues/299) | pushrod: [12.5] Showcase source view: the code for each page |
 | 76 | [#300](https://github.com/KenSuenobu/rust-pushrod/issues/300) | pushrod: [12.6] Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources |
 | 77 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
 | **78** | checkpoint | **Pushrod Showcase released** |
@@ -1465,9 +1465,9 @@ One application that shows every widget and core feature live, with a property p
 
 **Show on video:**
 
-- [ ] Every page shows its real source
-- [ ] Copy places it on the clipboard
-- [ ] Documentation pages include the same snippets
+- [x] Every page shows its real source
+- [x] Copy places it on the clipboard
+- [x] Documentation pages include the same snippets
 
 ### Step 76: Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources
 

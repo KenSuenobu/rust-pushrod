@@ -20,6 +20,7 @@ use crate::pages;
 use crate::property_panel::{self, PickRequest, PropertyPanel};
 use crate::registry::Registry;
 use crate::settings;
+use crate::source_view::{self, CopyState};
 use pushrod::cache::WidgetCache;
 use pushrod::color::{Color, FontStyle};
 use pushrod::composite::TypedParts;
@@ -31,6 +32,7 @@ use pushrod::layout::{Align, Alignment, Column, LayoutParams, Margin, Row};
 use pushrod::widget::{ROOT_WIDGET_ID, Widget, WidgetId};
 use pushrod_widgets::button::Button;
 use pushrod_widgets::container::{Container, ContentSize};
+use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::panel::Panel;
 use pushrod_widgets::text::Text;
 use pushrod_widgets::text_field::TextField;
@@ -57,6 +59,10 @@ pub struct Shell {
     pub title: WidgetId,
     /// The selected page's one-line description.
     pub description: WidgetId,
+    /// The **Source** toggle that swaps the page for its code.
+    pub source: WidgetId,
+    /// The **Copy** button, shown while the code is.
+    pub copy: WidgetId,
     /// The content of the page area's scrolling container.
     pub page_area: WidgetId,
 }
@@ -83,6 +89,8 @@ pub struct ShowcaseState {
     pub panel: PropertyPanel,
     /// The event log and its entries.
     pub log: EventLog,
+    /// Whether the code of the page is shown instead of the page.
+    pub showing_source: bool,
 }
 
 /// Layout parameters that fill the slot in both directions.
@@ -229,7 +237,36 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
         400,
     );
     let heading = Font::new("", 20, FontStyle::BOLD);
-    let title = cache.add_child(right, Box::new(Text::new("").size(400, 28).font(heading)));
+    let head = add_panel(
+        cache,
+        right,
+        Box::new(Row::new().spacing(8)),
+        fill_width(),
+        400,
+    );
+
+    if let Some(panel) = cache.get_mut(head) {
+        panel.set_size(size(400, 28));
+    }
+
+    let title = cache.add_child(head, Box::new(Text::new("").size(400, 28).font(heading)));
+    let copy = cache.add_child(head, Box::new(source_view::copy_button()));
+    let source = cache.add_child(head, Box::new(Button::new("Source").size(72, 24).toggle()));
+
+    if let Some(widget) = cache.get_mut(copy) {
+        widget.set_hidden(true);
+    }
+
+    for (id, stretch) in [(title, 1), (copy, 0), (source, 0)] {
+        if let Some(widget) = cache.get_mut(id) {
+            widget.set_layout_params(LayoutParams {
+                stretch,
+                alignment: Alignment::new(Align::Fill, Align::Center),
+                ..LayoutParams::default()
+            });
+        }
+    }
+
     let description = cache.add_child(right, Box::new(Text::new("").size(400, 20)));
 
     for id in [title, description] {
@@ -260,6 +297,8 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
         list,
         title,
         description,
+        source,
+        copy,
         page_area,
     };
     let mut registry = Registry::new();
@@ -277,6 +316,7 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
         started: false,
         panel,
         log,
+        showing_source: false,
     };
 
     rebuild_list(engine.widgets(), &mut state, "");
@@ -310,6 +350,18 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
     engine.on_event(|state, ui, event| {
         property_panel::handle(state, ui, event);
         event_log::handle(state, ui, event);
+
+        if let Event::Toggled { id, checked } = event
+            && *id == state.shell.source
+        {
+            state.showing_source = *checked;
+
+            if let Some(index) = state.selected {
+                select_page(state, ui, index);
+            }
+
+            return;
+        }
 
         match event {
             // Page buttons are toggles (the selected one stays pressed), so a click arrives as `Toggled`.
@@ -418,10 +470,16 @@ pub fn select_page(state: &mut ShowcaseState, ui: &mut ShowcaseUi<'_>, index: us
         let _ = ui.widgets().remove(old);
     }
 
-    let root = page.build(ui);
+    let code = page.source();
+    let root = if state.showing_source {
+        source_view::add_code_view(ui.widgets(), state.shell.page_area, code)
+    } else {
+        let root = page.build(ui);
 
-    // The page is built at the top of the tree; move it into the scrolling area.
-    let _ = ui.widgets().reparent(root, state.shell.page_area);
+        // The page is built at the top of the tree; move it into the scrolling area.
+        let _ = ui.widgets().reparent(root, state.shell.page_area);
+        root
+    };
     state.page_root = Some(root);
     state.selected = Some(index);
 
@@ -437,6 +495,14 @@ pub fn select_page(state: &mut ShowcaseState, ui: &mut ShowcaseUi<'_>, index: us
         if let Some(button) = ui.get_mut::<Button>(*id) {
             button.set_checked(*button_index == index);
         }
+    }
+
+    if let Some(copy) = ui.get_mut::<CustomPaint<CopyState>>(state.shell.copy) {
+        copy.set_data(CopyState {
+            text: code.to_string(),
+            copied: false,
+        });
+        copy.set_hidden(!state.showing_source);
     }
 
     if let Some(path) = &state.settings_path {

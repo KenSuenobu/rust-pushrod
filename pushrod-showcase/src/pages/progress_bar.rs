@@ -78,6 +78,6 @@ impl Page for ProgressBarPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("progress_bar.rs")
+        crate::source_view::build_source("progress_bar.rs")
     }
 }
