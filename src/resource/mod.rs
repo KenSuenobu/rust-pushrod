@@ -73,6 +73,16 @@ pub trait ResourceKind: Sized {
 macro_rules! kind_by_name {
     ($($id:ident => $table:ident),+ $(,)?) => {$(
         impl ResourceKind for $id {
+            /// Looks the named resource up in this kind's table of the set's file.
+            ///
+            /// # Arguments
+            ///
+            /// * `set` - The resource set to search.
+            /// * `name` - The resource name.
+            ///
+            /// # Returns
+            ///
+            /// The ID, or `None` if the table has no such name.
             fn find_in(set: &ResourceSet, name: &str) -> Option<Self> {
                 set.file().resources.$table.by_name(name).map(|e| $id(e.id))
             }
@@ -90,6 +100,16 @@ kind_by_name!(
 );
 
 impl ResourceKind for FormId {
+    /// Looks the named form up in the set's file; a form's ID is its 1-based position.
+    ///
+    /// # Arguments
+    ///
+    /// * `set` - The resource set to search.
+    /// * `name` - The form name.
+    ///
+    /// # Returns
+    ///
+    /// The ID, or `None` if the file has no such form.
     fn find_in(set: &ResourceSet, name: &str) -> Option<Self> {
         let index = set.file().forms.iter().position(|f| f.name == name)?;
 
