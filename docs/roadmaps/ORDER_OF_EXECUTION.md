@@ -122,7 +122,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 83 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
 | **84** | checkpoint | **Chassis M1: core without UI complete** |
 | ✅ 85 | [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) | pushrod: [9.5] Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons |
-| 86 | [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) | pushrod: [9.8] Drag and drop within the application |
+| ✅ 86 | [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) | pushrod: [9.8] Drag and drop within the application |
 | 87 | [#81](https://github.com/KenSuenobu/rust-pushrod/issues/81) | pushrod: [1.15] Undo and redo command stack |
 | 88 | [#59](https://github.com/KenSuenobu/rust-pushrod/issues/59) | pushrod: [5.4] Autoresizing (keep margins or stretch on resize) |
 | 89 | [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) | pushrod: [4.5] List view |
@@ -1610,10 +1610,10 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 
 **Show on video:**
 
-- [ ] Drag between two lists
-- [ ] Drop highlighting and cancel
-- [ ] OS file drops delivered
-- [ ] Emits the corresponding `EngineEvent` (9.10)
+- [x] Drag between two lists
+- [x] Drop highlighting and cancel
+- [x] OS file drops delivered
+- [x] Emits the corresponding `EngineEvent` (9.10)
 
 ### Step 87: Undo and redo command stack
 

@@ -59,6 +59,7 @@ use crate::action::{Action, ActionGroupId, ActionId, Actions};
 use crate::backend::{Backend, Waker};
 use crate::cache::WidgetCache;
 use crate::color::Color;
+use crate::dnd::{DragPayload, DragSource, DropTarget};
 use crate::error::Result;
 use crate::event::{
     CustomEvent, EngineEvent, EngineEventKind, Event, EventKind, EventMask, EventTarget, MaskScope,
@@ -1975,6 +1976,62 @@ impl<S> Engine<S> {
         F: FnMut(&mut S, &mut Ui<S>) + 'static,
     {
         self.action_callbacks.push((action, Box::new(callback)));
+    }
+
+    /// Makes a `Widget` a drag source.  Pressing on it (or a descendant) and moving the pointer a
+    /// few pixels starts a drag that carries the source's payload.  See [`crate::dnd`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget`.
+    /// * `source` - The payload maker and optional drag image.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` exists.
+    pub fn set_drag_source(&mut self, id: WidgetId, source: DragSource) -> bool {
+        self.widget_cache.set_drag_source(id, source)
+    }
+
+    /// Makes a `Widget` a drop target for the payload types it accepts.  While an accepted
+    /// payload is over it, it has [`VisualState::DRAG_OVER`](crate::widget::VisualState::DRAG_OVER).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget`.
+    /// * `target` - The accepted types.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the `Widget` exists.
+    pub fn set_drop_target(&mut self, id: WidgetId, target: DropTarget) -> bool {
+        self.widget_cache.set_drop_target(id, target)
+    }
+
+    /// Registers a callback that runs when a payload is dropped on a `Widget`: by a drag inside
+    /// the window, or files dropped from the operating system (a `Vec<PathBuf>` payload).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The drop target.
+    /// * `callback` - Called with the application state, a [`Ui`] handle, and the payload.
+    ///
+    /// # Returns
+    ///
+    /// The [`CallbackId`] of the registered callback.
+    pub fn on_drop<F>(&mut self, id: WidgetId, mut callback: F) -> CallbackId
+    where
+        F: FnMut(&mut S, &mut Ui<S>, &DragPayload) + 'static,
+    {
+        self.register(
+            id,
+            EventKind::Dropped,
+            Box::new(move |s, ui, event| {
+                if let Event::Dropped { payload, .. } = event {
+                    callback(s, ui, payload);
+                }
+            }),
+        )
     }
 
     /// Registers a callback that receives every event the `Widget`s generate.

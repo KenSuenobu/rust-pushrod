@@ -19,7 +19,7 @@
 use crate::compositor::Compositor;
 use crate::font::{FontCache, FontNotice};
 use crate::image_cache::ImageCache;
-use crate::input::{Wake, to_input_event, types_to_disable};
+use crate::input::{Wake, to_input_events, types_to_disable};
 use crate::painter::{Sdl2Painter, to_sdl_color, to_sdl_rect};
 use crate::scale::{blit_rects, window_scale};
 use crate::texture::TextureStore;
@@ -107,6 +107,8 @@ pub struct Sdl2Backend {
     compositor: Compositor,
     canvas: Canvas<Window>,
     pump: EventPump,
+    /// Files of a drop that has begun but not completed.
+    drop_pending: Vec<std::path::PathBuf>,
     text_input: TextInputUtil,
     clipboard: ClipboardUtil,
     waker: Option<Waker>,
@@ -241,6 +243,7 @@ impl Sdl2Backend {
         Ok(Self {
             scale,
             pump: sdl.event_pump()?,
+            drop_pending: Vec::new(),
             text_input: video.text_input(),
             clipboard: video.clipboard(),
             _sdl: sdl,
@@ -396,7 +399,12 @@ impl Backend for Sdl2Backend {
 
         raw.extend(self.pump.poll_iter());
 
-        let mut events: Vec<InputEvent> = raw.into_iter().filter_map(to_input_event).collect();
+        let mouse = self.pump.mouse_state();
+        let mut events = to_input_events(
+            raw,
+            pushrod::geometry::point(mouse.x(), mouse.y()),
+            &mut self.drop_pending,
+        );
 
         // SDL2 has no scale-change event: moving the window to a display with another pixel
         // density changes its drawable size, so the scale is compared after every poll.

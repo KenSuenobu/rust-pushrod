@@ -145,6 +145,13 @@ pub enum InputEvent {
         /// How far it scrolled, horizontally (`x`) and vertically (`y`).
         delta: Point,
     },
+    /// Files were dropped on the window from the operating system.
+    FilesDropped {
+        /// Where the pointer was, in window coordinates.
+        position: Point,
+        /// The dropped files, in the order the system reported them.
+        paths: Vec<std::path::PathBuf>,
+    },
     /// A key went down (or repeated).
     KeyDown {
         /// The key.
@@ -193,7 +200,8 @@ impl InputEvent {
             | InputEvent::Resized(_)
             | InputEvent::ScaleChanged(_)
             | InputEvent::AccessibilityActivated(_)
-            | InputEvent::AccessAction { .. } => None,
+            | InputEvent::AccessAction { .. }
+            | InputEvent::FilesDropped { .. } => None,
             InputEvent::MouseDown { .. } | InputEvent::MouseUp { .. } => {
                 Some(EventMask::POINTER_BUTTONS)
             }
