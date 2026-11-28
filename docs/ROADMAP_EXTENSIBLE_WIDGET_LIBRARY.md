@@ -2816,12 +2816,14 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![12.1 step set 2: Typing in the search field filters the pages](mockups/12.1-2.png)
 
+**Status:** done (#295). `pushrod-showcase` is a new workspace crate (`cargo run -p pushrod-showcase`): a `Page` trait (`name`, `group`, `description`, `build`, `source`), a `Registry` with name-and-description search, a shell with a page list and a scrolling page area, and the last page remembered in `$XDG_CONFIG_HOME/pushrod-showcase/last_page`. Eleven pages exist so far (nine gallery tiles, Row and Column, Text Field); the rest of the gallery moves in 12.2 (#296). `gallery.rs` stays a full example until then, because the benchmarks measure it.
+
 **Acceptance Criteria.**
 
-- `cargo run -p pushrod-showcase` opens the shell with grouped pages
-- Search filters the page list
-- Adding a page needs only an implementation of `Page` and one registration line
-- Gallery example content available as pages
+- [x] `cargo run -p pushrod-showcase` opens the shell with grouped pages
+- [x] Search filters the page list
+- [x] Adding a page needs only an implementation of `Page` and one registration line
+- [ ] Gallery example content available as pages (partly: nine tiles so far)
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 5.3 (#58), 5.6 (#117), 2.6 (#32), 7.3 (#71).
 

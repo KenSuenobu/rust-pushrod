@@ -1,0 +1,24 @@
+[package]
+name = "pushrod-showcase"
+version = "0.3.0"
+authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
+description = "The Pushrod Showcase: an interactive demo of every widget"
+publish = false
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[lib]
+name = "pushrod_showcase"
+path = "src/lib.rs"
+
+[[bin]]
+name = "pushrod-showcase"
+path = "src/main.rs"
+
+[dependencies]
+pushrod = { path = "..", version = "0.3.0" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.0" }
+pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.3.0" }

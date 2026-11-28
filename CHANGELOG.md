@@ -15,6 +15,8 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+- [#295] pushrod-showcase: searchable page shell with a Page trait [kenji]
+
 ## [0.2.0] - 2026-11-27
 
 ### Added
