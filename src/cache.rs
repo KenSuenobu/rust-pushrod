@@ -1491,11 +1491,12 @@ impl WidgetCache {
         }
 
         for (id, is_visible) in visible.into_iter().enumerate() {
-            if self.cache[id].is_invalidated() {
-                if is_visible {
-                    self.paint(id as WidgetId, backend);
-                }
-
+            // A `Widget` that is not visible (hidden, or inside a hidden ancestor) is not painted,
+            // so it stays invalidated until it is: showing its ancestor invalidates only the
+            // ancestor, and the parts below it (a scroll bar's arrows and track) must still be
+            // painted the first time they are seen.
+            if is_visible && self.cache[id].is_invalidated() {
+                self.paint(id as WidgetId, backend);
                 self.cache[id].set_invalidated(false);
                 redraw = true;
             }

@@ -19,6 +19,7 @@
 //! implement [`page::Page`] in a new file under `pages/` and add one line to
 //! [`pages::register_all`].
 
+pub mod event_log;
 pub mod page;
 pub mod pages;
 pub mod property_panel;

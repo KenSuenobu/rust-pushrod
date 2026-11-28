@@ -2901,11 +2901,13 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![12.4 step set 1: Clicking and toggling on a page; the events appear in the log](mockups/12.4-1.png)
 
+**Status:** done (#298). `pushrod-showcase/src/event_log.rs` adds the log under the page: each widget event (`Clicked`, `Toggled`, `ValueChanged`, ...) is appended with its widget ID and payload, newest last, for the last 200 events. *Engine events* switches on the engine events that follow from what you do on the page (`FocusChanged`, `PropertyChanged`, ...); the ones the log itself causes are never offered. **Kind** cycles a filter, **Clear** empties the log, **Pause** stops recording, and clicking a line selects and outlines the widget that emitted it.
+
 **Acceptance Criteria.**
 
-- Widget events appear as they happen with ID and payload
-- Engine events can be switched on
-- Filter, clear, and pause
+- [x] Widget events appear as they happen with ID and payload
+- [x] Engine events can be switched on
+- [x] Filter, clear, and pause
 
 **Parallelism / Dependencies.** Parallelizable. Requires 12.1 (#295), 9.10 (#109).
 

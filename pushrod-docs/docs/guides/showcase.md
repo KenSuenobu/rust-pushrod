@@ -58,6 +58,33 @@ flowchart LR
 
 The page root (`PageRoot`) sees presses before the widget under the pointer, so a widget that consumes its own press, such as a slider, can still be selected.
 
+## Watching the events
+
+Under the page is the **Events** log. Pushrod's widgets are driven by events, and the log shows which one fires when: each widget event the page emits (`Clicked`, `Toggled`, `ValueChanged`, ...) is added at the bottom with the time, its kind, the ID of the widget, and its payload, such as `12:01:07  Toggled  widget 14  checked: true`. The log keeps the last 200 events.
+
+![The event log under a Check Box page (the design mockup)](/img/screenshots/showcase-event-log.png)
+
+- **Click or type on the page.** `Clicked`, `Activated`, `Toggled`, `ValueChanged`, `SelectionChanged`, `TextChanged`, `EditingFinished`, `FocusGained`, `FocusLost`, `KeyPressed`, `TextEntered`, `Triggered`, and `PropertyChanged` are recorded. Pointer movement is not, and neither are events from the showcase's own controls.
+- **Tick *Engine events*** to add the engine events that follow from what you do on the page: `FocusChanged`, `PropertyChanged`, `ActionTriggered`, `MnemonicActivated`, the three `Composition...` events, `ModalOpened`, `ModalClosed`, and `Error`. They are drawn in gray. Events the log causes itself (a widget added, layout changed, idle ran) are never offered, because they would fill the log with its own lines.
+- **Click *Kind*** to step through the filter: *All*, one kind of event, and *Engine*. The events are kept, so going back to *All* shows them again.
+- **Tick *Pause*** to stop recording. Events that happen while paused are dropped, not saved.
+- **Click *Clear*** to empty the log.
+- **Click a line** to select the widget that emitted it. It is outlined on the page and its properties appear in the property panel. If the page has changed since, nothing is selected.
+
+```mermaid
+flowchart LR
+    W[Widget on the page] -->|event| E[describe]
+    N[Engine] -->|engine event, if switched on| D[describe_engine]
+    E --> P{On the page and not paused?}
+    D --> P
+    P -->|yes| R[record]
+    R --> K[Entry kept, last 200]
+    K -->|passes the Kind filter| L[Line added to the list]
+    L -->|click| S[select_widget outlines the emitter]
+```
+
+The log is `pushrod-showcase/src/event_log.rs`.
+
 ## How it fits together
 
 ```mermaid

@@ -310,7 +310,7 @@ fn parse_color(text: &str) -> Option<Color> {
 /// # Returns
 ///
 /// `true` if `id` is in the subtree.
-fn in_subtree(ui: &mut ShowcaseUi<'_>, root: WidgetId, id: WidgetId) -> bool {
+pub(crate) fn in_subtree(ui: &mut ShowcaseUi<'_>, root: WidgetId, id: WidgetId) -> bool {
     let mut current = id;
 
     // The depth is bounded by the number of widgets, so a broken parent link cannot loop.
