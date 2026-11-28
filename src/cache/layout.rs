@@ -17,6 +17,9 @@
 //! [`WidgetCache::draw_loop`] runs it once per frame, before painting.  Only `Widget`s that
 //! flagged themselves (a changed size, visibility, size hint, text, or font, a new or removed
 //! child, or a new layout) start it.
+//!
+//! Before it, [`WidgetCache::run_anchors`] moves and resizes the children of resized containers
+//! that have no layout, according to each child's [`Anchors`](crate::layout::Anchors).
 
 use super::WidgetCache;
 use crate::backend::Backend;
@@ -53,6 +56,98 @@ impl WidgetCache {
     /// window can use the root's minimum size as its minimum size.
     pub fn measured_hint(&self, id: WidgetId) -> Option<SizeHint> {
         self.layout_hints.get(&id).copied()
+    }
+
+    /// Applies [`Anchors`](crate::layout::Anchors): for each container without a layout whose
+    /// size changed since its children were last anchored, moves and resizes the children that
+    /// have anchors by the amount the container grew or shrank.  Containers are handled parents
+    /// first, so a resized child's own anchored children follow in the same pass.  A moved child
+    /// keeps its cached texture; a resized one is repainted.  Emits
+    /// [`EngineEvent::AnchorsApplied`] once for each container that changed a child.
+    ///
+    /// The first time a container is seen with anchored children, its current size is remembered
+    /// and nothing moves.
+    pub(super) fn run_anchors(&mut self) {
+        let mut containers = BTreeSet::new();
+
+        for id in 1..self.cache.len() as WidgetId {
+            if !self.cache[id as usize].anchors().is_empty() {
+                let parent = self.cache[id as usize].get_parent();
+
+                if !self.cache[parent as usize].has_layout() {
+                    containers.insert((self.depth(parent), parent));
+                }
+            }
+        }
+
+        // A container that lost its anchored children starts over if it gets new ones.
+        for id in 0..self.cache.len() as WidgetId {
+            if self.cache[id as usize].core().anchor_basis().is_some()
+                && !containers.iter().any(|(_, c)| *c == id)
+            {
+                self.cache[id as usize].core_mut().set_anchor_basis(None);
+            }
+        }
+
+        for (_, container) in containers {
+            self.anchor_children(container);
+        }
+    }
+
+    /// Applies the anchors of one container's children.
+    ///
+    /// # Arguments
+    ///
+    /// * `container` - A container without a layout that has anchored children.
+    fn anchor_children(&mut self, container: WidgetId) {
+        let now = self.cache[container as usize].get_size();
+        let basis = self.cache[container as usize].core().anchor_basis();
+
+        self.cache[container as usize]
+            .core_mut()
+            .set_anchor_basis(Some(now));
+
+        let Some(before) = basis else {
+            return;
+        };
+
+        if before == now {
+            return;
+        }
+
+        let dw = i64::from(now.w) - i64::from(before.w);
+        let dh = i64::from(now.h) - i64::from(before.h);
+        let mut changed = 0;
+
+        for child in self.children[container as usize].clone() {
+            let widget = &mut self.cache[child as usize];
+            let anchors = widget.anchors();
+
+            if anchors.is_empty() {
+                continue;
+            }
+
+            let origin = widget.get_origin();
+            let size = widget.get_size();
+            let rect = anchors.apply(Rect::new(origin.x, origin.y, size.w, size.h), dw, dh);
+            let (moved, resized) = widget.core_mut().place(rect);
+
+            if resized && widget.has_layout() {
+                widget.request_layout();
+            }
+
+            if moved || resized {
+                changed += 1;
+                self.needs_full_redraw = true;
+            }
+        }
+
+        if changed > 0 {
+            self.queue_event(Event::Engine(EngineEvent::AnchorsApplied {
+                container,
+                children: changed,
+            }));
+        }
     }
 
     /// Runs the layout pass for everything that needs it, then clears the flags.

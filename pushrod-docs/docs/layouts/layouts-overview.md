@@ -126,6 +126,10 @@ Rules for a layout:
 - It must be a **pure function** of its arguments, since layout can run any number of times.
 - It never paints; the engine repaints only the widgets whose size changed.
 
+## Containers without a layout
+
+A container without a layout keeps absolute positions, but its children can still follow it when it is resized: see [Autoresizing](../concepts/autoresizing.md). A container **with** a layout is arranged by the layout, and anchors on its children are ignored.
+
 ## Engine event
 
 `LayoutChanged { container }` is emitted after a container's children were arranged. See [Engine events](../events/engine-events.md).

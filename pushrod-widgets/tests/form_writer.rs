@@ -291,3 +291,38 @@ fn a_layout_the_format_cannot_store_is_an_error() {
         Err(Error::FormFile { .. })
     ));
 }
+
+#[test]
+fn anchors_are_stored_and_restored() {
+    use pushrod::layout::Anchors;
+
+    let mut built = engine();
+    let mut panel = Panel::new();
+
+    panel.set_size(size(200, 120));
+    let panel = built.add_widget(panel);
+
+    let mut ok = Button::new("OK");
+
+    ok.set_size(size(60, 24));
+    ok.set_anchors(Anchors::RIGHT | Anchors::BOTTOM);
+    built.add_child_widget(panel, ok);
+
+    let mut writer = writer();
+
+    writer.add_form("main", built.widgets(), panel).unwrap();
+
+    let file = FormFile::from_bytes(&writer.to_bytes().unwrap()).unwrap();
+    let mut loaded = engine();
+    let form = loaded.load_form(&file, "main").unwrap();
+    let kids = loaded.widgets().children_of(form.root()).to_vec();
+
+    assert_eq!(
+        loaded.widgets().get(kids[0]).unwrap().anchors(),
+        Anchors::RIGHT | Anchors::BOTTOM
+    );
+    assert_eq!(
+        loaded.widgets().get(form.root()).unwrap().anchors(),
+        Anchors::empty()
+    );
+}

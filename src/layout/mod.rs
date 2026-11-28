@@ -29,6 +29,8 @@
 //! * [`Row`], [`Column`], and [`Spacer`] - ready-made layouts that place children in a line; see
 //!   the [`linear`] module.
 //! * [`FormLayout`] - aligned "Label: field" rows; see the [`form`] module.
+//! * [`Anchors`] - autoresizing for containers without a layout: a child keeps its margins or
+//!   stretches when the container is resized; see the [`anchors`] module.
 //!
 //! Give any container a layout with [`Widget::set_layout`](crate::widget::Widget::set_layout).
 //! Without one, a container keeps absolute positioning.  Layout runs once per frame, before
@@ -68,9 +70,11 @@
 //! }
 //! ```
 
+pub mod anchors;
 pub mod form;
 pub mod linear;
 
+pub use anchors::Anchors;
 pub use form::FormLayout;
 pub use linear::{Column, Row, Spacer};
 

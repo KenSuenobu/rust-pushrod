@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.9] - 2026-11-28
+
+### Added
+
+- [#59] Autoresizing: anchors keep margins or stretch children on resize [kenji]
+
 ## [0.3.8] - 2026-11-28
 
 ### Added

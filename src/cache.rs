@@ -1495,6 +1495,7 @@ impl WidgetCache {
         // Arranging parts can ask for layout (a resized part), and layout for arranging (a
         // container that fits its content), so the two alternate until both are settled.
         for _ in 0..MAX_SETTLE_PASSES {
+            self.run_anchors();
             self.run_layout(backend);
 
             if !self.arrange_requested_parts() {
