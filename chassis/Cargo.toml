@@ -1,7 +1,6 @@
 [package]
 name = "chassis"
 version = "0.1.0"
-authors = ["Ken Suenobu <ksuenobu@fastmail.com>"]
 description = "Chassis, the visual form designer for Pushrod: the project model"
 edition.workspace = true
 rust-version.workspace = true
