@@ -104,3 +104,61 @@ pub fn parse_functions(
 
     Ok(found)
 }
+
+/// Finds the name of one top-level function, so a rename can replace only those bytes.
+///
+/// # Arguments
+///
+/// * `source` - The Rust source text.
+/// * `file` - The file it came from, relative to the project, for errors.
+/// * `name` - The function to find.
+///
+/// # Returns
+///
+/// The byte range of the function's name in `source`, or `None` if there is no top-level function
+/// of that name.
+///
+/// # Errors
+///
+/// [`ProjectError::Handlers`] if the parser cannot be set up or the source does not parse
+/// cleanly.
+pub fn function_name_range(
+    source: &str,
+    file: &Path,
+    name: &str,
+) -> Result<Option<std::ops::Range<usize>>, ProjectError> {
+    let fail = |message: String| ProjectError::Handlers {
+        path: file.to_path_buf(),
+        message,
+    };
+    let mut parser = Parser::new();
+
+    parser
+        .set_language(&tree_sitter_rust::LANGUAGE.into())
+        .map_err(|e| fail(e.to_string()))?;
+
+    let tree = parser
+        .parse(source, None)
+        .ok_or_else(|| fail("the parser gave no result".to_string()))?;
+    let root = tree.root_node();
+
+    if root.has_error() {
+        return Err(fail("the file has syntax errors".to_string()));
+    }
+
+    let mut cursor = root.walk();
+
+    for node in root.children(&mut cursor) {
+        if node.kind() != "function_item" {
+            continue;
+        }
+
+        if let Some(n) = node.child_by_field_name("name")
+            && &source[n.byte_range()] == name
+        {
+            return Ok(Some(n.byte_range()));
+        }
+    }
+
+    Ok(None)
+}

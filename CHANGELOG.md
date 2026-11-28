@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-11-27
+
+### Added
+
+- [#165] chassis: code generation rules; bodies survive every edit [kenji]
+
 ## [0.3.2] - 2026-11-27
 
 ### Added

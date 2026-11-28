@@ -117,7 +117,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | **78** | checkpoint | **Pushrod Showcase released** |
 | ✅ 79 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
 | ✅ 80 | [#164](https://github.com/KenSuenobu/rust-pushrod/issues/164) | chassis: [2.1] Project model |
-| 81 | [#165](https://github.com/KenSuenobu/rust-pushrod/issues/165) | chassis: [6.1] Code generation rules |
+| ✅ 81 | [#165](https://github.com/KenSuenobu/rust-pushrod/issues/165) | chassis: [6.1] Code generation rules |
 | 82 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
 | 83 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
 | **84** | checkpoint | **Chassis M1: core without UI complete** |
@@ -1545,8 +1545,8 @@ Project model, resource access, code generation, and a command-line generator, a
 
 **Show on video:**
 
-- [ ] Tests prove handler bodies survive every designer operation
-- [ ] Rules documented
+- [x] Tests prove handler bodies survive every designer operation
+- [x] Rules documented
 
 ### Step 82: Event wiring generation
 

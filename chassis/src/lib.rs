@@ -15,8 +15,10 @@
 //! # Chassis
 //!
 //! Chassis is the visual form designer for Pushrod.  This crate holds its core, which has no
-//! window and is fully unit-tested: today, the [project model](project).
+//! window and is fully unit-tested: the [project model](project) and the [code generation
+//! rules](codegen).
 
+pub mod codegen;
 pub mod project;
 
 pub use project::{Handler, Ownership, Project, ProjectError};
