@@ -200,3 +200,21 @@ fn last_page_is_remembered() {
 
     let _ = std::fs::remove_dir_all(dir);
 }
+
+#[test]
+fn every_page_opens_with_its_title() {
+    let (mut engine, mut state) = start(None);
+    let buttons = state.buttons.clone();
+
+    assert_eq!(buttons.len(), state.registry.len());
+
+    for (button, index) in buttons {
+        click(&mut engine, &mut state, button);
+
+        assert_eq!(state.selected, Some(index));
+        assert_eq!(
+            title(&mut engine, &state),
+            state.registry.get(index).unwrap().name()
+        );
+    }
+}

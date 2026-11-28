@@ -29,6 +29,10 @@ impl Page for ButtonPage {
         "Button"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.button"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }

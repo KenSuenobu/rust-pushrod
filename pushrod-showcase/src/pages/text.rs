@@ -30,6 +30,10 @@ impl Page for TextPage {
         "Text"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.text"]
+    }
+
     fn group(&self) -> Group {
         Group::Core
     }

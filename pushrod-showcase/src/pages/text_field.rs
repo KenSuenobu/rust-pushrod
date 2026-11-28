@@ -29,6 +29,10 @@ impl Page for TextFieldPage {
         "Text Field"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.text_field"]
+    }
+
     fn group(&self) -> Group {
         Group::Forms
     }

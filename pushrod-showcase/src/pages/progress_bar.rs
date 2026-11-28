@@ -29,6 +29,10 @@ impl Page for ProgressBarPage {
         "Progress Bar"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.progress_bar"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }

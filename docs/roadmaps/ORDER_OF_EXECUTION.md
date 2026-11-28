@@ -108,7 +108,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 69 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
 | **70** | checkpoint | **Pushrod v0.2 released: the Pushrod MVP is complete** |
 | ✅ 71 | [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) | pushrod: [12.1] Showcase application shell |
-| 72 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
+| ✅ 72 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
 | 73 | [#297](https://github.com/KenSuenobu/rust-pushrod/issues/297) | pushrod: [12.3] Showcase property panel: change any property live |
 | 74 | [#298](https://github.com/KenSuenobu/rust-pushrod/issues/298) | pushrod: [12.4] Showcase event log |
 | 75 | [#299](https://github.com/KenSuenobu/rust-pushrod/issues/299) | pushrod: [12.5] Showcase source view: the code for each page |
@@ -1417,9 +1417,9 @@ One application that shows every widget and core feature live, with a property p
 
 **Show on video:**
 
-- [ ] Every registered standard widget has a page
-- [ ] The completeness test fails when a registered type has no page
-- [ ] CONTRIBUTING.md states the rule
+- [x] Every registered standard widget has a page
+- [x] The completeness test fails when a registered type has no page
+- [x] CONTRIBUTING.md states the rule
 
 ### Step 73: Showcase property panel: change any property live
 

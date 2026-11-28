@@ -85,4 +85,17 @@ registry.register(hello::HelloPage);
 | `build` | Adds the page's widgets and returns the root. Give the root a fixed size so the area knows how far to scroll. |
 | `source` | The page's source code, for the source view. Return `include_str!("hello.rs")`; the default is an empty string. |
 
+## Every widget has a page
+
+A page lists the registered widget types it demonstrates in `widget_types`, for example `&["pushrod.slider"]`. The completeness test (`pushrod-showcase/tests/completeness.rs`) registers every widget library, then fails and names any type that no page lists:
+
+```mermaid
+flowchart LR
+    L[Widget libraries register their types] --> T[Completeness test]
+    P[Pages list widget_types] --> T
+    T -->|a type has no page| F[Test fails, naming the type]
+```
+
+**A pull request that adds a widget adds its page**, and adds its library's `register` call to the test when the library is new. The Standard widgets group has a page for every `pushrod.` type: Text, Button, Check Box, Radio Button, Slider, Glyph Button, Progress Bar, Separator, Group Box, Boxed Label, Frame, Image, Panel, and Text Field. Each page shows the widget's states and options live (normal, selected, disabled, sizes). The Image page uses a file that does not exist, so it shows the crossed box drawn for a missing file.
+
 All sample data on the pages is fictional.

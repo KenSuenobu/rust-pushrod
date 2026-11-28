@@ -1,6 +1,6 @@
 [package]
 name = "pushrod-showcase"
-version = "0.2.1"
+version = "0.2.2"
 description = "The Pushrod Showcase: an interactive demo of every widget"
 publish = false
 edition.workspace = true

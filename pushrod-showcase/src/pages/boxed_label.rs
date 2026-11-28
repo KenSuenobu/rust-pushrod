@@ -30,6 +30,10 @@ impl Page for BoxedLabelPage {
         "Boxed Label"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.boxed_label"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }
