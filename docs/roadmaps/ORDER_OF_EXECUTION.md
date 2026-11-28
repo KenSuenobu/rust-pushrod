@@ -109,7 +109,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | **70** | checkpoint | **Pushrod v0.2 released: the Pushrod MVP is complete** |
 | ✅ 71 | [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) | pushrod: [12.1] Showcase application shell |
 | ✅ 72 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
-| 73 | [#297](https://github.com/KenSuenobu/rust-pushrod/issues/297) | pushrod: [12.3] Showcase property panel: change any property live |
+| ✅ 73 | [#297](https://github.com/KenSuenobu/rust-pushrod/issues/297) | pushrod: [12.3] Showcase property panel: change any property live |
 | 74 | [#298](https://github.com/KenSuenobu/rust-pushrod/issues/298) | pushrod: [12.4] Showcase event log |
 | 75 | [#299](https://github.com/KenSuenobu/rust-pushrod/issues/299) | pushrod: [12.5] Showcase source view: the code for each page |
 | 76 | [#300](https://github.com/KenSuenobu/rust-pushrod/issues/300) | pushrod: [12.6] Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources |
@@ -1433,9 +1433,9 @@ One application that shows every widget and core feature live, with a property p
 
 **Show on video:**
 
-- [ ] Selecting a demo widget lists its properties
-- [ ] Edits apply immediately; Reset restores
-- [ ] Works for any registered widget without per-widget code
+- [x] Selecting a demo widget lists its properties
+- [x] Edits apply immediately; Reset restores
+- [x] Works for any registered widget without per-widget code
 
 ### Step 74: Showcase event log
 

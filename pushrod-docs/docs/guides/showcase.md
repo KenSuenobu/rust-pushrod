@@ -23,6 +23,41 @@ cargo run -p pushrod-showcase
 - **Resize the window.** The list keeps its width and the page area takes the rest.
 - **Close and reopen it.** The last page is remembered in `$XDG_CONFIG_HOME/pushrod-showcase/last_page` (or `~/.config/pushrod-showcase/last_page`).
 
+## Changing a property live
+
+Below the page is the **Properties** panel. It starts empty: *Click a widget on the page to select it.*
+
+![The property panel: a button selected on its page, with its text and disabled flag changed (the design mockup)](/img/screenshots/showcase-property-panel.png)
+
+- **Click any widget on the page** to select it. A blue outline is drawn around it and the panel lists every property the widget reports through introspection (`Widget::properties`), so it works for any registered widget with no code for that widget.
+- **Edit a property.** The editor depends on the kind of value:
+
+| Kind | Editor |
+| --- | --- |
+| True or false (`enabled`, `hidden`) | A check box. |
+| Whole or fractional number (`x`, `width`, `value`) | A text field. The widget changes as soon as the text is a valid number; half-typed text such as `-` is ignored until it is. |
+| Text (`tooltip`) | A text field. |
+| Color (`color`) | A text field holding `#rrggbb` or `#rrggbbaa`. |
+| A choice (`align_horizontal`, `align_vertical`) | A button; each click shows the next of `start`, `center`, `end`, `fill`. |
+
+- The line next to the title reports `Set <name>.` after an edit, or the error when the widget refuses the value (for example a width that is out of range).
+- **Click Reset** to rebuild the page and clear the selection. Opening another page does the same.
+
+Each edit goes through `Ui::set_widget_property`, so it emits a `PropertyChanged` engine event like any other property change. The panel is `pushrod-showcase/src/property_panel.rs`.
+
+```mermaid
+flowchart LR
+    C[Press on a page widget] -->|capture phase| R[PageRoot posts PickRequest]
+    R --> S[select_widget]
+    S -->|properties| L[One editor per property]
+    S --> O[Blue outline]
+    L -->|edit| A[Ui::set_widget_property]
+    A -->|PropertyChanged| E[Widget redraws]
+    X[Reset] --> P[select_page rebuilds the page]
+```
+
+The page root (`PageRoot`) sees presses before the widget under the pointer, so a widget that consumes its own press, such as a slider, can still be selected.
+
 ## How it fits together
 
 ```mermaid

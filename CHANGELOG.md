@@ -119,3 +119,4 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [#154] Resource kinds: strings, images, icons, files, menus, alerts with stable IDs [kenji]
 - [#153] Resource manager: load sets, stack them, get resources by typed ID [kenji]
 - [#155] Typed IDs (StringId, ImageId...) and generated constants per resource kind [kenji]
+- [#297] Showcase property panel: select a widget and change any property live [kenji]
