@@ -148,6 +148,33 @@ pub trait Backend {
     /// The events that arrived, in order; empty if none did.
     fn poll_events(&mut self, wait: Option<Duration>) -> Vec<InputEvent>;
 
+    /// Collects waiting input like [`Backend::poll_events`], and lets the caller react to
+    /// window-resize events *while the user is still dragging the window edge*.
+    ///
+    /// Some platforms (macOS, Windows) run their own loop during an interactive resize, so
+    /// `poll_events` does not return until the mouse is released and the window shows a stretched
+    /// copy of the old frame.  A backend that can be called back during that drag does so through
+    /// `live`, which receives the backend and the events to apply; the caller dispatches them and
+    /// redraws.  The default has no such callback and behaves exactly like `poll_events`.
+    ///
+    /// # Arguments
+    ///
+    /// * `wait` - How long to block for the first event; `None` returns at once.
+    /// * `live` - Called with the backend and the resize events that arrive mid-drag.
+    ///
+    /// # Returns
+    ///
+    /// The events that arrived, as for [`Backend::poll_events`].
+    fn poll_events_live(
+        &mut self,
+        wait: Option<Duration>,
+        live: &mut dyn FnMut(&mut dyn Backend, Vec<InputEvent>),
+    ) -> Vec<InputEvent> {
+        let _ = live;
+
+        self.poll_events(wait)
+    }
+
     /// Returns a function other threads call to end a [`Backend::poll_events`] wait early; the
     /// next poll then yields [`InputEvent::Wake`].
     ///
