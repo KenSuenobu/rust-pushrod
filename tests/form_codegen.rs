@@ -16,7 +16,10 @@
 
 use pushrod::error::Error;
 use pushrod::form::codegen::{generate_ids, write_ids};
-use pushrod::form::{FormFile, FormIndex, ObjectRecord, SymbolKind};
+use pushrod::form::{
+    AlertKind, AlertResource, FileResource, FormFile, FormIndex, IconResource, MenuItem, MenuKind,
+    MenuResource, ObjectRecord, SymbolKind,
+};
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
@@ -233,4 +236,152 @@ impl WriteForTest for FormFile {
     fn write_to_path_for_test(&self, path: &std::path::Path) {
         std::fs::write(path, self.to_bytes().unwrap()).unwrap();
     }
+}
+
+/// Builds a file with one form and one resource of every kind.
+fn with_resources() -> FormFile {
+    let mut file = sample();
+    let r = &mut file.resources;
+
+    r.strings.add("SAVE_FAILED", "Save failed".into()).unwrap();
+    r.strings.add("HelloWorld", "Hello".into()).unwrap();
+    r.images.add("LOGO", vec![1, 2, 3]).unwrap();
+    r.icons
+        .add(
+            "app icon",
+            IconResource {
+                image: 1,
+                mask: None,
+                selected: None,
+                caption: String::new(),
+            },
+        )
+        .unwrap();
+    r.files
+        .add(
+            "LICENSE",
+            FileResource {
+                mime: "text/plain".into(),
+                data: b"x".to_vec(),
+            },
+        )
+        .unwrap();
+    r.menus
+        .add(
+            "MAIN_MENU",
+            MenuResource {
+                kind: MenuKind::Bar,
+                items: vec![MenuItem::command("Save", "save")],
+            },
+        )
+        .unwrap();
+    r.alerts
+        .add(
+            "CONFIRM",
+            AlertResource {
+                kind: AlertKind::Question,
+                title: 1,
+                message: 2,
+                buttons: vec![1],
+            },
+        )
+        .unwrap();
+    file
+}
+
+#[test]
+fn every_resource_kind_gets_a_typed_module() {
+    let source = generate_ids(&with_resources()).unwrap();
+
+    for expected in [
+        "pub const MAIN: FormId = FormId(1);",
+        "pub const SIGN_IN: FormId = FormId(2);",
+        "pub const SAVE_FAILED: StringId = StringId(1);",
+        "pub const HELLO_WORLD: StringId = StringId(2);",
+        "pub const LOGO: ImageId = ImageId(1);",
+        "pub const APP_ICON: IconId = IconId(1);",
+        "pub const LICENSE: FileId = FileId(1);",
+        "pub const MAIN_MENU: MenuId = MenuId(1);",
+        "pub const CONFIRM: AlertId = AlertId(1);",
+        "pub const OK: FormIndex = FormIndex(1);",
+        "use pushrod::resource::StringId;",
+    ] {
+        assert!(
+            source.contains(expected),
+            "missing `{expected}` in\n{source}"
+        );
+    }
+}
+
+#[test]
+fn resource_output_is_deterministic_and_ordered_by_id() {
+    let file = with_resources();
+
+    assert_eq!(generate_ids(&file).unwrap(), generate_ids(&file).unwrap());
+
+    let mut moved = file.clone();
+    moved.resources.strings.move_to(2, 0);
+    let source = generate_ids(&moved).unwrap();
+
+    assert!(source.find("SAVE_FAILED").unwrap() < source.find("HELLO_WORLD").unwrap());
+}
+
+#[test]
+fn empty_kinds_have_no_module() {
+    let source = generate_ids(&sample()).unwrap();
+
+    assert!(source.contains("pub mod forms"));
+    for kind in ["strings", "images", "icons", "files", "menus", "alerts"] {
+        assert!(!source.contains(&format!("pub mod {kind}")), "{kind}");
+    }
+}
+
+#[test]
+fn resource_name_errors() {
+    let mut file = FormFile::new();
+
+    file.resources.strings.add("ok button", "a".into()).unwrap();
+    file.resources.strings.add("OK_BUTTON", "b".into()).unwrap();
+    assert!(generate_ids(&file).is_err());
+
+    let mut file = FormFile::new();
+
+    file.resources.images.add("2fast", vec![1]).unwrap();
+    assert!(generate_ids(&file).is_err());
+}
+
+#[test]
+fn a_form_cannot_take_a_resource_module_name() {
+    for name in [
+        "forms", "Strings", "images", "icons", "files", "menus", "alerts",
+    ] {
+        let mut file = FormFile::new();
+        let root = file.add_object(None, ObjectRecord::new("pushrod.panel"));
+
+        file.add_form(name, root);
+        assert!(generate_ids(&file).is_err(), "{name}");
+    }
+}
+
+#[test]
+fn resource_output_is_rustfmt_clean() {
+    let source = generate_ids(&with_resources()).unwrap();
+    let Ok(mut child) = Command::new("rustfmt")
+        .args(["--edition", "2024", "--emit", "stdout"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+    else {
+        return;
+    };
+
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(source.as_bytes())
+        .unwrap();
+    let output = child.wait_with_output().unwrap();
+
+    assert_eq!(String::from_utf8(output.stdout).unwrap(), source);
 }

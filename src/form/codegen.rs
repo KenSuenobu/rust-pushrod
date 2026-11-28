@@ -35,12 +35,19 @@
 //! assert!(source.contains("pub const OK: FormIndex = FormIndex(1);"));
 //! ```
 //!
+//! Resources get the same treatment with typed IDs (see [`crate::resource`]): a `forms` module holds
+//! one [`FormId`](crate::resource::FormId) per form (its position in the file, counting from 1), and
+//! `strings`, `images`, `icons`, `files`, `menus`, and `alerts` modules hold one constant per
+//! resource of that kind, such as `strings::SAVE_FAILED: StringId`.  A kind with no resources has no
+//! module, and a form cannot take one of these seven names.
+//!
 //! The output is deterministic (forms in file order, constants by object number) and already
 //! formatted the way `rustfmt` formats it, so regenerating an unchanged file changes nothing.
 //! [`write_ids`] is for `build.rs`; the `pushrod-form-ids` command does the same from a shell.
 //! Generation is an offline build step with no running engine, so it emits no engine event.
 
 use super::format::{FormError, FormFile, NO_OBJECT, SymbolKind};
+use super::resources::ResourceTable;
 use crate::error::{Error, Result};
 use std::collections::HashSet;
 use std::path::Path;
@@ -51,6 +58,11 @@ const KEYWORDS: &[&str] = &[
     "false", "fn", "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub",
     "ref", "return", "self", "static", "struct", "super", "trait", "true", "type", "unsafe", "use",
     "where", "while",
+];
+
+/// The module names of the generated resource modules; a form cannot be named like one.
+const RESERVED_MODULES: &[&str] = &[
+    "forms", "strings", "images", "icons", "files", "menus", "alerts",
 ];
 
 /// Splits a name into lowercase words at every character that is not a letter or digit and at
@@ -154,6 +166,88 @@ fn subtree(file: &FormFile, root: u32) -> Vec<u32> {
     out
 }
 
+/// Writes a module of constants of one ID type.
+///
+/// # Arguments
+///
+/// * `out` - The source text being built.
+/// * `module` - The module's name.
+/// * `type_name` - The ID type of every constant, such as `StringId`.
+/// * `what` - What each constant names, for documentation and errors, such as `string`.
+/// * `entries` - The number and name of each constant.
+///
+/// # Errors
+///
+/// Returns [`FormError::Invalid`] if a name is not a usable identifier or two names become the same
+/// constant.
+fn write_module<'a>(
+    out: &mut String,
+    module: &str,
+    type_name: &str,
+    what: &str,
+    entries: impl Iterator<Item = (u32, &'a str)>,
+) -> std::result::Result<(), FormError> {
+    let mut constants: Vec<(u32, String, &str)> = Vec::new();
+    let mut seen = HashSet::new();
+
+    for (id, name) in entries {
+        let constant = identifier(what, name, true)?;
+
+        if !seen.insert(constant.clone()) {
+            return Err(FormError::invalid(format!(
+                "two {what}s are named `{constant}` in Rust"
+            )));
+        }
+        constants.push((id, constant, name));
+    }
+    constants.sort();
+
+    out.push('\n');
+    out.push_str(&format!(
+        "#[allow(dead_code)]\npub mod {module} {{\n    use pushrod::resource::{type_name};\n"
+    ));
+    for (id, constant, name) in &constants {
+        out.push_str(&format!(
+            "\n    /// The {what} `{}`.\n    pub const {constant}: {type_name} = {type_name}({id});\n",
+            name.replace(['\n', '\r'], " ")
+        ));
+    }
+    out.push_str("}\n");
+    Ok(())
+}
+
+/// Writes the module of one resource table, or nothing if the table is empty.
+///
+/// # Arguments
+///
+/// * `out` - The source text being built.
+/// * `module` - The module's name.
+/// * `type_name` - The ID type of every constant.
+/// * `what` - What each constant names.
+/// * `table` - The resource table.
+///
+/// # Errors
+///
+/// See [`write_module`].
+fn write_table<T>(
+    out: &mut String,
+    module: &str,
+    type_name: &str,
+    what: &str,
+    table: &ResourceTable<T>,
+) -> std::result::Result<(), FormError> {
+    if table.is_empty() {
+        return Ok(());
+    }
+    write_module(
+        out,
+        module,
+        type_name,
+        what,
+        table.iter().map(|e| (e.id, e.name.as_str())),
+    )
+}
+
 /// Generates the Rust source of the ID constants of a form file.
 ///
 /// # Arguments
@@ -162,13 +256,16 @@ fn subtree(file: &FormFile, root: u32) -> Vec<u32> {
 ///
 /// # Returns
 ///
-/// The source text: one `pub mod` per form, holding one `pub const NAME: FormIndex` per ID symbol
-/// of an object in that form.  Symbols that name no object of any form are left out.
+/// The source text: a `forms` module of [`FormId`](crate::resource::FormId) constants; one
+/// `pub mod` per form, holding one `pub const NAME: FormIndex` per ID symbol of an object in that
+/// form; and one module per non-empty resource kind (`strings`, `images`, `icons`, `files`,
+/// `menus`, `alerts`) of typed constants.  Symbols that name no object of any form are left out.
 ///
 /// # Errors
 ///
 /// Returns [`FormError::Invalid`] if the file is inconsistent, two forms have the same module name,
-/// two symbols of a form have the same constant name, or a name is not a usable Rust identifier.
+/// a form is named like a resource module (`forms`, `strings`, ...), two symbols of a form or two
+/// resources of a kind have the same constant name, or a name is not a usable Rust identifier.
 pub fn generate_ids(file: &FormFile) -> std::result::Result<String, FormError> {
     file.validate()?;
 
@@ -176,8 +273,27 @@ pub fn generate_ids(file: &FormFile) -> std::result::Result<String, FormError> {
         String::from("// Generated by pushrod::form::codegen from a form file.  Do not edit.\n");
     let mut modules = HashSet::new();
 
+    if !file.forms.is_empty() {
+        let forms = file.forms.iter().zip(1u32..);
+
+        write_module(
+            &mut out,
+            "forms",
+            "FormId",
+            "form",
+            forms.map(|(form, id)| (id, form.name.as_str())),
+        )?;
+    }
+
     for form in &file.forms {
         let module = identifier("form", &form.name, false)?;
+
+        if RESERVED_MODULES.contains(&module.as_str()) {
+            return Err(FormError::invalid(format!(
+                "form `{}` is named like the generated `{module}` module",
+                form.name
+            )));
+        }
 
         if !modules.insert(module.clone()) {
             return Err(FormError::invalid(format!(
@@ -223,6 +339,21 @@ pub fn generate_ids(file: &FormFile) -> std::result::Result<String, FormError> {
         }
         out.push_str("}\n");
     }
+
+    let resources = &file.resources;
+
+    write_table(
+        &mut out,
+        "strings",
+        "StringId",
+        "string",
+        &resources.strings,
+    )?;
+    write_table(&mut out, "images", "ImageId", "image", &resources.images)?;
+    write_table(&mut out, "icons", "IconId", "icon", &resources.icons)?;
+    write_table(&mut out, "files", "FileId", "file", &resources.files)?;
+    write_table(&mut out, "menus", "MenuId", "menu", &resources.menus)?;
+    write_table(&mut out, "alerts", "AlertId", "alert", &resources.alerts)?;
     Ok(out)
 }
 
