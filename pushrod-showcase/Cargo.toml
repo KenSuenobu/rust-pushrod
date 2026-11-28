@@ -1,6 +1,6 @@
 [package]
 name = "pushrod-showcase"
-version = "0.3.5"
+version = "0.3.6"
 description = "The Pushrod Showcase: an interactive demo of every widget"
 publish = false
 edition.workspace = true
@@ -18,9 +18,9 @@ name = "pushrod-showcase"
 path = "src/main.rs"
 
 [dependencies]
-pushrod = { path = "..", version = "0.3.5" }
-pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.5" }
-pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.3.5" }
+pushrod = { path = "..", version = "0.3.6" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.6" }
+pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.3.6" }
 
 # PNG reading and writing for the tour; the same version and features pushrod-sdl2 uses.
 [dependencies.sdl2]

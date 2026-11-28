@@ -55,6 +55,7 @@
 //! ```
 
 use crate::accessibility::{AccessAction, AccessTree, AccessUpdate};
+use crate::action::{Action, ActionGroupId, ActionId, Actions};
 use crate::backend::{Backend, Waker};
 use crate::cache::WidgetCache;
 use crate::color::Color;
@@ -66,7 +67,7 @@ use crate::event::{
 use crate::font::FontRegistry;
 use crate::form::{FormFile, FormHandle};
 use crate::geometry::{Point, Rect, Size};
-use crate::input::{InputEvent, Key, Modifiers};
+use crate::input::{InputEvent, Key, Modifiers, MouseButton};
 use crate::registry::{PropertyValue, WidgetRegistry};
 use crate::resource::{FormId, Resources};
 use crate::root_widget::RootWidget;
@@ -221,6 +222,8 @@ type CustomCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>, &CustomEvent)>;
 
 /// A callback run once when a modal dialog is dismissed; see [`Ui::open_modal`].  It receives
 /// the application state, a [`Ui`] handle, and the `Widget` that dismissed the dialog.
+type ActionCallback<S> = Box<dyn FnMut(&mut S, &mut Ui<S>)>;
+
 type ModalCallback<S> = Box<dyn FnOnce(&mut S, &mut Ui<S>, WidgetId)>;
 
 /// The handle passed to callbacks.
@@ -237,6 +240,7 @@ pub struct Ui<'a, S = ()> {
     timers: &'a mut TimerSchedule,
     modals: &'a mut Vec<(WidgetId, ModalCallback<S>)>,
     resources: &'a Resources,
+    actions: &'a mut Actions,
 }
 
 impl<S> std::fmt::Debug for Ui<'_, S> {
@@ -257,6 +261,78 @@ impl<S> std::fmt::Debug for Ui<'_, S> {
 }
 
 impl<'a, S> Ui<'a, S> {
+    /// Returns a registered action.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action's ID.
+    ///
+    /// # Returns
+    ///
+    /// The [`Action`], or `None` if the ID is not registered.
+    pub fn action(&self, id: ActionId) -> Option<&Action> {
+        self.actions.get(id)
+    }
+
+    /// Enables or disables an action and every control bound to it.  Queues
+    /// [`EngineEvent::ActionChanged`] when the state changed.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action.
+    /// * `enabled` - The new state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the state changed.
+    pub fn set_action_enabled(&mut self, id: ActionId, enabled: bool) -> bool {
+        self.actions.set_enabled(self.widgets, id, enabled)
+    }
+
+    /// Checks or unchecks a checkable action and every control bound to it.  See
+    /// [`Engine::set_action_checked`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action.
+    /// * `checked` - The new state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the state changed.
+    pub fn set_action_checked(&mut self, id: ActionId, checked: bool) -> bool {
+        self.actions.set_checked(self.widgets, id, checked)
+    }
+
+    /// Changes an action's label on every control bound to it.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action.
+    /// * `label` - The new label.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the label changed.
+    pub fn set_action_label(&mut self, id: ActionId, label: &str) -> bool {
+        self.actions.set_label(self.widgets, id, label)
+    }
+
+    /// Triggers an action as if a control or its shortcut had.  Queues
+    /// [`EngineEvent::ActionInvoked`]; the action's `on_action` callbacks run after the current
+    /// callback returns.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action.
+    ///
+    /// # Returns
+    ///
+    /// `true` if triggered; `false` if the action is unknown or disabled.
+    pub fn trigger_action(&mut self, id: ActionId) -> bool {
+        self.actions.trigger(self.widgets, id)
+    }
+
     /// Returns the resources the application loaded into the `Engine`.
     ///
     /// # Returns
@@ -558,6 +634,10 @@ pub struct Engine<S = ()> {
     modal_callbacks: Vec<(WidgetId, ModalCallback<S>)>,
     /// The resource sets the application loaded.
     resources: Resources,
+    /// The registered actions, their groups, and the controls bound to them.
+    actions: Actions,
+    /// The `on_action` callbacks, by action.
+    action_callbacks: Vec<(ActionId, ActionCallback<S>)>,
 }
 
 impl<S> std::fmt::Debug for Engine<S> {
@@ -626,6 +706,8 @@ impl<S> Engine<S> {
             minimum_size: None,
             modal_callbacks: Vec::new(),
             resources: Resources::new(),
+            actions: Actions::default(),
+            action_callbacks: Vec::new(),
         }
     }
 
@@ -909,6 +991,7 @@ impl<S> Engine<S> {
                 timers: &mut self.timers,
                 modals: &mut self.modal_callbacks,
                 resources: &self.resources,
+                actions: &mut self.actions,
             };
 
             callback(state, &mut ui);
@@ -941,6 +1024,7 @@ impl<S> Engine<S> {
             timers: &mut self.timers,
             modals: &mut self.modal_callbacks,
             resources: &self.resources,
+            actions: &mut self.actions,
         };
 
         for callback in self.idle_callbacks.iter_mut() {
@@ -1753,6 +1837,146 @@ impl<S> Engine<S> {
         callback_id
     }
 
+    /// Creates an action group.
+    ///
+    /// # Arguments
+    ///
+    /// * `exclusive` - `true` if checking one member unchecks the others (and one member always
+    ///   stays checked), like radio buttons.
+    ///
+    /// # Returns
+    ///
+    /// The group's ID; set it as `group` on each [`Action`] before adding it.
+    pub fn add_action_group(&mut self, exclusive: bool) -> ActionGroupId {
+        self.actions.add_group(exclusive)
+    }
+
+    /// Registers an [`Action`].  Queues [`EngineEvent::ActionAdded`].
+    ///
+    /// # Arguments
+    ///
+    /// * `action` - The action to register.
+    ///
+    /// # Returns
+    ///
+    /// The ID assigned to the action.
+    pub fn add_action(&mut self, action: Action) -> ActionId {
+        let id = self.actions.add(action);
+
+        self.widget_cache
+            .queue_event(Event::Engine(EngineEvent::ActionAdded { action: id }));
+        id
+    }
+
+    /// Returns a registered action.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action's ID.
+    ///
+    /// # Returns
+    ///
+    /// The [`Action`], or `None` if the ID is not registered.
+    pub fn action(&self, id: ActionId) -> Option<&Action> {
+        self.actions.get(id)
+    }
+
+    /// Binds a control to an action.  The control takes the action's label (`text`), tooltip,
+    /// enabled state and, for a checkable action, checked state, and from then on follows every
+    /// change.  Clicking the control, or toggling it, triggers the action.  A control
+    /// without one of those properties (a button has no `checked`) ignores it.
+    ///
+    /// # Arguments
+    ///
+    /// * `action` - The action.
+    /// * `widget` - The control's `Widget` ID; it is bound to one action at a time.
+    ///
+    /// # Returns
+    ///
+    /// `true` if bound; `false` if the action or the `Widget` does not exist.
+    pub fn bind_widget(&mut self, action: ActionId, widget: WidgetId) -> bool {
+        self.actions.bind(&mut self.widget_cache, action, widget)
+    }
+
+    /// Enables or disables an action and every control bound to it.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action.
+    /// * `enabled` - The new state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the state changed.
+    pub fn set_action_enabled(&mut self, id: ActionId, enabled: bool) -> bool {
+        self.actions
+            .set_enabled(&mut self.widget_cache, id, enabled)
+    }
+
+    /// Checks or unchecks a checkable action and every control bound to it.  In an exclusive
+    /// group, checking one action unchecks the others, and unchecking the checked one is refused.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action.
+    /// * `checked` - The new state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the state changed.
+    pub fn set_action_checked(&mut self, id: ActionId, checked: bool) -> bool {
+        self.actions
+            .set_checked(&mut self.widget_cache, id, checked)
+    }
+
+    /// Triggers an action, as a bound control or its shortcut does.  Queues
+    /// [`EngineEvent::ActionInvoked`].
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The action.
+    ///
+    /// # Returns
+    ///
+    /// `true` if triggered; `false` if the action is unknown or disabled.
+    pub fn trigger_action(&mut self, id: ActionId) -> bool {
+        self.actions.trigger(&mut self.widget_cache, id)
+    }
+
+    /// Registers a callback that runs each time an action is triggered, by a bound control, its
+    /// shortcut, or `trigger_action`.  For a checkable action the new state is already set; read
+    /// it with [`Ui::action`].
+    ///
+    /// # Arguments
+    ///
+    /// * `action` - The action.
+    /// * `callback` - Called with the application state and a [`Ui`] handle.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use pushrod::action::Action;
+    /// use pushrod::engine::Engine;
+    /// use pushrod::geometry::size;
+    ///
+    /// let mut engine: Engine<u32> = Engine::new(size(320, 200), 30);
+    /// let save = engine.add_action(Action::new("Save"));
+    ///
+    /// engine.on_action(save, |saves, _ui| *saves += 1);
+    ///
+    /// let mut saves = 0;
+    ///
+    /// engine.trigger_action(save);
+    /// engine.run_idle(&mut saves);
+    /// assert_eq!(saves, 1);
+    /// ```
+    pub fn on_action<F>(&mut self, action: ActionId, callback: F)
+    where
+        F: FnMut(&mut S, &mut Ui<S>) + 'static,
+    {
+        self.action_callbacks.push((action, Box::new(callback)));
+    }
+
     /// Registers a callback that receives every event the `Widget`s generate.
     ///
     /// These callbacks run after the `Widget`-specific callbacks for the same event, in the order
@@ -2025,6 +2249,19 @@ impl<S> Engine<S> {
             return Vec::new();
         }
 
+        if let InputEvent::KeyDown {
+            key,
+            modifiers,
+            repeat: false,
+        } = &event
+            && let Some(action) = self
+                .actions
+                .find_shortcut(&self.widget_cache, *key, *modifiers)
+        {
+            self.actions.trigger(&mut self.widget_cache, action);
+            return Vec::new();
+        }
+
         match event {
             InputEvent::Quit => {
                 self.running = false;
@@ -2094,6 +2331,7 @@ impl<S> Engine<S> {
                     timers: &mut self.timers,
                     modals: &mut self.modal_callbacks,
                     resources: &self.resources,
+                    actions: &mut self.actions,
                 };
 
                 callback(state, &mut ui, *dismissed_by);
@@ -2105,9 +2343,37 @@ impl<S> Engine<S> {
         }
     }
 
+    /// Applies the action rules to an event before callbacks see it: a click or toggle on a bound
+    /// control triggers its action, and a removed `Widget` is unbound.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event being delivered.
+    fn run_action_hooks(&mut self, event: &Event) {
+        match event {
+            Event::Clicked {
+                id,
+                button: MouseButton::Left,
+                ..
+            } => {
+                self.actions
+                    .control_activated(&mut self.widget_cache, *id, None);
+            }
+            Event::Toggled { id, checked } => {
+                self.actions
+                    .control_activated(&mut self.widget_cache, *id, Some(*checked));
+            }
+            Event::Engine(EngineEvent::WidgetRemoved { id, .. }) => {
+                self.actions.unbind_widget(*id);
+            }
+            _ => {}
+        }
+    }
+
     /// Delivers a generated `Event` to the callbacks.
     fn fire(&mut self, event: &Event, state: &mut S) {
         self.run_modal_callback(event, state);
+        self.run_action_hooks(event);
 
         let mut ui = Ui {
             widgets: &mut self.widget_cache,
@@ -2117,6 +2383,7 @@ impl<S> Engine<S> {
             timers: &mut self.timers,
             modals: &mut self.modal_callbacks,
             resources: &self.resources,
+            actions: &mut self.actions,
         };
 
         if let Event::Custom(custom) = event {
@@ -2130,6 +2397,14 @@ impl<S> Engine<S> {
         {
             for (_, callback) in callbacks.iter_mut() {
                 callback(state, &mut ui, event);
+            }
+        }
+
+        if let Event::Engine(EngineEvent::ActionInvoked { action }) = event {
+            for (id, callback) in self.action_callbacks.iter_mut() {
+                if id == action {
+                    callback(state, &mut ui);
+                }
             }
         }
 

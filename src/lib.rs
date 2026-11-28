@@ -67,6 +67,7 @@
 #![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
 pub mod accessibility;
+pub mod action;
 pub mod appearance;
 pub mod backend;
 pub mod cache;

@@ -84,6 +84,7 @@
 //! and `SystemEvent` is split into `PointerPressed`, `PointerReleased`, and `PointerMoved`.
 //! Window-system input arrives as a backend's [`InputEvent`](crate::input::InputEvent).
 
+use crate::action::ActionId;
 use crate::error::Error;
 use crate::geometry::{Point, Size};
 use crate::input::{Key, Modifiers, MouseButton};
@@ -391,6 +392,12 @@ pub enum EngineEventKind {
     ResourcesLoaded,
     /// See [`EngineEvent::ResourcesFreed`].
     ResourcesFreed,
+    /// See [`EngineEvent::ActionAdded`].
+    ActionAdded,
+    /// See [`EngineEvent::ActionChanged`].
+    ActionChanged,
+    /// See [`EngineEvent::ActionInvoked`].
+    ActionInvoked,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -656,6 +663,23 @@ pub enum EngineEvent {
         /// How many sets were freed.
         sets: usize,
     },
+    /// An [`Action`](crate::action::Action) was registered with `Engine::add_action`.
+    ActionAdded {
+        /// The new action.
+        action: ActionId,
+    },
+    /// An action's enabled state, checked state, or label changed, and every control bound to it
+    /// was updated.
+    ActionChanged {
+        /// The action that changed.
+        action: ActionId,
+    },
+    /// An action was triggered by a bound control or its shortcut (or `trigger_action`).  This is
+    /// the action's `Triggered` notification; the `on_action` callback runs with it.
+    ActionInvoked {
+        /// The action that was triggered.
+        action: ActionId,
+    },
 }
 
 impl EngineEvent {
@@ -702,6 +726,9 @@ impl EngineEvent {
             EngineEvent::FormLoaded { .. } => EngineEventKind::FormLoaded,
             EngineEvent::ResourcesLoaded { .. } => EngineEventKind::ResourcesLoaded,
             EngineEvent::ResourcesFreed { .. } => EngineEventKind::ResourcesFreed,
+            EngineEvent::ActionAdded { .. } => EngineEventKind::ActionAdded,
+            EngineEvent::ActionChanged { .. } => EngineEventKind::ActionChanged,
+            EngineEvent::ActionInvoked { .. } => EngineEventKind::ActionInvoked,
         }
     }
 }

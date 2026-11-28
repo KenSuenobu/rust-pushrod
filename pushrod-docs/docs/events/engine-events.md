@@ -59,6 +59,9 @@ flowchart TD
 | `FormLoaded { form, root, widgets }` | A form was loaded with `Engine::load_form`; `root` is the widget made from the form's root object and `widgets` is how many widgets it created. See [Loading forms](../forms/loading-forms.md). |
 | `ResourcesLoaded { sets }` | Resource sets were given to the engine with `Engine::set_resources`. See [Resources](../forms/resources.md). |
 | `ResourcesFreed { sets }` | The engine's resource sets were replaced or cleared. |
+| `ActionAdded { action }` | An [action](./actions-and-keyboard-shortcuts.md) was registered with `add_action`. |
+| `ActionChanged { action }` | An action's enabled state, checked state, or label changed, and its bound controls were updated. |
+| `ActionInvoked { action }` | An action was triggered by a bound control, its shortcut, or `trigger_action`. |
 | `Error { error }` | Something failed while the loop was running (a font would not load, a texture could not be created). The loop keeps going. See [Errors](../guides/creating-an-application.md#errors). |
 
 More variants are added by the features that need them (menus, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
