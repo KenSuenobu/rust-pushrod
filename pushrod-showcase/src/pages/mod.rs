@@ -25,11 +25,15 @@ mod boxed_label;
 mod button;
 mod check_box;
 mod frame;
+mod glyph_button;
 mod group_box;
+mod image_widget;
+mod panel;
 mod progress_bar;
 mod radio_button;
 mod row_and_column;
 mod separator;
+mod slider;
 mod text;
 mod text_field;
 
@@ -48,6 +52,10 @@ pub fn register_all(registry: &mut Registry) {
     registry.register(group_box::GroupBoxPage);
     registry.register(boxed_label::BoxedLabelPage);
     registry.register(frame::FramePage);
+    registry.register(glyph_button::GlyphButtonPage);
+    registry.register(slider::SliderPage);
+    registry.register(image_widget::ImageWidgetPage);
+    registry.register(panel::PanelPage);
     registry.register(row_and_column::RowAndColumnPage);
     registry.register(text_field::TextFieldPage);
 }

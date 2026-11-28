@@ -123,4 +123,24 @@ impl Registry {
             .map(|(index, _)| index)
             .collect()
     }
+
+    /// Returns the widget type names that no registered page demonstrates.
+    ///
+    /// # Arguments
+    ///
+    /// * `types` - The type names a widget library registered.
+    ///
+    /// # Returns
+    ///
+    /// The names that no page lists in [`Page::widget_types`], sorted.
+    pub fn missing_pages<'a>(&self, types: &[&'a str]) -> Vec<&'a str> {
+        let mut missing: Vec<&str> = types
+            .iter()
+            .copied()
+            .filter(|name| !self.pages.iter().any(|p| p.widget_types().contains(name)))
+            .collect();
+
+        missing.sort_unstable();
+        missing
+    }
 }

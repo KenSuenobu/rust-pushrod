@@ -30,6 +30,10 @@ impl Page for GroupBoxPage {
         "Group Box"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.group_box"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }

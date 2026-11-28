@@ -2823,7 +2823,7 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 - [x] `cargo run -p pushrod-showcase` opens the shell with grouped pages
 - [x] Search filters the page list
 - [x] Adding a page needs only an implementation of `Page` and one registration line
-- [ ] Gallery example content available as pages (partly: nine tiles so far)
+- [ ] Gallery example content available as pages (partly: see 12.2 (#296))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 5.3 (#58), 5.6 (#117), 2.6 (#32), 7.3 (#71).
 
@@ -2845,11 +2845,13 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![12.2 step set 1: The Check Box page: every state, live](mockups/12.2-1.png)
 
+**Status:** done (#296). Every type `pushrod_widgets::register` adds has a page (Glyph Button, Slider, Image, and Panel are new); a page lists its types in `Page::widget_types`, and `pushrod-showcase/tests/completeness.rs` fails, naming the type, when one has none. A new widget library adds its `register` call to that test. Widgets that are not registered (Container, Scroll Bar, Alert, Custom Paint) are outside the test. The Image page shows the missing-file box, as no sample bitmap ships.
+
 **Acceptance Criteria.**
 
-- Every registered standard widget has a page
-- The completeness test fails when a registered type has no page
-- CONTRIBUTING.md states the rule
+- [x] Every registered standard widget has a page
+- [x] The completeness test fails when a registered type has no page
+- [x] CONTRIBUTING.md states the rule
 
 **Parallelism / Dependencies.** Parallelizable. Requires 12.1 (#295), 6.1 (#60).
 

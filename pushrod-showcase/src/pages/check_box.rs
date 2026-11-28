@@ -29,6 +29,10 @@ impl Page for CheckBoxPage {
         "Check Box"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.check_box"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }

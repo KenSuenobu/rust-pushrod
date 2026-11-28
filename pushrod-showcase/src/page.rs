@@ -69,6 +69,17 @@ pub trait Page {
     /// The name.
     fn name(&self) -> &'static str;
 
+    /// Returns the registered widget type names (for example `"pushrod.button"`) this page
+    /// demonstrates.  The completeness test fails when a widget library registers a type that
+    /// no page lists here.
+    ///
+    /// # Returns
+    ///
+    /// The type names; empty (the default) for a page that is not about a registered widget.
+    fn widget_types(&self) -> &'static [&'static str] {
+        &[]
+    }
+
     /// Returns the group the page is listed under.
     ///
     /// # Returns

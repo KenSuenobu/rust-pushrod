@@ -29,6 +29,10 @@ impl Page for RadioButtonPage {
         "Radio Button"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.radio_button"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }

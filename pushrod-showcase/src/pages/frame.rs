@@ -30,6 +30,10 @@ impl Page for FramePage {
         "Frame"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.frame"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }

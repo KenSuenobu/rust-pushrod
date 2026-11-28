@@ -30,6 +30,10 @@ impl Page for SeparatorPage {
         "Separator"
     }
 
+    fn widget_types(&self) -> &'static [&'static str] {
+        &["pushrod.separator"]
+    }
+
     fn group(&self) -> Group {
         Group::Standard
     }
