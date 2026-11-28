@@ -46,6 +46,14 @@ PUSHROD_GOLDEN=1 cargo test -p pushrod-sdl2 --test visual --test contacts
 
 A plain `cargo test` skips the comparison (the tolerance helpers are still tested).
 
+## The showcase tour
+
+Every page of [The Pushrod Showcase](../guides/showcase.md) has a golden too, in
+`pushrod-showcase/tests/golden/showcase-<page>.png`. Compare with
+`cargo run -p pushrod-showcase -- --tour` and rewrite with
+`cargo run -p pushrod-showcase -- --tour --update-golden`. The same tolerance applies, and a mismatch
+writes the same three files to the same directory, so the **golden** job's artifact holds both.
+
 ## Update the goldens
 
 After an intended change to how a widget looks, regenerate, then **look at the changed PNGs**

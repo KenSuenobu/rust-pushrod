@@ -2977,11 +2977,13 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 **Solution / Scope.** `--tour` runs the showcase headless with the test painter: it visits every page, renders it, and compares it with a golden image (7.2 (#70)). `--screenshots <dir>` writes the page images that the documentation site's widget pages show. CI runs the tour on every pull request and uploads differing images as artifacts.
 
+**Status:** done (#301). `pushrod-showcase --tour` renders every page with SDL's software renderer (the test painter of 7.2 (#70)) and compares it with `pushrod-showcase/tests/golden/showcase-<page>.png`; `--tour --update-golden` rewrites them. `--screenshots <dir>` writes `showcase-page-<page>.png`, which are in `pushrod-docs/static/img/screenshots/`. The tour runs in the CI **golden** job and its diffs go to the `golden-diff` artifact. The tour is `src/tour.rs` and its tests are `tests/tour.rs`.
+
 **Acceptance Criteria.**
 
-- The tour visits every page and compares golden images in CI
-- Documentation screenshots are generated, not hand-made
-- Differences are uploaded as artifacts
+- [x] The tour visits every page and compares golden images in CI
+- [x] Documentation screenshots are generated, not hand-made
+- [x] Differences are uploaded as artifacts
 
 **Parallelism / Dependencies.** Parallelizable. Requires 12.2 (#296), 7.2 (#70).
 

@@ -94,7 +94,6 @@ One application showing every widget live, with a property panel, event log, and
 | Order | Issue | Title |
 |---|---|---|
 | 3 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
-| 8 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
 
 ## Chassis MVP
 

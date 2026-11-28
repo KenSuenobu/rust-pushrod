@@ -113,7 +113,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 74 | [#298](https://github.com/KenSuenobu/rust-pushrod/issues/298) | pushrod: [12.4] Showcase event log |
 | ✅ 75 | [#299](https://github.com/KenSuenobu/rust-pushrod/issues/299) | pushrod: [12.5] Showcase source view: the code for each page |
 | ✅ 76 | [#300](https://github.com/KenSuenobu/rust-pushrod/issues/300) | pushrod: [12.6] Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources |
-| 77 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
+| ✅ 77 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
 | **78** | checkpoint | **Pushrod Showcase released** |
 | 79 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
 | 80 | [#164](https://github.com/KenSuenobu/rust-pushrod/issues/164) | chassis: [2.1] Project model |
@@ -1495,9 +1495,9 @@ One application that shows every widget and core feature live, with a property p
 
 **Show on video:**
 
-- [ ] The tour visits every page and compares golden images in CI
-- [ ] Documentation screenshots are generated, not hand-made
-- [ ] Differences are uploaded as artifacts
+- [x] The tour visits every page and compares golden images in CI
+- [x] Documentation screenshots are generated, not hand-made
+- [x] Differences are uploaded as artifacts
 
 ### Step 78: Checkpoint: Pushrod Showcase released
 

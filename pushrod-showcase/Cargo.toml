@@ -21,3 +21,8 @@ path = "src/main.rs"
 pushrod = { path = "..", version = "0.2.3" }
 pushrod-widgets = { path = "../pushrod-widgets", version = "0.2.3" }
 pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.2.3" }
+
+# PNG reading and writing for the tour; the same version and features pushrod-sdl2 uses.
+[dependencies.sdl2]
+version = "0.38"
+features = ["image", "unsafe_textures"]
