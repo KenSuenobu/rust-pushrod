@@ -21,9 +21,13 @@ use pushrod::geometry::Size;
 use pushrod::widget::WidgetId;
 use pushrod_widgets::text::Text;
 
+mod appearance;
 mod boxed_label;
 mod button;
 mod check_box;
+mod dialogs;
+mod focus;
+mod form_layout;
 mod frame;
 mod glyph_button;
 mod group_box;
@@ -31,6 +35,8 @@ mod image_widget;
 mod panel;
 mod progress_bar;
 mod radio_button;
+mod resource_form;
+mod resources_by_id;
 mod row_and_column;
 mod separator;
 mod slider;
@@ -44,6 +50,9 @@ mod text_field;
 /// * `registry` - The registry to add the pages to.
 pub fn register_all(registry: &mut Registry) {
     registry.register(text::TextPage);
+    registry.register(appearance::AppearancePage);
+    registry.register(focus::FocusPage);
+    registry.register(dialogs::DialogsPage);
     registry.register(button::ButtonPage);
     registry.register(check_box::CheckBoxPage);
     registry.register(radio_button::RadioButtonPage);
@@ -57,6 +66,9 @@ pub fn register_all(registry: &mut Registry) {
     registry.register(image_widget::ImageWidgetPage);
     registry.register(panel::PanelPage);
     registry.register(row_and_column::RowAndColumnPage);
+    registry.register(form_layout::FormLayoutPage);
+    registry.register(resource_form::ResourceFormPage);
+    registry.register(resources_by_id::ResourcesByIdPage);
     registry.register(text_field::TextFieldPage);
 }
 

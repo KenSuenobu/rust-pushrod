@@ -123,3 +123,4 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [#298] Showcase event log: widget and engine events, filter, clear, pause [kenji]
 - [#298] Hidden widgets stay invalidated until painted: scroll bars no longer blank [kenji]
 - [#299] Showcase source view: each page's build code, with Source toggle and Copy [kenji]
+- [#300] Showcase core pages: appearance, focus, dialogs, form layout, resources [kenji]

@@ -106,6 +106,35 @@ flowchart LR
 
 The same snippets are the ones to quote on a widget's documentation page: copy them from the **Source** view, or from the page's file, and they compile against the current library.
 
+## Core feature pages
+
+Some pages show behavior rather than a widget. They have no `widget_types`, so the completeness test ignores them.
+
+| Page (group) | What to try |
+| --- | --- |
+| **Text** (Core) | Justify left, center, and right; truncate at the end, start, or middle; wrap by word. |
+| **Appearance** (Core) | Normal, checked, mixed, and disabled widgets side by side. **Hover, press, or Tab** to a widget to see those states. |
+| **Focus and Tab** (Core) | **Click a field, then press Tab or Shift-Tab** to move. **Return** presses OK; **Escape** presses Cancel. |
+| **Dialogs and Alerts** (Core) | **Click *Information*, *Warning*, or *Question*.** The window behind goes inert; choose a button, or press Return or Escape. The page reports the button chosen. |
+| **Row and Column** (Layouts) | The same three buttons placed left to right and top to bottom. |
+| **Form Layout** (Layouts) | **Drag the *Form width* slider** left. Labels sit beside their fields while the form is wide, and move above them when it is narrow. |
+| **Form from a Resource File** (Forms and resources) | A contact form (Name, Email, OK, Cancel) loaded from `pushrod-showcase/resources/showcase.prsc` by `FormId(1)`. |
+| **Strings and Images by ID** (Forms and resources) | Strings found by `StringId` and by name, and the `LOGO` image's size and cache key found by `ImageId`. |
+
+The resource file is built by `resources::build` and saved with `cargo run -p pushrod-showcase --example make_resources`; a test fails if the file on disk and the builder disagree. The IDs in `resources.rs` (`FORM_TITLE`, `GREETING`, `LOGO`, `CONTACT_FORM`) are checked against the names in the file by another test.
+
+```mermaid
+flowchart LR
+    B[resources::build] -->|make_resources example| F[showcase.prsc]
+    F -->|include_bytes| R[Resources]
+    R -->|StringId, ImageId| P[Strings and Images page]
+    R -->|load_resource_form at startup| S[Hidden shelf]
+    S -->|FormId 1, borrowed| Q[Form from a Resource File page]
+    Q -->|Page::leave| S
+```
+
+An alert is added to the window, which lays out its children in a row. The Dialogs page marks the alert as floating (`shell::FLOATING`) so the window's layout leaves it where it centers itself.
+
 ## How it fits together
 
 ```mermaid
@@ -166,6 +195,8 @@ registry.register(hello::HelloPage);
 | `group` | The heading the page is listed under. |
 | `description` | The line under the title. Search matches it too. |
 | `build` | Adds the page's widgets and returns the root. Give the root a fixed size so the area knows how far to scroll. |
+| `handle_event` | Optional. Reacts to an event while the page is showing: a width slider, or a button that opens a dialog. |
+| `leave` | Optional. Runs just before the page's widgets are removed, so a page can give back what it borrowed. |
 | `source` | The page's source code, for the source view. Return `crate::source_view::build_source("hello.rs")`, the text of the page's `build` function; the default is an empty string. |
 
 ## Every widget has a page

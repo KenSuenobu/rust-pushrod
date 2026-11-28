@@ -30,8 +30,11 @@ use std::time::Instant;
 type Harness = (Engine<ShowcaseState>, ShowcaseState);
 
 /// Builds the shell headlessly, opens the named page, and settles the layout.
+/// A window tall enough to show every page button without scrolling the list.
+const TALL_H: u32 = WINDOW_H * 2;
+
 fn start(page: &str) -> Harness {
-    let mut engine: Engine<ShowcaseState> = Engine::new(size(WINDOW_W, WINDOW_H), 30);
+    let mut engine: Engine<ShowcaseState> = Engine::new(size(WINDOW_W, TALL_H), 30);
     let mut state = shell::build(&mut engine, None);
 
     engine.run_idle(&mut state);
@@ -51,7 +54,7 @@ fn start(page: &str) -> Harness {
 
 /// Draws frames until the layout settles.
 fn settle(engine: &mut Engine<ShowcaseState>) {
-    let mut backend = HeadlessBackend::new(size(WINDOW_W, WINDOW_H));
+    let mut backend = HeadlessBackend::new(size(WINDOW_W, TALL_H));
 
     for _ in 0..3 {
         engine.widgets().draw_loop(&mut backend);
@@ -399,9 +402,9 @@ fn unpainted(engine: &mut Engine<ShowcaseState>, backend: &HeadlessBackend) -> V
 fn scroll_bars_are_painted_when_they_first_appear() {
     // One backend for the whole session, as in the real window: a widget painted into an
     // earlier backend would hide the bug.
-    let mut engine: Engine<ShowcaseState> = Engine::new(size(WINDOW_W, WINDOW_H), 30);
+    let mut engine: Engine<ShowcaseState> = Engine::new(size(WINDOW_W, TALL_H), 30);
     let mut state = shell::build(&mut engine, None);
-    let mut backend = HeadlessBackend::new(size(WINDOW_W, WINDOW_H));
+    let mut backend = HeadlessBackend::new(size(WINDOW_W, TALL_H));
 
     engine.run_idle(&mut state);
 

@@ -15,6 +15,7 @@
 //! The [`Page`] trait: one showcase page per widget or feature, and the groups pages sit in.
 
 use crate::shell::ShowcaseUi;
+use pushrod::event::Event;
 use pushrod::widget::WidgetId;
 
 /// The heading a page is listed under in the page list.
@@ -108,6 +109,26 @@ pub trait Page {
     ///
     /// The ID of the page's root widget.
     fn build(&self, ui: &mut ShowcaseUi<'_>) -> WidgetId;
+
+    /// Reacts to an event while the page is showing.  A page that has controls of its own (a
+    /// width slider, a button that opens a dialog) answers them here; the default ignores
+    /// every event.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The callback handle.
+    /// * `root` - The page's root widget, as `build` returned it.
+    /// * `event` - The event a widget generated.
+    fn handle_event(&self, _ui: &mut ShowcaseUi<'_>, _root: WidgetId, _event: &Event) {}
+
+    /// Runs just before the page's widgets are removed, so a page can give back anything it
+    /// borrowed (such as a form loaded once at startup).  The default does nothing.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The callback handle.
+    /// * `root` - The page's root widget.
+    fn leave(&self, _ui: &mut ShowcaseUi<'_>, _root: WidgetId) {}
 
     /// Returns the source code of the page, for the source view.
     ///
