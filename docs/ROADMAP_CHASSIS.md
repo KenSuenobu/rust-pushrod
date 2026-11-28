@@ -1377,14 +1377,16 @@ Code generation rules, a command-line generator, build and run, error list, temp
 
 **Acceptance Criteria.**
 
-- Output identical to what the UI generates
-- `chassis check` exits non-zero on problems
+- [x] Output identical to what the UI generates
+- [x] `chassis check` exits non-zero on problems
 
 **Parallelism / Dependencies.** Parallelizable. Chassis: 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)), 5.7 ([#166](https://github.com/KenSuenobu/rust-pushrod/issues/166)), 6.1 ([#165](https://github.com/KenSuenobu/rust-pushrod/issues/165))
 
 **Technical Stack.** Rust, clap
 
 **Documentation.** `pushrod-docs/docs/chassis/projects-and-resources.md` ("Projects and resources", Chassis group, update).
+
+**Status:** done (#167). `chassis/src/cli.rs` (`render`, `generate`, `check`, `run`) and the `chassis` binary; tests in `chassis/tests/cli.rs`. Docs: `pushrod-docs/docs/chassis/projects-and-resources.md`.
 
 ### 6.6: Build targets, including the Atari ST
 

@@ -141,3 +141,38 @@ cargo run -p chassis --example wiring -- path/to/project MainWindow
 ```
 
 The example prints each wired handler with its widget, event, and engine method, then writes `src/generated/main_window_wiring.rs`.
+
+## The command line
+
+The `chassis` command regenerates the generated code without opening the designer, and checks a project for problems. It calls the same function the designer does (`chassis::cli::render`), so the files are byte for byte the same.
+
+```mermaid
+flowchart LR
+    R["app.prsc"] --> X["chassis::cli::render"]
+    H["src/forms/*.rs"] --> X
+    X --> G["chassis generate<br/>writes src/generated/"]
+    X --> C["chassis check<br/>compares, writes nothing"]
+```
+
+```bash
+cargo run -p chassis -- generate path/to/project
+cargo run -p chassis -- check path/to/project
+```
+
+The project defaults to the current directory. `generate` writes `src/generated/ids.rs`, one `<form>_wiring.rs` per form, and `src/generated/mod.rs` (the module list), and prints each path. Nothing is written if any file cannot be produced.
+
+`check` writes nothing. It prints one line per problem and exits non-zero if there are any:
+
+| Kind | Meaning |
+|---|---|
+| `invalid` | A name that is not a usable Rust identifier, a handler that is not `pub`, a handler that could mean two widgets or events, or a project with no resource file. |
+| `orphaned` | A function named `on_...` that matches no widget and event of its form (for example, its widget was deleted), or a file in `src/forms` that belongs to no form. |
+| `missing` | A generated file that does not exist or is out of date, so a handler is not wired. Run `chassis generate`. |
+
+| Exit code | Meaning |
+|---|---|
+| `0` | Success; `check` found nothing. |
+| `1` | `check` found problems. |
+| `2` | Bad arguments, or the project could not be loaded or written. |
+
+Use `chassis check` in CI to fail a build whose generated code is out of date. A `build.rs` can call `chassis::cli::generate` (or run the command) to regenerate before compiling.
