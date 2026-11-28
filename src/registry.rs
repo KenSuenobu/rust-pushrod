@@ -43,9 +43,43 @@
 //! assert_eq!(widget.get_size().w, 40);
 //! assert!(registry.create("acme.missing", &Properties::new()).is_err());
 //! ```
+//!
+//! ## Event metadata
+//!
+//! A designer lists the events a widget supports and writes handler stubs for them, so an entry
+//! can also declare its events as a `&'static [`[`EventInfo`]`]`: the event's name, a one-line
+//! description, its payload fields, whether it is the widget's default event, and the engine
+//! callback registration it maps to (`on_click`, `on_toggle`, ...).  Events every widget can
+//! receive (pointer, key, focus) are the core's [`SHARED_EVENTS`], so a widget declares only its
+//! own.  The payload lists the fields besides the widget `id`, which every widget-addressed event
+//! carries.
+//!
+//! ```rust
+//! use pushrod::event::EventKind;
+//! use pushrod::prelude::*;
+//! use pushrod::registry::{EventInfo, PayloadField, Properties, WidgetRegistry};
+//! use pushrod::root_widget::RootWidget;
+//!
+//! const EVENTS: &[EventInfo] = &[EventInfo {
+//!     name: "Toggled",
+//!     description: "The switch was flipped.",
+//!     kind: EventKind::Toggled,
+//!     payload: &[PayloadField { name: "checked", type_name: "bool" }],
+//!     is_default: true,
+//!     callback: Some("on_toggle"),
+//! }];
+//!
+//! let mut registry = WidgetRegistry::new();
+//!
+//! registry.register_with_events("acme.switch", EVENTS, |_| Ok(Box::new(RootWidget::new(size(10, 10)))));
+//!
+//! assert_eq!(registry.default_event("acme.switch").unwrap().name, "Toggled");
+//! assert!(registry.all_events("acme.switch").unwrap().len() > 1);
+//! ```
 
 use crate::color::Color;
 use crate::error::{Error, Result};
+use crate::event::EventKind;
 use crate::geometry::{point, size};
 use crate::widget::Widget;
 use std::collections::BTreeMap;
@@ -265,6 +299,179 @@ impl Properties {
     }
 }
 
+/// One field of an event's payload, besides the widget `id` every widget-addressed event carries.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PayloadField {
+    /// The field name, as it appears on the `Event` variant (`"checked"`).
+    pub name: &'static str,
+    /// The field's type as written in Rust (`"bool"`, `"Point"`).
+    pub type_name: &'static str,
+}
+
+/// What a designer needs to know about one event a widget can emit: enough to list it, document
+/// it, and generate a handler stub with the right parameters.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct EventInfo {
+    /// The event's name (`"Clicked"`), the same as its `Event` variant.
+    pub name: &'static str,
+    /// A one-line description.
+    pub description: &'static str,
+    /// The kind of `Event` this declares, which the engine reports for it.
+    pub kind: EventKind,
+    /// The payload fields besides the widget `id`.
+    pub payload: &'static [PayloadField],
+    /// `true` if this is the widget's default event, the one a designer wires on a double-click.
+    /// At most one event of a widget is the default.
+    pub is_default: bool,
+    /// The `Engine` registration method that handles this event (`"on_click"`), or `None` if it
+    /// is handled only through `Engine::on_event`.
+    pub callback: Option<&'static str>,
+}
+
+/// Builds a payload field in a `const` table.
+///
+/// # Arguments
+///
+/// * `name` - The field name.
+/// * `type_name` - The field's Rust type.
+///
+/// # Returns
+///
+/// The field.
+const fn field(name: &'static str, type_name: &'static str) -> PayloadField {
+    PayloadField { name, type_name }
+}
+
+/// Builds a shared (never default) event in a `const` table.
+///
+/// # Arguments
+///
+/// * `name` - The event name.
+/// * `description` - The one-line description.
+/// * `kind` - The event kind.
+/// * `payload` - The payload fields.
+/// * `callback` - The engine registration method, if any.
+///
+/// # Returns
+///
+/// The event.
+const fn shared(
+    name: &'static str,
+    description: &'static str,
+    kind: EventKind,
+    payload: &'static [PayloadField],
+    callback: Option<&'static str>,
+) -> EventInfo {
+    EventInfo {
+        name,
+        description,
+        kind,
+        payload,
+        is_default: false,
+        callback,
+    }
+}
+
+/// The events any widget can receive from the engine: pointer, keyboard, and focus.  They are
+/// listed after a widget's own events by [`WidgetRegistry::all_events`], and none is a default.
+pub const SHARED_EVENTS: &[EventInfo] = &[
+    shared(
+        "PointerEntered",
+        "The pointer moved onto the widget.",
+        EventKind::PointerEntered,
+        &[],
+        Some("on_hover"),
+    ),
+    shared(
+        "PointerExited",
+        "The pointer moved off the widget.",
+        EventKind::PointerExited,
+        &[],
+        Some("on_hover"),
+    ),
+    shared(
+        "PointerMoved",
+        "The pointer moved over the widget.",
+        EventKind::PointerMoved,
+        &[field("position", "Point")],
+        None,
+    ),
+    shared(
+        "PointerPressed",
+        "A mouse button went down over the widget.",
+        EventKind::PointerPressed,
+        &[
+            field("button", "MouseButton"),
+            field("position", "Point"),
+            field("count", "u8"),
+        ],
+        Some("on_press"),
+    ),
+    shared(
+        "PointerReleased",
+        "A mouse button went up after a press on the widget.",
+        EventKind::PointerReleased,
+        &[
+            field("button", "MouseButton"),
+            field("position", "Point"),
+            field("count", "u8"),
+        ],
+        Some("on_release"),
+    ),
+    shared(
+        "Scrolled",
+        "The wheel or trackpad scrolled over the widget.",
+        EventKind::Scrolled,
+        &[field("delta", "Point")],
+        None,
+    ),
+    shared(
+        "KeyPressed",
+        "A key went down while the widget had the keyboard.",
+        EventKind::KeyPressed,
+        &[
+            field("key", "Key"),
+            field("modifiers", "Modifiers"),
+            field("repeat", "bool"),
+        ],
+        Some("on_key_press"),
+    ),
+    shared(
+        "KeyReleased",
+        "A key went up while the widget had the keyboard.",
+        EventKind::KeyReleased,
+        &[field("key", "Key"), field("modifiers", "Modifiers")],
+        None,
+    ),
+    shared(
+        "FocusGained",
+        "The widget became the keyboard focus.",
+        EventKind::FocusGained,
+        &[],
+        Some("on_focus_change"),
+    ),
+    shared(
+        "FocusLost",
+        "The widget stopped being the keyboard focus.",
+        EventKind::FocusLost,
+        &[],
+        Some("on_focus_change"),
+    ),
+    shared(
+        "ContextMenuRequested",
+        "A context menu was requested over the widget.",
+        EventKind::ContextMenuRequested,
+        &[field("position", "Point")],
+        None,
+    ),
+];
+
+/// A registered widget type: how to build it and which events it declares.
+struct Entry {
+    constructor: Constructor,
+    events: &'static [EventInfo],
+}
+
 /// A function that builds a `Widget` from properties.
 ///
 /// It returns an error, rather than panicking, when a property it needs is missing or invalid.
@@ -275,7 +482,7 @@ pub type Constructor = Box<dyn Fn(&Properties) -> Result<Box<dyn Widget>>>;
 /// See the [module documentation](self) for an example.
 #[derive(Default)]
 pub struct WidgetRegistry {
-    constructors: BTreeMap<String, Constructor>,
+    entries: BTreeMap<String, Entry>,
 }
 
 impl fmt::Debug for WidgetRegistry {
@@ -290,7 +497,7 @@ impl fmt::Debug for WidgetRegistry {
     /// The formatting result.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("WidgetRegistry")
-            .field("types", &self.constructors.keys().collect::<Vec<_>>())
+            .field("types", &self.entries.keys().collect::<Vec<_>>())
             .finish()
     }
 }
@@ -305,7 +512,9 @@ impl WidgetRegistry {
         Self::default()
     }
 
-    /// Registers a constructor under a type name, replacing any constructor already there.
+    /// Registers a constructor under a type name, replacing any constructor already there.  A
+    /// replaced entry keeps the events it declared, so a library that restyles a widget does not
+    /// have to repeat them.
     ///
     /// # Arguments
     ///
@@ -319,9 +528,84 @@ impl WidgetRegistry {
     where
         F: Fn(&Properties) -> Result<Box<dyn Widget>> + 'static,
     {
-        self.constructors
-            .insert(name.into(), Box::new(constructor))
+        let name = name.into();
+        let events = self.entries.get(&name).map_or(&[][..], |e| e.events);
+
+        self.register_with_events(name, events, constructor)
+    }
+
+    /// Registers a constructor and the events its widget declares, replacing any entry already
+    /// there (constructor and events both).
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The stable type name, such as `"acme.tree_view"`.
+    /// * `events` - The widget's own events, not the [`SHARED_EVENTS`].  Mark at most one as the
+    ///   default.
+    /// * `constructor` - Builds the `Widget` from its properties.
+    ///
+    /// # Returns
+    ///
+    /// `true` if an existing entry was replaced.
+    pub fn register_with_events<F>(
+        &mut self,
+        name: impl Into<String>,
+        events: &'static [EventInfo],
+        constructor: F,
+    ) -> bool
+    where
+        F: Fn(&Properties) -> Result<Box<dyn Widget>> + 'static,
+    {
+        self.entries
+            .insert(
+                name.into(),
+                Entry {
+                    constructor: Box::new(constructor),
+                    events,
+                },
+            )
             .is_some()
+    }
+
+    /// Returns the events a widget type declares itself, without the shared ones.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The type name.
+    ///
+    /// # Returns
+    ///
+    /// The declared events (empty if it declares none), or `None` if the name is not registered.
+    pub fn events(&self, name: &str) -> Option<&'static [EventInfo]> {
+        self.entries.get(name).map(|e| e.events)
+    }
+
+    /// Returns every event a widget type supports: its own, then the [`SHARED_EVENTS`].  This is
+    /// the list a designer shows.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The type name.
+    ///
+    /// # Returns
+    ///
+    /// The events, or `None` if the name is not registered.
+    pub fn all_events(&self, name: &str) -> Option<Vec<&'static EventInfo>> {
+        self.events(name)
+            .map(|own| own.iter().chain(SHARED_EVENTS).collect())
+    }
+
+    /// Returns a widget type's default event.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The type name.
+    ///
+    /// # Returns
+    ///
+    /// The event marked as default, or `None` if the name is not registered or has none.
+    pub fn default_event(&self, name: &str) -> Option<&'static EventInfo> {
+        self.events(name)?.iter().find(|e| e.is_default)
     }
 
     /// Returns whether a type name is registered.
@@ -334,7 +618,7 @@ impl WidgetRegistry {
     ///
     /// `true` if the name is registered.
     pub fn contains(&self, name: &str) -> bool {
-        self.constructors.contains_key(name)
+        self.entries.contains_key(name)
     }
 
     /// Lists the registered type names, in alphabetical order (for a palette).
@@ -343,7 +627,7 @@ impl WidgetRegistry {
     ///
     /// The names.
     pub fn names(&self) -> Vec<&str> {
-        self.constructors.keys().map(String::as_str).collect()
+        self.entries.keys().map(String::as_str).collect()
     }
 
     /// Builds a `Widget` from its type name and properties, then applies the common properties
@@ -363,11 +647,11 @@ impl WidgetRegistry {
     /// Returns [`Error::UnknownWidgetType`] if `name` is not registered, or whatever error the
     /// constructor reports for missing or invalid properties.
     pub fn create(&self, name: &str, properties: &Properties) -> Result<Box<dyn Widget>> {
-        let constructor = self
-            .constructors
+        let entry = self
+            .entries
             .get(name)
             .ok_or_else(|| Error::unknown_widget_type(name))?;
-        let mut widget = constructor(properties)?;
+        let mut widget = (entry.constructor)(properties)?;
 
         if properties.get_int("x").is_some() || properties.get_int("y").is_some() {
             let origin = widget.get_origin();
