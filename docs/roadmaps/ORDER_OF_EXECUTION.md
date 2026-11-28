@@ -105,7 +105,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 66 | [#65](https://github.com/KenSuenobu/rust-pushrod/issues/65) | pushrod: [6.6] Generate ID constants from a form file |
 | ✅ 67 | [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) | pushrod: [6.11] Resource kinds: strings, images, icons, files, menus, and alerts |
 | ✅ 68 | [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) | pushrod: [6.12] Typed resource IDs: generated constants per resource kind |
-| 69 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
+| ✅ 69 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
 | **70** | checkpoint | **Pushrod v0.2 released: the Pushrod MVP is complete** |
 | 71 | [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) | pushrod: [12.1] Showcase application shell |
 | 72 | [#296](https://github.com/KenSuenobu/rust-pushrod/issues/296) | pushrod: [12.2] Showcase pages for every standard widget, with a completeness test |
@@ -1374,11 +1374,11 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 **Show on video:**
 
-- [ ] Load from a file and from embedded bytes; same results
-- [ ] Every kind retrievable by typed ID; wrong-kind IDs fail to compile
-- [ ] Stacked sets resolve in order; an application set overrides a library set
-- [ ] Images upload once and are shared by every widget that uses them
-- [ ] Malformed files return an error, never panic
+- [x] Load from a file and from embedded bytes; same results
+- [x] Every kind retrievable by typed ID; wrong-kind IDs fail to compile
+- [x] Stacked sets resolve in order; an application set overrides a library set
+- [x] Images upload once and are shared by every widget that uses them
+- [x] Malformed files return an error, never panic
 
 ### Step 70: Checkpoint: Pushrod v0.2 released: the Pushrod MVP is complete
 

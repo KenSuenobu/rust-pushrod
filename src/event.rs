@@ -387,6 +387,10 @@ pub enum EngineEventKind {
     AccessActionPerformed,
     /// See [`EngineEvent::FormLoaded`].
     FormLoaded,
+    /// See [`EngineEvent::ResourcesLoaded`].
+    ResourcesLoaded,
+    /// See [`EngineEvent::ResourcesFreed`].
+    ResourcesFreed,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -642,6 +646,16 @@ pub enum EngineEvent {
         /// How many widgets the form created.
         widgets: usize,
     },
+    /// Resource sets were given to the `Engine` with `Engine::set_resources`.
+    ResourcesLoaded {
+        /// How many sets were loaded.
+        sets: usize,
+    },
+    /// The `Engine`'s resource sets were freed, replaced or cleared.
+    ResourcesFreed {
+        /// How many sets were freed.
+        sets: usize,
+    },
 }
 
 impl EngineEvent {
@@ -686,6 +700,8 @@ impl EngineEvent {
             EngineEvent::AccessibilityChanged { .. } => EngineEventKind::AccessibilityChanged,
             EngineEvent::AccessActionPerformed { .. } => EngineEventKind::AccessActionPerformed,
             EngineEvent::FormLoaded { .. } => EngineEventKind::FormLoaded,
+            EngineEvent::ResourcesLoaded { .. } => EngineEventKind::ResourcesLoaded,
+            EngineEvent::ResourcesFreed { .. } => EngineEventKind::ResourcesFreed,
         }
     }
 }

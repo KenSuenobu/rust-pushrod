@@ -68,6 +68,7 @@ use crate::form::{FormFile, FormHandle};
 use crate::geometry::{Point, Rect, Size};
 use crate::input::{InputEvent, Key, Modifiers};
 use crate::registry::{PropertyValue, WidgetRegistry};
+use crate::resource::{FormId, Resources};
 use crate::root_widget::RootWidget;
 use crate::timer::TimerSchedule;
 use crate::widget::{Widget, WidgetId};
@@ -235,6 +236,7 @@ pub struct Ui<'a, S = ()> {
     posted: &'a mut Vec<Event>,
     timers: &'a mut TimerSchedule,
     modals: &'a mut Vec<(WidgetId, ModalCallback<S>)>,
+    resources: &'a Resources,
 }
 
 impl<S> std::fmt::Debug for Ui<'_, S> {
@@ -255,6 +257,15 @@ impl<S> std::fmt::Debug for Ui<'_, S> {
 }
 
 impl<'a, S> Ui<'a, S> {
+    /// Returns the resources the application loaded into the `Engine`.
+    ///
+    /// # Returns
+    ///
+    /// The [`Resources`]; empty until [`Engine::set_resources`] is called.
+    pub fn resources(&self) -> &Resources {
+        self.resources
+    }
+
     /// Opens a modal dialog and runs `callback` once when it is dismissed.
     ///
     /// While the dialog is open, input goes only to `root` and its descendants: the rest of the
@@ -545,6 +556,8 @@ pub struct Engine<S = ()> {
     minimum_size: Option<Size>,
     /// The dismissal callbacks of the open modal dialogs, by dialog root, first opened first.
     modal_callbacks: Vec<(WidgetId, ModalCallback<S>)>,
+    /// The resource sets the application loaded.
+    resources: Resources,
 }
 
 impl<S> std::fmt::Debug for Engine<S> {
@@ -612,6 +625,7 @@ impl<S> Engine<S> {
             scale_factor: 1.0,
             minimum_size: None,
             modal_callbacks: Vec::new(),
+            resources: Resources::new(),
         }
     }
 
@@ -894,6 +908,7 @@ impl<S> Engine<S> {
                 posted: &mut self.posted,
                 timers: &mut self.timers,
                 modals: &mut self.modal_callbacks,
+                resources: &self.resources,
             };
 
             callback(state, &mut ui);
@@ -925,6 +940,7 @@ impl<S> Engine<S> {
             posted: &mut self.posted,
             timers: &mut self.timers,
             modals: &mut self.modal_callbacks,
+            resources: &self.resources,
         };
 
         for callback in self.idle_callbacks.iter_mut() {
@@ -1284,6 +1300,74 @@ impl<S> Engine<S> {
             &self.widget_registry,
             parent,
             file,
+            name,
+        )
+    }
+
+    /// Returns the resources the application loaded.
+    ///
+    /// # Returns
+    ///
+    /// The [`Resources`]; empty until [`set_resources`](Engine::set_resources) is called.
+    pub fn resources(&self) -> &Resources {
+        &self.resources
+    }
+
+    /// Gives the `Engine` its resources, freeing any it had before.
+    ///
+    /// Queues [`EngineEvent::ResourcesFreed`] if sets were replaced, then
+    /// [`EngineEvent::ResourcesLoaded`].
+    ///
+    /// # Arguments
+    ///
+    /// * `resources` - The loaded sets; the `Engine` owns them from now on.
+    pub fn set_resources(&mut self, resources: Resources) {
+        self.clear_resources();
+
+        let sets = resources.sets();
+
+        self.resources = resources;
+        self.widget_cache
+            .queue_event(Event::Engine(EngineEvent::ResourcesLoaded { sets }));
+    }
+
+    /// Frees the loaded resources.  Queues [`EngineEvent::ResourcesFreed`] if there were any.
+    pub fn clear_resources(&mut self) {
+        let sets = self.resources.sets();
+
+        if sets > 0 {
+            self.resources = Resources::new();
+            self.widget_cache
+                .queue_event(Event::Engine(EngineEvent::ResourcesFreed { sets }));
+        }
+    }
+
+    /// Builds a form from the loaded resources, as a child of the root `Widget`.
+    ///
+    /// The first set that has the form is used.  Behaves as [`load_form`](Engine::load_form).
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The form's ID.
+    ///
+    /// # Returns
+    ///
+    /// The [`FormHandle`] for the new widgets.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::FormFile`](crate::error::Error::FormFile) if no set has the form, and the errors
+    /// of [`load_form`](Engine::load_form).
+    pub fn load_resource_form(&mut self, id: FormId) -> Result<FormHandle> {
+        let (set, name) = self.resources.form(id).ok_or_else(|| {
+            crate::error::Error::form_file("resources", format!("no form with ID {}", id.get()))
+        })?;
+
+        crate::form::loader::load(
+            &mut self.widget_cache,
+            &self.widget_registry,
+            crate::widget::ROOT_WIDGET_ID,
+            set.file(),
             name,
         )
     }
@@ -2009,6 +2093,7 @@ impl<S> Engine<S> {
                     posted: &mut self.posted,
                     timers: &mut self.timers,
                     modals: &mut self.modal_callbacks,
+                    resources: &self.resources,
                 };
 
                 callback(state, &mut ui, *dismissed_by);
@@ -2031,6 +2116,7 @@ impl<S> Engine<S> {
             posted: &mut self.posted,
             timers: &mut self.timers,
             modals: &mut self.modal_callbacks,
+            resources: &self.resources,
         };
 
         if let Event::Custom(custom) = event {
