@@ -88,9 +88,11 @@ impl WidgetCache {
     ///
     /// `true` if a parent, grandparent, or higher ancestor is hidden.
     pub(super) fn hidden_above(&self, id: WidgetId) -> bool {
-        self.ancestors(id)
-            .iter()
-            .any(|&a| self.get(a).is_some_and(|w| w.is_hidden()))
+        self.ancestors(id).iter().any(|&a| match self.syncing {
+            // The placeholder in a syncing composite's slot says nothing about it.
+            Some((syncing, was_hidden)) if syncing == a => was_hidden,
+            _ => self.get(a).is_some_and(|w| w.is_hidden()),
+        })
     }
 
     /// Returns whether the `Widget` is a focusable member of a radio group.

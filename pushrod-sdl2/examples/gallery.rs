@@ -33,6 +33,7 @@ use pushrod_widgets::radio_button::RadioGroup;
 use pushrod_widgets::scroll_bar::ScrollBar;
 use pushrod_widgets::separator::Separator;
 use pushrod_widgets::slider::Slider;
+use pushrod_widgets::tab_view::TabView;
 use pushrod_widgets::text::{Text, TextJustify};
 use pushrod_widgets::text_field::{Accessory, IntegerField, TextField};
 
@@ -718,6 +719,41 @@ pub fn main() -> Result<(), pushrod::error::Error> {
 
     list.select_range(1..3);
     engine.add_child_widget(list_tile, list);
+
+    // Tab View: three pages of fictional settings.  Click a tab, or press Ctrl+Tab (Ctrl+Shift+Tab
+    // goes back) while a tab or a control in a page has the keyboard focus.
+    let tabs_tile = add_tile(&mut engine, panel_id, 2, 7, "Tab View");
+    let tabs = engine.add_child_widget(
+        tabs_tile,
+        TabView::new()
+            .at(10, 36)
+            .size(TILE_W - 20, 104)
+            .with_page("General")
+            .with_page("Advanced")
+            .with_page("About"),
+    );
+    let pages = engine
+        .widgets()
+        .get_as::<TabView>(tabs)
+        .map(TabView::pages)
+        .unwrap_or_default();
+
+    if let [general, advanced, about] = pages[..] {
+        engine.add_child_widget(
+            general,
+            CheckBox::new("Check for updates").at(10, 10).size(200, 20),
+        );
+        engine.add_child_widget(
+            general,
+            CheckBox::new("Show hints").at(10, 36).size(200, 20),
+        );
+        engine.add_child_widget(advanced, Text::new("Cache size").at(10, 10).size(120, 20));
+        engine.add_child_widget(advanced, TextField::new().at(10, 36).size(120, 24));
+        engine.add_child_widget(
+            about,
+            Text::new("Sample Settings 1.0").at(10, 10).size(200, 20),
+        );
+    }
 
     let quit_id = engine.add_child_widget(
         panel_id,

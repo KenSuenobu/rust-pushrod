@@ -52,10 +52,10 @@ Like every Pushrod widget, it gets these from the core rather than implementing 
 
 ## Acceptance criteria
 
-- [ ] Switching hides/shows pages
-- [ ] Hidden controls keep state and IDs
-- [ ] Ctrl+Tab
-- [ ] Parts are retrievable and modifiable as described
+- [x] Switching hides/shows pages
+- [x] Hidden controls keep state and IDs
+- [x] Ctrl+Tab
+- [x] Parts are retrievable and modifiable as described
 
 ## Depends on
 

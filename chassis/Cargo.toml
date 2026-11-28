@@ -18,9 +18,9 @@ name = "chassis"
 path = "src/lib.rs"
 
 [dependencies]
-pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.11" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.3.12" }
 clap = { version = "4", features = ["derive"] }
-pushrod = { path = "..", version = "0.3.11" }
+pushrod = { path = "..", version = "0.3.12" }
 toml_edit = "0.25"
 tree-sitter = "0.27"
 tree-sitter-rust = "0.24"

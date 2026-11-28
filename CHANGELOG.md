@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.12] - 2026-11-28
+
+### Added
+
+- [#51] Tab view: tabs switch pages, Ctrl+Tab, hidden pages keep their controls [kenji]
+
 ## [0.3.11] - 2026-11-28
 
 ### Fixed

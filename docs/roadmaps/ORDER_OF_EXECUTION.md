@@ -126,7 +126,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 87 | [#81](https://github.com/KenSuenobu/rust-pushrod/issues/81) | pushrod: [1.15] Undo and redo command stack |
 | ✅ 88 | [#59](https://github.com/KenSuenobu/rust-pushrod/issues/59) | pushrod: [5.4] Autoresizing (keep margins or stretch on resize) |
 | ✅ 89 | [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) | pushrod: [4.5] List view |
-| 90 | [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) | pushrod: [4.4] Tab view |
+| ✅ 90 | [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) | pushrod: [4.4] Tab view |
 | 91 | [#92](https://github.com/KenSuenobu/rust-pushrod/issues/92) | pushrod: [4.9] Table view |
 | 92 | [#90](https://github.com/KenSuenobu/rust-pushrod/issues/90) | pushrod: [3.10] Expander (collapsible section) |
 | 93 | [#37](https://github.com/KenSuenobu/rust-pushrod/issues/37) | pushrod: [2.11] Menu bar and drop-down menus (drawn by Pushrod) |
@@ -1672,10 +1672,10 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 
 **Show on video:**
 
-- [ ] Switching hides/shows pages
-- [ ] Hidden controls keep state and IDs
-- [ ] Ctrl+Tab
-- [ ] Parts are retrievable and modifiable as described
+- [x] Switching hides/shows pages
+- [x] Hidden controls keep state and IDs
+- [x] Ctrl+Tab
+- [x] Parts are retrievable and modifiable as described
 
 ### Step 91: Table view
 

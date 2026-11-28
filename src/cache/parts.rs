@@ -425,6 +425,7 @@ impl WidgetCache {
     ///
     /// * `id` - The ID of a composite.
     fn sync_composite(&mut self, id: WidgetId) {
+        let was_hidden = self.cache[id as usize].is_hidden();
         let parent = self.cache[id as usize].get_parent();
         let mut widget = std::mem::replace(
             &mut self.cache[id as usize],
@@ -434,10 +435,13 @@ impl WidgetCache {
 
         ctx.set_source(Some(id));
 
+        let outer = self.syncing.replace((id, was_hidden));
+
         if let Some(composite) = widget.as_composite_mut() {
             composite.sync_parts(self, &mut ctx);
         }
 
+        self.syncing = outer;
         self.cache[id as usize] = widget;
 
         let events = self.finish(ctx);

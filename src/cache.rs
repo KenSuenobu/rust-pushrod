@@ -91,6 +91,9 @@ pub struct WidgetCache {
     captured_widget_id: Option<WidgetId>,
     /// The modifier keys last reported, for [`EventCtx::modifiers`].
     held_modifiers: crate::input::Modifiers,
+    /// The composite whose `sync_parts` is running, and whether it is really hidden: its slot
+    /// holds a hidden placeholder meanwhile, which must not hide its parts from focus.
+    syncing: Option<(WidgetId, bool)>,
     needs_full_redraw: bool,
     cache_policy: CachePolicy,
     pending_events: Vec<Event>,
@@ -145,6 +148,7 @@ impl WidgetCache {
             current_widget_id: ROOT_WIDGET_ID,
             captured_widget_id: None,
             held_modifiers: crate::input::Modifiers::empty(),
+            syncing: None,
             needs_full_redraw: true,
             cache_policy: CachePolicy::TextureCache,
             pending_events: Vec::new(),
