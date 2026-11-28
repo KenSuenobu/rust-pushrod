@@ -18,7 +18,7 @@ import pathlib
 import re
 import sys
 
-ROOTS = ["src", "pushrod-widgets/src"]
+ROOTS = ["src", "pushrod-widgets/src", "chassis/src"]
 ITEM = re.compile(
     r"^\s*pub(\([^)]*\))?\s+(?:const\s+|unsafe\s+|async\s+|extern\s+\"[^\"]*\"\s+)*"
     r"(fn|struct|enum|trait|type|const|static|union)\b"

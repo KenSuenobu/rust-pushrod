@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-27
+
+### Added
+
+- [#164] chassis: project model with ownership rules, handler discovery [kenji]
+
 ## [0.3.1] - 2026-11-27
 
 ### Added
