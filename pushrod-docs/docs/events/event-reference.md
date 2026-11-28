@@ -66,7 +66,7 @@ Positions are `Point`s in window coordinates.
 | `Activated { id }` | A widget is activated. |
 | `Toggled { id, checked }` | A checkable widget changes state; `checked` is the new state. |
 | `ValueChanged { id }` | A slider, spinner, or similar changes value. |
-| `SelectionChanged { id }` | A selection changes, such as a [List View](../widgets/list-view.md) row being selected. |
+| `SelectionChanged { id }` | A selection changes, such as a [List View](../widgets/list-view.md) row being selected or a [Tab View](../widgets/tab-view.md) page being shown. |
 | `TextChanged { id }` | An editor's text changes. |
 | `EditingFinished { id }` | Editing is confirmed or the editor loses focus. |
 | `AccessoryClicked { id, which }` | A search or custom accessory inside an editor is clicked; `which` is `AccessorySide::Leading` or `Trailing`. |

@@ -1270,6 +1270,8 @@ Numeric field with up/down arrows, range, and step. **Widget roadmap:** [`docs/w
 
 ### 4.4 (#51): Tab view
 
+**Status:** done (#51). `pushrod_widgets::tab_view::{TabView, TabViewParts}`: `TabView::new()` with `at`, `size`, and `with_page(title)`; a `Composite` of toggle-`Button` tabs (`tab:0` ...) and `Panel` pages (`page:0` ...). Switching hides the other pages (their controls keep IDs and state); a click on a tab, Ctrl+Tab and Ctrl+Shift+Tab (wrapping), or `select_page` emits `SelectionChanged`, read with `selected_page()`. `tabs()`, `pages()`, `TabView::add_page(cache, id, title) -> (tab, page)`, `remove_page`, and `set_page_title`. The core's focus check no longer treats a composite's parts as hidden while its `sync_parts` runs, so a view can move the focus out of a page it hides. Tests in `pushrod-widgets/tests/tab_view.rs`; example `pushrod-widgets/examples/tab_view.rs`. Docs: `pushrod-docs/docs/widgets/tab-view.md`.
+
 Tabs that switch between pages of controls. **Widget roadmap:** [`docs/widgets/tab-view.md`](widgets/tab-view.md) (look, behavior, events, acceptance criteria).
 
 **Dependencies.** Requires 1.1 (#19), 5.2 (#57).

@@ -79,6 +79,7 @@ pub mod registry;
 pub mod scroll_bar;
 pub mod separator;
 pub mod slider;
+pub mod tab_view;
 pub mod text;
 pub mod text_field;
 

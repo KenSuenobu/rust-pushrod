@@ -40,6 +40,7 @@ pub use crate::radio_button::{RadioButton, RadioGroup};
 pub use crate::scroll_bar::{ScrollBar, ScrollBarParts};
 pub use crate::separator::Separator;
 pub use crate::slider::Slider;
+pub use crate::tab_view::{TabView, TabViewParts};
 pub use crate::text::Text;
 pub use crate::text_field::validate::{Mask, Validator, Validity};
 pub use crate::text_field::{Accessory, IntegerField, NumberField, TextField};
