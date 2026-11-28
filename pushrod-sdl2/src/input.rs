@@ -20,7 +20,7 @@ use pushrod::event::EventMask;
 use pushrod::geometry::{Point, Size};
 use pushrod::input::{InputEvent, Key, Modifiers, MouseButton};
 use sdl2::event::{Event, EventType, WindowEvent};
-use sdl2::keyboard::{Keycode, Mod};
+use sdl2::keyboard::{Keycode, Mod, Scancode};
 use sdl2::mouse::MouseButton as SdlButton;
 use std::path::PathBuf;
 
@@ -247,6 +247,50 @@ pub(crate) fn to_input_events(
     out
 }
 
+/// Works out the modifier keys held from the state of individual keys.
+///
+/// # Arguments
+///
+/// * `pressed` - Tells whether a key is held.
+///
+/// # Returns
+///
+/// The modifiers held (left and right keys are not distinguished).
+pub(crate) fn scancode_modifiers(pressed: impl Fn(Scancode) -> bool) -> Modifiers {
+    let any = |a: Scancode, b: Scancode| pressed(a) || pressed(b);
+    let mut held = Modifiers::empty();
+
+    held.set(Modifiers::SHIFT, any(Scancode::LShift, Scancode::RShift));
+    held.set(Modifiers::CTRL, any(Scancode::LCtrl, Scancode::RCtrl));
+    held.set(Modifiers::ALT, any(Scancode::LAlt, Scancode::RAlt));
+    held.set(Modifiers::GUI, any(Scancode::LGui, Scancode::RGui));
+    held
+}
+
+/// Puts an [`InputEvent::ModifiersChanged`] before each mouse press.
+///
+/// # Arguments
+///
+/// * `events` - The input events, in order.
+/// * `held` - The modifier keys held.
+///
+/// # Returns
+///
+/// The events with the modifiers reported ahead of every `MouseDown`.
+pub(crate) fn with_modifiers(events: Vec<InputEvent>, held: Modifiers) -> Vec<InputEvent> {
+    let mut out = Vec::with_capacity(events.len() + 1);
+
+    for event in events {
+        if matches!(event, InputEvent::MouseDown { .. }) {
+            out.push(InputEvent::ModifiersChanged(held));
+        }
+
+        out.push(event);
+    }
+
+    out
+}
+
 /// Returns the `SDL2` event types that feed only classes outside `mask`, and so can be disabled
 /// in `SDL2` itself.
 ///
@@ -290,6 +334,33 @@ pub(crate) fn types_to_disable(mask: EventMask) -> Vec<EventType> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn held_modifiers_are_read_from_individual_keys() {
+        let held = scancode_modifiers(|code| matches!(code, Scancode::RShift | Scancode::LGui));
+
+        assert_eq!(held, Modifiers::SHIFT | Modifiers::GUI);
+        assert_eq!(scancode_modifiers(|_| false), Modifiers::empty());
+    }
+
+    #[test]
+    fn modifiers_are_reported_before_each_press() {
+        let down = InputEvent::MouseDown {
+            position: Point { x: 1, y: 2 },
+            button: MouseButton::Left,
+            clicks: 1,
+        };
+        let out = with_modifiers(vec![InputEvent::Exposed, down.clone()], Modifiers::CTRL);
+
+        assert_eq!(
+            out,
+            vec![
+                InputEvent::Exposed,
+                InputEvent::ModifiersChanged(Modifiers::CTRL),
+                down
+            ]
+        );
+    }
 
     #[test]
     fn all_classes_disable_no_sdl_types() {

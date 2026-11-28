@@ -70,6 +70,7 @@ pub mod frame;
 pub mod glyph_button;
 pub mod group_box;
 pub mod image_widget;
+pub mod list_view;
 pub mod panel;
 pub mod prelude;
 pub mod progress_bar;

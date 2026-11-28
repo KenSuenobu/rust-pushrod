@@ -26,6 +26,7 @@ use pushrod_widgets::frame::Frame;
 use pushrod_widgets::glyph_button::GlyphButton;
 use pushrod_widgets::group_box::GroupBox;
 use pushrod_widgets::image_widget::{FitMode, ImageWidget};
+use pushrod_widgets::list_view::{ListView, SelectionMode, VecModel};
 use pushrod_widgets::panel::Panel;
 use pushrod_widgets::progress_bar::ProgressBar;
 use pushrod_widgets::radio_button::RadioGroup;
@@ -706,6 +707,17 @@ pub fn main() -> Result<(), pushrod::error::Error> {
         220,
         "Content: 420 by 260",
     );
+
+    // List View: 10,000 fictional rows from a model; only the six that fit exist as widgets.
+    // Click, Shift-click, Ctrl-click, the arrow keys, and type-ahead work on it.
+    let list_tile = add_tile(&mut engine, panel_id, 1, 7, "List View");
+    let mut list = ListView::new(VecModel::new((1..=10_000).map(|n| format!("Item {n:05}"))))
+        .at(10, 36)
+        .size(TILE_W - 20, 104)
+        .selection_mode(SelectionMode::Multiple);
+
+    list.select_range(1..3);
+    engine.add_child_widget(list_tile, list);
 
     let quit_id = engine.add_child_widget(
         panel_id,
