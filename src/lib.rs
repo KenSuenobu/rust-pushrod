@@ -85,6 +85,7 @@ pub mod paint;
 pub mod prelude;
 pub mod properties;
 pub mod registry;
+pub mod resource;
 pub mod root_widget;
 pub mod text;
 pub mod timer;

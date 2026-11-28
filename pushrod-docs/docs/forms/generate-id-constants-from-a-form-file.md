@@ -1,7 +1,7 @@
 ---
 sidebar_position: 7
 title: Generate ID constants from a form file
-description: Turn the ID symbols of a form file into Rust FormIndex constants from build.rs or the pushrod-form-ids command, so renaming a widget in the designer breaks the build instead of attaching a callback to the wrong widget.
+description: Turn the ID symbols and resources of a form file into typed Rust constants (FormIndex, FormId, StringId, ImageId and more) from build.rs or the pushrod-form-ids command, so renaming a widget in the designer breaks the build instead of attaching a callback to the wrong widget.
 ---
 
 # Generate ID constants from a form file
@@ -37,10 +37,49 @@ pub mod main {
 | One module per form | The form's name in `snake_case`: `Sign In` becomes `sign_in`. |
 | One constant per ID symbol | The symbol's name in `SHOUTING_CASE`: `userName` becomes `USER_NAME`. |
 | Which symbols | Only `SymbolKind::Id` symbols of an object in that form's tree. Action symbols and symbols that name no object of a form are left out. |
-| Order | Forms in file order, constants by object number: the output is deterministic. |
+| Order | Forms in file order, constants by number: the output is deterministic. |
 | Formatting | Already `rustfmt`-clean, so regenerating changes nothing. |
 
 An unusable name is an error rather than a silent rename: a name with no letters or digits, one that starts with a digit, a form named like a Rust keyword (`type`), two forms with the same module name, or two symbols with the same constant name in a form.
+
+## Resource constants
+
+Forms and every kind of resource get constants of their own type, so an ID of one kind cannot be used as another. The types live in `pushrod::resource`: `FormId`, `StringId`, `ImageId`, `IconId`, `FileId`, `MenuId`, and `AlertId` (`FormIndex` is re-exported there).
+
+```rust
+#[allow(dead_code)]
+pub mod forms {
+    use pushrod::resource::FormId;
+
+    /// The form `Contact Dialog`.
+    pub const CONTACT_DIALOG: FormId = FormId(1);
+}
+
+#[allow(dead_code)]
+pub mod strings {
+    use pushrod::resource::StringId;
+
+    /// The string `SAVE_FAILED`.
+    pub const SAVE_FAILED: StringId = StringId(3);
+}
+```
+
+| Module | Type | Number |
+| --- | --- | --- |
+| `forms` | `FormId` | The form's position in the file, counting from 1. |
+| `strings`, `images`, `icons`, `files`, `menus`, `alerts` | `StringId`, `ImageId`, `IconId`, `FileId`, `MenuId`, `AlertId` | The resource's stable ID. |
+
+A kind with no resources has no module. Names are converted to `SHOUTING_CASE` (`app icon` becomes `APP_ICON`), constants are ordered by number, and two resources of a kind that become the same constant are an error. A form cannot be named `forms`, `strings`, `images`, `icons`, `files`, `menus`, or `alerts`, because its module would collide with the generated one.
+
+Mixing kinds is a compile error:
+
+```rust
+use pushrod::resource::{ImageId, StringId};
+
+fn show_image(image: ImageId) {}
+
+show_image(StringId(3));
+```
 
 ## From a program
 
@@ -61,6 +100,7 @@ fn main() {
     let source = generate_ids(&file).expect("the names are valid identifiers");
 
     assert!(source.contains("pub const OK_BUTTON: FormIndex = FormIndex(1);"));
+    assert!(source.contains("pub const MAIN: FormId = FormId(1);"));
 }
 ```
 
@@ -90,7 +130,7 @@ include!(concat!(env!("OUT_DIR"), "/form_ids.rs"));
 let ok = form.widget(main::OK_BUTTON).expect("the form has an OK button");
 ```
 
-The runnable version is the `form` example: its `build.rs` writes a sample form file and generates its constants. Run it with `cargo run -p pushrod-widgets --example form`.
+The runnable version is the `form` example: its `build.rs` writes a sample form file and generates its constants. It also prints `forms::MAIN` and `strings::GREETING`. Run it with `cargo run -p pushrod-widgets --example form`.
 
 ## From a shell
 

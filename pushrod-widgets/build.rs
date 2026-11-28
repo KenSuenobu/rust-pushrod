@@ -57,6 +57,10 @@ fn sample_file() -> FormFile {
 
     file.add_form("main", root);
     file.add_symbol(SymbolKind::Id, ok, "OK_BUTTON");
+    file.resources
+        .strings
+        .add("GREETING", "Hello, Sample".to_string())
+        .expect("the sample string is added");
 
     file
 }

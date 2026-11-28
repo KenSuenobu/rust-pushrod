@@ -24,7 +24,8 @@ use pushrod::form::FormFile;
 use pushrod::geometry::{point, size};
 use pushrod::input::{InputEvent, MouseButton};
 
-// The ID constants `build.rs` generated from the form file (`pub mod main { pub const OK_BUTTON }`).
+// The ID constants `build.rs` generated from the form file (`pub mod main { pub const OK_BUTTON }`,
+// `forms::MAIN`, `strings::GREETING`).
 include!(concat!(env!("OUT_DIR"), "/form_ids.rs"));
 
 /// Reads the form file `build.rs` wrote.
@@ -54,6 +55,11 @@ fn main() {
         .widget(main::OK_BUTTON)
         .expect("the form has an OK button");
 
+    println!(
+        "form {} has greeting string {}",
+        forms::MAIN.get(),
+        strings::GREETING.get()
+    );
     engine.on_click(ok, |log, _ui| log.push("OK was clicked".into()));
 
     let mut backend = HeadlessBackend::new(size(320, 200));

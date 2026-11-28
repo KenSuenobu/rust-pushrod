@@ -104,7 +104,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 65 | [#64](https://github.com/KenSuenobu/rust-pushrod/issues/64) | pushrod: [6.5] Form writer: save a widget subtree to a file |
 | ✅ 66 | [#65](https://github.com/KenSuenobu/rust-pushrod/issues/65) | pushrod: [6.6] Generate ID constants from a form file |
 | ✅ 67 | [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) | pushrod: [6.11] Resource kinds: strings, images, icons, files, menus, and alerts |
-| 68 | [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) | pushrod: [6.12] Typed resource IDs: generated constants per resource kind |
+| ✅ 68 | [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) | pushrod: [6.12] Typed resource IDs: generated constants per resource kind |
 | 69 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
 | **70** | checkpoint | **Pushrod v0.2 released: the Pushrod MVP is complete** |
 | 71 | [#295](https://github.com/KenSuenobu/rust-pushrod/issues/295) | pushrod: [12.1] Showcase application shell |
@@ -1360,9 +1360,9 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 **Show on video:**
 
-- [ ] Constants generated for every kind and every named widget
-- [ ] Passing an ID of the wrong kind is a compile error
-- [ ] Generated output identical across runs
+- [x] Constants generated for every kind and every named widget
+- [x] Passing an ID of the wrong kind is a compile error
+- [x] Generated output identical across runs
 
 ### Step 69: Resource manager: load resource sets and get resources by ID
 

@@ -1925,6 +1925,8 @@ IDs are assigned once and never renumbered when other resources are added or rem
 
 ### 6.12 (#155): Typed resource IDs: generated constants per resource kind
 
+**Status:** done (#155). `pushrod::resource` holds the ID newtypes `FormId`, `StringId`, `ImageId`, `IconId`, `FileId`, `MenuId`, `AlertId` (and re-exports `FormIndex`); using one kind as another does not compile. `generate_ids` / `write_ids` / `pushrod-form-ids` now also write a `forms` module (`FormId`, position in the file from 1), and a `strings`, `images`, `icons`, `files`, `menus`, or `alerts` module for each non-empty resource table. A form cannot be named like one of those modules. Deterministic and rustfmt-clean; no engine event (offline build step). The `form` example uses `forms::MAIN` and `strings::GREETING`. Docs: `pushrod-docs/docs/forms/generate-id-constants-from-a-form-file.md`.
+
 **Problem Statement.** Numbers in code are unreadable and fragile. The resource editor should produce named constants, and the type system should stop an ID of one kind being used as another.
 
 **Solution / Scope.** ID newtypes `FormId`, `StringId`, `ImageId`, `IconId`, `FileId`, `MenuId`, `AlertId` (and `FormIndex` for widgets inside a form). Code generation (extending 6.6 (#65), for `build.rs` or the CLI) writes one module per kind and one per form:

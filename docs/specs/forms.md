@@ -27,7 +27,10 @@ implemented by `pushrod::form` (`FormFile::to_bytes` and `FormFile::from_bytes`)
 - `FormWriter` saves a widget subtree as a form: geometry, flags, properties, `Column` and `Row`
   layouts, and child layout parameters; composite parts are not written.
 - `pushrod::form::codegen` (`generate_ids`, `write_ids`, and the `pushrod-form-ids` command) turns ID
-  symbols into `FormIndex` constants, one module per form.
+  symbols into `FormIndex` constants, one module per form, and every resource into a typed constant
+  (`FormId`, `StringId`, `ImageId`, `IconId`, `FileId`, `MenuId`, `AlertId` from `pushrod::resource`)
+  in a `forms`, `strings`, `images`, `icons`, `files`, `menus`, or `alerts` module. An ID of one kind
+  **must not** be accepted where another is expected.
 
 - A file may carry **resources**: string, image, icon, file, menu, and alert tables, each entry with a
   stable ID and a name. An ID **must** be assigned once and never reused or renumbered, and a reader
