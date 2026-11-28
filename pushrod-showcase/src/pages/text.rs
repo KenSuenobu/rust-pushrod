@@ -93,6 +93,6 @@ impl Page for TextPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("text.rs")
+        crate::source_view::build_source("text.rs")
     }
 }

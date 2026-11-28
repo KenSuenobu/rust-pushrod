@@ -68,6 +68,6 @@ impl Page for RadioButtonPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("radio_button.rs")
+        crate::source_view::build_source("radio_button.rs")
     }
 }

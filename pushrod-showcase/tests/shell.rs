@@ -24,6 +24,8 @@ use pushrod_showcase::pages;
 use pushrod_showcase::registry::Registry;
 use pushrod_showcase::settings;
 use pushrod_showcase::shell::{self, ShowcaseState};
+use pushrod_showcase::source_view::Code;
+use pushrod_widgets::custom_paint::CustomPaint;
 use pushrod_widgets::text::Text;
 
 /// Builds the shell headlessly and runs the first idle pass.
@@ -123,7 +125,7 @@ fn page_names_are_unique_and_pages_carry_source() {
         let page = registry.get(index).unwrap();
 
         assert!(!page.description().is_empty());
-        assert!(page.source().contains("impl Page for"), "{}", page.name());
+        assert!(page.source().starts_with("fn build("), "{}", page.name());
     }
 }
 
@@ -217,4 +219,107 @@ fn every_page_opens_with_its_title() {
             state.registry.get(index).unwrap().name()
         );
     }
+}
+
+#[test]
+fn every_page_source_is_its_own_build_function() {
+    let mut registry = Registry::new();
+
+    pages::register_all(&mut registry);
+
+    for index in 0..registry.len() {
+        let page = registry.get(index).unwrap();
+        let source = page.source();
+
+        assert!(source.starts_with("fn build("), "{}", page.name());
+        assert!(source.ends_with('}'), "{}", page.name());
+        assert!(!source.contains("impl Page for"), "{}", page.name());
+    }
+}
+
+#[test]
+fn the_source_toggle_swaps_the_page_for_its_code_and_back() {
+    let (mut engine, mut state) = start(None);
+    let page = state.page_root.unwrap();
+    let code = state
+        .registry
+        .get(state.selected.unwrap())
+        .unwrap()
+        .source();
+
+    assert!(engine.widgets().get(state.shell.copy).unwrap().is_hidden());
+
+    {
+        let id = state.shell.source;
+        click(&mut engine, &mut state, id);
+    }
+
+    assert!(state.showing_source);
+    assert!(engine.widgets().get(page).is_none());
+    assert!(!engine.widgets().get(state.shell.copy).unwrap().is_hidden());
+
+    let view = engine
+        .widgets()
+        .get_as::<CustomPaint<Code>>(state.page_root.unwrap())
+        .unwrap();
+
+    assert_eq!(view.data().text, code);
+
+    // Choosing another page while the code is shown shows that page's code.
+    let (button, index) = state
+        .buttons
+        .iter()
+        .copied()
+        .find(|(_, index)| state.registry.get(*index).unwrap().name() == "Button")
+        .unwrap();
+
+    click(&mut engine, &mut state, button);
+
+    let button_code = state.registry.get(index).unwrap().source();
+    let view = engine
+        .widgets()
+        .get_as::<CustomPaint<Code>>(state.page_root.unwrap())
+        .unwrap();
+
+    assert_eq!(view.data().text, button_code);
+
+    {
+        let id = state.shell.source;
+        click(&mut engine, &mut state, id);
+    }
+
+    assert!(!state.showing_source);
+    assert!(engine.widgets().get(state.shell.copy).unwrap().is_hidden());
+    assert!(
+        engine
+            .widgets()
+            .get_as::<CustomPaint<Code>>(state.page_root.unwrap())
+            .is_none()
+    );
+}
+
+#[test]
+fn copy_places_the_shown_code_on_the_clipboard() {
+    let (mut engine, mut state) = start(None);
+    let code = state
+        .registry
+        .get(state.selected.unwrap())
+        .unwrap()
+        .source();
+
+    {
+        let id = state.shell.source;
+        click(&mut engine, &mut state, id);
+    }
+    assert!(engine.widgets().take_clipboard_write().is_none());
+
+    {
+        let id = state.shell.copy;
+        click(&mut engine, &mut state, id);
+    }
+
+    assert_eq!(
+        engine.widgets().take_clipboard_write().as_deref(),
+        Some(code)
+    );
 }

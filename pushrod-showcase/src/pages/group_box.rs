@@ -59,6 +59,6 @@ impl Page for GroupBoxPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("group_box.rs")
+        crate::source_view::build_source("group_box.rs")
     }
 }

@@ -85,6 +85,27 @@ flowchart LR
 
 The log is `pushrod-showcase/src/event_log.rs`.
 
+## Reading the code
+
+Every page can show the code that builds it. **Click *Source*** (at the top right of the page, next to the title) to swap the page for its `build` function; click it again to go back to the live page. Choosing another page while *Source* is on shows that page's code.
+
+- **Scroll** the code with the wheel or the scroll bars; it is in the same scrolling area as the page.
+- **Click *Copy*** (it appears next to *Source*) to put the whole snippet on the clipboard. The label reads *Copied* until you next press it.
+- **Click the code, then press Ctrl+A (Command+A on macOS)** to select it all, and **Ctrl+C (Command+C)** to copy it. Copying emits an `Activated` event like any other button.
+
+The code is not typed into the showcase: `pushrod-showcase/build.rs` reads each file in `pushrod-showcase/src/pages/` when the showcase is compiled and keeps the text of its `build` function, so what you see is what ran and cannot go stale. The built-in font is proportional, so indentation is kept by position rather than by a monospaced face.
+
+```mermaid
+flowchart LR
+    F[pages/button.rs] -->|build.rs: extract::build_fn| T[PAGE_SOURCES at compile time]
+    T -->|Page::source| V[Code view]
+    S[Source toggle] -->|Toggled| V
+    V --> C[Copy button / Ctrl+C]
+    C -->|set_clipboard_text| B[System clipboard]
+```
+
+The same snippets are the ones to quote on a widget's documentation page: copy them from the **Source** view, or from the page's file, and they compile against the current library.
+
 ## How it fits together
 
 ```mermaid
@@ -145,7 +166,7 @@ registry.register(hello::HelloPage);
 | `group` | The heading the page is listed under. |
 | `description` | The line under the title. Search matches it too. |
 | `build` | Adds the page's widgets and returns the root. Give the root a fixed size so the area knows how far to scroll. |
-| `source` | The page's source code, for the source view. Return `include_str!("hello.rs")`; the default is an empty string. |
+| `source` | The page's source code, for the source view. Return `crate::source_view::build_source("hello.rs")`, the text of the page's `build` function; the default is an empty string. |
 
 ## Every widget has a page
 

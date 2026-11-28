@@ -71,6 +71,6 @@ impl Page for SeparatorPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("separator.rs")
+        crate::source_view::build_source("separator.rs")
     }
 }

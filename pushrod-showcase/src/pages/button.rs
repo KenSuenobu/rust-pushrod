@@ -79,6 +79,6 @@ impl Page for ButtonPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("button.rs")
+        crate::source_view::build_source("button.rs")
     }
 }

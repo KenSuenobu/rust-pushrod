@@ -66,7 +66,7 @@ Every widget page uses the same sections, in this order (see [Button](./widgets/
 
 ## Code samples
 
-Code samples must compile against the current library. Mark a complete sample as checked by writing `rust checked` on its opening fence (for example ```` ```rust checked title="src/main.rs" ````). The `pushrod-doc-samples` crate compiles every checked sample, and CI fails when one breaks. A checked sample must be a whole program or module: its own `use` lines and no code outside functions. Fragments that rely on an `engine` defined elsewhere stay plain `rust`. Prefer copying from an example (`pushrod-widgets/examples/`) or a test, and keep samples complete enough to paste. Import standard widgets from `pushrod_widgets` and everything else from `pushrod`.
+Code samples must compile against the current library. Mark a complete sample as checked by writing `rust checked` on its opening fence (for example ```` ```rust checked title="src/main.rs" ````). The `pushrod-doc-samples` crate compiles every checked sample, and CI fails when one breaks. A checked sample must be a whole program or module: its own `use` lines and no code outside functions. Fragments that rely on an `engine` defined elsewhere stay plain `rust`. Prefer copying from an example (`pushrod-widgets/examples/`), a test, or a showcase page (the **Source** view of [The Pushrod Showcase](guides/showcase.md) shows each page's `build` function, taken from its file at compile time), and keep samples complete enough to paste. Import standard widgets from `pushrod_widgets` and everything else from `pushrod`.
 
 ## Documenting the code
 

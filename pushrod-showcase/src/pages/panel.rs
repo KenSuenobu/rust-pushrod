@@ -68,6 +68,6 @@ impl Page for PanelPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("panel.rs")
+        crate::source_view::build_source("panel.rs")
     }
 }

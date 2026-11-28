@@ -62,6 +62,6 @@ impl Page for BoxedLabelPage {
     }
 
     fn source(&self) -> &'static str {
-        include_str!("boxed_label.rs")
+        crate::source_view::build_source("boxed_label.rs")
     }
 }

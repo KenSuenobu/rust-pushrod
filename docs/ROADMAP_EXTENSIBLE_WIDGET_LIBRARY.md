@@ -2929,11 +2929,13 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![12.5 step set 1: The Source toggle shows the code that builds the page](mockups/12.5-1.png)
 
+**Status:** done (#299). `pushrod-showcase/build.rs` copies each page's `build` function out of its file at compile time (`src/extract.rs`); `src/source_view.rs` shows it in a scrolling code view with a **Copy** button, behind a **Source** toggle in the page header. Ctrl/Command+A selects the code and Ctrl/Command+C copies it. The built-in font is proportional, so indentation is kept by position rather than by a monospaced face.
+
 **Acceptance Criteria.**
 
-- Every page shows its real source
-- Copy places it on the clipboard
-- Documentation pages include the same snippets
+- [x] Every page shows its real source
+- [x] Copy places it on the clipboard
+- [x] Documentation pages include the same snippets
 
 **Parallelism / Dependencies.** Parallelizable. Requires 12.2 (#296), 1.27 (#290).
 
