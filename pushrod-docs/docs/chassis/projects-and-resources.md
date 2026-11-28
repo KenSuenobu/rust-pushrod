@@ -85,6 +85,39 @@ flowchart TD
 
 A call to the old name inside a body (a recursive call, for example) is not updated; that code is yours. Every edit is parsed again before it is written, and a refused request leaves the file untouched.
 
+## Event wiring
+
+You never write registration code. Name a handler `on_<widget>_<event>` in snake case in the form's handler file, and Chassis wires it. `on_ok_button_clicked` handles the `Clicked` event of the widget whose ID symbol is `OK_BUTTON`; `on_accept_toggled` handles `Toggled` on `ACCEPT`. The widget types and their events come from Pushrod's widget registry (its event metadata), so the generator knows which engine method registers each event.
+
+```mermaid
+flowchart LR
+    H["src/forms/&lt;form&gt;.rs<br/>on_ok_button_clicked"] --> M[match_handlers]
+    R["Widget registry<br/>events per widget type"] --> M
+    F["Resource file<br/>ID symbols"] --> M
+    M --> G["generate_wiring"]
+    G --> W["src/generated/&lt;form&gt;_wiring.rs<br/>wire(engine, form)"]
+```
+
+`write_wiring` writes `src/generated/<form>_wiring.rs`, for example `main_window_wiring.rs`:
+
+```rust
+pub fn wire(engine: &mut Engine<AppState>, form: &FormHandle) {
+    if let Some(id) = form.widget(ids::main_window::OK_BUTTON) {
+        engine.on_click(id, on_ok_button_clicked);
+    }
+}
+```
+
+Call `wire` once after loading the form. The file starts with a do-not-edit header, is rewritten in full, and is formatted like every generated file. It uses the typed ID constants (`ids`) and imports your handlers from `crate::forms::<form>`, and it expects an `AppState` type at the crate root. The output is deterministic: entries are sorted by handler name, so the same form file, handlers, and registry always give the same file.
+
+| Situation | Result |
+|---|---|
+| A function whose name matches no widget and event (a helper) | Ignored. |
+| A matching handler that is not `pub` | Refused, naming the handler. |
+| An event with no engine registration method (`KeyReleased`, for example) | Refused; handle it with `Engine::on_event`. |
+| Two handlers on one widget that use the same registration method (`on_ok_button_focus_gained` and `on_ok_button_focus_lost` both use `on_focus_change`) | Refused; keep one, which receives both. |
+| A form with no matching handlers | `wire` is generated empty. |
+
 ## Try it
 
 ```bash
@@ -100,3 +133,11 @@ cargo run -p chassis --example codegen -- path/to/project MainWindow "pub fn on_
 ```
 
 The example appends the stub to the form's handler file and lists the handlers. Running it again with the same function is refused, because the function already exists.
+
+To see which handlers wire to which widgets, and write the wiring file:
+
+```bash
+cargo run -p chassis --example wiring -- path/to/project MainWindow
+```
+
+The example prints each wired handler with its widget, event, and engine method, then writes `src/generated/main_window_wiring.rs`.

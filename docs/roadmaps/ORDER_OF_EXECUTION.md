@@ -118,7 +118,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 79 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
 | ✅ 80 | [#164](https://github.com/KenSuenobu/rust-pushrod/issues/164) | chassis: [2.1] Project model |
 | ✅ 81 | [#165](https://github.com/KenSuenobu/rust-pushrod/issues/165) | chassis: [6.1] Code generation rules |
-| 82 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
+| ✅ 82 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
 | 83 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
 | **84** | checkpoint | **Chassis M1: core without UI complete** |
 | 85 | [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) | pushrod: [9.5] Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons |
@@ -1558,8 +1558,8 @@ Project model, resource access, code generation, and a command-line generator, a
 
 **Show on video:**
 
-- [ ] A project with handlers builds and every handler fires
-- [ ] Deterministic output (same input, same output)
+- [x] A project with handlers builds and every handler fires
+- [x] Deterministic output (same input, same output)
 
 ### Step 83: Command-line generator
 

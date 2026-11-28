@@ -23,8 +23,12 @@
 //!    ([`Project::create_stub`]); a file that exists is never overwritten.
 //! 3. Afterwards it only appends handler stubs ([`insert_handler_stub`]) and renames a handler's
 //!    name in its signature ([`rename_handler`]).
-//! 4. It never edits a function body.  Both edits change the file by splicing text at one place;
+//! 4. Handlers are connected to the engine by generated wiring ([`wiring`]), never by code the
+//!    developer writes.
+//! 5. It never edits a function body.  Both edits change the file by splicing text at one place;
 //!    every other byte is kept as it was, and the result is parsed again before it is written.
+
+pub mod wiring;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};

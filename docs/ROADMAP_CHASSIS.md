@@ -1242,8 +1242,10 @@ Events menu with code indicators, inspector Events tab, handler creation, the co
 
 **Acceptance Criteria.**
 
-- A project with handlers builds and every handler fires
-- Deterministic output (same input, same output)
+- [x] A project with handlers builds and every handler fires
+- [x] Deterministic output (same input, same output)
+
+**Status:** done (#166). `chassis/src/codegen/wiring.rs`: `match_handlers`, `generate_wiring`, and `write_wiring`; tests in `chassis/tests/wiring.rs`. Docs: `pushrod-docs/docs/chassis/projects-and-resources.md`.
 
 **Parallelism / Dependencies.** Not parallelizable. Chassis: 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164)); Pushrod: Pushrod 6.12 [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) Typed resource IDs: generated constants per resource kind, Pushrod 6.13 [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) Event metadata in the widget registry
 
