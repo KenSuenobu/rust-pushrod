@@ -121,7 +121,6 @@ Builds on the Pushrod Core MVP project. Each "Pushrod for Mx" phase holds the po
 
 | Order | Issue | Title |
 |---|---|---|
-| 11 | [#165](https://github.com/KenSuenobu/rust-pushrod/issues/165) | chassis: [6.1] Code generation rules |
 | 12 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
 | 13 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
 

@@ -1298,10 +1298,12 @@ Code generation rules, a command-line generator, build and run, error list, temp
 
 **Acceptance Criteria.**
 
-- Tests prove handler bodies survive every designer operation
-- Rules documented
+- [x] Tests prove handler bodies survive every designer operation
+- [x] Rules documented
 
 **Parallelism / Dependencies.** Not parallelizable. Chassis: 2.1 ([#164](https://github.com/KenSuenobu/rust-pushrod/issues/164))
+
+**Status:** done (#165). `chassis/src/codegen/mod.rs`: `write_generated` (rustfmt, `src/generated` only), `create_main`, `insert_handler_stub`, and `rename_handler`; tests in `chassis/tests/codegen.rs`. Docs: `pushrod-docs/docs/chassis/projects-and-resources.md`.
 
 **Technical Stack.** Rust, rustfmt
 

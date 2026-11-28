@@ -31,7 +31,7 @@
 //! has written.
 
 mod error;
-mod handlers;
+pub(crate) mod handlers;
 mod manifest;
 
 use std::path::{Component, Path, PathBuf};
@@ -498,7 +498,7 @@ impl Project {
     /// # Returns
     ///
     /// The error.
-    fn refuse(rel: &Path, message: &str) -> ProjectError {
+    pub(crate) fn refuse(rel: &Path, message: &str) -> ProjectError {
         ProjectError::Ownership {
             path: rel.to_path_buf(),
             message: message.to_string(),
@@ -693,7 +693,7 @@ impl Project {
     /// # Errors
     ///
     /// [`ProjectError::Io`] if a folder or the file cannot be written.
-    fn write(&self, rel: &Path, bytes: &[u8]) -> Result<(), ProjectError> {
+    pub(crate) fn write(&self, rel: &Path, bytes: &[u8]) -> Result<(), ProjectError> {
         let path = self.root.join(rel);
         let io = |message: String| ProjectError::Io {
             path: path.clone(),

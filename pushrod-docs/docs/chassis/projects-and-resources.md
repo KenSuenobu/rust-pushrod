@@ -60,6 +60,31 @@ for form in project.forms() {
 - `create_stub` creates a form's handler file only if it does not exist. If it exists, it is yours and stays untouched.
 - `save_resources` and `create_resource_file` write the resource file, after checking it is valid.
 
+## Code generation rules
+
+Chassis follows written rules when it writes code, and tests in `chassis/tests/codegen.rs` enforce them. The functions live in `chassis::codegen`.
+
+```mermaid
+flowchart TD
+    A[Designer operation] --> B{Which file?}
+    B -->|src/generated/| C["Rewrite, then rustfmt<br/>write_generated"]
+    B -->|src/main.rs| D["Create once<br/>create_main"]
+    B -->|src/forms/&lt;form&gt;.rs| E{Exists?}
+    E -->|No| F["Create stub once<br/>create_stub"]
+    E -->|Yes| G["Append a stub or rename a signature<br/>insert_handler_stub, rename_handler"]
+    B -->|Anything else| H[Never written]
+```
+
+| Rule | Function |
+|---|---|
+| Chassis rewrites only `src/generated/`, and formats what it writes with `rustfmt`. Source that `rustfmt` rejects is not written. | `write_generated` |
+| `src/main.rs` and `src/forms/<form>.rs` are created once. A file that exists is yours and is never overwritten. | `create_main`, `create_stub` |
+| After that, Chassis only appends a handler stub. A function with the same name is never replaced. | `insert_handler_stub` |
+| Or it renames a handler in its signature. Only the bytes of the name change; the new name must be a valid identifier that the file does not already use. | `rename_handler` |
+| Chassis never edits a function body. Comments, spacing, and code outside the changed name are kept exactly. | all of the above |
+
+A call to the old name inside a body (a recursive call, for example) is not updated; that code is yours. Every edit is parsed again before it is written, and a refused request leaves the file untouched.
+
 ## Try it
 
 ```bash
@@ -67,3 +92,11 @@ cargo run -p chassis --example project -- path/to/project
 ```
 
 prints the project's name, its resource counts, each form with its handler file, and the handlers found in it.
+
+To see the rules work on a copy of your project, add a handler stub to a form with:
+
+```bash
+cargo run -p chassis --example codegen -- path/to/project MainWindow "pub fn on_close() {}"
+```
+
+The example appends the stub to the form's handler file and lists the handlers. Running it again with the same function is refused, because the function already exists.
