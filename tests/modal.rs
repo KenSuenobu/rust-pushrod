@@ -504,20 +504,28 @@ fn opening_repaints_a_dialog_that_was_hidden_since_it_was_built() {
     let mut app = App::new();
     let mut backend = pushrod::backend::headless::HeadlessBackend::new(size(300, 300));
 
-    // Hidden `Widget`s are skipped by the first frame, so the dialog has never been painted.
+    // Hidden `Widget`s are skipped by the first frame, so the dialog has never been painted and
+    // stays invalidated until it is.
     app.engine.widgets().draw_loop(&mut backend);
     assert!(
-        !app.engine
+        app.engine
             .widgets()
             .get(app.cancel)
             .unwrap()
             .is_invalidated()
     );
+    assert!(!backend.texture_sizes.contains_key(&app.cancel));
 
     app.open(app.dialog);
 
     for id in [app.dialog, app.ok, app.cancel] {
         assert!(app.engine.widgets().get(id).unwrap().is_invalidated());
+    }
+
+    app.engine.widgets().draw_loop(&mut backend);
+
+    for id in [app.dialog, app.ok, app.cancel] {
+        assert!(backend.texture_sizes.contains_key(&id), "{id} not painted");
     }
 }
 

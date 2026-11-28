@@ -121,3 +121,4 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [#155] Typed IDs (StringId, ImageId...) and generated constants per resource kind [kenji]
 - [#297] Showcase property panel: select a widget and change any property live [kenji]
 - [#298] Showcase event log: widget and engine events, filter, clear, pause [kenji]
+- [#298] Hidden widgets stay invalidated until painted: scroll bars no longer blank [kenji]

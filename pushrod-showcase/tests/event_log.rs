@@ -368,3 +368,94 @@ fn the_log_sits_under_the_page() {
     assert!(list.y > kind.y);
     assert!(list.x >= page.x);
 }
+
+/// Returns the visible widgets that have not been painted at their size.
+fn unpainted(engine: &mut Engine<ShowcaseState>, backend: &HeadlessBackend) -> Vec<WidgetId> {
+    let mut missing = Vec::new();
+    let mut stack = vec![pushrod::widget::ROOT_WIDGET_ID];
+
+    while let Some(id) = stack.pop() {
+        let Some(widget) = engine.widgets().get(id) else {
+            continue;
+        };
+
+        if widget.is_hidden() {
+            continue;
+        }
+
+        let extent = widget.get_size();
+
+        if extent.w > 0 && extent.h > 0 && backend.texture_sizes.get(&id) != Some(&extent) {
+            missing.push(id);
+        }
+
+        stack.extend(engine.widgets().children_of(id).to_vec());
+    }
+
+    missing
+}
+
+#[test]
+fn scroll_bars_are_painted_when_they_first_appear() {
+    // One backend for the whole session, as in the real window: a widget painted into an
+    // earlier backend would hide the bug.
+    let mut engine: Engine<ShowcaseState> = Engine::new(size(WINDOW_W, WINDOW_H), 30);
+    let mut state = shell::build(&mut engine, None);
+    let mut backend = HeadlessBackend::new(size(WINDOW_W, WINDOW_H));
+
+    engine.run_idle(&mut state);
+
+    for _ in 0..3 {
+        engine.widgets().draw_loop(&mut backend);
+    }
+
+    let mut step = |engine: &mut Engine<ShowcaseState>, state: &mut ShowcaseState, id: WidgetId| {
+        let position = center(engine, id);
+
+        for event in [
+            InputEvent::MouseDown {
+                position,
+                button: MouseButton::Left,
+                clicks: 1,
+            },
+            InputEvent::MouseUp {
+                position,
+                button: MouseButton::Left,
+                clicks: 1,
+            },
+        ] {
+            engine.dispatch(event, state);
+        }
+
+        engine.advance(Instant::now(), state);
+        engine.run_idle(state);
+
+        for _ in 0..3 {
+            engine.widgets().draw_loop(&mut backend);
+        }
+
+        unpainted(engine, &backend)
+    };
+    let index = state.registry.find("Button").unwrap();
+    let (list_button, _) = state
+        .buttons
+        .iter()
+        .copied()
+        .find(|(_, i)| *i == index)
+        .unwrap();
+
+    assert_eq!(
+        step(&mut engine, &mut state, list_button),
+        Vec::<WidgetId>::new()
+    );
+
+    let normal = page_button(&mut engine, &state, "Normal");
+
+    // Selecting a widget fills the property list, so its scroll bar appears.
+    for _ in 0..3 {
+        assert_eq!(
+            step(&mut engine, &mut state, normal),
+            Vec::<WidgetId>::new()
+        );
+    }
+}
