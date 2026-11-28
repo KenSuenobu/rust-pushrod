@@ -21,6 +21,7 @@
 
 pub mod event_log;
 pub mod extract;
+pub mod golden;
 pub mod page;
 pub mod pages;
 pub mod property_panel;
@@ -29,3 +30,4 @@ pub mod resources;
 pub mod settings;
 pub mod shell;
 pub mod source_view;
+pub mod tour;

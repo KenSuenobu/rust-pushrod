@@ -126,7 +126,7 @@ jobs:
         run: cargo build -p pushrod-sdl2 --all-targets --features bundled
 
   golden:
-    name: Golden-image rendering tests (Xvfb)
+    name: Golden-image rendering tests and showcase tour (Xvfb)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -140,6 +140,14 @@ jobs:
           PUSHROD_GOLDEN: "1"
           PUSHROD_GOLDEN_DIFF_DIR: ${{ github.workspace }}/golden-diff
         run: xvfb-run -a cargo test -p pushrod-sdl2 --test visual --test contacts
+      - name: Tour every showcase page and compare with pushrod-showcase/tests/golden
+        env:
+          SDL_VIDEODRIVER: x11
+          PUSHROD_GOLDEN: "1"
+          PUSHROD_GOLDEN_DIFF_DIR: ${{ github.workspace }}/golden-diff
+        run: |
+          xvfb-run -a cargo run -p pushrod-showcase -- --tour
+          xvfb-run -a cargo test -p pushrod-showcase --test tour
       - name: Upload diff images
         if: failure()
         uses: actions/upload-artifact@v4

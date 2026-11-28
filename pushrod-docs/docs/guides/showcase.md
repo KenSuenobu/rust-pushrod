@@ -135,6 +135,40 @@ flowchart LR
 
 An alert is added to the window, which lays out its children in a row. The Dialogs page marks the alert as floating (`shell::FLOATING`) so the window's layout leaves it where it centers itself.
 
+## The tour: regression tests and documentation images
+
+The showcase doubles as a regression test and as the source of the documentation's page images. Both run headless: no window is shown, and pages are drawn with SDL's software renderer, which is deterministic.
+
+| Command | What it does |
+| --- | --- |
+| `cargo run -p pushrod-showcase -- --tour` | Opens every page, renders the whole window, and compares it with `pushrod-showcase/tests/golden/showcase-<page>.png`. Exits with an error when a page differs or has no golden. |
+| `cargo run -p pushrod-showcase -- --tour --update-golden` | Rewrites the goldens. **Look at the changed images** before committing them. |
+| `cargo run -p pushrod-showcase -- --screenshots <dir>` | Writes `showcase-page-<page>.png` for every page to `<dir>`. |
+
+The file name is the page name in lower case with other characters as `-`: **Row and Column** is `row-and-column`. A pixel matches when every channel is within 3 of the golden, and a page passes when at most 0.2% of its pixels differ; this is the same rule as the [golden-image rendering tests](../contributing/golden-image-rendering-tests.md).
+
+**Refresh the documentation images** after a change to how a page looks, from the repository root:
+
+```sh
+cargo run -p pushrod-showcase -- --screenshots pushrod-docs/static/img/screenshots
+```
+
+Reference a page's image on its documentation page as `/img/screenshots/showcase-page-<page>.png`, for example `showcase-page-button.png`. Never edit these images by hand.
+
+In CI, the **golden** job runs `pushrod-showcase --tour` under Xvfb on every pull request. A page that differs writes `showcase-<page>.actual.png`, `.expected.png`, and `.diff.png` to `golden-diff/`, which the job uploads as the `golden-diff` artifact. A new page needs its golden in the same pull request: the test `every_page_has_a_golden_image` fails without it.
+
+```mermaid
+flowchart LR
+    T["--tour"] --> P[Open each page headless]
+    P --> R[Render with the software renderer]
+    R --> C{Same as tests/golden?}
+    C -->|yes| OK[Page passes]
+    C -->|no| D[Write actual, expected, and diff images]
+    D --> U[CI uploads golden-diff]
+    S["--screenshots dir"] --> P
+    R -->|screenshots| I[showcase-page-name.png for the docs]
+```
+
 ## How it fits together
 
 ```mermaid

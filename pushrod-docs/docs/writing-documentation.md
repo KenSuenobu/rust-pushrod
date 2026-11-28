@@ -61,7 +61,8 @@ Every widget page uses the same sections, in this order (see [Button](./widgets/
 
 ## Screenshots and mockups
 
-- Screenshots go in `static/img/screenshots/` and are referenced as `/img/screenshots/<name>.png`. Take them from a running example (for instance under Xvfb) so they show what Pushrod really draws.
+- Showcase page images are generated, not hand-made: run `cargo run -p pushrod-showcase -- --screenshots pushrod-docs/static/img/screenshots` and use `/img/screenshots/showcase-page-<page>.png` (see [The Pushrod Showcase](guides/showcase.md)).
+- Other screenshots go in `static/img/screenshots/` and are referenced as `/img/screenshots/<name>.png`. Take them from a running example (for instance under Xvfb) so they show what Pushrod really draws.
 - Until a widget exists, use its roadmap mockup from `docs/mockups/` in the repository.
 
 ## Code samples
