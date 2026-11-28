@@ -40,8 +40,8 @@
 //! ## Flags and sizes
 //!
 //! A nonzero behavior or state value replaces the widget's flags; zero keeps what the widget's
-//! constructor set.  A zero width or height keeps the widget's own size.  Anchors are stored in
-//! the file and not applied yet.
+//! constructor set.  A zero width or height keeps the widget's own size.  Anchors are applied as
+//! [`Anchors`] (`0` means none); a value with bits the library does not know is rejected.
 //!
 //! After the constructor runs, each named property is also offered to the widget's
 //! [`set_property`](Widget::set_property), so values the constructor does not read (such as
@@ -55,7 +55,7 @@ use super::format::{
 use crate::error::{Error, Result};
 use crate::event::{EngineEvent, Event};
 use crate::geometry::{point, size};
-use crate::layout::{Align, Alignment, Column, LayoutParams, Margin, Row};
+use crate::layout::{Align, Alignment, Anchors, Column, LayoutParams, Margin, Row};
 use crate::registry::{Properties, PropertyValue, WidgetRegistry};
 use crate::widget::{Behavior, VisualState, Widget, WidgetId};
 use std::collections::HashMap;
@@ -372,6 +372,15 @@ fn build(
             .map_err(|_| object_error(form, number, record, "state flags do not fit"))?;
 
         widget.set_state(VisualState::from_bits_truncate(bits));
+    }
+
+    if record.anchors != 0 {
+        let anchors = u8::try_from(record.anchors)
+            .ok()
+            .and_then(Anchors::from_bits)
+            .ok_or_else(|| object_error(form, number, record, "unknown anchor bits"))?;
+
+        widget.set_anchors(anchors);
     }
 
     for property in &record.properties {

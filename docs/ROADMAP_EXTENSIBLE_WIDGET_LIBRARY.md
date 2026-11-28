@@ -1455,14 +1455,16 @@ A widget whose children live on a content area with its own size and 0,0 origin;
 
 ### 5.4 (#59): Autoresizing (keep margins or stretch on resize)
 
+**Status:** done (#59). `pushrod::layout::Anchors` (`LEFT`, `RIGHT`, `TOP`, `BOTTOM`, `STRETCH_WIDTH`, `STRETCH_HEIGHT`), `Widget::set_anchors`/`anchors`; `WidgetCache::draw_loop` applies them before layout to children of resized containers without a layout, and emits `AnchorsApplied { container, children }`; the form loader and writer store them in the object's `anchors` field; tests in `tests/anchors.rs` and `pushrod-widgets/tests/form_writer.rs`; example `pushrod-widgets/examples/anchors.rs`. Docs: `pushrod-docs/docs/concepts/autoresizing.md`. Window resize reaches anchors through the root, which `Engine` resizes.
+
 **Problem Statement.** Designed forms are absolutely positioned, which is simple, but nothing adapts when a window or pane is resized.
 
 **Solution / Scope.** An `Anchors` setting on `WidgetCore` (left, right, top, bottom, plus stretch width/height), applied when the parent's size changes. Absolute positioning remains the default; no constraint solver. Sibling-relative attachments can be revisited only if real forms need them. Anchors apply to containers without a layout manager; containers with a layout (5.5 (#116)) are arranged by the layout instead.
 
 **Acceptance Criteria.**
 
-- Children follow their anchors on parent resize
-- Stored in form files
+- [x] Children follow their anchors on parent resize
+- [x] Stored in form files
 
 **Parallelism / Dependencies.** Parallelizable. Requires PR #10.
 

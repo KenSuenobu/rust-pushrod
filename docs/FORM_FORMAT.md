@@ -73,7 +73,7 @@ once.
 | width, height | `u32` each | Size |
 | behavior | `u32` | Behavior flags |
 | state | `u32` | State flags |
-| anchors | `u32` | Which edges follow the parent |
+| anchors | `u32` | Which edges follow the parent when it is resized: bit 0 left, 1 right, 2 top, 3 bottom, 4 stretch width, 5 stretch height; `0` for none (the widget keeps its place). A reader rejects other bits |
 | properties | `u32` | Offset of the object's block in the property section, or `0xFFFFFFFF` for none |
 
 Children form a linked list: the parent names the first child, and each child names the next

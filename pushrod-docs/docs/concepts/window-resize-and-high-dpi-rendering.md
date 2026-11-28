@@ -106,7 +106,7 @@ On `InputEvent::Resized(size)` the engine:
 
 After each layout pass the engine reads the root layout's minimum size (`cache.measured_hint(0)`). When it changes, the engine gives it to the backend as the window's **minimum size**, so the user cannot shrink the window below what the layout needs, and emits `MinimumWindowSizeChanged { size }`. `engine.minimum_window_size()` returns the last value. A root without a layout sets no minimum.
 
-A root without a layout is resized too, but its children keep their absolute positions. Autoresizing anchors for absolutely positioned widgets are a later feature.
+A root without a layout is resized too, and its children keep their absolute positions unless they have [anchors](./autoresizing.md), which keep their margins or stretch them.
 
 ## Testing
 

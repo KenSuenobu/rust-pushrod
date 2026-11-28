@@ -324,6 +324,7 @@ impl FormWriter {
         record.height = size.h;
         record.behavior = u32::from(widget.behavior().bits());
         record.state = u32::from(widget.state().bits());
+        record.anchors = u32::from(widget.anchors().bits());
 
         for property in widget.properties() {
             if RECORD_PROPERTIES.contains(&property.name.as_str()) {

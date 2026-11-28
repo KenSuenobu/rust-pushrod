@@ -92,7 +92,7 @@ For each object, in this order:
 | `1` | `Column` (top to bottom) | spacing, then a margin on every side (both optional) |
 | `2` | `Row` (left to right) | spacing, then a margin on every side (both optional) |
 
-Alignment codes in a child layout: `0` start, `1` center, `2` end, `3` fill. The grid cell and the anchors are stored in the file and not applied yet.
+Alignment codes in a child layout: `0` start, `1` center, `2` end, `3` fill. The grid cell is stored in the file and not applied yet. The object's `anchors` are applied as [`Anchors`](../concepts/autoresizing.md); `0` means none, and a value with unknown bits is rejected.
 
 ## Errors
 

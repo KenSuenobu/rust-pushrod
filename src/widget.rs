@@ -52,7 +52,7 @@ use crate::controllers::{Controller, ControllerEvent, Controllers};
 use crate::error::Result;
 use crate::event::{Event, EventCtx, EventMask, Propagation};
 use crate::geometry::{Point, Rect, Size};
-use crate::layout::{Layout, LayoutParams, SizeHint};
+use crate::layout::{Anchors, Layout, LayoutParams, SizeHint};
 use crate::paint::Painter;
 use crate::properties::{Property, core_properties, set_core_property};
 use crate::registry::PropertyValue;
@@ -183,6 +183,10 @@ pub struct WidgetCore {
     requested_size: Size,
     hint_override: Option<SizeHint>,
     layout_params: LayoutParams,
+    /// How the `Widget` follows its container's size; see [`Widget::set_anchors`].
+    anchors: Anchors,
+    /// The container's size when its children's anchors were last applied; `None` until then.
+    anchor_basis: Option<Size>,
     layout: Option<LayoutSlot>,
     layout_dirty: bool,
     /// Whether a composite asked for its parts to be laid out again before the next frame.
@@ -244,6 +248,24 @@ impl WidgetCore {
         }
 
         (moved, resized)
+    }
+
+    /// Returns the container's size when its children's anchors were last applied.
+    ///
+    /// # Returns
+    ///
+    /// The size, or `None` if no anchors have been applied for this container yet.
+    pub(crate) fn anchor_basis(&self) -> Option<Size> {
+        self.anchor_basis
+    }
+
+    /// Sets or clears the size the children's anchors were last applied for.
+    ///
+    /// # Arguments
+    ///
+    /// * `basis` - The container's size, or `None` to start over.
+    pub(crate) fn set_anchor_basis(&mut self, basis: Option<Size>) {
+        self.anchor_basis = basis;
     }
 
     /// Returns the container's layout manager, if it has one.
@@ -348,6 +370,8 @@ impl WidgetCore {
             requested_size: size,
             hint_override: None,
             layout_params: LayoutParams::default(),
+            anchors: Anchors::empty(),
+            anchor_basis: None,
             layout: None,
             layout_dirty: false,
             arrange_requested: false,
@@ -961,6 +985,26 @@ pub trait Widget: Any {
 
         core.layout_params = params;
         core.layout_dirty = true;
+    }
+
+    /// Returns how the `Widget` follows its container's size.
+    ///
+    /// # Returns
+    ///
+    /// The [`Anchors`]; none by default, which keeps the `Widget` where it is.
+    fn anchors(&self) -> Anchors {
+        self.core().anchors
+    }
+
+    /// Sets how the `Widget` follows its container when the container is resized: it keeps the
+    /// margin to an edge, or stretches.  Applies only if the container has no layout manager;
+    /// the next frame applies it, and emits [`EngineEvent::AnchorsApplied`](crate::event::EngineEvent::AnchorsApplied).
+    ///
+    /// # Arguments
+    ///
+    /// * `anchors` - The edges to keep and the stretching.
+    fn set_anchors(&mut self, anchors: Anchors) {
+        self.core_mut().anchors = anchors;
     }
 
     /// Gives the `Widget` a layout manager, so it places its children instead of the application,

@@ -74,7 +74,7 @@ A widget does not know its registry name, so tell the writer which Rust type is 
 | Strings | Once each, by the file's string pool. |
 | Images | Once each, in the image pool. |
 
-Two limits of the loader apply to a saved file: a behavior or state of zero keeps what the widget's constructor set, and a layout's alignment and anchors that the loader does not apply yet are stored but ignored.
+Two limits of the loader apply to a saved file: a behavior or state of zero keeps what the widget's constructor set, and a layout's grid cell that the loader does not apply yet is stored but ignored. Anchors are stored and restored (see [Autoresizing](../concepts/autoresizing.md)).
 
 ## Images
 

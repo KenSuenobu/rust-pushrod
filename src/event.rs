@@ -340,6 +340,8 @@ pub enum EngineEventKind {
     PartsArranged,
     /// See [`EngineEvent::LayoutChanged`].
     LayoutChanged,
+    /// See [`EngineEvent::AnchorsApplied`].
+    AnchorsApplied,
     /// See [`EngineEvent::EventBroadcast`].
     EventBroadcast,
     /// See [`EngineEvent::CustomEventDropped`].
@@ -476,6 +478,14 @@ pub enum EngineEvent {
     LayoutChanged {
         /// The ID of the container that was arranged.
         container: WidgetId,
+    },
+    /// A container's children followed it after it was resized, according to their
+    /// [`Anchors`](crate::layout::Anchors).  Sent once for each container, before a frame.
+    AnchorsApplied {
+        /// The ID of the container that was resized.
+        container: WidgetId,
+        /// How many children moved or were resized.
+        children: usize,
     },
     /// An event mask changed.
     EventMaskChanged {
@@ -749,6 +759,7 @@ impl EngineEvent {
             EngineEvent::WidgetRestacked { .. } => EngineEventKind::WidgetRestacked,
             EngineEvent::PartsArranged { .. } => EngineEventKind::PartsArranged,
             EngineEvent::LayoutChanged { .. } => EngineEventKind::LayoutChanged,
+            EngineEvent::AnchorsApplied { .. } => EngineEventKind::AnchorsApplied,
             EngineEvent::EventBroadcast { .. } => EngineEventKind::EventBroadcast,
             EngineEvent::CustomEventDropped { .. } => EngineEventKind::CustomEventDropped,
             EngineEvent::FontLoaded { .. } => EngineEventKind::FontLoaded,
