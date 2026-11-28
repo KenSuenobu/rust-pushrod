@@ -430,7 +430,9 @@ fn tabs_can_be_retitled_and_restyled_and_widen_to_fit() {
     let second_x = f.engine.widgets().get(second).unwrap().get_origin().x;
 
     assert!(after > before);
-    assert_eq!(second_x, after as i32, "the next tab moves over");
+    // Each button sits one pixel inside its two-pixel-wider outline, and the next outline
+    // starts where this one ends.
+    assert_eq!(second_x, after as i32 + 3, "the next tab moves over");
 }
 
 #[test]
