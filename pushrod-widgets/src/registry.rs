@@ -35,6 +35,8 @@
 //! | `pushrod.frame` | none |
 //! | `pushrod.panel` | none |
 //!
+//! [`register_form_types`] teaches a [`FormWriter`] the same names, so saved forms load again.
+//!
 //! Widgets that need code, not data (`CustomPaint`), or that are built from other widgets
 //! (`Container`, `ScrollBar`, `Alert`) are not registered.
 //!
@@ -54,6 +56,7 @@
 
 use crate::prelude::*;
 use pushrod::error::{Error, Result};
+use pushrod::form::FormWriter;
 use pushrod::registry::{Properties, WidgetRegistry};
 use pushrod::widget::Widget;
 
@@ -168,4 +171,28 @@ pub fn register(registry: &mut WidgetRegistry) {
     registry.register("pushrod.text_field", |_| done(TextField::new()));
     registry.register("pushrod.frame", |_| done(Frame::new()));
     registry.register("pushrod.panel", |_| done(Panel::new()));
+}
+
+/// Tells a form writer which type name each standard widget is saved as, the same names
+/// [`register`] uses, and that the `path` property of an image widget names an image.
+///
+/// # Arguments
+///
+/// * `writer` - The writer to teach the standard widget types.
+pub fn register_form_types(writer: &mut FormWriter) {
+    writer.register_type::<Button>("pushrod.button");
+    writer.register_type::<CheckBox>("pushrod.check_box");
+    writer.register_type::<RadioButton>("pushrod.radio_button");
+    writer.register_type::<Text>("pushrod.text");
+    writer.register_type::<BoxedLabel>("pushrod.boxed_label");
+    writer.register_type::<GroupBox>("pushrod.group_box");
+    writer.register_type::<GlyphButton>("pushrod.glyph_button");
+    writer.register_type::<ImageWidget>("pushrod.image");
+    writer.register_type::<ProgressBar>("pushrod.progress_bar");
+    writer.register_type::<Slider>("pushrod.slider");
+    writer.register_type::<Separator>("pushrod.separator");
+    writer.register_type::<TextField>("pushrod.text_field");
+    writer.register_type::<Frame>("pushrod.frame");
+    writer.register_type::<Panel>("pushrod.panel");
+    writer.image_property("path");
 }

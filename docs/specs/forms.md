@@ -24,7 +24,9 @@ implemented by `pushrod::form` (`FormFile::to_bytes` and `FormFile::from_bytes`)
   readers.
 - `Engine::load_form` builds a form through the widget registry, all or nothing, errors name the
   object and property, and it emits `FormLoaded { form, root, widgets }`.
-- The writer and generated ID constants are roadmap items 6.5 and 6.6.
+- `FormWriter` saves a widget subtree as a form: geometry, flags, properties, `Column` and `Row`
+  layouts, and child layout parameters; composite parts are not written.
+- Generated ID constants are roadmap item 6.6.
 
 The guide is [Form file format](../../pushrod-docs/docs/forms/form-file-format.md).
 Conformance: `tests/conformance/forms.rs`.

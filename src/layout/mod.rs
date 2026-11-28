@@ -321,6 +321,17 @@ pub trait Layout {
 
         None
     }
+
+    /// Describes the layout so a form file can store it (see `docs/FORM_FORMAT.md`).
+    ///
+    /// # Returns
+    ///
+    /// The form layout kind code and its parameters, or `None` (the default) if a form file
+    /// cannot store this layout.  [`Column`] and [`Row`] return `Some` when their settings fit
+    /// the format: spacing and one margin for all four sides.
+    fn form_spec(&self) -> Option<(u8, Vec<i32>)> {
+        None
+    }
 }
 
 /// Positions a `Widget` inside a slot, as its [`LayoutParams`] ask.  Layout managers call it so

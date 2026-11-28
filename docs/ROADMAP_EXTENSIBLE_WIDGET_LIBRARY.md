@@ -1768,6 +1768,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 ### 6.5 (#64): Form writer: save a widget subtree to a file
 
+**Status:** done (#64). `pushrod::form::FormWriter`: `register_type::<T>(name)` (`pushrod_widgets::register_form_types` for the standard widgets), `add_form(name, &cache, root)` returns each widget's object number, `add_image` (deduplicated), `image_property`, `add_symbol`, `write(path)`, `to_bytes()`. Writes geometry, flags, properties from `Widget::properties()`, `Column`/`Row` layouts (`Layout::form_spec`), and non-default child layout; composite parts are skipped. The loader now also offers each named property to `set_property`, so values such as `checked` round-trip. Not done: part overrides and added/removed parts of composites, and an engine event (the writer only reads the tree). See `pushrod-widgets/examples/form_writer.rs`.
+
 **Problem Statement.** Chassis must save designs, and tests need files produced from code-built forms.
 
 **Solution / Scope.** `FormWriter::add_form(name, &cache, root)` + `write(path)`; skips composite parts; properties via introspection; deduplicates strings and images.
