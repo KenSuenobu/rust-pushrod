@@ -377,6 +377,8 @@ SDL2 ──(types disabled at source for masked classes)──> event pump
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/guides/handling-events.md` ("Handling events", Guides, update). Guides: Table of callbacks (see Naming in the roadmap). Rustdoc: All `on_*` methods. Examples: Check box with `on_toggle` in the example. Screenshots: n/a.
 
+**Status:** done (#97). `src/action.rs`, `Engine::add_action`/`bind_widget`/`on_action`; tests in `pushrod-widgets/tests/actions.rs`; example `pushrod-widgets/examples/actions.rs`. Docs: `pushrod-docs/docs/events/actions-and-keyboard-shortcuts.md`. Menu and toolbar binding follows with their widgets.
+
 **Sources.** [Qt: QAction (shared commands for menus, toolbars, shortcuts)](https://doc.qt.io/qt-6/qaction.html); [Apple: Target-Action](https://developer.apple.com/library/archive/documentation/General/Devpedia-CocoaApp-MOSX/TargetAction.html)
 
 ### 1.7 (#3): GPU text: font cache with a glyph atlas texture
@@ -2376,11 +2378,11 @@ SystemEvent(id, sdl_event) ->  PointerPressed / PointerReleased / PointerMoved {
 
 **Acceptance Criteria.**
 
-- A Bold action toggled from the toolbar checks the Bold menu item
-- Disabling an action disables every control
-- Shortcuts trigger actions; platform-standard keys map correctly
-- Exclusive action groups
-- Emits the corresponding `EngineEvent` (9.10 (#109))
+- [x] A Bold action toggled from the toolbar checks the Bold menu item (any bound controls; menu and toolbar widgets bind in their own tickets)
+- [x] Disabling an action disables every control
+- [x] Shortcuts trigger actions; platform-standard keys map correctly
+- [x] Exclusive action groups
+- [x] Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Not parallelizable. Requires 9.1 (#93), 1.6 (#22).
 

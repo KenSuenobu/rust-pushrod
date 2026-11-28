@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-11-27
+
+### Added
+
+- [#97] Actions and keyboard shortcuts shared by controls [kenji]
+
 ## [0.3.5] - 2026-11-27
 
 ### Added

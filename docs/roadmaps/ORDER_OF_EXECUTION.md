@@ -121,7 +121,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 82 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
 | ✅ 83 | [#167](https://github.com/KenSuenobu/rust-pushrod/issues/167) | chassis: [6.5] Command-line generator |
 | **84** | checkpoint | **Chassis M1: core without UI complete** |
-| 85 | [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) | pushrod: [9.5] Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons |
+| ✅ 85 | [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) | pushrod: [9.5] Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons |
 | 86 | [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) | pushrod: [9.8] Drag and drop within the application |
 | 87 | [#81](https://github.com/KenSuenobu/rust-pushrod/issues/81) | pushrod: [1.15] Undo and redo command stack |
 | 88 | [#59](https://github.com/KenSuenobu/rust-pushrod/issues/59) | pushrod: [5.4] Autoresizing (keep margins or stretch on resize) |
@@ -1592,11 +1592,11 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 
 **Show on video:**
 
-- [ ] A Bold action toggled from the toolbar checks the Bold menu item
-- [ ] Disabling an action disables every control
-- [ ] Shortcuts trigger actions; platform-standard keys map correctly
-- [ ] Exclusive action groups
-- [ ] Emits the corresponding `EngineEvent` (9.10)
+- [x] A Bold action toggled from the toolbar checks the Bold menu item
+- [x] Disabling an action disables every control
+- [x] Shortcuts trigger actions; platform-standard keys map correctly
+- [x] Exclusive action groups
+- [x] Emits the corresponding `EngineEvent` (9.10)
 
 ### Step 86: Drag and drop within the application
 
