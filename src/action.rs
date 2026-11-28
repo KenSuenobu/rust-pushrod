@@ -260,6 +260,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `icon` - The icon name.
+    ///
+    /// # Returns
+    ///
+    /// The action with the icon set.
     pub fn icon(mut self, icon: &str) -> Self {
         self.icon = Some(icon.to_string());
         self
@@ -270,6 +274,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `shortcut` - The key and modifiers.
+    ///
+    /// # Returns
+    ///
+    /// The action with the shortcut set.
     pub fn shortcut(mut self, shortcut: Shortcut) -> Self {
         self.shortcut = Some(shortcut);
         self
@@ -280,6 +288,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `standard` - The standard shortcut, resolved for the running platform.
+    ///
+    /// # Returns
+    ///
+    /// The action with the shortcut set.
     pub fn standard_shortcut(self, standard: StandardShortcut) -> Self {
         self.shortcut(standard.shortcut())
     }
@@ -289,6 +301,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `scope` - The scope.
+    ///
+    /// # Returns
+    ///
+    /// The action with the scope set.
     pub fn scope(mut self, scope: ShortcutScope) -> Self {
         self.scope = scope;
         self
@@ -299,6 +315,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `tooltip` - The tooltip text.
+    ///
+    /// # Returns
+    ///
+    /// The action with the tooltip set.
     pub fn tooltip(mut self, tooltip: &str) -> Self {
         self.tooltip = tooltip.to_string();
         self
@@ -309,6 +329,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `status_text` - The description.
+    ///
+    /// # Returns
+    ///
+    /// The action with the status text set.
     pub fn status_text(mut self, status_text: &str) -> Self {
         self.status_text = status_text.to_string();
         self
@@ -319,6 +343,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `checked` - The starting state.
+    ///
+    /// # Returns
+    ///
+    /// The action, now checkable.
     pub fn checkable(mut self, checked: bool) -> Self {
         self.checkable = true;
         self.checked = checked;
@@ -330,6 +358,10 @@ impl Action {
     /// # Arguments
     ///
     /// * `enabled` - The starting state.
+    ///
+    /// # Returns
+    ///
+    /// The action with the enabled state set.
     pub fn enabled(mut self, enabled: bool) -> Self {
         self.enabled = enabled;
         self
@@ -414,11 +446,19 @@ impl Actions {
     }
 
     /// Returns how many actions are registered.
+    ///
+    /// # Returns
+    ///
+    /// The number of actions.
     pub fn len(&self) -> usize {
         self.actions.len()
     }
 
     /// Returns whether no action is registered.
+    ///
+    /// # Returns
+    ///
+    /// `true` if there are no actions.
     pub fn is_empty(&self) -> bool {
         self.actions.is_empty()
     }
