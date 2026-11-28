@@ -54,8 +54,8 @@
 //! pushrod_sdl2::run(engine, pushrod_sdl2::WindowSettings::new("app", size(400, 200)), AppState::default());
 //! ```
 
-use crate::accessibility::{AccessAction, AccessTree, AccessUpdate};
-use crate::action::{Action, ActionGroupId, ActionId, Actions};
+use crate::accessibility::{AccessAction, AccessTree, AccessUpdate, Role};
+use crate::action::{Action, ActionGroupId, ActionId, Actions, StandardShortcut};
 use crate::backend::{Backend, Waker};
 use crate::cache::WidgetCache;
 use crate::color::Color;
@@ -73,6 +73,7 @@ use crate::registry::{PropertyValue, WidgetRegistry};
 use crate::resource::{FormId, Resources};
 use crate::root_widget::RootWidget;
 use crate::timer::TimerSchedule;
+use crate::undo::{Command, TextEdit, UndoStack};
 use crate::widget::{Widget, WidgetId};
 use std::any::Any;
 use std::cell::RefCell;
@@ -242,6 +243,7 @@ pub struct Ui<'a, S = ()> {
     modals: &'a mut Vec<(WidgetId, ModalCallback<S>)>,
     resources: &'a Resources,
     actions: &'a mut Actions,
+    undo: &'a mut UndoStack<S>,
 }
 
 impl<S> std::fmt::Debug for Ui<'_, S> {
@@ -341,6 +343,136 @@ impl<'a, S> Ui<'a, S> {
     /// The [`Resources`]; empty until [`Engine::set_resources`] is called.
     pub fn resources(&self) -> &Resources {
         self.resources
+    }
+
+    /// Returns the undo and redo history.
+    ///
+    /// # Returns
+    ///
+    /// The [`UndoStack`].
+    pub fn undo_stack(&self) -> &UndoStack<S> {
+        self.undo
+    }
+
+    /// Applies a command and pushes it on the undo stack.  Pushing clears the redo history.
+    /// Commands pushed while this one is applied are ignored.
+    ///
+    /// # Arguments
+    ///
+    /// * `command` - The command.
+    /// * `state` - The application state.
+    pub fn push_command<C>(&mut self, command: C, state: &mut S)
+    where
+        C: Command<S> + 'static,
+    {
+        let mut command: Box<dyn Command<S>> = Box::new(command);
+
+        if self.undo.is_replaying() {
+            return;
+        }
+
+        self.undo.set_replaying(true);
+        command.apply(state, self);
+        self.undo.set_replaying(false);
+        self.undo.record(command);
+        self.undo_changed();
+    }
+
+    /// Pushes a command whose change has already happened; it is not applied again until a redo.
+    ///
+    /// # Arguments
+    ///
+    /// * `command` - The command.
+    pub fn record_command<C>(&mut self, command: C)
+    where
+        C: Command<S> + 'static,
+    {
+        self.undo.record(Box::new(command));
+        self.undo_changed();
+    }
+
+    /// Undoes the last command.  Queues [`EngineEvent::CommandUndone`].
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The application state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a command was undone; `false` if there was nothing to undo.
+    pub fn undo(&mut self, state: &mut S) -> bool {
+        let Some(mut command) = self.undo.begin_undo() else {
+            return false;
+        };
+        let description = command.description();
+
+        command.revert(state, self);
+        self.undo.finish_undo(command);
+        self.widgets
+            .queue_event(Event::Engine(EngineEvent::CommandUndone { description }));
+        self.undo_changed();
+        true
+    }
+
+    /// Redoes the last undone command.  Queues [`EngineEvent::CommandRedone`].
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The application state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a command was redone; `false` if there was nothing to redo.
+    pub fn redo(&mut self, state: &mut S) -> bool {
+        let Some(mut command) = self.undo.begin_redo() else {
+            return false;
+        };
+        let description = command.description();
+
+        command.apply(state, self);
+        self.undo.finish_redo(command);
+        self.widgets
+            .queue_event(Event::Engine(EngineEvent::CommandRedone { description }));
+        self.undo_changed();
+        true
+    }
+
+    /// Forgets all undo and redo history.
+    pub fn clear_undo(&mut self) {
+        self.undo.clear();
+        self.undo_changed();
+    }
+
+    /// Sets the text of a text field, as an undo or redo does, without recording an edit, and
+    /// remembers it as the field's last recorded text.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The text field.
+    /// * `text` - Its text.
+    pub(crate) fn undo_baseline_set(&mut self, id: WidgetId, text: &str) {
+        self.undo.set_baseline(id, text.to_string());
+    }
+
+    /// If the stack changed, queues [`EngineEvent::UndoStackChanged`] and enables or disables the
+    /// bound Undo and Redo actions to match.
+    pub(crate) fn undo_changed(&mut self) {
+        if !self.undo.take_dirty() {
+            return;
+        }
+
+        let (can_undo, can_redo) = (self.undo.can_undo(), self.undo.can_redo());
+
+        if let Some((undo, redo)) = self.undo.bound_actions() {
+            self.actions.set_enabled(self.widgets, undo, can_undo);
+            self.actions.set_enabled(self.widgets, redo, can_redo);
+        }
+
+        self.widgets
+            .queue_event(Event::Engine(EngineEvent::UndoStackChanged {
+                can_undo,
+                can_redo,
+            }));
     }
 
     /// Opens a modal dialog and runs `callback` once when it is dismissed.
@@ -639,6 +771,8 @@ pub struct Engine<S = ()> {
     actions: Actions,
     /// The `on_action` callbacks, by action.
     action_callbacks: Vec<(ActionId, ActionCallback<S>)>,
+    /// The undo and redo history.
+    undo: UndoStack<S>,
 }
 
 impl<S> std::fmt::Debug for Engine<S> {
@@ -709,6 +843,7 @@ impl<S> Engine<S> {
             resources: Resources::new(),
             actions: Actions::default(),
             action_callbacks: Vec::new(),
+            undo: UndoStack::default(),
         }
     }
 
@@ -993,6 +1128,7 @@ impl<S> Engine<S> {
                 modals: &mut self.modal_callbacks,
                 resources: &self.resources,
                 actions: &mut self.actions,
+                undo: &mut self.undo,
             };
 
             callback(state, &mut ui);
@@ -1026,6 +1162,7 @@ impl<S> Engine<S> {
             modals: &mut self.modal_callbacks,
             resources: &self.resources,
             actions: &mut self.actions,
+            undo: &mut self.undo,
         };
 
         for callback in self.idle_callbacks.iter_mut() {
@@ -2389,6 +2526,7 @@ impl<S> Engine<S> {
                     modals: &mut self.modal_callbacks,
                     resources: &self.resources,
                     actions: &mut self.actions,
+                    undo: &mut self.undo,
                 };
 
                 callback(state, &mut ui, *dismissed_by);
@@ -2427,10 +2565,225 @@ impl<S> Engine<S> {
         }
     }
 
+    /// Builds a [`Ui`] over the engine's parts, for the `Engine`'s own methods.
+    ///
+    /// # Returns
+    ///
+    /// The handle.
+    fn ui(&mut self) -> Ui<'_, S> {
+        Ui {
+            widgets: &mut self.widget_cache,
+            running: &mut self.running,
+            event_mask: &mut self.event_mask,
+            posted: &mut self.posted,
+            timers: &mut self.timers,
+            modals: &mut self.modal_callbacks,
+            resources: &self.resources,
+            actions: &mut self.actions,
+            undo: &mut self.undo,
+        }
+    }
+
+    /// Returns the undo and redo history.
+    ///
+    /// # Returns
+    ///
+    /// The [`UndoStack`].
+    pub fn undo_stack(&self) -> &UndoStack<S> {
+        &self.undo
+    }
+
+    /// Applies a command and pushes it on the undo stack.  See [`Ui::push_command`].
+    ///
+    /// # Arguments
+    ///
+    /// * `command` - The command.
+    /// * `state` - The application state.
+    pub fn push_command<C>(&mut self, command: C, state: &mut S)
+    where
+        C: Command<S> + 'static,
+    {
+        self.ui().push_command(command, state);
+    }
+
+    /// Pushes a command whose change has already happened.  See [`Ui::record_command`].
+    ///
+    /// # Arguments
+    ///
+    /// * `command` - The command.
+    pub fn record_command<C>(&mut self, command: C)
+    where
+        C: Command<S> + 'static,
+    {
+        self.ui().record_command(command);
+    }
+
+    /// Undoes the last command.  See [`Ui::undo`].
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The application state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a command was undone.
+    pub fn undo(&mut self, state: &mut S) -> bool {
+        self.ui().undo(state)
+    }
+
+    /// Redoes the last undone command.  See [`Ui::redo`].
+    ///
+    /// # Arguments
+    ///
+    /// * `state` - The application state.
+    ///
+    /// # Returns
+    ///
+    /// `true` if a command was redone.
+    pub fn redo(&mut self, state: &mut S) -> bool {
+        self.ui().redo(state)
+    }
+
+    /// Forgets all undo and redo history.
+    pub fn clear_undo(&mut self) {
+        self.ui().clear_undo();
+    }
+
+    /// Sets how many commands the undo stack keeps; the oldest are forgotten first.
+    ///
+    /// # Arguments
+    ///
+    /// * `limit` - The most undo steps to keep; at least 1.
+    pub fn set_undo_limit(&mut self, limit: usize) {
+        self.undo.set_limit(limit);
+        self.ui().undo_changed();
+    }
+
+    /// Turns on or off the recording of text field edits (on by default).  Edits to a password
+    /// field are never recorded.
+    ///
+    /// # Arguments
+    ///
+    /// * `on` - `true` to record text edits.
+    pub fn set_text_undo(&mut self, on: bool) {
+        self.undo.set_text_undo(on);
+    }
+
+    /// Keeps two registered actions enabled only when there is something to undo and redo.
+    ///
+    /// # Arguments
+    ///
+    /// * `undo` - The Undo action.
+    /// * `redo` - The Redo action.
+    pub fn bind_undo_actions(&mut self, undo: ActionId, redo: ActionId) {
+        self.undo.bind_actions((undo, redo));
+        self.ui().undo_changed();
+    }
+
+    /// Adds the standard Undo and Redo actions (with their platform shortcuts), binds them to the
+    /// stack, and returns them.  Bind controls to them with [`Engine::bind_widget`]; the
+    /// application only has to call [`Engine::on_action`] if it wants extra work on top of the
+    /// undo itself.
+    ///
+    /// # Returns
+    ///
+    /// The IDs of the Undo and Redo actions.
+    pub fn add_undo_actions(&mut self) -> (ActionId, ActionId) {
+        let undo = self.add_action(
+            Action::new("Undo")
+                .standard_shortcut(StandardShortcut::Undo)
+                .enabled(self.undo.can_undo()),
+        );
+        let redo = self.add_action(
+            Action::new("Redo")
+                .standard_shortcut(StandardShortcut::Redo)
+                .enabled(self.undo.can_redo()),
+        );
+
+        self.bind_undo_actions(undo, redo);
+        (undo, redo)
+    }
+
+    /// Reads the text of an editable field that undo may record.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The `Widget`.
+    ///
+    /// # Returns
+    ///
+    /// The text, or `None` if the `Widget` is not a text editor or holds a password.
+    fn editable_text(&self, id: WidgetId) -> Option<String> {
+        let widget = self.widget_cache.get(id)?;
+
+        if !widget.accepts_text_input() || widget.accessibility().role == Role::PasswordInput {
+            return None;
+        }
+
+        widget
+            .properties()
+            .into_iter()
+            .find_map(|p| match (p.name.as_str(), p.value) {
+                ("text", PropertyValue::Text(text)) => Some(text),
+                _ => None,
+            })
+    }
+
+    /// Applies the undo rules to an event before callbacks see it: records text edits, ends the
+    /// merge run when focus changes, and runs the Undo and Redo actions.
+    ///
+    /// # Arguments
+    ///
+    /// * `event` - The event being delivered.
+    /// * `state` - The application state.
+    fn run_undo_hooks(&mut self, event: &Event, state: &mut S) {
+        match event {
+            Event::FocusGained { id } if self.undo.text_undo() => {
+                self.undo.seal();
+
+                if let Some(text) = self.editable_text(*id) {
+                    self.undo.set_baseline(*id, text);
+                }
+            }
+            Event::FocusLost { id } if self.undo.text_undo() => {
+                self.undo.seal();
+                self.undo.forget_baseline(*id);
+            }
+            Event::TextChanged { id } if self.undo.text_undo() && !self.undo.is_replaying() => {
+                let Some(after) = self.editable_text(*id) else {
+                    return;
+                };
+                let before = self.undo.baseline(*id).map(str::to_string);
+
+                self.undo.set_baseline(*id, after.clone());
+
+                if let Some(before) = before
+                    && before != after
+                {
+                    self.undo
+                        .record(Box::new(TextEdit::new(*id, &before, &after)));
+                    self.ui().undo_changed();
+                }
+            }
+            Event::Engine(EngineEvent::WidgetRemoved { id, .. }) => self.undo.forget_baseline(*id),
+            Event::Engine(EngineEvent::ActionInvoked { action }) => {
+                if let Some((undo, redo)) = self.undo.bound_actions() {
+                    if *action == undo {
+                        self.ui().undo(state);
+                    } else if *action == redo {
+                        self.ui().redo(state);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
     /// Delivers a generated `Event` to the callbacks.
     fn fire(&mut self, event: &Event, state: &mut S) {
         self.run_modal_callback(event, state);
         self.run_action_hooks(event);
+        self.run_undo_hooks(event, state);
 
         let mut ui = Ui {
             widgets: &mut self.widget_cache,
@@ -2441,6 +2794,7 @@ impl<S> Engine<S> {
             modals: &mut self.modal_callbacks,
             resources: &self.resources,
             actions: &mut self.actions,
+            undo: &mut self.undo,
         };
 
         if let Event::Custom(custom) = event {

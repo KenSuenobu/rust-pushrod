@@ -62,6 +62,8 @@ flowchart TD
 | `ActionAdded { action }` | An [action](./actions-and-keyboard-shortcuts.md) was registered with `add_action`. |
 | `ActionChanged { action }` | An action's enabled state, checked state, or label changed, and its bound controls were updated. |
 | `ActionInvoked { action }` | An action was triggered by a bound control, its shortcut, or `trigger_action`. |
+| `UndoStackChanged { can_undo, can_redo }` | The undo stack changed. See [Undo and redo](../concepts/undo-and-redo-command-stack.md). |
+| `CommandUndone { description }` / `CommandRedone { description }` | A command was undone or redone. |
 | `DragStarted { source }` | A [drag](./drag-and-drop-within-the-application.md) began from `source`. |
 | `DragEnded { source, target, dropped }` | A drag ended; `dropped` is `true` when a target accepted the payload. |
 | `FilesDropped { target, count }` | Files were dropped on the window from the OS; `target` is the accepting widget, if any. |
