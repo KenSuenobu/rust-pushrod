@@ -2873,11 +2873,13 @@ Each image shows the widget step by step, drawn in Pushrod's current style; blue
 
 ![12.3 step set 1: A button selected on its page; its text and disabled flag changed in the property panel](mockups/12.3-1.png)
 
+**Status:** done (#297). Pressing a widget on a page selects it: the page root (`PageRoot`) sees the press in the capture phase, so widgets that consume their own press still work, and posts a `PickRequest`. The selected widget gets a blue outline and `pushrod-showcase/src/property_panel.rs` lists `Widget::properties` with a check box (bool), a text field (number, text, `#rrggbb[aa]` color), or a cycling button (`align_*`); edits go through `Ui::set_widget_property` and emit `PropertyChanged`. **Reset** rebuilds the page. `pushrod-extra-widgets` does not exist yet, so its property grid (4.5 (#52)) is not used.
+
 **Acceptance Criteria.**
 
-- Selecting a demo widget lists its properties
-- Edits apply immediately; Reset restores
-- Works for any registered widget without per-widget code
+- [x] Selecting a demo widget lists its properties
+- [x] Edits apply immediately; Reset restores
+- [x] Works for any registered widget without per-widget code
 
 **Parallelism / Dependencies.** Parallelizable. Requires 12.2 (#296), 6.2 (#61).
 

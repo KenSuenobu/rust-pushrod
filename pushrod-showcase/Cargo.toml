@@ -18,6 +18,6 @@ name = "pushrod-showcase"
 path = "src/main.rs"
 
 [dependencies]
-pushrod = { path = "..", version = "0.2.1" }
-pushrod-widgets = { path = "../pushrod-widgets", version = "0.2.1" }
-pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.2.1" }
+pushrod = { path = "..", version = "0.2.2" }
+pushrod-widgets = { path = "../pushrod-widgets", version = "0.2.2" }
+pushrod-sdl2 = { path = "../pushrod-sdl2", version = "0.2.2" }

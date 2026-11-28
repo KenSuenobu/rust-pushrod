@@ -21,6 +21,7 @@
 
 pub mod page;
 pub mod pages;
+pub mod property_panel;
 pub mod registry;
 pub mod settings;
 pub mod shell;

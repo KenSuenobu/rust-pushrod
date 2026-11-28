@@ -14,11 +14,11 @@
 
 //! The showcase's pages: one file per widget or feature.
 
+use crate::property_panel::PageRoot;
 use crate::registry::Registry;
 use crate::shell::ShowcaseUi;
 use pushrod::geometry::Size;
 use pushrod::widget::WidgetId;
-use pushrod_widgets::panel::Panel;
 use pushrod_widgets::text::Text;
 
 mod boxed_label;
@@ -71,8 +71,7 @@ pub fn register_all(registry: &mut Registry) {
 ///
 /// The panel's ID.
 pub(crate) fn page_root(ui: &mut ShowcaseUi<'_>, page_size: Size) -> WidgetId {
-    ui.widgets()
-        .add(Box::new(Panel::new().size(page_size.w, page_size.h)))
+    ui.widgets().add(Box::new(PageRoot::new(page_size)))
 }
 
 /// Adds a plain text label.

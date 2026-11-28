@@ -16,6 +16,7 @@
 
 use crate::page::Group;
 use crate::pages;
+use crate::property_panel::{self, PickRequest, PropertyPanel};
 use crate::registry::Registry;
 use crate::settings;
 use pushrod::cache::WidgetCache;
@@ -35,7 +36,7 @@ use pushrod_widgets::text_field::TextField;
 use std::path::PathBuf;
 
 /// The window's starting size, in pixels.
-pub const WINDOW_W: u32 = 900;
+pub const WINDOW_W: u32 = 1180;
 pub const WINDOW_H: u32 = 640;
 
 /// The width of the page list, in pixels.
@@ -77,6 +78,8 @@ pub struct ShowcaseState {
     pub start_page: Option<String>,
     /// Whether the first page has been opened.
     pub started: bool,
+    /// The property panel and its selection.
+    pub panel: PropertyPanel,
 }
 
 /// Layout parameters that fill the slot in both directions.
@@ -101,7 +104,7 @@ fn fill(stretch: u32) -> LayoutParams {
 /// # Returns
 ///
 /// The parameters.
-fn fill_width() -> LayoutParams {
+pub(crate) fn fill_width() -> LayoutParams {
     LayoutParams {
         alignment: Alignment::new(Align::Fill, Align::Start),
         ..LayoutParams::default()
@@ -121,7 +124,7 @@ fn fill_width() -> LayoutParams {
 /// # Returns
 ///
 /// The panel's ID.
-fn add_panel(
+pub(crate) fn add_panel(
     cache: &mut WidgetCache,
     parent: WidgetId,
     layout: Box<dyn pushrod::layout::Layout>,
@@ -229,6 +232,19 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
     }
 
     let page_area = add_scroller(cache, right, ContentSize::FitChildren);
+
+    // Far right: the property panel, as in the roadmap mockup.
+    let props = add_panel(
+        cache,
+        ROOT_WIDGET_ID,
+        Box::new(Column::new().spacing(8).margins(Margin::all(12))),
+        LayoutParams {
+            alignment: Alignment::new(Align::Start, Align::Fill),
+            ..LayoutParams::default()
+        },
+        property_panel::PANEL_W + 24,
+    );
+    let panel = property_panel::build(cache, props);
     let shell = Shell {
         search,
         list,
@@ -249,6 +265,7 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
         start_page: settings_path.as_deref().and_then(settings::load_last_page),
         settings_path,
         started: false,
+        panel,
     };
 
     rebuild_list(engine.widgets(), &mut state, "");
@@ -269,15 +286,23 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
         }
     });
 
-    engine.on_event(|state, ui, event| match event {
-        // Page buttons are toggles (the selected one stays pressed), so a click arrives as `Toggled`.
-        Event::Clicked { id, .. } | Event::Toggled { id, .. } => {
-            if let Some(&(_, index)) = state.buttons.iter().find(|(button, _)| button == id) {
-                select_page(state, ui, index);
+    engine.on_custom::<PickRequest, _>(|state, ui, _source, request| {
+        property_panel::pick(state, ui, request.id);
+    });
+
+    engine.on_event(|state, ui, event| {
+        property_panel::handle(state, ui, event);
+
+        match event {
+            // Page buttons are toggles (the selected one stays pressed), so a click arrives as `Toggled`.
+            Event::Clicked { id, .. } | Event::Toggled { id, .. } => {
+                if let Some(&(_, index)) = state.buttons.iter().find(|(button, _)| button == id) {
+                    select_page(state, ui, index);
+                }
             }
+            Event::TextChanged { id } if *id == state.shell.search => apply_filter(state, ui),
+            _ => {}
         }
-        Event::TextChanged { id } if *id == state.shell.search => apply_filter(state, ui),
-        _ => {}
     });
 
     state
@@ -361,6 +386,12 @@ pub fn apply_filter(state: &mut ShowcaseState, ui: &mut ShowcaseUi<'_>) {
 /// * `ui` - The callback handle.
 /// * `index` - The page's index in the registry.
 pub fn select_page(state: &mut ShowcaseState, ui: &mut ShowcaseUi<'_>, index: usize) {
+    if state.registry.get(index).is_none() {
+        return;
+    }
+
+    property_panel::clear(state, ui);
+
     let Some(page) = state.registry.get(index) else {
         return;
     };
