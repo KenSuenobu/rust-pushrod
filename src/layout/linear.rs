@@ -115,6 +115,33 @@ struct Linear {
 }
 
 impl Linear {
+    /// Describes the layout for a form file.
+    ///
+    /// # Returns
+    ///
+    /// The kind code (`1` for a column, `2` for a row) with the spacing and margin, or `None` if
+    /// the margins are not the same on every side or a cross alignment is set.
+    fn form_spec(&self) -> Option<(u8, Vec<i32>)> {
+        let m = self.margins;
+
+        if self.cross.is_some() || m.left != m.top || m.top != m.right || m.right != m.bottom {
+            return None;
+        }
+
+        let kind = match self.axis {
+            Axis::Vertical => 1,
+            Axis::Horizontal => 2,
+        };
+
+        Some((
+            kind,
+            vec![
+                i32::try_from(self.spacing).ok()?,
+                i32::try_from(m.left).ok()?,
+            ],
+        ))
+    }
+
     /// Creates a linear layout with no spacing, no margins, and each child's own alignment.
     ///
     /// # Arguments
@@ -502,6 +529,16 @@ macro_rules! linear_builders {
             /// One rectangle per child.
             fn arrange(&self, children: &[ChildInfo], bounds: Rect) -> Vec<Rect> {
                 self.0.arrange(children, bounds)
+            }
+
+            /// Describes the layout for a form file.
+            ///
+            /// # Returns
+            ///
+            /// The kind code (`1` column, `2` row) with spacing and margin, or `None` if the
+            /// margins differ by side or [`Self::align`] was used, which the format cannot store.
+            fn form_spec(&self) -> Option<(u8, Vec<i32>)> {
+                self.0.form_spec()
             }
         }
     };

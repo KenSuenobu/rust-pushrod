@@ -81,4 +81,4 @@ pub mod slider;
 pub mod text;
 pub mod text_field;
 
-pub use registry::register;
+pub use registry::{register, register_form_types};

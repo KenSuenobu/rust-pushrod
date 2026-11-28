@@ -17,7 +17,8 @@
 //! A form file stores one or more forms (widget trees) in a compact, versioned, little-endian
 //! binary format, so a program refers to every object by its number, as classic resource files
 //! did.  The format is specified in `docs/FORM_FORMAT.md`; the [`mod@format`] module reads and writes
-//! it using only the standard library.
+//! it using only the standard library, [`loader`] builds widgets from it, and [`writer`] saves widgets
+//! to it.
 //!
 //! ```
 //! use pushrod::form::{FormFile, ObjectRecord};
@@ -32,9 +33,11 @@
 
 pub mod format;
 pub mod loader;
+pub mod writer;
 
 pub use format::{
     ChildLayout, FORMAT_VERSION, FormEntry, FormError, FormFile, FormValue, ImageEntry, LayoutSpec,
     MAGIC, NO_OBJECT, ObjectRecord, Property, Symbol, SymbolKind,
 };
 pub use loader::FormHandle;
+pub use writer::FormWriter;

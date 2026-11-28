@@ -43,6 +43,10 @@
 //! constructor set.  A zero width or height keeps the widget's own size.  Anchors are stored in
 //! the file and not applied yet.
 //!
+//! After the constructor runs, each named property is also offered to the widget's
+//! [`set_property`](Widget::set_property), so values the constructor does not read (such as
+//! `checked`) are restored; a property the widget does not accept was consumed by the constructor.
+//!
 //! An image property becomes a text property holding the image's name in the image pool.
 
 use super::format::{
@@ -283,6 +287,7 @@ fn build(
 ) -> Result<Box<dyn Widget>> {
     let record = &file.objects[number as usize];
     let mut props = Properties::new();
+    let mut named = Vec::new();
 
     for property in &record.properties {
         if let Property::Named { name, value } = property {
@@ -296,6 +301,7 @@ fn build(
                 )
             })?;
 
+            named.push((name.clone(), value.clone()));
             props.set(name.clone(), value);
         }
     }
@@ -315,6 +321,12 @@ fn build(
             ),
             other => object_error(form, number, record, &other.to_string()),
         })?;
+
+    // A constructor may read only some properties; give the widget the rest, such as `checked`.
+    // A property the widget does not accept by name was already consumed by its constructor.
+    for (name, value) in &named {
+        let _ = widget.set_property(name, value);
+    }
 
     widget.set_origin(point(record.x, record.y));
 
