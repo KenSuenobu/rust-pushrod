@@ -65,6 +65,7 @@
 //! | Semantic | `SelectionChanged` | The selection in a list, table, or tab set changes. |
 //! | Semantic | `TextChanged` | The text of an editor changes. |
 //! | Semantic | `EditingFinished` | An editor loses focus or the user confirms its text. |
+//! | Semantic | `Dropped` | A drag payload, or files from the OS, was dropped on an accepting target. |
 //! | Semantic | `AccessoryClicked` | A custom accessory button inside an editor is clicked; `which` is its side. |
 //! | Semantic | `Triggered` | A named action is triggered (menu, shortcut, toolbar). |
 //! | Semantic | `ContextMenuRequested` | The user asks for a context menu at `position`. |
@@ -85,6 +86,7 @@
 //! Window-system input arrives as a backend's [`InputEvent`](crate::input::InputEvent).
 
 use crate::action::ActionId;
+use crate::dnd::DragPayload;
 use crate::error::Error;
 use crate::geometry::{Point, Size};
 use crate::input::{Key, Modifiers, MouseButton};
@@ -398,6 +400,12 @@ pub enum EngineEventKind {
     ActionChanged,
     /// See [`EngineEvent::ActionInvoked`].
     ActionInvoked,
+    /// See [`EngineEvent::DragStarted`].
+    DragStarted,
+    /// See [`EngineEvent::DragEnded`].
+    DragEnded,
+    /// See [`EngineEvent::FilesDropped`].
+    FilesDropped,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -680,6 +688,27 @@ pub enum EngineEvent {
         /// The action that was triggered.
         action: ActionId,
     },
+    /// A drag began: the pointer moved past the threshold from a press on a drag source.
+    DragStarted {
+        /// The `Widget` registered as the drag source.
+        source: WidgetId,
+    },
+    /// A drag ended, by a drop, a release elsewhere, or Escape.
+    DragEnded {
+        /// The `Widget` registered as the drag source.
+        source: WidgetId,
+        /// The accepting target under the pointer, if any, when the drag ended by a drop.
+        target: Option<WidgetId>,
+        /// `true` if the payload was dropped on a target; `false` if the drag was cancelled.
+        dropped: bool,
+    },
+    /// Files were dropped on the window from the operating system.
+    FilesDropped {
+        /// The accepting target that received them, or `None` if none accepted.
+        target: Option<WidgetId>,
+        /// How many files were dropped.
+        count: usize,
+    },
 }
 
 impl EngineEvent {
@@ -729,6 +758,9 @@ impl EngineEvent {
             EngineEvent::ActionAdded { .. } => EngineEventKind::ActionAdded,
             EngineEvent::ActionChanged { .. } => EngineEventKind::ActionChanged,
             EngineEvent::ActionInvoked { .. } => EngineEventKind::ActionInvoked,
+            EngineEvent::DragStarted { .. } => EngineEventKind::DragStarted,
+            EngineEvent::DragEnded { .. } => EngineEventKind::DragEnded,
+            EngineEvent::FilesDropped { .. } => EngineEventKind::FilesDropped,
         }
     }
 }
@@ -791,6 +823,8 @@ pub enum EventKind {
     EditingFinished,
     /// See [`Event::AccessoryClicked`].
     AccessoryClicked,
+    /// See [`Event::Dropped`].
+    Dropped,
     /// See [`Event::Triggered`].
     Triggered,
     /// See [`Event::ContextMenuRequested`].
@@ -859,6 +893,7 @@ impl EventKind {
             | K::TextChanged
             | K::EditingFinished
             | K::AccessoryClicked
+            | K::Dropped
             | K::Triggered
             | K::ContextMenuRequested
             | K::CloseRequested
@@ -1055,6 +1090,14 @@ pub enum Event {
         /// Which accessory was clicked.
         which: AccessorySide,
     },
+    /// A drag payload was dropped on widget `id`, which accepts its type.  Files dropped from the
+    /// operating system arrive the same way, with a `Vec<PathBuf>` payload.
+    Dropped {
+        /// The drop target.
+        id: WidgetId,
+        /// What was dropped.
+        payload: DragPayload,
+    },
     /// A named action was triggered by widget `id`.
     Triggered {
         /// The widget that triggered it.
@@ -1179,6 +1222,7 @@ impl Event {
             | Event::TextChanged { id }
             | Event::EditingFinished { id }
             | Event::AccessoryClicked { id, .. }
+            | Event::Dropped { id, .. }
             | Event::ViewportChanged { id, .. } => Some(*id),
             _ => None,
         }
@@ -1211,6 +1255,7 @@ impl Event {
             Event::TextChanged { .. } => EventKind::TextChanged,
             Event::EditingFinished { .. } => EventKind::EditingFinished,
             Event::AccessoryClicked { .. } => EventKind::AccessoryClicked,
+            Event::Dropped { .. } => EventKind::Dropped,
             Event::Triggered { .. } => EventKind::Triggered,
             Event::ContextMenuRequested { .. } => EventKind::ContextMenuRequested,
             Event::PropertyChanged { .. } => EventKind::PropertyChanged,
@@ -1258,6 +1303,7 @@ impl Event {
             | Event::TextChanged { id }
             | Event::EditingFinished { id }
             | Event::AccessoryClicked { id, .. }
+            | Event::Dropped { id, .. }
             | Event::Triggered { id, .. }
             | Event::ContextMenuRequested { id, .. }
             | Event::PropertyChanged { id, .. }

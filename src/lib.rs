@@ -74,6 +74,7 @@ pub mod cache;
 pub mod color;
 pub mod composite;
 pub mod controllers;
+pub mod dnd;
 pub mod engine;
 pub mod error;
 pub mod event;

@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-11-28
+
+### Added
+
+- [#100] Drag and drop within the window, and OS file drops [kenji]
+
 ## [0.3.6] - 2026-11-27
 
 ### Added

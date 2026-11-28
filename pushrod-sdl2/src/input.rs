@@ -22,6 +22,7 @@ use pushrod::input::{InputEvent, Key, Modifiers, MouseButton};
 use sdl2::event::{Event, EventType, WindowEvent};
 use sdl2::keyboard::{Keycode, Mod};
 use sdl2::mouse::MouseButton as SdlButton;
+use std::path::PathBuf;
 
 /// The `SDL2` user event the run loop wakes on when another thread posts; it carries no data.
 pub(crate) struct Wake;
@@ -204,6 +205,48 @@ pub(crate) fn to_input_event(event: Event) -> Option<InputEvent> {
     })
 }
 
+/// Converts a batch of `SDL2` events, gathering the files of each drop into one
+/// [`InputEvent::FilesDropped`].
+///
+/// `SDL2` reports a drop as `DropBegin`, one `DropFile` per file, then `DropComplete`, without a
+/// position, so the pointer position is supplied by the caller.
+///
+/// # Arguments
+///
+/// * `events` - The `SDL2` events, in order.
+/// * `pointer` - Where the pointer is now, used as the drop position.
+/// * `pending` - The files of a drop still in progress; kept between calls because a drop can
+///   span two polls.
+///
+/// # Returns
+///
+/// The input events, with a `FilesDropped` at each `DropComplete`.
+pub(crate) fn to_input_events(
+    events: impl IntoIterator<Item = Event>,
+    pointer: Point,
+    pending: &mut Vec<PathBuf>,
+) -> Vec<InputEvent> {
+    let mut out = Vec::new();
+
+    for event in events {
+        match event {
+            Event::DropBegin { .. } => pending.clear(),
+            Event::DropFile { filename, .. } => pending.push(PathBuf::from(filename)),
+            Event::DropComplete { .. } => {
+                if !pending.is_empty() {
+                    out.push(InputEvent::FilesDropped {
+                        position: pointer,
+                        paths: std::mem::take(pending),
+                    });
+                }
+            }
+            other => out.extend(to_input_event(other)),
+        }
+    }
+
+    out
+}
+
 /// Returns the `SDL2` event types that feed only classes outside `mask`, and so can be disabled
 /// in `SDL2` itself.
 ///
@@ -279,6 +322,62 @@ mod tests {
 
         assert!(!types.contains(&EventType::Quit));
         assert!(!types.contains(&EventType::Window));
+    }
+
+    #[test]
+    fn dropped_files_arrive_as_one_event_at_the_pointer() {
+        let mut pending = Vec::new();
+        let events = vec![
+            Event::DropBegin {
+                timestamp: 0,
+                window_id: 0,
+            },
+            Event::DropFile {
+                timestamp: 0,
+                window_id: 0,
+                filename: "/tmp/a.txt".to_string(),
+            },
+            Event::DropFile {
+                timestamp: 0,
+                window_id: 0,
+                filename: "/tmp/b.txt".to_string(),
+            },
+            Event::DropComplete {
+                timestamp: 0,
+                window_id: 0,
+            },
+        ];
+        let out = to_input_events(events, Point { x: 5, y: 6 }, &mut pending);
+
+        assert_eq!(
+            out,
+            vec![InputEvent::FilesDropped {
+                position: Point { x: 5, y: 6 },
+                paths: vec![PathBuf::from("/tmp/a.txt"), PathBuf::from("/tmp/b.txt")],
+            }]
+        );
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn a_drop_split_across_polls_is_joined_and_empty_drops_are_ignored() {
+        let mut pending = Vec::new();
+        let file = Event::DropFile {
+            timestamp: 0,
+            window_id: 0,
+            filename: "x".to_string(),
+        };
+        let complete = || Event::DropComplete {
+            timestamp: 0,
+            window_id: 0,
+        };
+
+        assert!(to_input_events([file], Point { x: 0, y: 0 }, &mut pending).is_empty());
+        assert_eq!(
+            to_input_events([complete()], Point { x: 0, y: 0 }, &mut pending).len(),
+            1
+        );
+        assert!(to_input_events([complete()], Point { x: 0, y: 0 }, &mut pending).is_empty());
     }
 
     #[test]

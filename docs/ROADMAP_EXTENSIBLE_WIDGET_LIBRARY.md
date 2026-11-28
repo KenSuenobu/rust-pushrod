@@ -2455,16 +2455,18 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Acceptance Criteria.**
 
-- Drag between two lists
-- Drop highlighting and cancel
-- OS file drops delivered
-- Emits the corresponding `EngineEvent` (9.10 (#109))
+- [x] Drag between two lists
+- [x] Drop highlighting and cancel
+- [x] OS file drops delivered
+- [x] Emits the corresponding `EngineEvent` (9.10 (#109))
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.4 (#96), 5.1 (#56).
 
 **Technical Stack.** Rust, SDL2 drop events
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/events/drag-and-drop-within-the-application.md` ("Drag and drop within the application", Events, new). Guides: Drag and drop section. Rustdoc: `dnd` module. Examples: Reorder a list by dragging. Screenshots: Gallery tile.
+
+**Status:** done (#100). `src/dnd.rs`, `src/cache/dnd.rs`, `Engine::set_drag_source`/`set_drop_target`/`on_drop`, `InputEvent::FilesDropped` (SDL `DropFile`); tests in `pushrod-widgets/tests/drag_and_drop.rs`; example `pushrod-widgets/examples/drag_and_drop.rs`. Docs: `pushrod-docs/docs/events/drag-and-drop-within-the-application.md`. There is no list widget yet; the "lists" are any widgets.
 
 ### 9.9 (#101): Pointer cursor per widget
 

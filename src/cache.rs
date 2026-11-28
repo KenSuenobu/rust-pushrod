@@ -49,6 +49,7 @@ use std::collections::{HashMap, HashSet};
 use std::time::Duration;
 
 mod access;
+mod dnd;
 mod focus;
 mod layout;
 mod modal;
@@ -105,6 +106,7 @@ pub struct WidgetCache {
     layout_hints: HashMap<WidgetId, SizeHint>,
     modals: Vec<modal::ModalFrame>,
     modal_style: ModalStyle,
+    dnd: dnd::DndState,
 }
 
 impl std::fmt::Debug for WidgetCache {
@@ -157,6 +159,7 @@ impl WidgetCache {
             layout_hints: HashMap::new(),
             modals: Vec::new(),
             modal_style: ModalStyle::default(),
+            dnd: dnd::DndState::default(),
         }
     }
 
@@ -1153,6 +1156,10 @@ impl WidgetCache {
 
                 let target = self.current_widget_id;
 
+                if mouse_btn == crate::input::MouseButton::Left {
+                    self.dnd_pointer_down(target, point(x, y));
+                }
+
                 self.captured_widget_id = Some(target);
                 self.set_state_flag(target, VisualState::PRESSED, true);
                 self.focus_for_click(target);
@@ -1173,6 +1180,10 @@ impl WidgetCache {
                 button: mouse_btn,
                 clicks,
             } => {
+                if self.dnd_pointer_up(point(x, y), &mut ctx) {
+                    return self.finish(ctx);
+                }
+
                 self.current_widget_id = self.widget_at(x, y);
 
                 let target = self
@@ -1196,6 +1207,10 @@ impl WidgetCache {
             InputEvent::MouseMove {
                 position: Point { x, y },
             } => {
+                if self.dnd_pointer_move(point(x, y)) {
+                    return self.finish(ctx);
+                }
+
                 let previous_widget_id = self.current_widget_id;
 
                 self.current_widget_id = self.widget_at(x, y);
@@ -1246,6 +1261,15 @@ impl WidgetCache {
                 let target = self.current_widget_id;
 
                 self.propagate_with(target, &Event::Scrolled { id: target, delta }, &mut ctx);
+            }
+
+            InputEvent::KeyDown {
+                key: crate::input::Key::Escape,
+                ..
+            } if self.dnd_cancel() => {}
+
+            InputEvent::FilesDropped { position, paths } => {
+                self.dnd_files(position, paths, &mut ctx);
             }
 
             InputEvent::KeyDown {

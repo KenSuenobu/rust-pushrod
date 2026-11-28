@@ -70,6 +70,7 @@ Positions are `Point`s in window coordinates.
 | `TextChanged { id }` | An editor's text changes. |
 | `EditingFinished { id }` | Editing is confirmed or the editor loses focus. |
 | `AccessoryClicked { id, which }` | A search or custom accessory inside an editor is clicked; `which` is `AccessorySide::Leading` or `Trailing`. |
+| `Dropped { id, payload }` | A payload was dropped on target `id`, by a [drag](./drag-and-drop-within-the-application.md) or as files from the OS. |
 | `Triggered { id, action }` | A named action is triggered. |
 | `ContextMenuRequested { id, position }` | The user asks for a context menu. |
 | `PropertyChanged { id, name }` | A named property changes. |

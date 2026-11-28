@@ -62,6 +62,9 @@ flowchart TD
 | `ActionAdded { action }` | An [action](./actions-and-keyboard-shortcuts.md) was registered with `add_action`. |
 | `ActionChanged { action }` | An action's enabled state, checked state, or label changed, and its bound controls were updated. |
 | `ActionInvoked { action }` | An action was triggered by a bound control, its shortcut, or `trigger_action`. |
+| `DragStarted { source }` | A [drag](./drag-and-drop-within-the-application.md) began from `source`. |
+| `DragEnded { source, target, dropped }` | A drag ended; `dropped` is `true` when a target accepted the payload. |
+| `FilesDropped { target, count }` | Files were dropped on the window from the OS; `target` is the accepting widget, if any. |
 | `Error { error }` | Something failed while the loop was running (a font would not load, a texture could not be created). The loop keeps going. See [Errors](../guides/creating-an-application.md#errors). |
 
 More variants are added by the features that need them (menus, windows, drawing modes, ...). `EngineEvent` is `#[non_exhaustive]`, so always include a `_` arm when you `match` on it.
