@@ -136,3 +136,24 @@ cargo run -p pushrod-sdl2 --example resizable
 | `EngineEvent::ScaleFactorChanged`, `EngineEvent::MinimumWindowSizeChanged` | See [Engine events](../events/engine-events.md). |
 | `geometry::to_physical`, `to_physical_size`, `to_physical_point`, `to_logical_length`, `stroke_width` | The conversions, for a backend of your own. |
 | `Sdl2Painter::with_scale(scale)` | An SDL2 painter that draws at a scale. |
+
+## Live resize while dragging
+
+On macOS and Windows the operating system runs its own loop while the user drags a window edge, so the event pump does not return until the mouse is released. Without help, the window would show a stretched copy of the old frame during the drag.
+
+`Sdl2Backend` registers an `SDL2` event watch, which `SDL2` still calls during the drag. Through `Backend::poll_events_live`, the watch hands each size change to the engine, which dispatches it, lays out, and redraws immediately.
+
+```mermaid
+sequenceDiagram
+    participant OS as Platform resize loop
+    participant W as SDL2 event watch
+    participant E as Engine
+    OS->>W: size changed
+    W->>E: live callback (Resized)
+    E->>E: layout and draw_loop
+    E->>OS: present
+```
+
+Other backends keep the default `poll_events_live`, which simply calls `poll_events`.
+
+The canvas presents with vsync. Without it, frames drawn mid-drag reach the screen a few resize events late, and the operating system stretches them to fit, so the window appears to zoom in and out slightly.

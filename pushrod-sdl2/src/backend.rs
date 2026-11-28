@@ -35,15 +35,72 @@ use pushrod::widget::WidgetId;
 use sdl2::EventPump;
 use sdl2::Sdl;
 use sdl2::clipboard::ClipboardUtil;
+use sdl2::event::{Event, EventWatch, EventWatchCallback, WindowEvent};
 use sdl2::image::SaveSurface;
 use sdl2::keyboard::TextInputUtil;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::{BlendMode, Canvas};
 use sdl2::surface::Surface;
 use sdl2::video::Window;
+use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use std::thread::{self, ThreadId};
 use std::time::Duration;
+
+/// The closure [`Backend::poll_events_live`] receives, with its borrow lifetime erased.
+type LiveFn = dyn FnMut(&mut dyn Backend, Vec<InputEvent>);
+
+/// Where the live-resize watch finds the backend and the caller's closure while a poll is in
+/// progress.  Both pointers are set only for the duration of one `poll_events_live` call.
+#[derive(Default)]
+struct LiveSlot {
+    /// The backend that is inside `poll_events_live`.
+    backend: Cell<Option<*mut Sdl2Backend>>,
+    /// The caller's closure.
+    live: Cell<Option<*mut LiveFn>>,
+    /// `true` while the closure runs, so it is not re-entered.
+    busy: Cell<bool>,
+}
+
+/// An `SDL2` event watch that redraws the window while it is being resized.  `SDL2` calls watches
+/// from inside platform resize loops, where the normal event pump is blocked.
+struct LiveResize {
+    /// Shared with the backend.
+    slot: Rc<LiveSlot>,
+    /// Watches may be called from any thread that pushes events; only this one may draw.
+    thread: ThreadId,
+}
+
+impl EventWatchCallback for LiveResize {
+    fn callback(&mut self, event: Event) {
+        let Event::Window {
+            win_event: WindowEvent::SizeChanged(..),
+            ..
+        } = event
+        else {
+            return;
+        };
+
+        if thread::current().id() != self.thread || self.slot.busy.get() {
+            return;
+        }
+
+        let (Some(backend), Some(live)) = (self.slot.backend.get(), self.slot.live.get()) else {
+            return;
+        };
+
+        let events = to_input_events(vec![event], pushrod::geometry::point(0, 0), &mut Vec::new());
+
+        self.slot.busy.set(true);
+        // SAFETY: both pointers were taken from live borrows by `poll_events_live`, which is
+        // blocked in `SDL2` (the caller of this watch) and clears them before it returns; this
+        // runs on the same thread, and `busy` prevents re-entry.
+        unsafe { (*live)(&mut *backend, events) };
+        self.slot.busy.set(false);
+    }
+}
 
 /// How the window is created.
 ///
@@ -101,12 +158,17 @@ impl WindowSettings {
 /// when presented.  Modal backdrops darken and blur that frame on the GPU.  Text comes from the glyph atlas in the
 /// [`FontCache`].
 pub struct Sdl2Backend {
+    // Declared first so the watch is removed before `SDL2` shuts down.
+    /// Keeps the live-resize watch registered.
+    _live_watch: EventWatch<'static, LiveResize>,
     _sdl: Sdl,
     // Declared before `canvas` so the cached textures are freed while the renderer lives.
     images: ImageCache,
     compositor: Compositor,
     canvas: Canvas<Window>,
     pump: EventPump,
+    /// Shared with the live-resize watch.
+    live_slot: Rc<LiveSlot>,
     /// Files of a drop that has begun but not completed.
     drop_pending: Vec<std::path::PathBuf>,
     text_input: TextInputUtil,
@@ -217,6 +279,9 @@ impl Sdl2Backend {
             .into_canvas()
             .target_texture()
             .accelerated()
+            // Present in step with the display: without it, frames drawn during a live resize
+            // reach the screen a few events late and the window appears to zoom in and out.
+            .present_vsync()
             .build()
             .map_err(|e| e.to_string())?;
 
@@ -239,8 +304,15 @@ impl Sdl2Backend {
         };
 
         let scale = Self::read_scale(&canvas);
+        let live_slot = Rc::new(LiveSlot::default());
+        let live_watch = events.add_event_watch(LiveResize {
+            slot: Rc::clone(&live_slot),
+            thread: thread::current().id(),
+        });
 
         Ok(Self {
+            live_slot,
+            _live_watch: live_watch,
             scale,
             pump: sdl.event_pump()?,
             drop_pending: Vec::new(),
@@ -425,6 +497,31 @@ impl Backend for Sdl2Backend {
             self.scale = scale;
             events.push(InputEvent::ScaleChanged(scale));
         }
+
+        events
+    }
+
+    fn poll_events_live(
+        &mut self,
+        wait: Option<Duration>,
+        live: &mut dyn FnMut(&mut dyn Backend, Vec<InputEvent>),
+    ) -> Vec<InputEvent> {
+        let slot = Rc::clone(&self.live_slot);
+        let backend: *mut Sdl2Backend = self;
+
+        // SAFETY: the lifetime is erased only while this call runs; both pointers are cleared
+        // before it returns, so the watch never sees them afterward.
+        let live: *mut LiveFn = unsafe {
+            std::mem::transmute(live as *mut (dyn FnMut(&mut dyn Backend, Vec<InputEvent>) + '_))
+        };
+
+        slot.backend.set(Some(backend));
+        slot.live.set(Some(live));
+
+        let events = self.poll_events(wait);
+
+        slot.backend.set(None);
+        slot.live.set(None);
 
         events
     }

@@ -2909,7 +2909,18 @@ impl<S> Engine<S> {
             // With no timers wanted and nothing to repaint, wait for input instead of polling.
             let idle = self.is_idle();
             let wait = idle.then(|| Duration::from_millis(self.idle_wait_ms(backend.now()) as u64));
-            let batch = backend.poll_events(wait);
+            // While the user drags the window edge the platform may not return from this call;
+            // the backend then hands resize events to the closure, which lays out and redraws so
+            // the window resizes in real time instead of showing a stretched frame.
+            let batch = backend.poll_events_live(wait, &mut |live_backend, events| {
+                for event in events {
+                    self.dispatch(event, &mut state);
+                }
+
+                if self.widget_cache.draw_loop(live_backend) {
+                    live_backend.present();
+                }
+            });
 
             let had_events = !batch.is_empty();
 
