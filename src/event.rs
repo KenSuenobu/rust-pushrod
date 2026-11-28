@@ -406,6 +406,12 @@ pub enum EngineEventKind {
     DragEnded,
     /// See [`EngineEvent::FilesDropped`].
     FilesDropped,
+    /// See [`EngineEvent::UndoStackChanged`].
+    UndoStackChanged,
+    /// See [`EngineEvent::CommandUndone`].
+    CommandUndone,
+    /// See [`EngineEvent::CommandRedone`].
+    CommandRedone,
 }
 
 /// An action Pushrod performs internally, carried by [`Event::Engine`].
@@ -709,6 +715,23 @@ pub enum EngineEvent {
         /// How many files were dropped.
         count: usize,
     },
+    /// The undo stack changed: a command was pushed, merged, undone, redone, or forgotten.
+    UndoStackChanged {
+        /// Whether there is a command to undo.
+        can_undo: bool,
+        /// Whether there is a command to redo.
+        can_redo: bool,
+    },
+    /// A command was undone.
+    CommandUndone {
+        /// The command's description.
+        description: String,
+    },
+    /// A command was redone.
+    CommandRedone {
+        /// The command's description.
+        description: String,
+    },
 }
 
 impl EngineEvent {
@@ -761,6 +784,9 @@ impl EngineEvent {
             EngineEvent::DragStarted { .. } => EngineEventKind::DragStarted,
             EngineEvent::DragEnded { .. } => EngineEventKind::DragEnded,
             EngineEvent::FilesDropped { .. } => EngineEventKind::FilesDropped,
+            EngineEvent::UndoStackChanged { .. } => EngineEventKind::UndoStackChanged,
+            EngineEvent::CommandUndone { .. } => EngineEventKind::CommandUndone,
+            EngineEvent::CommandRedone { .. } => EngineEventKind::CommandRedone,
         }
     }
 }

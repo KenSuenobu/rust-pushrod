@@ -614,15 +614,17 @@ Like every widget, it can also receive application-defined custom events in `han
 
 **Acceptance Criteria.**
 
-- Undo/redo of text edits and application commands
-- Consecutive typing merges into one undo step
-- Undo/Redo actions enable and disable automatically
+- [x] Undo/redo of text edits and application commands
+- [x] Consecutive typing merges into one undo step
+- [x] Undo/Redo actions enable and disable automatically
 
 **Parallelism / Dependencies.** Parallelizable. Requires 9.5 (#97).
 
 **Technical Stack.** Rust
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/concepts/undo-and-redo-command-stack.md` ("Undo and redo command stack", Concepts, new). Guides: Undo section. Rustdoc: `undo` module. Examples: Text field with undo. Screenshots: n/a.
+
+**Status:** done (#81). `src/undo.rs`, `Engine::push_command`/`undo`/`redo`/`add_undo_actions`; tests in `pushrod-widgets/tests/undo.rs`; example `pushrod-widgets/examples/undo.rs`. Docs: `pushrod-docs/docs/concepts/undo-and-redo-command-stack.md`.
 
 ### 1.16 (#82): Multiple windows: separate OS windows, each with its own engine
 

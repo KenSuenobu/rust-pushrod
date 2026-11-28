@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-11-28
+
+### Added
+
+- [#81] Undo and redo command stack shared by text fields and commands [kenji]
+
 ## [0.3.7] - 2026-11-28
 
 ### Added

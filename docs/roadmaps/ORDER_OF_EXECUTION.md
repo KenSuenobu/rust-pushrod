@@ -123,7 +123,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | **84** | checkpoint | **Chassis M1: core without UI complete** |
 | ✅ 85 | [#97](https://github.com/KenSuenobu/rust-pushrod/issues/97) | pushrod: [9.5] Actions and keyboard shortcuts: shared commands for menus, toolbars, and buttons |
 | ✅ 86 | [#100](https://github.com/KenSuenobu/rust-pushrod/issues/100) | pushrod: [9.8] Drag and drop within the application |
-| 87 | [#81](https://github.com/KenSuenobu/rust-pushrod/issues/81) | pushrod: [1.15] Undo and redo command stack |
+| ✅ 87 | [#81](https://github.com/KenSuenobu/rust-pushrod/issues/81) | pushrod: [1.15] Undo and redo command stack |
 | 88 | [#59](https://github.com/KenSuenobu/rust-pushrod/issues/59) | pushrod: [5.4] Autoresizing (keep margins or stretch on resize) |
 | 89 | [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) | pushrod: [4.5] List view |
 | 90 | [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) | pushrod: [4.4] Tab view |
@@ -1625,9 +1625,9 @@ The main window, three panes, Designer/Code tabs, commands, and the project draw
 
 **Show on video:**
 
-- [ ] Undo/redo of text edits and application commands
-- [ ] Consecutive typing merges into one undo step
-- [ ] Undo/Redo actions enable and disable automatically
+- [x] Undo/redo of text edits and application commands
+- [x] Consecutive typing merges into one undo step
+- [x] Undo/Redo actions enable and disable automatically
 
 ### Step 88: Autoresizing (keep margins or stretch on resize)
 

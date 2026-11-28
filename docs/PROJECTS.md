@@ -126,7 +126,6 @@ Builds on the Pushrod Core MVP project. Each "Pushrod for Mx" phase holds the po
 
 | Order | Issue | Title |
 |---|---|---|
-| 16 | [#81](https://github.com/KenSuenobu/rust-pushrod/issues/81) | pushrod: [1.15] Undo and redo command stack |
 | 17 | [#59](https://github.com/KenSuenobu/rust-pushrod/issues/59) | pushrod: [5.4] Autoresizing (keep margins or stretch on resize) |
 | 18 | [#52](https://github.com/KenSuenobu/rust-pushrod/issues/52) | pushrod: [4.5] List view |
 | 19 | [#51](https://github.com/KenSuenobu/rust-pushrod/issues/51) | pushrod: [4.4] Tab view |
