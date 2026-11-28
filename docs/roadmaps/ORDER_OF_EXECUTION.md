@@ -103,7 +103,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 64 | [#63](https://github.com/KenSuenobu/rust-pushrod/issues/63) | pushrod: [6.4] Form loader: build a form from a file with stable IDs |
 | ✅ 65 | [#64](https://github.com/KenSuenobu/rust-pushrod/issues/64) | pushrod: [6.5] Form writer: save a widget subtree to a file |
 | ✅ 66 | [#65](https://github.com/KenSuenobu/rust-pushrod/issues/65) | pushrod: [6.6] Generate ID constants from a form file |
-| 67 | [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) | pushrod: [6.11] Resource kinds: strings, images, icons, files, menus, and alerts |
+| ✅ 67 | [#154](https://github.com/KenSuenobu/rust-pushrod/issues/154) | pushrod: [6.11] Resource kinds: strings, images, icons, files, menus, and alerts |
 | 68 | [#155](https://github.com/KenSuenobu/rust-pushrod/issues/155) | pushrod: [6.12] Typed resource IDs: generated constants per resource kind |
 | 69 | [#153](https://github.com/KenSuenobu/rust-pushrod/issues/153) | pushrod: [6.10] Resource manager: load resource sets and get resources by ID |
 | **70** | checkpoint | **Pushrod v0.2 released: the Pushrod MVP is complete** |
@@ -1345,10 +1345,10 @@ Forms, form files, and resources by ID (the runtime foundation for Chassis), plu
 
 **Show on video:**
 
-- [ ] Round trip (write, read) for every kind
-- [ ] IDs stay stable when resources are added, removed, or reordered
-- [ ] Older readers skip unknown kinds
-- [ ] `docs/FORM_FORMAT.md` documents every table
+- [x] Round trip (write, read) for every kind
+- [x] IDs stay stable when resources are added, removed, or reordered
+- [x] Older readers skip unknown kinds
+- [x] `docs/FORM_FORMAT.md` documents every table
 
 ### Step 68: Typed resource IDs: generated constants per resource kind
 

@@ -40,6 +40,34 @@ fn form_file_round_trips_a_widget_tree() {
     assert_eq!(loaded.id_of("OK_BUTTON"), Some(ok));
 }
 
+/// Spec "The form file format": a resource keeps its ID when others are removed, the ID is not
+/// reused, and the file reads back the same.
+#[test]
+fn resource_ids_are_stable() {
+    let mut file = FormFile::new();
+    let first = file
+        .resources
+        .strings
+        .add("FIRST", "One".to_string())
+        .unwrap();
+    let second = file
+        .resources
+        .strings
+        .add("SECOND", "Two".to_string())
+        .unwrap();
+    file.resources.strings.remove(first);
+    let third = file
+        .resources
+        .strings
+        .add("THIRD", "Three".to_string())
+        .unwrap();
+    assert!(third > second);
+
+    let loaded = FormFile::from_bytes(&file.to_bytes().unwrap()).unwrap();
+    assert_eq!(loaded.resources.strings.get(second).unwrap().value, "Two");
+    assert!(loaded.resources.strings.get(first).is_none());
+}
+
 /// Spec "The form file format": a reader rejects a newer version and never panics on damage.
 #[test]
 fn form_file_is_versioned_and_checked() {

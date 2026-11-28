@@ -29,5 +29,9 @@ implemented by `pushrod::form` (`FormFile::to_bytes` and `FormFile::from_bytes`)
 - `pushrod::form::codegen` (`generate_ids`, `write_ids`, and the `pushrod-form-ids` command) turns ID
   symbols into `FormIndex` constants, one module per form.
 
+- A file may carry **resources**: string, image, icon, file, menu, and alert tables, each entry with a
+  stable ID and a name. An ID **must** be assigned once and never reused or renumbered, and a reader
+  **must** skip a resource table or menu item kind it does not know.
+
 The guide is [Form file format](../../pushrod-docs/docs/forms/form-file-format.md).
 Conformance: `tests/conformance/forms.rs`.

@@ -1895,6 +1895,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 
 ### 6.11 (#154): Resource kinds: strings, images, icons, files, menus, and alerts
 
+**Status:** done (#154). `pushrod::form::resources`: `FormFile::resources` holds a `ResourceTable` per kind (strings, images, icons, files, menus, alerts); each entry has a stable ID (from 1, never reused or renumbered, the next ID is saved) and a unique name. Stored as an optional tag-length-value resource section (64-byte header; a file without resources keeps the 56-byte header), so readers skip unknown tables and menu item kinds. Icons refer to image IDs and alerts to string IDs. Format-only, so no engine event. Docs: `docs/FORM_FORMAT.md`, `pushrod-docs/docs/forms/form-file-format.md`.
+
 **Problem Statement.** Forms reference text, pictures, and icons, and applications ship other data (license text, templates, sample files). Keeping them in the same resource file, under IDs, keeps the application self-contained and lets Chassis edit them in one place.
 
 **Solution / Scope.** Add tables to the format (6.3 (#62)), each entry with a stable numeric ID and a name:
