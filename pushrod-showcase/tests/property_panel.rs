@@ -20,7 +20,7 @@ use pushrod::geometry::{Point, point, size};
 use pushrod::input::{InputEvent, MouseButton};
 use pushrod::widget::WidgetId;
 use pushrod_showcase::property_panel::EditorKind;
-use pushrod_showcase::shell::{self, ShowcaseState};
+use pushrod_showcase::shell::{self, ShowcaseState, WINDOW_H, WINDOW_W};
 use pushrod_widgets::button::Button;
 use pushrod_widgets::check_box::CheckBox;
 use pushrod_widgets::text_field::TextField;
@@ -30,7 +30,7 @@ type Harness = (Engine<ShowcaseState>, ShowcaseState);
 
 /// Builds the shell headlessly, opens the named page, and settles the layout.
 fn start(page: &str) -> Harness {
-    let mut engine: Engine<ShowcaseState> = Engine::new(size(900, 640), 30);
+    let mut engine: Engine<ShowcaseState> = Engine::new(size(WINDOW_W, WINDOW_H), 30);
     let mut state = shell::build(&mut engine, None);
 
     engine.run_idle(&mut state);
@@ -50,7 +50,7 @@ fn start(page: &str) -> Harness {
 
 /// Draws frames until the layout settles.
 fn settle(engine: &mut Engine<ShowcaseState>) {
-    let mut backend = HeadlessBackend::new(size(900, 640));
+    let mut backend = HeadlessBackend::new(size(WINDOW_W, WINDOW_H));
 
     for _ in 0..3 {
         engine.widgets().draw_loop(&mut backend);

@@ -14,6 +14,7 @@
 
 //! The showcase window: a search field and page list on the left, the selected page on the right.
 
+use crate::event_log::{self, EventLog};
 use crate::page::Group;
 use crate::pages;
 use crate::property_panel::{self, PickRequest, PropertyPanel};
@@ -80,6 +81,8 @@ pub struct ShowcaseState {
     pub started: bool,
     /// The property panel and its selection.
     pub panel: PropertyPanel,
+    /// The event log and its entries.
+    pub log: EventLog,
 }
 
 /// Layout parameters that fill the slot in both directions.
@@ -152,7 +155,11 @@ pub(crate) fn add_panel(
 /// # Returns
 ///
 /// The ID of the container's content.
-fn add_scroller(cache: &mut WidgetCache, parent: WidgetId, mode: ContentSize) -> WidgetId {
+pub(crate) fn add_scroller(
+    cache: &mut WidgetCache,
+    parent: WidgetId,
+    mode: ContentSize,
+) -> WidgetId {
     let container = cache.add_child(
         parent,
         Box::new(Container::new(point(0, 0), size(100, 100), size(0, 0)).content_mode(mode)),
@@ -233,6 +240,9 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
 
     let page_area = add_scroller(cache, right, ContentSize::FitChildren);
 
+    // Bottom of the right column: the event log, under the page.
+    let log = event_log::build(cache, right, 400);
+
     // Far right: the property panel, as in the roadmap mockup.
     let props = add_panel(
         cache,
@@ -266,6 +276,7 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
         settings_path,
         started: false,
         panel,
+        log,
     };
 
     rebuild_list(engine.widgets(), &mut state, "");
@@ -284,6 +295,12 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
                 select_page(state, ui, index);
             }
         }
+
+        event_log::follow(state, ui);
+    });
+
+    engine.on_engine_event_filtered(&event_log::ENGINE_KINDS, |state, ui, event| {
+        event_log::handle_engine(state, ui, event);
     });
 
     engine.on_custom::<PickRequest, _>(|state, ui, _source, request| {
@@ -292,6 +309,7 @@ pub fn build(engine: &mut Engine<ShowcaseState>, settings_path: Option<PathBuf>)
 
     engine.on_event(|state, ui, event| {
         property_panel::handle(state, ui, event);
+        event_log::handle(state, ui, event);
 
         match event {
             // Page buttons are toggles (the selected one stays pressed), so a click arrives as `Toggled`.
