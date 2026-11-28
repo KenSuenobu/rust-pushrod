@@ -14,7 +14,8 @@
 // limitations under the License.
 
 //! Builds a small form from type names and properties with the widget registry, then shows an
-//! unknown type name reported as an error.  Run it with
+//! unknown type name reported as an error, then lists the events each standard type declares.
+//! Run it with
 //! `cargo run -p pushrod-widgets --example registry`.
 
 use pushrod::cache::WidgetCache;
@@ -63,5 +64,28 @@ fn main() {
             }
             Err(error) => println!("{name}: {error}"),
         }
+    }
+
+    // The events a designer would list for each type: its own (default marked), then the shared ones.
+    for name in registry.names() {
+        let events = registry.events(name).unwrap_or_default();
+        let list: Vec<String> = events
+            .iter()
+            .map(|e| {
+                format!(
+                    "{}{} ({})",
+                    e.name,
+                    if e.is_default { "*" } else { "" },
+                    e.callback.unwrap_or("on_event")
+                )
+            })
+            .collect();
+        let total = registry.all_events(name).map_or(0, |all| all.len());
+
+        println!(
+            "{name}: {} (+{} shared)",
+            list.join(", "),
+            total - events.len()
+        );
     }
 }

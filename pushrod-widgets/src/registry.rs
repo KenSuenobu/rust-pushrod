@@ -35,6 +35,11 @@
 //! | `pushrod.frame` | none |
 //! | `pushrod.panel` | none |
 //!
+//! Each type also declares its events (see [`WidgetRegistry::events`]): `Clicked` for `button` and
+//! `glyph_button`; `Toggled` for `check_box` and `radio_button`; `ValueChanged` and
+//! `EditingFinished` for `slider`; `TextChanged` and `EditingFinished` for `text_field`.  The
+//! others (`image` is display only when built from properties) only receive the shared pointer, key, and focus events.
+//!
 //! [`register_form_types`] teaches a [`FormWriter`] the same names, so saved forms load again.
 //!
 //! Widgets that need code, not data (`CustomPaint`), or that are built from other widgets
@@ -56,9 +61,82 @@
 
 use crate::prelude::*;
 use pushrod::error::{Error, Result};
+use pushrod::event::EventKind;
 use pushrod::form::FormWriter;
-use pushrod::registry::{Properties, WidgetRegistry};
+use pushrod::registry::{EventInfo, PayloadField, Properties, WidgetRegistry};
 use pushrod::widget::Widget;
+
+/// The `Clicked` event of a button-like widget.
+const CLICKED: &[EventInfo] = &[EventInfo {
+    name: "Clicked",
+    description: "The widget was clicked.",
+    kind: EventKind::Clicked,
+    payload: &[
+        PayloadField {
+            name: "button",
+            type_name: "MouseButton",
+        },
+        PayloadField {
+            name: "count",
+            type_name: "u8",
+        },
+    ],
+    is_default: true,
+    callback: Some("on_click"),
+}];
+
+/// The `Toggled` event of a check box or radio button.
+const TOGGLED: &[EventInfo] = &[EventInfo {
+    name: "Toggled",
+    description: "The checked state changed.",
+    kind: EventKind::Toggled,
+    payload: &[PayloadField {
+        name: "checked",
+        type_name: "bool",
+    }],
+    is_default: true,
+    callback: Some("on_toggle"),
+}];
+
+/// The events of a slider.
+const SLIDER_EVENTS: &[EventInfo] = &[
+    EventInfo {
+        name: "ValueChanged",
+        description: "The value changed.",
+        kind: EventKind::ValueChanged,
+        payload: &[],
+        is_default: true,
+        callback: Some("on_value_change"),
+    },
+    EventInfo {
+        name: "EditingFinished",
+        description: "The user let go of the slider or left it.",
+        kind: EventKind::EditingFinished,
+        payload: &[],
+        is_default: false,
+        callback: Some("on_editing_finished"),
+    },
+];
+
+/// The events of a text field.
+const TEXT_FIELD_EVENTS: &[EventInfo] = &[
+    EventInfo {
+        name: "TextChanged",
+        description: "The text changed.",
+        kind: EventKind::TextChanged,
+        payload: &[],
+        is_default: true,
+        callback: Some("on_text_change"),
+    },
+    EventInfo {
+        name: "EditingFinished",
+        description: "Return was pressed or the field lost focus.",
+        kind: EventKind::EditingFinished,
+        payload: &[],
+        is_default: false,
+        callback: Some("on_editing_finished"),
+    },
+];
 
 /// Returns a required text property.
 ///
@@ -102,14 +180,16 @@ fn done<W: Widget>(widget: W) -> Result<Box<dyn Widget>> {
 ///
 /// * `registry` - The registry to add the widgets to.
 pub fn register(registry: &mut WidgetRegistry) {
-    registry.register("pushrod.button", |p| done(Button::new(text(p, "text")?)));
-    registry.register("pushrod.check_box", |p| {
+    registry.register_with_events("pushrod.button", CLICKED, |p| {
+        done(Button::new(text(p, "text")?))
+    });
+    registry.register_with_events("pushrod.check_box", TOGGLED, |p| {
         let mut w = CheckBox::new(text(p, "text")?);
 
         w.set_checked(p.get_bool("checked").unwrap_or(false));
         done(w)
     });
-    registry.register("pushrod.radio_button", |p| {
+    registry.register_with_events("pushrod.radio_button", TOGGLED, |p| {
         let mut w = RadioButton::new(text(p, "text")?);
 
         w.set_checked(p.get_bool("checked").unwrap_or(false));
@@ -122,7 +202,7 @@ pub fn register(registry: &mut WidgetRegistry) {
     registry.register("pushrod.group_box", |p| {
         done(GroupBox::new(text(p, "title")?))
     });
-    registry.register("pushrod.glyph_button", |p| {
+    registry.register_with_events("pushrod.glyph_button", CLICKED, |p| {
         let mut chars = text(p, "glyph")?.chars();
 
         match (chars.next(), chars.next()) {
@@ -142,7 +222,7 @@ pub fn register(registry: &mut WidgetRegistry) {
 
         done(w)
     });
-    registry.register("pushrod.slider", |p| {
+    registry.register_with_events("pushrod.slider", SLIDER_EVENTS, |p| {
         let min = p.get_float("min").unwrap_or(0.0);
         let max = p.get_float("max").unwrap_or(100.0);
         let mut w = Slider::new(min, max);
@@ -168,7 +248,9 @@ pub fn register(registry: &mut WidgetRegistry) {
             done(Separator::horizontal(1))
         }
     });
-    registry.register("pushrod.text_field", |_| done(TextField::new()));
+    registry.register_with_events("pushrod.text_field", TEXT_FIELD_EVENTS, |_| {
+        done(TextField::new())
+    });
     registry.register("pushrod.frame", |_| done(Frame::new()));
     registry.register("pushrod.panel", |_| done(Panel::new()));
 }

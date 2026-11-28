@@ -116,7 +116,6 @@ Builds on the Pushrod Core MVP project. Each "Pushrod for Mx" phase holds the po
 
 | Order | Issue | Title |
 |---|---|---|
-| 9 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
 
 ### M1: core without UI (4)
 

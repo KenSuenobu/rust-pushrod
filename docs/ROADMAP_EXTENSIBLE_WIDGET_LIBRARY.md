@@ -1963,15 +1963,17 @@ Names come from the resource file's symbol table (converted to `SCREAMING_SNAKE_
 
 **Acceptance Criteria.**
 
-- Every standard widget declares its events and default event
-- Declared events match emitted events (test)
-- Third-party widget libraries can declare theirs
+- [x] Every standard widget declares its events and default event
+- [x] Declared events match emitted events (test)
+- [x] Third-party widget libraries can declare theirs
 
 **Parallelism / Dependencies.** Parallelizable. Requires 6.1 (#60), 9.1 (#93).
 
 **Technical Stack.** Rust
 
 **Documentation.** Docusaurus page: `pushrod-docs/docs/forms/widget-registry-and-factory.md` ("Widget registry and factory", Forms, update). Guides: update the guide or concept page covering: Widget registry (events section). Rustdoc: `EventInfo`. Examples: n/a. Screenshots: n/a.
+
+**Status:** done (#156). `EventInfo` and `PayloadField` are in `src/registry.rs`; `WidgetRegistry::register_with_events` declares a widget's own events, `events`, `all_events` (own, then the core's `SHARED_EVENTS`), and `default_event` read them. `pushrod_widgets::register` declares `Clicked` (button, glyph button), `Toggled` (check box, radio button), `ValueChanged` and `EditingFinished` (slider), and `TextChanged` and `EditingFinished` (text field). Widgets with no events of their own (text, labels, group box, progress bar, separator, frame, panel) and the display-only image declare none. The test is `declared_events_match_the_events_a_widget_emits` in `pushrod-widgets/tests/registry.rs`.
 
 ## Epic 7: Quality, documentation, and release (#17)
 

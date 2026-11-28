@@ -80,18 +80,70 @@ These **common properties** are applied by `create` to every widget, so a constr
 
 `CustomPaint` needs code rather than data, and `Container`, `ScrollBar`, and `Alert` are built from other widgets, so they are not registered. A missing required property (such as `text` for a button) is an `Error::Property`.
 
+## Event metadata
+
+A designer lists the events a widget supports and writes handler stubs for them, so a registry entry can also declare its **events**. Each is an `EventInfo`:
+
+| Field | Meaning |
+| --- | --- |
+| `name` | The event's name, the same as its `Event` variant (`"Clicked"`) |
+| `description` | One line saying when it happens |
+| `kind` | The `EventKind` the engine reports for it |
+| `payload` | The `PayloadField`s (`name` and `type_name`) besides the widget `id`, which every widget-addressed event carries |
+| `is_default` | `true` for the widget's default event; at most one event is the default |
+| `callback` | The `Engine` registration that handles it (`Some("on_click")`), or `None` if only `Engine::on_event` sees it |
+
+```mermaid
+flowchart LR
+    S["SHARED_EVENTS (core): pointer, key, focus"] --> A["all_events(name)"]
+    O["Widget's own events (register_with_events)"] --> A
+    O --> D["default_event(name)"]
+    A --> T["Designer: events list and handler stubs"]
+    D --> T
+```
+
+Events every widget can receive come from the core as `SHARED_EVENTS`, so a widget declares only its own. Read them with:
+
+| Method | Returns |
+| --- | --- |
+| `events(name)` | The widget's own events (`None` if the name is not registered) |
+| `all_events(name)` | Its own events, then the shared ones: the list a designer shows |
+| `default_event(name)` | The event marked as default, if any |
+
+`pushrod_widgets::register` declares these:
+
+| Type name | Own events (default first) |
+| --- | --- |
+| `pushrod.button`, `pushrod.glyph_button` | `Clicked` (`on_click`) |
+| `pushrod.check_box`, `pushrod.radio_button` | `Toggled` (`on_toggle`) |
+| `pushrod.slider` | `ValueChanged` (`on_value_change`), `EditingFinished` (`on_editing_finished`) |
+| `pushrod.text_field` | `TextChanged` (`on_text_change`), `EditingFinished` (`on_editing_finished`) |
+| Every other standard type | none, so no default event |
+
+`pushrod.image` is display only when built from properties, so it declares no `Clicked`. A test builds every standard widget, feeds it hover, click, key, and text input, and checks that the events it emits (besides the shared ones) are exactly the ones it declares.
+
 ## Registering your own widgets
 
-Give each library its own prefix and a `register` function:
+Give each library its own prefix and a `register` function. Use `register_with_events` to declare the widget's events:
 
 ```rust checked title="src/acme.rs"
 use pushrod::error::Error;
+use pushrod::event::EventKind;
 use pushrod::geometry::size;
-use pushrod::registry::WidgetRegistry;
+use pushrod::registry::{EventInfo, PayloadField, WidgetRegistry};
 use pushrod::root_widget::RootWidget;
 
+const SWITCH_EVENTS: &[EventInfo] = &[EventInfo {
+    name: "Toggled",
+    description: "The switch was flipped.",
+    kind: EventKind::Toggled,
+    payload: &[PayloadField { name: "checked", type_name: "bool" }],
+    is_default: true,
+    callback: Some("on_toggle"),
+}];
+
 pub fn register(registry: &mut WidgetRegistry) {
-    registry.register("acme.blank", |props| {
+    registry.register_with_events("acme.blank", SWITCH_EVENTS, |props| {
         let side = props
             .get_int("side")
             .ok_or_else(|| Error::property("side", "required"))?;
@@ -101,7 +153,7 @@ pub fn register(registry: &mut WidgetRegistry) {
 }
 ```
 
-`register` returns `true` when it replaced an existing constructor. A library can use this to **replace a standard type** such as `pushrod.button` so existing forms get a new look without changing.
+`register` and `register_with_events` return `true` when they replaced an existing entry. A library can use this to **replace a standard type** such as `pushrod.button` so existing forms get a new look without changing. `register` keeps the events the replaced entry declared; `register_with_events` replaces them.
 
 ## Errors
 

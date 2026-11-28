@@ -115,7 +115,7 @@ Sources: [Pushrod roadmap](../ROADMAP_EXTENSIBLE_WIDGET_LIBRARY.md), [Chassis ro
 | ✅ 76 | [#300](https://github.com/KenSuenobu/rust-pushrod/issues/300) | pushrod: [12.6] Showcase pages for core features: text, layouts, focus, dialogs, forms, and resources |
 | ✅ 77 | [#301](https://github.com/KenSuenobu/rust-pushrod/issues/301) | pushrod: [12.7] Showcase in CI: scripted tour, golden screenshots, and documentation images |
 | **78** | checkpoint | **Pushrod Showcase released** |
-| 79 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
+| ✅ 79 | [#156](https://github.com/KenSuenobu/rust-pushrod/issues/156) | pushrod: [6.13] Event metadata in the widget registry |
 | 80 | [#164](https://github.com/KenSuenobu/rust-pushrod/issues/164) | chassis: [2.1] Project model |
 | 81 | [#165](https://github.com/KenSuenobu/rust-pushrod/issues/165) | chassis: [6.1] Code generation rules |
 | 82 | [#166](https://github.com/KenSuenobu/rust-pushrod/issues/166) | chassis: [5.7] Event wiring generation |
@@ -1517,9 +1517,9 @@ Project model, resource access, code generation, and a command-line generator, a
 
 **Show on video:**
 
-- [ ] Every standard widget declares its events and default event
-- [ ] Declared events match emitted events (test)
-- [ ] Third-party widget libraries can declare theirs
+- [x] Every standard widget declares its events and default event
+- [x] Declared events match emitted events (test)
+- [x] Third-party widget libraries can declare theirs
 
 ### Step 80: Project model
 

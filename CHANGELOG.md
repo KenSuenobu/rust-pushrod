@@ -15,6 +15,12 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-27
+
+### Added
+
+- [#156] Widget registry event metadata: EventInfo, default event, shared events [kenji]
+
 ## [0.3.0] - 2026-11-27
 
 ### Added
