@@ -44,7 +44,8 @@ const KEYWORDS: &[&str] = &[
 /// The project-relative path of the application's entry point.
 pub const MAIN_FILE: &str = "src/main.rs";
 
-/// Formats Rust source with `rustfmt`.
+/// Formats Rust source with `rustfmt`.  Line endings are always `\n`, so generated files are
+/// the same on every platform.
 ///
 /// # Arguments
 ///
@@ -64,7 +65,14 @@ pub fn format_source(source: &str) -> Result<String, ProjectError> {
         message,
     };
     let mut child = Command::new("rustfmt")
-        .args(["--edition", "2024", "--emit", "stdout"])
+        .args([
+            "--edition",
+            "2024",
+            "--emit",
+            "stdout",
+            "--config",
+            "newline_style=Unix",
+        ])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
