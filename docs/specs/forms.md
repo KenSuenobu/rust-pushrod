@@ -35,6 +35,11 @@ implemented by `pushrod::form` (`FormFile::to_bytes` and `FormFile::from_bytes`)
 - A file may carry **resources**: string, image, icon, file, menu, and alert tables, each entry with a
   stable ID and a name. An ID **must** be assigned once and never reused or renumbered, and a reader
   **must** skip a resource table or menu item kind it does not know.
+- **Resource manager.** `Resources` loads a resource file from a path or from bytes, returns `Result`
+  and never panics on malformed input, and gets strings, images, icons, files, menus, alerts, and forms
+  by typed ID. Stacked sets **must** be searched in order. `Engine::set_resources` emits
+  `ResourcesLoaded` and `ResourcesFreed`. The guide is
+  [Resources](../../pushrod-docs/docs/forms/resources.md).
 
 The guide is [Form file format](../../pushrod-docs/docs/forms/form-file-format.md).
 Conformance: `tests/conformance/forms.rs`.

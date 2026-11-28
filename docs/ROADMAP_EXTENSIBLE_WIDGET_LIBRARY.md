@@ -1879,6 +1879,8 @@ Widget registry, property introspection, a binary form file format, loader and w
 - **Widgets use resource IDs:** properties can reference resources (an Image widget's `image: ImageId`, a Label's `text: StringId`), resolved when the form is built, so forms never carry duplicate copies of shared images or text.
 - Emits engine events for loading and freeing (9.10 (#109)). Hot reload while developing is a later addition.
 
+**Status:** done (#153). `pushrod::resource::Resources` loads from `load(path)` or `from_bytes(..)` (errors, never panics), stacks sets with `with_fallback` (searched in order), and has typed getters (`string`, `image`, `icon`, `file`, `menu`, `alert`, `form`) plus `find::<Id>(name)`. `Engine::set_resources` / `clear_resources` / `resources()` / `load_resource_form(FormId)` and `Ui::resources()`; emits `ResourcesLoaded` and `ResourcesFreed`. Images are shared `ImageHandle`s with a texture cache key. Not done: widget properties that reference resource IDs (needs a form-format extension) and the backend upload of image bytes (the painter draws images by path). Docs: `pushrod-docs/docs/forms/resources.md`, `examples/resources.rs`.
+
 **Acceptance Criteria.**
 
 - Load from a file and from embedded bytes; same results
