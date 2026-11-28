@@ -15,6 +15,8 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-27
+
 ### Added
 
 - [#114] Specs in docs/specs and conformance tests in tests/conformance [kenji]
@@ -23,6 +25,7 @@ This changelog starts with the modernized core (pull request #10). Releases befo
 - [#60] WidgetRegistry: create widgets by type name; standard set registered [kenji]
 - [#61] Property introspection: list and set widget properties by name [kenji]
 - [#62] Versioned binary form file format with reader and writer (pushrod::form) [kenji]
+- [#153] Resource manager: load resource sets and get resources by ID [kenji]
 
 ### Changed
 
